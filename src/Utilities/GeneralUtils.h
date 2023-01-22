@@ -34,6 +34,7 @@ public:
 	static std::string IntToDigits(int num);
 	static int CountDigitsInNumber(int number);
 	static CoordStruct CalculateCoordsFromDistance(CoordStruct currentCoords, CoordStruct targetCoords, int distance);
+	static int GetColorFromColorAdd(int colorIndex);
 
 	template<typename T>
 	static T FastPow(T x, size_t n)
