@@ -422,6 +422,7 @@ New:
 - Insignias visibility and position adjustments (by Fryone)
 - Promotion animation (by Fryone)
 - Allow different technos to share build limit in a group (by ststl & Ollerus)
+- Nonprovocative Warheads (by Starkku)
 
 Vanilla fixes:
 - Allow AI to repair structures built from base nodes/trigger action 125/SW delivery in single player missions (by Trsdy)

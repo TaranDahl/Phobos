@@ -124,12 +124,15 @@ public:
 		Valueable<bool> InflictLocomotor;
 		Valueable<bool> RemoveInflictedLocomotor;
 
+		Valueable<bool> Nonprovocative;
+
 		ValueableVector<AttachEffectTypeClass*> AttachEffect_AttachTypes;
 		ValueableVector<AttachEffectTypeClass*> AttachEffect_RemoveTypes;
 		std::vector<std::string> AttachEffect_RemoveGroups;
 		ValueableVector<int> AttachEffect_CumulativeRemoveMinCounts;
 		ValueableVector<int> AttachEffect_CumulativeRemoveMaxCounts;
 		ValueableVector<int> AttachEffect_DurationOverrides;
+
 		// Ares tags
 		// http://ares-developers.github.io/Ares-docs/new/warheads/general.html
 		Valueable<bool> AffectsEnemies;
@@ -252,6 +255,8 @@ public:
 
 			, InflictLocomotor { false }
 			, RemoveInflictedLocomotor { false }
+
+			, Nonprovocative { false }
 
 			, AttachEffect_AttachTypes {}
 			, AttachEffect_RemoveTypes {}
