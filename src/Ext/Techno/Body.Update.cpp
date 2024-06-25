@@ -7,6 +7,7 @@
 #include <Ext/Anim/Body.h>
 #include <Ext/Bullet/Body.h>
 #include <Ext/House/Body.h>
+#include <Ext/WeaponType/Body.h>
 #include <Utilities/EnumFunctions.h>
 #include <Utilities/AresFunctions.h>
 
@@ -477,7 +478,7 @@ void TechnoExt::ExtData::UpdateTypeData(TechnoTypeClass* pCurrentType)
 
 				// OpenTopped adds passengers to logic layer when enabled. Under normal conditions this does not need to be removed since
 				// OpenTopped state does not change while passengers are still in transport but in case of type conversion that can happen.
-				MapClass::Logics->RemoveObject(pPassenger);
+				LogicClass::Instance->RemoveObject(pPassenger);
 			}
 
 			pPassenger = abstract_cast<FootClass*>(pPassenger->NextObject);
@@ -803,9 +804,11 @@ void TechnoExt::ExtData::UpdateTemporal()
 // Updates state of all AttachEffects on techno.
 void TechnoExt::ExtData::UpdateAttachEffects()
 {
+	auto const pThis = this->OwnerObject();
 	bool inTunnel = this->IsInTunnel || this->IsBurrowed;
 	bool markForRedraw = false;
 	std::vector<std::unique_ptr<AttachEffectClass>>::iterator it;
+	std::vector<WeaponTypeClass*> expireWeapons;
 
 	for (it = this->AttachedEffects.begin(); it != this->AttachedEffects.end(); )
 	{
@@ -828,7 +831,7 @@ void TechnoExt::ExtData::UpdateAttachEffects()
 			if (pType->ExpireWeapon && (pType->ExpireWeapon_TriggerOn & ExpireWeaponCondition::Expire) != ExpireWeaponCondition::None)
 			{
 				if (!pType->Cumulative || !pType->ExpireWeapon_CumulativeOnlyOnce || this->GetAttachedEffectCumulativeCount(pType) < 1)
-					attachEffect->ExpireWeapon();
+					expireWeapons.push_back(pType->ExpireWeapon);
 			}
 
 			if (!attachEffect->AllowedToBeActive() && attachEffect->ResetIfRecreatable())
@@ -848,7 +851,15 @@ void TechnoExt::ExtData::UpdateAttachEffects()
 	this->RecalculateStatMultipliers();
 
 	if (markForRedraw)
-		this->OwnerObject()->MarkForRedraw();
+		pThis->MarkForRedraw();
+
+	auto const coords = pThis->GetCoords();
+	auto const pOwner = pThis->Owner;
+
+	for (auto const& pWeapon : expireWeapons)
+	{
+		WeaponTypeExt::DetonateAt(pWeapon, coords, pThis, pOwner, pThis);
+	}
 }
 
 // Updates state of AttachEffects of same cumulative type on techno, (which one is first active instance existing, if any), kills animations if needed.
