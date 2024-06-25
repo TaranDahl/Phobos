@@ -143,7 +143,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->UnitIdleActionIntervalMax.Read(exINI, GameStrings::AudioVisual, "UnitIdleActionIntervalMax");
 	if (this->UnitIdleActionIntervalMax.Get() < this->UnitIdleActionIntervalMin.Get())
 		this->UnitIdleActionIntervalMax = 450;
-	this->RecountBurst.Read(exINI, GameStrings::AudioVisual, "RecountBurst");
+	this->RecountBurst.Read(exINI, GameStrings::General, "RecountBurst");
 
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
 	this->ForbidParallelAIQueues_Aircraft.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Aircraft");
