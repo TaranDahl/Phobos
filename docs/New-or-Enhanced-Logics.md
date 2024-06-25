@@ -706,13 +706,30 @@ Trajectory.Straight.ConfineAtHeight=0           ; integer
 
 #### Bombard trajectory
 
-- Similar trajectory to `Straight`, but targets a coordinate above the intended target (height determined by `Trajectory.Bombard.Height`). When the projectile approaches that coordinate, it will free fall and explodes when it hits the target or ground.
+- Similar trajectory to `Straight`, but targets a coordinate between the attacker and intended target first. When the projectile approaches that turning point, it'll turn to the intended target and explodes when it hits the target or ground.
+  - `Trajectory.Bombard.Height` controls the height of the turning point.
+  - `Trajectory.Bombard.FallPercent` controls the distance of the turning point by its percentage of the total distance between attacker and intended target. If set to 0%, then it'll fly up vertically. If set to 100%, then it'll travel to the top of the intended target.
+    - For each launch the turning point percentage could add or minus a random value, which is not greater than `Trajectory.Bombard.FallPercentShift`. If set to 0%, random shift will be disabled.
+    - You can also makes the turning point scatter randomly in a circle with `Trajectory.Bombard.FallScatterRange` as its radius. If set to 0, random scatter will be disabled.
+  - `Trajectory.Bombard.FreeFallOnTarget` controls how it'll hit the intended target. If set to true, the projectile will be respawned above the intended target and free fall. If set to false, the projectile will travel to the intended target from the turning point.
+  - `Trajectory.Bombard.NoLaunch` controls whether the attacker will fire the projectile by itself. If set to true, projectile will directly fall from the turning point.
+  - `Trajectory.Bombard.FallSpeed` controls the initial speed of the projectile after it turns. If set to 0.0, then it'll use `Trajectory.Speed`. Can't work together with `Trajectory.Bombard.FreeFallOnTarget=true`.
+  - `Trajectory.Bombard.TargetSnapDistance` controls the maximum distance in cells from intended target the projectile can be at moment of detonation to make the projectile 'snap' on the intended target. Set to 0 to disable snapping.
+  - `Trajectory.Bombard.TurningPointAnim`, if set, will play an anim when the projectile reaches the turning point. If `Trajectory.Bombard.FreeFallOnTarget` is set to true, it'll be spawned above the target with the projectile together. If `Trajectory.Bombard.NoLaunch` is set to true, it'll be played at where the projectile falls, no matter if it's free fall or not.
 
 In `rulesmd.ini`:
 ```ini
-[SOMEPROJECTILE]                                ; Projectile
-Trajectory=Bombard                              ; Trajectory type
-Trajectory.Bombard.Height=0.0                   ; double
+[SOMEPROJECTILE]                          ; Projectile
+Trajectory=Bombard                        ; Trajectory type
+Trajectory.Bombard.Height=0.0             ; double
+Trajectory.Bombard.FallPercent=1.0        ; double
+Trajectory.Bombard.FallPercentShift=0.0   ; double
+Trajectory.Bombard.FallScatterRange=0.0   ; floating point value
+Trajectory.Bombard.FreeFallOnTarget=true  ; boolean
+Trajectory.Bombard.NoLaunch=false         ; boolean
+Trajectory.Bombard.FallSpeed=0.0          ; double
+Trajectory.Bombard.TargetSnapDistance=0.5 ; floating point value
+Trajectory.Bombard.TurningPointAnim=      ; Animation
 ```
 
 #### Disperse trajectory
@@ -1000,6 +1017,24 @@ Detonate.Damage=        ; integer
 Detonate.AtFirer=false  ; boolean
 ```
 
+### Grant new superweapons in superweapons
+
+- Superweapons can add 1-time superweapons to the firer like the nuke crate. Granted types can be additionally randomized using the same rules as with LimboDelivery (see above).
+- `SW.GrantOneTime.InitialReady` specifies if all new granted superweapons will be ready for launch. If not set this behaviour will be managed by `SW.InitialReady` of the granted superweapon.
+- `Message.GrantOneTimeLaunched` will be displayed to the firer when the main superweapon is launched.
+- `EVA.GrantOneTimeLaunched` will be played to the firer when the main superweapon is launched.
+
+In `rulesmd.ini`:
+```ini
+[SOMESW]                         ; Super Weapon
+SW.GrantOneTime=                 ; List of super weapons
+SW.GrantOneTime.RollChances=     ; List of percentages.
+SW.GrantOneTime.RandomWeightsN=  ; List of integers.
+SW.GrantOneTime.InitialReady=    ; boolean
+Message.GrantOneTimeLaunched=    ; CSF entry key
+EVA.GrantOneTimeLaunched=        ; EVA entry
+```
+
 ## Technos
 
 ### Automatic passenger deletion
@@ -1061,6 +1096,34 @@ In `rulesmd.ini`:
 [SOMETECHNO]               ; TechnoType
 AutoFire=false             ; boolean
 AutoFire.TargetSelf=false  ; boolean
+```
+
+### Build limit group
+- You can now make different technos share build limit in a group.
+- `BuildLimitGroup.Types` determines the technos that'll be used for build limit conditions of the selected techno. Note that the limit won't be applied to technos in the list. To do this, you'll have to manually define the limit per techno.
+- `BuildLimitGroup.Nums` determines the amount of technos that would reach the build limit. If using a single integer, it'll use the sum of all technos in the group to calculate build limit. If using a list of integers with the same size of `BuildLimitGroup.Types`, it'll calculate build limit per techno with value matching the position in `BuildLimitGroup.Types` is used for that type.
+- `BuildLimitGroup.Factor` determines each of this techno instance will count as what value when calculating build limit.
+  - This is only used by BuildLimitGroup. No other place will use it when counting owned objects, including `BuildLimitGroup.ExtraLimit`.
+- `BuildLimitGroup.ContentIfAnyMatch` determines the rule of calculating build limit per techno. If set to true, build limit will be content if the amount of any techno in the group reaches its `BuildLimitGroup.Nums` value. If set to false, then it'll only be content if the amount of all technos in the group reached.
+- `BuildLimitGroup.NotBuildableIfQueueMatch` determines the moment to stop the techno's production. If set to true, its production will be stopped once the condition is content by the sum of real technos and technos in production queue. If set to false, it'll only be stopped when the condition is content by real technos.
+- You can also add an extra value into `BuildLimitGroup.Nums`, determined by the amount of specific technos owned by its house.
+  - `BuildLimitGroup.ExtraLimit.Types` determines the technos that'll be used for extra value calculation.
+  - `BuildLimitGroup.ExtraLimit.Nums` determines the actual value of increment. Value matching the position in `BuildLimitGroup.ExtraLimit.Types` is used for that type. For each of these technos, it'll increase the extra value by its amount * corresponding value from the list.
+  - `BuildLimitGroup.ExtraLimit.MaxCount` determines the maximum amount of technos being counted into the extra value calculation. Value matching the position in `BuildLimitGroup.ExtraLimit.Types` is used for that type. If not set or set to a value below 1, it'll be considered as no maximum count.
+  - `BuildLimitGroup.ExtraLimit.MaxNum` determines the maximum of values in `BuildLimitGroup.Nums` after extra limit calculation. If not set or set to a value below 1, it'll be considered as no maximum value.
+
+  In `rulesmd.ini`:
+```ini
+[SOMETECHNO]                                    ; TechnoType
+BuildLimitGroup.Types=                          ; list of TechnoType names
+BuildLimitGroup.Nums=                           ; integer, or a list of integers
+BuildLimitGroup.Factor=1                        ; integer
+BuildLimitGroup.ContentIfAnyMatch=false         ; boolean
+BuildLimitGroup.NotBuildableIfQueueMatch=false  ; boolean
+BuildLimitGroup.ExtraLimit.Types=               ; list of TechnoType names
+BuildLimitGroup.ExtraLimit.Nums=                ; list of integers
+BuildLimitGroup.ExtraLimit.MaxCount=            ; list of integers
+BuildLimitGroup.ExtraLimit.MaxNum=0             ; integer
 ```
 
 ### Customizable OpenTopped properties
@@ -1352,6 +1415,18 @@ In `rulesmd.ini`:
 [SOMETECHNO]
 Convert.HumanToComputer =   ; TechnoType
 Convert.ComputerToHuman =   ; TechnoType
+```
+
+### Recount burst index
+- You can now make technos recount their current burst index when change the firing weapon. Defaults to `[General]` -> `RecountBurst`, which in turn defaults to false.
+
+In `rulesmd.ini`:
+```ini
+[General]
+RecountBurst=false  ; boolean
+
+[SOMETECHNO]        ; TechnoType
+RecountBurst=       ; boolean
 ```
 
 ## Terrain
@@ -1680,7 +1755,7 @@ FeedbackWeapon=  ; WeaponType
   - `Strafing.Shots` controls the number of times the weapon is fired during a single strafe run. `Ammo` is only deducted at the end of the strafe run, regardless of the number of shots fired.
   - `Strafing.SimulateBurst` controls whether or not the shots fired during strafing simulate behavior of `Burst`, allowing for alternating firing offset. Only takes effect if weapon has `Burst` set to 1 or undefined.
   - `Strafing.UseAmmoPerShot`, if set to `true` overrides the usual behaviour of only deducting ammo after a strafing run and instead doing it after each individual shot.
-  
+
 In `rulesmd.ini`:
 ```ini
 [SOMEWEAPON]                   ; WeaponType
@@ -1703,4 +1778,19 @@ In `rulesmd.ini`:
 [SOMEWEAPON]         ; WeaponType
 CanTarget=all        ; list of Affected Target Enumeration (none|land|water|empty|infantry|units|buildings|all)
 CanTargetHouses=all  ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+```
+
+### Keep Range After Firing
+
+- Technos will maintain a suitable distance after firing if `KeepRange` is not set to 0.
+  - `KeepRange` controls how long the distance to maintain when the techno's ROF timer is ticking. What is actually read is its absolute value. If it is a positive value, it will be stayed outside this distance, just like it has a special `MinimumRange` after firing. If it is a negative value, it will be kept as close as possible to this distance, just like it has a special `Range` after firing. In addition, if the effective range section is too small, it will be considered unable to fire. It is best to have an effective range of 1.0, and 2.0 is best for Infantry.
+    - `KeepRange.AllowAI` controls whether this function is effective for computer.
+    - `KeepRange.AllowPlayer` controls whether this function is effective for human.
+
+In `rulesmd.ini`:
+```ini
+[SOMEWEAPON]                 ; WeaponType
+KeepRange=0                  ; floating point value
+KeepRange.AllowAI=false      ; boolean
+KeepRange.AllowPlayer=false  ; boolean
 ```

@@ -587,6 +587,9 @@ DEFINE_HOOK(0x6F3B37, TechnoClass_GetFLH_BurstFLH_1, 0x7)
 	auto const pTypeExt = pExt->TypeExtData;
 	auto const pWeaponStruct = pThis->GetWeapon(weaponIndex);
 
+	if (pTypeExt->RecountBurst.Get(RulesExt::Global()->RecountBurst) && pWeaponStruct != pExt->LastWeaponStruct)
+		pThis->CurrentBurstIndex = 0;
+
 	pExt->LastWeaponFLH = { OriginalX, OriginalY, OriginalZ };
 
 	if (pThis->CurrentBurstIndex % 2 == 1 && weaponIndex >= 0)

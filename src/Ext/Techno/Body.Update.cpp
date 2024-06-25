@@ -11,6 +11,8 @@
 #include <Utilities/EnumFunctions.h>
 #include <Utilities/AresFunctions.h>
 
+#include <WWMouseClass.h>
+#include <TacticalClass.h>
 
 // TechnoClass_AI_0x6F9E50
 // It's not recommended to do anything more here it could have a better place for performance consideration
@@ -578,6 +580,154 @@ void TechnoExt::ExtData::UpdateMindControlAnim()
 	else if (this->MindControlRingAnimType)
 	{
 		this->MindControlRingAnimType = nullptr;
+	}
+}
+
+void TechnoExt::ExtData::ApplyUnitIdleAction()
+{
+	auto const pThis = specific_cast<UnitClass*>(this->OwnerObject());
+
+	if (!pThis)
+		return;
+
+	if (pThis->Target || pThis->InLimbo)
+	{
+		if (this->UnitIdleActionTimer.IsTicking())
+			this->UnitIdleActionTimer.Stop();
+
+		if (this->UnitIdleActionGapTimer.IsTicking())
+		{
+			this->UnitIdleActionGapTimer.Stop();
+			this->UnitIdleFacingDirection = pThis->SecondaryFacing.Desired();
+			const DirStruct currentFacingDirection = pThis->SecondaryFacing.Current();
+
+			pThis->SecondaryFacing.DesiredFacing = currentFacingDirection;
+			pThis->SecondaryFacing.StartFacing = currentFacingDirection;
+			pThis->SecondaryFacing.RotationTimer.Start(0);
+
+			pThis->SecondaryFacing.SetROT(this->UnitIdleTurretROT);
+			pThis->SecondaryFacing.SetDesired(this->UnitIdleFacingDirection);
+		}
+	}
+	else if (this->UnitIdleActionSelected && pThis->IsSelected && pThis->Owner->IsControlledByCurrentPlayer())
+	{
+		pThis->unknown_bool_6AF = false;
+
+		if (this->UnitIdleActionTimer.IsTicking())
+			this->UnitIdleActionTimer.Stop();
+
+		if (this->UnitIdleActionGapTimer.IsTicking())
+		{
+			this->UnitIdleActionGapTimer.Stop();
+			const DirStruct currentFacingDirection = pThis->SecondaryFacing.Current();
+
+			pThis->SecondaryFacing.DesiredFacing = currentFacingDirection;
+			pThis->SecondaryFacing.StartFacing = currentFacingDirection;
+			pThis->SecondaryFacing.RotationTimer.Start(0);
+
+			pThis->SecondaryFacing.SetROT(this->UnitIdleTurretROT);
+		}
+
+		const CoordStruct mouseCoords = TacticalClass::Instance->ClientToCoords(WWMouseClass::Instance->XY1);
+
+		if (mouseCoords != CoordStruct::Empty)
+		{
+			CoordStruct technoCoords = this->OwnerObject()->GetCoords();
+			const int offset = -static_cast<int>(technoCoords.Z * 1.25);
+			technoCoords.X += offset;
+			technoCoords.Y += offset;
+
+			const double nowRadian = Math::atan2(technoCoords.Y - mouseCoords.Y, mouseCoords.X - technoCoords.X);
+			this->UnitIdleFacingDirection.SetRadian<32>(nowRadian);
+		}
+
+		pThis->SecondaryFacing.SetDesired(this->UnitIdleFacingDirection);
+	}
+	else if (!this->UnitIdleAction)
+	{
+		if (!pThis->SecondaryFacing.IsRotating() && !pThis->BunkerLinkedItem && (!pThis->Type->IsSimpleDeployer || !pThis->Deployed) && !pThis->IsAttackedByLocomotor
+			&& (Unsorted::CurrentFrame - pThis->unknown_int_120) >= (RulesClass::Instance->GuardAreaTargetingDelay + 5))
+		{
+			pThis->SecondaryFacing.SetDesired(pThis->Destination ? pThis->GetTargetDirection(pThis->Destination) : pThis->PrimaryFacing.Current());
+		}
+	}
+	else if (pThis->Locomotor->Is_Moving())
+	{
+		if (this->UnitIdleActionTimer.IsTicking())
+			this->UnitIdleActionTimer.Stop();
+
+		if (this->UnitIdleActionGapTimer.IsTicking())
+		{
+			this->UnitIdleActionGapTimer.Stop();
+			const DirStruct currentFacingDirection = pThis->SecondaryFacing.Current();
+
+			pThis->SecondaryFacing.DesiredFacing = currentFacingDirection;
+			pThis->SecondaryFacing.StartFacing = currentFacingDirection;
+			pThis->SecondaryFacing.RotationTimer.Start(0);
+
+			pThis->SecondaryFacing.SetROT(this->UnitIdleTurretROT);
+		}
+
+		if (!pThis->SecondaryFacing.IsRotating() && !pThis->BunkerLinkedItem && (!pThis->Type->IsSimpleDeployer || !pThis->Deployed) && !pThis->IsAttackedByLocomotor
+			&& (Unsorted::CurrentFrame - pThis->unknown_int_120) >= (RulesClass::Instance->GuardAreaTargetingDelay + 5))
+		{
+			pThis->SecondaryFacing.SetDesired(pThis->Destination ? pThis->GetTargetDirection(pThis->Destination) : pThis->PrimaryFacing.Current());
+		}
+	}
+	else if (pThis->GetCurrentMission() == Mission::Guard || pThis->GetCurrentMission() == Mission::Sticky)
+	{
+		pThis->unknown_bool_6AF = false;
+
+		if (this->UnitIdleActionTimer.Completed())
+		{
+			double const extraRadian = ScenarioClass::Instance->Random.RandomDouble() - 0.5;
+			this->UnitIdleActionTimer.Stop();
+			this->UnitIdleActionGapTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionIntervalMin, RulesExt::Global()->UnitIdleActionIntervalMax));
+			this->UnitIdleFacingDirection.SetRadian<32>(pThis->PrimaryFacing.Current().GetRadian<32>() + (pThis->BunkerLinkedItem ? extraRadian * Math::TwoPi : extraRadian));
+
+			pThis->SecondaryFacing.SetROT(ScenarioClass::Instance->Random.RandomRanged(2,4) >> 1);
+			pThis->SecondaryFacing.SetDesired(this->UnitIdleFacingDirection);
+		}
+		else if (this->UnitIdleActionGapTimer.IsTicking())
+		{
+			if (!this->UnitIdleActionGapTimer.HasTimeLeft())
+			{
+				double const extraRadian = ScenarioClass::Instance->Random.RandomDouble() - 0.5;
+				this->UnitIdleActionGapTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionIntervalMin, RulesExt::Global()->UnitIdleActionIntervalMax));
+				this->UnitIdleFacingDirection.SetRadian<32>(pThis->PrimaryFacing.Current().GetRadian<32>() + (pThis->BunkerLinkedItem ? extraRadian * Math::TwoPi : extraRadian));
+
+				pThis->SecondaryFacing.SetROT(ScenarioClass::Instance->Random.RandomRanged(2,4) >> 1);
+				pThis->SecondaryFacing.SetDesired(this->UnitIdleFacingDirection);
+			}
+		}
+		else if (!this->UnitIdleActionTimer.IsTicking() && !pThis->SecondaryFacing.IsRotating())
+		{
+			this->UnitIdleActionTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionRestartMin, RulesExt::Global()->UnitIdleActionRestartMax));
+			this->UnitIdleFacingDirection = pThis->PrimaryFacing.Current();
+
+			pThis->SecondaryFacing.SetROT(this->UnitIdleTurretROT);
+			pThis->SecondaryFacing.SetDesired(this->UnitIdleFacingDirection);
+		}
+	}
+	else
+	{
+		pThis->unknown_bool_6AF = false;
+
+		if (this->UnitIdleActionTimer.IsTicking() || this->UnitIdleActionGapTimer.IsTicking())
+		{
+			this->UnitIdleActionTimer.Stop();
+			this->UnitIdleActionGapTimer.Stop();
+		}
+
+		if (pThis->unknown_bool_6AF && pThis->GetCurrentMission() == Mission::Harmless)
+		{
+			this->UnitIdleFacingDirection = pThis->SecondaryFacing.Current();
+			const DirStruct currentFacingDirection = pThis->SecondaryFacing.Current();
+
+			pThis->SecondaryFacing.DesiredFacing = currentFacingDirection;
+			pThis->SecondaryFacing.StartFacing = currentFacingDirection;
+			pThis->SecondaryFacing.RotationTimer.Start(0);
+		}
 	}
 }
 

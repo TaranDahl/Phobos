@@ -75,6 +75,8 @@ DEFINE_HOOK(0x6F42F7, TechnoClass_Init, 0x2)
 	pExt->CurrentShieldType = pExt->TypeExtData->ShieldType;
 	pExt->InitializeLaserTrails();
 	pExt->InitializeAttachEffects();
+	pExt->InitializeDisplayInfo();
+	pExt->InitializeUnitAction();
 
 	return 0;
 }

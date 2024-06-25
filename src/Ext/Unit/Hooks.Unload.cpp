@@ -1,6 +1,7 @@
 #include <UnitClass.h>
 #include <TechnoClass.h>
 
+#include <Ext/Techno/Body.h>
 #include <Ext/TechnoType/Body.h>
 #include <Utilities/EnumFunctions.h>
 #include <Utilities/GeneralUtils.h>

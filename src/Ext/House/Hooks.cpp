@@ -285,3 +285,23 @@ DEFINE_HOOK(0x65E997, HouseClass_SendAirstrike_PlaceAircraft, 0x6)
 
 	return result ? SkipGameCode : SkipGameCodeNoSuccess;
 }
+
+DEFINE_HOOK(0x50B669, HouseClass_ShouldDisableCameo, 0x5)
+{
+	GET(HouseClass*, pThis, ECX);
+	GET_STACK(TechnoTypeClass*, pType, 0x4);
+	GET(bool, aresDisable, EAX);
+
+	if (aresDisable || !pType)
+		return 0;
+
+	auto const pExt = TechnoTypeExt::ExtMap.Find(pType);
+
+	if (pExt->ActuallyUnbuildable)
+		R->EAX(true);
+
+	if (HouseExt::ReachedBuildLimit(pThis, pType, false))
+		R->EAX(true);
+
+	return 0;
+}

@@ -129,6 +129,22 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 		this->HeightShadowScaling = false;
 	this->HeightShadowScaling_MinScale.Read(exINI, GameStrings::AudioVisual, "HeightShadowScaling.MinScale");
 
+	this->UnitIdleRotateTurret.Read(exINI, GameStrings::AudioVisual, "UnitIdleRotateTurret");
+	this->UnitIdlePointToMouse.Read(exINI, GameStrings::AudioVisual, "UnitIdlePointToMouse");
+	this->UnitIdleActionRestartMin.Read(exINI, GameStrings::AudioVisual, "UnitIdleActionRestartMin");
+	if (this->UnitIdleActionRestartMin.Get() <= 0)
+		this->UnitIdleActionRestartMin = 150;
+	this->UnitIdleActionRestartMax.Read(exINI, GameStrings::AudioVisual, "UnitIdleActionRestartMax");
+	if (this->UnitIdleActionRestartMax.Get() < this->UnitIdleActionRestartMin.Get())
+		this->UnitIdleActionRestartMax = 300;
+	this->UnitIdleActionIntervalMin.Read(exINI, GameStrings::AudioVisual, "UnitIdleActionIntervalMin");
+	if (this->UnitIdleActionIntervalMin.Get() <= 0)
+		this->UnitIdleActionIntervalMin = 150;
+	this->UnitIdleActionIntervalMax.Read(exINI, GameStrings::AudioVisual, "UnitIdleActionIntervalMax");
+	if (this->UnitIdleActionIntervalMax.Get() < this->UnitIdleActionIntervalMin.Get())
+		this->UnitIdleActionIntervalMax = 450;
+	this->RecountBurst.Read(exINI, GameStrings::AudioVisual, "RecountBurst");
+
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
 	this->ForbidParallelAIQueues_Aircraft.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Aircraft");
 	this->ForbidParallelAIQueues_Building.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Building");
@@ -282,6 +298,13 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AirShadowBaseScale_log)
 		.Process(this->HeightShadowScaling)
 		.Process(this->HeightShadowScaling_MinScale)
+		.Process(this->UnitIdleRotateTurret)
+		.Process(this->UnitIdlePointToMouse)
+		.Process(this->UnitIdleActionRestartMin)
+		.Process(this->UnitIdleActionRestartMax)
+		.Process(this->UnitIdleActionIntervalMin)
+		.Process(this->UnitIdleActionIntervalMax)
+		.Process(this->RecountBurst)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
 		.Process(this->ForbidParallelAIQueues_Building)

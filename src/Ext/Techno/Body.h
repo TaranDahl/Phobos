@@ -46,6 +46,12 @@ public:
 		int WHAnimRemainingCreationInterval;
 		bool CanCurrentlyDeployIntoBuilding; // Only set on UnitClass technos with DeploysInto set in multiplayer games, recalculated once per frame so no need to serialize.
 		std::vector<std::unique_ptr<AttachEffectClass>> AttachedEffects;
+		bool UnitIdleAction;
+		bool UnitIdleActionSelected;
+		int UnitIdleTurretROT;
+		CDTimerClass UnitIdleActionTimer;
+		CDTimerClass UnitIdleActionGapTimer;
+		DirStruct UnitIdleFacingDirection;
 		WeaponStruct* LastWeaponStruct;
 		CoordStruct LastWeaponFLH;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
@@ -94,6 +100,12 @@ public:
 			, AE_Cloakable { false }
 			, AE_ForceDecloak { false }
 			, AE_DisableWeapons { false }
+			, UnitIdleAction { false }
+			, UnitIdleActionSelected { false }
+			, UnitIdleTurretROT { 0 }
+			, UnitIdleActionTimer {}
+			, UnitIdleActionGapTimer {}
+			, UnitIdleFacingDirection {}
 			, LastWeaponStruct {}
 			, LastWeaponFLH {}
 			, FiringObstacleCell {}
@@ -119,6 +131,9 @@ public:
 		void InitializeAttachEffects();
 		bool HasAttachedEffects(std::vector<AttachEffectTypeClass*> attachEffectTypes, bool requireAll, bool ignoreSameSource, TechnoClass* pInvoker, AbstractClass* pSource, std::vector<int> const& minCounts, std::vector<int> const& maxCounts) const;
 		int GetAttachedEffectCumulativeCount(AttachEffectTypeClass* pAttachEffectType, bool ignoreSameSource = false, TechnoClass* pInvoker = nullptr, AbstractClass* pSource = nullptr) const;
+		void InitializeDisplayInfo();
+		void InitializeUnitAction();
+		void ApplyUnitIdleAction();
 
 		virtual ~ExtData() override;
 

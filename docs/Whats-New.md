@@ -383,6 +383,7 @@ New:
 - Allow setting default singleplayer map loading screen and briefing offsets (by Starkku)
 - Allow toggling whether or not fire particle systems adjust target coordinates when firer rotates (by Starkku)
 - `AmbientDamage` warhead & main target ignore customization (by Starkku)
+- Grant new superweapons in superweapons (by FS-21).
 - Flashing Technos on selecting (by Fryone)
 - Customizable DropPod properties on a per-InfantryType basis (by Trsdy)
 - Projectile return weapon (by Starkku)
@@ -406,7 +407,16 @@ New:
 - Custom tint on TechnoTypes (by Starkku)
 - Revenge weapon (by Starkku)
 - AttachEffect types with new features like custom tint and weapon range modifier (by Starkku)
-- New Disperse trajectory and Engrave trajectory with enhanced Straight trajectory(by CrimRecya)
+- Allow trajectory projectiles to use `Inaccurate` & `BallisticScatter` keys (by NaotoYuuki)
+- Enhance bombard trajectory with vertical and meteor trajectory (by NaotoYuuki & Ollerus)
+- Allow different technos to share build limit in a group (by ststl & Ollerus)
+- Technos will maintain a suitable distance after firing (by CrimRecya)
+- Several new Infotypes and a new single frame display method (by CrimRecya)
+- Projectile subject to land check before firing (by CrimRecya)
+- Technos recount current burst index when change the firing weapon (by CrimRecya)
+- Enhanced Straight trajectory (by CrimRecya)
+- New Disperse trajectory (by CrimRecya)
+- New Engrave trajectory (by CrimRecya)
 - Force shield effect sync on deploy & vs. organic targets effect customization to complement the Iron Curtain ones (by Starkku)
 - Map trigger action 41 (Play animation at waypoint) now uses additional parameter to determine if animation can play sound, deal damage etc. (by Starkku)
 - Allow restricting how many times per frame a single radiation site can damage a building (by Starkku)
@@ -479,6 +489,9 @@ Vanilla fixes:
 - Objects in invalid map coordinates are no longer used for starting view and AI base center calculations (by Starkku)
 - Units & buildings with `DecloakToFire=false` weapons can now cloak while targeting & reloading (by Starkku)
 - Units with `Sensors=true` will no longer reveal ally buildings (by Starkku)
+
+Ares fixes:
+- Taking over Ares' AlphaImage respawn logic to reduce lags from it (by NetsuNegi)
 
 Phobos fixes:
 - Fixed a few errors of calling for superweapon launch by `LaunchSW` or building infiltration (by Trsdy)

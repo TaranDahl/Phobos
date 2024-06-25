@@ -47,7 +47,7 @@ public:
 		Valueable<WeaponTypeClass*> ReturnWeapon;
 
 		Valueable<bool> SubjectToGround;
-		//If put these part into Trajectory theirselves, firing these bullets will crash the game after load the saved games.
+		//NEED HELP: If simply put these part into Trajectory theirselves, firing these bullets will crash the game after load the saved games.
 		Valueable<WarheadTypeClass*> Straight_PassDetonateWarhead;
 		Valueable<WarheadTypeClass*> Straight_ProximityWarhead;
 		ValueableVector<WeaponTypeClass*> Disperse_Weapons;
