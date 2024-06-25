@@ -330,15 +330,12 @@ void TechnoExt::ProcessDigitalDisplays(TechnoClass* pThis)
 			continue;
 
 		int value = -1;
-		int maxValue = -1;
+		int maxValue = 0;
 
 		GetValuesForDisplay(pThis, pDisplayType->InfoType, value, maxValue);
 
-		if (value == -1 || maxValue == -1)
+		if (value == -1 || maxValue == 0)
 			continue;
-
-		if (maxValue == 0)
-			maxValue = 1;
 
 		const bool isBuilding = pThis->WhatAmI() == AbstractType::Building;
 		const bool isInfantry = pThis->WhatAmI() == AbstractType::Infantry;
@@ -448,11 +445,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 		if (!pType->IsGattling)
 			return;
 
-		if (pThis->GattlingValue == 0)
-			value = 0;
-		else
-			value = pThis->CurrentGattlingStage + 1;
-
+		value = pThis->GattlingValue == 0 ? 0 : pThis->CurrentGattlingStage + 1;
 		maxValue = pType->WeaponStages;
 		break;
 	}
