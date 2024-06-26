@@ -422,6 +422,7 @@ New:
 - Insignias visibility and position adjustments (by Fryone)
 - Promotion animation (by Fryone)
 - Allow different technos to share build limit in a group (by ststl & Ollerus)
+- Reimplemented `Airburst` & `Splits` logic with more customization options (by Starkku)
 
 Vanilla fixes:
 - Allow AI to repair structures built from base nodes/trigger action 125/SW delivery in single player missions (by Trsdy)
@@ -489,6 +490,7 @@ Vanilla fixes:
 - Units & buildings with `DecloakToFire=false` weapons can now cloak while targeting & reloading (by Starkku)
 - Units with `Sensors=true` will no longer reveal ally buildings (by Starkku)
 - Waypoint path is drawn for all units under player control or `DebugKeysEnabled=yes` (by Trsdy)
+- Projectiles created from `AirburstWeapon` now remember their WeaponType and can apply radiation etc. (by Starkku)
 
 Phobos fixes:
 - Fixed a few errors of calling for superweapon launch by `LaunchSW` or building infiltration (by Trsdy)
