@@ -10,6 +10,11 @@
 class PhobosSwizzle
 {
 public:
+	static PhobosSwizzle Instance;
+
+	PhobosSwizzle() { }
+	~PhobosSwizzle() { }
+
 	/**
 	* pass in the *address* of the pointer you want to have changed
 	* caution, after the call *p will be NULL
