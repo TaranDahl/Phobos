@@ -394,7 +394,6 @@ DEFINE_HOOK(0x6FC689, TechnoClass_CanFire_LandNavalTarget, 0x6)
 #pragma endregion
 
 #pragma region TechnoClass_Fire
-
 DEFINE_HOOK(0x6FDD6F, TechnoClass_FireAt_UpdateWeaponStruct, 0x8)
 {
 	GET(WeaponStruct* const, pWeaponStruct, EAX);
