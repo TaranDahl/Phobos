@@ -394,6 +394,22 @@ DEFINE_HOOK(0x6FC689, TechnoClass_CanFire_LandNavalTarget, 0x6)
 #pragma endregion
 
 #pragma region TechnoClass_Fire
+
+DEFINE_HOOK(0x6FDD6F, TechnoClass_FireAt_UpdateWeaponStruct, 0x8)
+{
+	GET(WeaponStruct* const, pWeaponStruct, EAX);
+	GET(TechnoClass* const, pThis, ESI);
+
+	auto const pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (pExt->TypeExtData->RecountBurst.Get(RulesExt::Global()->RecountBurst) && pWeaponStruct != pExt->LastWeaponStruct)
+		pThis->CurrentBurstIndex = 0;
+
+	pExt->LastWeaponStruct = pWeaponStruct;
+
+	return 0;
+}
+
 DEFINE_HOOK(0x6FE43B, TechnoClass_FireAt_OpenToppedDmgMult, 0x8)
 {
 	enum { ApplyDamageMult = 0x6FE45A, ContinueCheck = 0x6FE460 };
@@ -591,26 +607,13 @@ DEFINE_HOOK(0x6F3B37, TechnoClass_GetFLH_BurstFLH_1, 0x7)
 		FootClass* currentPassenger = pThis->Passengers.FirstPassenger;
 		const int passengerIndex = -weaponIndex - 1;
 
-		for (int i = 0; i < passengerIndex && currentPassenger; i++)
+		for (int i = 0; i < passengerIndex; i++)
 			currentPassenger = abstract_cast<FootClass*>(currentPassenger->NextObject);
 
 		if (auto const pPassengerExt = TechnoExt::ExtMap.Find(currentPassenger))
-		{
 			pPassengerExt->LastWeaponFLH = { OriginalX, OriginalY, OriginalZ };
-			pPassengerExt->LastWeaponStruct = nullptr;
-		}
 
 		return 0;
-	}
-	else
-	{
-		auto const pWeaponStruct = pThis->GetWeapon(weaponIndex);
-
-		if (pTypeExt->RecountBurst.Get(RulesExt::Global()->RecountBurst) && pExt->LastWeaponStruct && pWeaponStruct != pExt->LastWeaponStruct)
-			pThis->CurrentBurstIndex = 0;
-
-		pExt->LastWeaponStruct = pWeaponStruct;
-		pExt->LastWeaponFLH = { OriginalX, ((pThis->CurrentBurstIndex % 2 == 1) ? -OriginalY : OriginalY), OriginalZ };
 	}
 
 	bool FLHFound = false;
@@ -632,6 +635,10 @@ DEFINE_HOOK(0x6F3B37, TechnoClass_GetFLH_BurstFLH_1, 0x7)
 		R->ECX(FLH.X);
 		R->EBP(FLH.Y);
 		R->EAX(FLH.Z);
+	}
+	else
+	{
+		pExt->LastWeaponFLH = { OriginalX, ((pThis->CurrentBurstIndex % 2 == 1) ? -OriginalY : OriginalY), OriginalZ };
 	}
 
 	return 0;
