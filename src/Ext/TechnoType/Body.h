@@ -226,6 +226,8 @@ public:
 		Nullable<bool> UnitIdleRotateTurret;
 		Nullable<bool> UnitIdlePointToMouse;
 		Nullable<bool> RecountBurst;
+		Valueable<bool> LeaveTransportKill;
+		Valueable<int> LeaveTransportRearm;
 
 		struct LaserTrailDataEntry
 		{
@@ -448,6 +450,8 @@ public:
 			, UnitIdleRotateTurret {}
 			, UnitIdlePointToMouse {}
 			, RecountBurst {}
+			, LeaveTransportKill { false }
+			, LeaveTransportRearm { 0 }
 		{ }
 
 		virtual ~ExtData() = default;
