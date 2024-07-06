@@ -305,3 +305,19 @@ DEFINE_HOOK(0x50B669, HouseClass_ShouldDisableCameo, 0x5)
 
 	return 0;
 }
+
+DEFINE_HOOK(0x6A640B, SideBarClass_AddCameo_DoNotPlayEVA, 0x5)
+{
+	GET(AbstractType, absType, ESI);
+	GET(int, idxType, EBP);
+
+	if (auto const pType = ObjectTypeClass::GetTechnoType(absType,idxType))
+	{
+		auto const pExt = TechnoTypeExt::ExtMap.Find(pType);
+
+		if (pExt->ActuallyUnbuildable)
+			return 0x6A641A;
+	}
+
+	return 0;
+}
