@@ -19,6 +19,7 @@ public:
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
+	virtual PhobosTrajectory* CreateInstance() const override;
 
 	virtual void Read(CCINIClass* const pINI, const char* pSection) override;
 
@@ -50,7 +51,7 @@ public:
 		, TurningPointAnim {}
 	{}
 
-	BombardTrajectory(PhobosTrajectoryType* pType) : PhobosTrajectory(TrajectoryFlag::Bombard)
+	BombardTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Bombard)
 		, IsFalling { false }
 		, RemainingDistance { 1 }
 		, Height { 0.0 }
