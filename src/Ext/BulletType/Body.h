@@ -47,10 +47,6 @@ public:
 		Valueable<WeaponTypeClass*> ReturnWeapon;
 
 		Valueable<bool> SubjectToGround;
-		//NEED HELP: If simply put these part into Trajectory theirselves, firing these bullets will crash the game after load the saved games.
-		Valueable<WarheadTypeClass*> Straight_PassDetonateWarhead;
-		Valueable<WarheadTypeClass*> Straight_ProximityWarhead;
-		ValueableVector<WeaponTypeClass*> Disperse_Weapons;
 
 		// Ares 0.7
 		Nullable<Leptons> BallisticScatter_Min;
@@ -80,9 +76,6 @@ public:
 			, Arcing_AllowElevationInaccuracy { true }
 			, ReturnWeapon {}
 			, SubjectToGround { false }
-			, Straight_PassDetonateWarhead {}
-			, Straight_ProximityWarhead {}
-			, Disperse_Weapons {}
 		{ }
 
 		virtual ~ExtData() = default;
