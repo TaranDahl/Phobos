@@ -502,6 +502,7 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->AE_ForceDecloak)
 		.Process(this->AE_DisableWeapons)
 		.Process(this->FiringObstacleCell)
+		.Process(this->KeepTargetOnMove)
 		;
 }
 

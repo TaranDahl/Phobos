@@ -46,6 +46,7 @@ public:
 		bool CanCurrentlyDeployIntoBuilding; // Only set on UnitClass technos with DeploysInto set in multiplayer games, recalculated once per frame so no need to serialize.
 		std::vector<std::unique_ptr<AttachEffectClass>> AttachedEffects;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
+		bool KeepTargetOnMove;
 
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
 		// as neither is guaranteed to point to the house the TechnoClass had prior to entering transport and cannot be safely overridden.
@@ -92,6 +93,7 @@ public:
 			, AE_ForceDecloak { false }
 			, AE_DisableWeapons { false }
 			, FiringObstacleCell {}
+			, KeepTargetOnMove { false }
 		{ }
 
 		void OnEarlyUpdate();
