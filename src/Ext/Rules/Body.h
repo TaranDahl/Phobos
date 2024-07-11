@@ -93,6 +93,11 @@ public:
 		Valueable<int> UnitIdleActionIntervalMin;
 		Valueable<int> UnitIdleActionIntervalMax;
 		Valueable<bool> RecountBurst;
+		Valueable<bool> FactoryProgressDisplay;
+		Valueable<bool> MainSWProgressDisplay;
+		Valueable<double> DamageOwnerMultiplier;
+		Valueable<double> DamageAlliesMultiplier;
+		Valueable<double> DamageEnemiesMultiplier;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -195,6 +200,11 @@ public:
 			, UnitIdleActionIntervalMin { 150 }
 			, UnitIdleActionIntervalMax { 450 }
 			, RecountBurst { false }
+			, FactoryProgressDisplay { false }
+			, MainSWProgressDisplay { false }
+			, DamageOwnerMultiplier { 1.0 }
+			, DamageAlliesMultiplier { 1.0 }
+			, DamageEnemiesMultiplier { 1.0 }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }

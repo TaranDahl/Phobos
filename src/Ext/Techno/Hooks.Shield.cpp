@@ -17,28 +17,52 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	GET(TechnoClass*, pThis, ECX);
 	LEA_STACK(args_ReceiveDamage*, args, 0x4);
 
-	if (!args->IgnoreDefenses)
+	if (!*args->Damage || args->IgnoreDefenses)
+		return 0;
+
+	//Calculate Damage Multiplier
+	if (const auto pHouse = pThis->Owner)
 	{
-		const auto pExt = TechnoExt::ExtMap.Find(pThis);
+		const auto pWHExt = WarheadTypeExt::ExtMap.Find(args->WH);
 
-		if (const auto pShieldData = pExt->Shield.get())
+		if (pHouse == args->SourceHouse)
 		{
-			if (!pShieldData->IsActive())
-				return 0;
-
-			const int nDamageLeft = pShieldData->ReceiveDamage(args);
-			if (nDamageLeft >= 0)
-			{
-				*args->Damage = nDamageLeft;
-
-				if (auto pTag = pThis->AttachedTag)
-					pTag->RaiseEvent((TriggerEvent)PhobosTriggerEvent::ShieldBroken, pThis, CellStruct::Empty);
-			}
-
-			if (nDamageLeft == 0)
-				RD::SkipLowDamageCheck = true;
+			if (pWHExt->DamageOwnerMultiplier != 1.0)
+				*args->Damage = static_cast<int>(*args->Damage * pWHExt->DamageOwnerMultiplier.Get(RulesExt::Global()->DamageOwnerMultiplier));
+		}
+		else if (pHouse->IsAlliedWith(args->SourceHouse))
+		{
+			if (pWHExt->DamageAlliesMultiplier != 1.0)
+				*args->Damage = static_cast<int>(*args->Damage * pWHExt->DamageAlliesMultiplier.Get(RulesExt::Global()->DamageAlliesMultiplier));
+		}
+		else
+		{
+			if (pWHExt->DamageEnemiesMultiplier != 1.0)
+				*args->Damage = static_cast<int>(*args->Damage * pWHExt->DamageEnemiesMultiplier.Get(RulesExt::Global()->DamageEnemiesMultiplier));
 		}
 	}
+
+	//Shield Receive Damage
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (const auto pShieldData = pExt->Shield.get())
+	{
+		if (!pShieldData->IsActive())
+			return 0;
+
+		const int nDamageLeft = pShieldData->ReceiveDamage(args);
+		if (nDamageLeft >= 0)
+		{
+			*args->Damage = nDamageLeft;
+
+			if (auto pTag = pThis->AttachedTag)
+				pTag->RaiseEvent((TriggerEvent)PhobosTriggerEvent::ShieldBroken, pThis, CellStruct::Empty);
+		}
+
+		if (nDamageLeft == 0)
+			RD::SkipLowDamageCheck = true;
+	}
+
 	return 0;
 }
 

@@ -342,6 +342,17 @@ DEFINE_HOOK(0x6F7E47, TechnoClass_EvaluateObject_MapZone, 0x7)
 	return AllowedObject;
 }
 
+DEFINE_HOOK(0x6F5EE3, TechnoClass_DrawExtras_FactoryProgress, 0x9)
+{
+	GET(TechnoClass*, pThis, EBP);
+	GET_STACK(RectangleStruct*, pBounds, STACK_OFFSET(0x98, 0x8));
+
+	TechnoExt::UpdateFactoryProgress(pThis, pBounds);
+	TechnoExt::UpdateSuperProgress(pThis, pBounds);
+
+	return 0;
+}
+
 DEFINE_HOOK(0x6F534E, TechnoClass_DrawExtras_Insignia, 0x5)
 {
 	enum { SkipGameCode = 0x6F5388 };
