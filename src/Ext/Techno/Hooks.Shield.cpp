@@ -24,22 +24,26 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	if (const auto pHouse = pThis->Owner)
 	{
 		const auto pWHExt = WarheadTypeExt::ExtMap.Find(args->WH);
+		const int sgnDamage = *args->Damage > 0 ? 1 : -1;
+		int calculateDamage = *args->Damage;
 
 		if (pHouse == args->SourceHouse)
 		{
 			if (pWHExt->DamageOwnerMultiplier != 1.0)
-				*args->Damage = static_cast<int>(*args->Damage * pWHExt->DamageOwnerMultiplier.Get(RulesExt::Global()->DamageOwnerMultiplier));
+				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageOwnerMultiplier.Get(RulesExt::Global()->DamageOwnerMultiplier));
 		}
 		else if (pHouse->IsAlliedWith(args->SourceHouse))
 		{
 			if (pWHExt->DamageAlliesMultiplier != 1.0)
-				*args->Damage = static_cast<int>(*args->Damage * pWHExt->DamageAlliesMultiplier.Get(RulesExt::Global()->DamageAlliesMultiplier));
+				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageAlliesMultiplier.Get(RulesExt::Global()->DamageAlliesMultiplier));
 		}
 		else
 		{
 			if (pWHExt->DamageEnemiesMultiplier != 1.0)
-				*args->Damage = static_cast<int>(*args->Damage * pWHExt->DamageEnemiesMultiplier.Get(RulesExt::Global()->DamageEnemiesMultiplier));
+				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageEnemiesMultiplier.Get(RulesExt::Global()->DamageEnemiesMultiplier));
 		}
+
+		*args->Damage = calculateDamage ? calculateDamage : sgnDamage;
 	}
 
 	//Shield Receive Damage
@@ -51,6 +55,7 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 			return 0;
 
 		const int nDamageLeft = pShieldData->ReceiveDamage(args);
+
 		if (nDamageLeft >= 0)
 		{
 			*args->Damage = nDamageLeft;
