@@ -55,7 +55,6 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 			return 0;
 
 		const int nDamageLeft = pShieldData->ReceiveDamage(args);
-
 		if (nDamageLeft >= 0)
 		{
 			*args->Damage = nDamageLeft;
