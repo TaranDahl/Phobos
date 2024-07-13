@@ -234,7 +234,7 @@ void TechnoExt::DrawFactoryProgress(TechnoClass* pThis, RectangleStruct* pBounds
 			return;
 		}
 	}
-	else
+	else // AIs have no Primary factories
 	{
 		pPrimaryFactory = pBuilding->Factory;
 
