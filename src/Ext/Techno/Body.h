@@ -197,8 +197,8 @@ public:
 	static WeaponTypeClass* GetCurrentWeapon(TechnoClass* pThis, int& weaponIndex, bool getSecondary = false);
 	static WeaponTypeClass* GetCurrentWeapon(TechnoClass* pThis, bool getSecondary = false);
 
-	static void UpdateFactoryProgress(TechnoClass* pThis, RectangleStruct* pBounds);
-	static void UpdateSuperProgress(TechnoClass* pThis, RectangleStruct* pBounds);
+	static void DrawFactoryProgress(TechnoClass* pThis, RectangleStruct* pBounds);
+	static void DrawSuperProgress(TechnoClass* pThis, RectangleStruct* pBounds);
 	static Point2D GetScreenLocation(TechnoClass* pThis);
 	static Point2D GetFootSelectBracketPosition(TechnoClass* pThis, Anchor anchor);
 	static Point2D GetBuildingSelectBracketPosition(TechnoClass* pThis, BuildingSelectBracketPosition bracketPosition);

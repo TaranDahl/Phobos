@@ -199,7 +199,7 @@ void TechnoExt::DrawInsignia(TechnoClass* pThis, Point2D* pLocation, RectangleSt
 	return;
 }
 
-void TechnoExt::UpdateFactoryProgress(TechnoClass* pThis, RectangleStruct* pBounds)
+void TechnoExt::DrawFactoryProgress(TechnoClass* pThis, RectangleStruct* pBounds)
 {
 	if (pThis->WhatAmI() != AbstractType::Building || !RulesExt::Global()->FactoryProgressDisplay)
 		return;
@@ -276,7 +276,7 @@ void TechnoExt::UpdateFactoryProgress(TechnoClass* pThis, RectangleStruct* pBoun
 	}
 }
 
-void TechnoExt::UpdateSuperProgress(TechnoClass* pThis, RectangleStruct* pBounds)
+void TechnoExt::DrawSuperProgress(TechnoClass* pThis, RectangleStruct* pBounds)
 {
 	if (pThis->WhatAmI() != AbstractType::Building || !RulesExt::Global()->MainSWProgressDisplay)
 		return;
