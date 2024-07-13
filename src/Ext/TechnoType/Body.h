@@ -229,6 +229,10 @@ public:
 		Valueable<bool> LeaveTransportKill;
 		Valueable<int> LeaveTransportRearm;
 
+		Nullable<AnimTypeClass*> Wake;
+		Nullable<AnimTypeClass*> Wake_Grapple;
+		Nullable<AnimTypeClass*> Wake_Sinking;
+
 		struct LaserTrailDataEntry
 		{
 			ValueableIdx<LaserTrailTypeClass> idxType;
@@ -418,6 +422,7 @@ public:
 			, SpawnHeight {}
 			, LandingDir {}
 			, DroppodType {}
+
 			, Convert_HumanToComputer { }
 			, Convert_ComputerToHuman { }
 
@@ -452,6 +457,10 @@ public:
 			, RecountBurst {}
 			, LeaveTransportKill { false }
 			, LeaveTransportRearm { 0 }
+
+			, Wake { }
+			, Wake_Grapple { }
+			, Wake_Sinking { }
 		{ }
 
 		virtual ~ExtData() = default;

@@ -131,6 +131,7 @@ This page lists all the individual contributions to the project by their author.
   - Customizable FLH when infantry is prone or deployed
   - Initial strength for cloned infantry
   - Grant new superweapons in superweapons
+  - Map Events 604 & 605 for checking if a specific Techno enters in a cell
 - **Starkku**:
   - Misc. minor bugfixes & improvements
   - AI script actions:
@@ -320,16 +321,19 @@ This page lists all the individual contributions to the project by their author.
    - Use `CustomPalette` for animations with `Tiled=yes`
    - Unlimited `AlternateFLH` entries
    - Build limit group
+   - Customizing whether passengers are kicked out when an aircraft fires
 - **TwinkleStar**
   - Custom slaves free sound
   - Jumpjet crash rotation control
   - Vehicle voxel turret shadows & body multi-section shadows
   - `TurretOffset` support for SHP vehicles
+  - Customizable wake anim
 - **Fryone**
   - Customizable ElectricBolt Arcs
   - Sound entry on unit's creation
   - Auto-deploy/Deploy block on ammo change
   - Flashing Technos on selecting
+  - Promotion animation
 - **ZivDero**
   - Allow giving ownership of buildings to players in Skirmish and MP using <Player @ A-H>
   - Re-enable the Veinhole Monster and Weeds from TS
@@ -346,6 +350,7 @@ This page lists all the individual contributions to the project by their author.
   - Enhanced Straight trajectory
   - New Disperse trajectory
   - New Engrave trajectory
+- **handama** - AI script action to jump back to previous script
 - **Ares developers**
   - YRpp and Syringe which are used, save/load, project foundation and generally useful code from Ares
   - unfinished RadTypes code

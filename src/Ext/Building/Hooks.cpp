@@ -237,7 +237,7 @@ DEFINE_HOOK(0x4CA07A, FactoryClass_AbandonProduction_Phobos, 0x8)
 	GET_STACK(void*, calledby, 0x18);
 
 	TechnoClass* pTechno = pFactory->Object;
-
+	if(calledby<0x7F0000)
 	// Replace the old log with this to figure out where keeps flushing the stream
 	Debug::LogGame("(%p) : %s is abandoning production of %s[%s]\n",
 		calledby, pFactory->Owner->PlainName, pTechno->GetType()->Name, pTechno->get_ID());
