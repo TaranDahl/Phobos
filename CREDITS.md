@@ -350,6 +350,9 @@ This page lists all the individual contributions to the project by their author.
   - Enhanced Straight trajectory
   - New Disperse trajectory
   - New Engrave trajectory
+  - Display Factories and superweapons progress on buildings
+  - Extra warhead multiplier for different houses
+  - Units Rotate Turret When in Idle Action
 - **handama** - AI script action to jump back to previous script
 - **Ares developers**
   - YRpp and Syringe which are used, save/load, project foundation and generally useful code from Ares
