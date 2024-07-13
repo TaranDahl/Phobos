@@ -237,7 +237,7 @@ DEFINE_HOOK(0x4CA07A, FactoryClass_AbandonProduction_Phobos, 0x8)
 	GET_STACK(void*, calledby, 0x18);
 
 	TechnoClass* pTechno = pFactory->Object;
-	if(calledby<0x7F0000)
+
 	// Replace the old log with this to figure out where keeps flushing the stream
 	Debug::LogGame("(%p) : %s is abandoning production of %s[%s]\n",
 		calledby, pFactory->Owner->PlainName, pTechno->GetType()->Name, pTechno->get_ID());
@@ -383,7 +383,7 @@ DEFINE_HOOK(0x45759D, BuildingClass_Infiltrate_NoAres, 0x5)
 	GET_STACK(HouseClass*, pInfiltratorHouse, STACK_OFFSET(0x14, -0x4));
 	GET(BuildingClass*, pBuilding, EBP);
 
-	BuildingExt::HandleInfiltrate(pBuilding, pInfiltratorHouse);
+	BuildingExt::ExtMap.Find(pBuilding)->HandleInfiltrate(pInfiltratorHouse, pBuilding->Owner->Available_Money());
 	R->EAX<int>(INFILTRATE_HOOK_MAGIC);
 	return 0;
 }
@@ -400,7 +400,7 @@ DEFINE_HOOK(0x4575A2, BuildingClass_Infiltrate_AfterAres, 0xE)
 	GET_STACK(HouseClass*, pInfiltratorHouse, -0x4);
 	GET(BuildingClass*, pBuilding, ECX);
 
-	BuildingExt::HandleInfiltrate(pBuilding, pInfiltratorHouse);
+	BuildingExt::ExtMap.Find(pBuilding)->HandleInfiltrate(pInfiltratorHouse, pBuilding->Owner->Available_Money());
 	return 0;
 }
 
