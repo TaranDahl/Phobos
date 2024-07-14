@@ -125,8 +125,8 @@ DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_TurretFacing_Idle, 0x6)
 	GET(UnitClass* const, pThis, ESI);
 	enum { SkipFacingForward = 0x736BE2 };
 
-	if (pThis->SecondaryFacing.IsRotating() && !pThis->Type->TurretSpins)
-		pThis->unknown_bool_6AF = true;
+	if (!pThis->Type->TurretSpins)
+		pThis->unknown_bool_6AF = pThis->SecondaryFacing.IsRotating();
 
 	TechnoExt::ExtMap.Find(pThis)->ApplyUnitIdleAction();
 

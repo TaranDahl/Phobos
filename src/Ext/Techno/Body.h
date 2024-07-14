@@ -47,10 +47,10 @@ public:
 		std::vector<std::unique_ptr<AttachEffectClass>> AttachedEffects;
 		bool UnitIdleAction;
 		bool UnitIdleActionSelected;
-		int UnitIdleTurretROT;
+		bool UnitIdleIsSelected;
+		int UnitIdleTurretROT; // If TypeExt get the Ares TurretROT, this can be replaced
 		CDTimerClass UnitIdleActionTimer;
 		CDTimerClass UnitIdleActionGapTimer;
-		DirStruct UnitIdleFacingDirection;
 		WeaponStruct* LastWeaponStruct;
 		CoordStruct LastWeaponFLH;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
@@ -102,9 +102,9 @@ public:
 			, UnitIdleAction { false }
 			, UnitIdleActionSelected { false }
 			, UnitIdleTurretROT { 0 }
+			, UnitIdleIsSelected { 0 }
 			, UnitIdleActionTimer {}
 			, UnitIdleActionGapTimer {}
-			, UnitIdleFacingDirection {}
 			, LastWeaponStruct {}
 			, LastWeaponFLH {}
 			, FiringObstacleCell {}
@@ -131,8 +131,9 @@ public:
 		bool HasAttachedEffects(std::vector<AttachEffectTypeClass*> attachEffectTypes, bool requireAll, bool ignoreSameSource, TechnoClass* pInvoker, AbstractClass* pSource, std::vector<int> const& minCounts, std::vector<int> const& maxCounts) const;
 		int GetAttachedEffectCumulativeCount(AttachEffectTypeClass* pAttachEffectType, bool ignoreSameSource = false, TechnoClass* pInvoker = nullptr, AbstractClass* pSource = nullptr) const;
 		void InitializeDisplayInfo();
-		void InitializeUnitAction();
+		void InitializeUnitIdleAction();
 		void ApplyUnitIdleAction();
+		void StopRotateWithNewROT(int ROT = -1);
 
 		virtual ~ExtData() override;
 		virtual void InvalidatePointer(void* ptr, bool bRemoved) override { }

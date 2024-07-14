@@ -602,7 +602,7 @@ void TechnoExt::ExtData::ApplyUnitIdleAction()
 
 	auto const turret = &pThis->SecondaryFacing;
 
-	if (pThis->Target || pThis->InLimbo) //Reset turret ROT
+	if (pThis->Target || pThis->InLimbo) // Reset turret ROT
 	{
 		if (this->UnitIdleActionTimer.IsTicking())
 			this->UnitIdleActionTimer.Stop();
@@ -610,137 +610,144 @@ void TechnoExt::ExtData::ApplyUnitIdleAction()
 		if (this->UnitIdleActionGapTimer.IsTicking())
 		{
 			this->UnitIdleActionGapTimer.Stop();
-			this->UnitIdleFacingDirection = turret->Desired();
+			const DirStruct desiredFacingDirection = turret->Desired();
+			this->StopRotateWithNewROT(this->UnitIdleTurretROT);
+			turret->SetDesired(desiredFacingDirection); // Continue turn to target
+		}
 
-			const DirStruct currentFacingDirection = turret->Current();
-			turret->DesiredFacing = currentFacingDirection;
-			turret->StartFacing = currentFacingDirection;
-			turret->RotationTimer.Start(0);
+		return;
+	}
+	else if (this->UnitIdleActionSelected && pThis->Owner->IsControlledByCurrentPlayer()) // Reset turret ROT + Turn to mouse
+	{
+		if (pThis->IsSelected)
+		{
+			if (this->UnitIdleActionTimer.IsTicking())
+				this->UnitIdleActionTimer.Stop();
 
-			turret->SetROT(this->UnitIdleTurretROT);
-			turret->SetDesired(this->UnitIdleFacingDirection);
+			if (this->UnitIdleActionGapTimer.IsTicking())
+			{
+				this->UnitIdleActionGapTimer.Stop();
+				this->StopRotateWithNewROT(this->UnitIdleTurretROT);
+			}
+
+			const CoordStruct mouseCoords = TacticalClass::Instance->ClientToCoords(WWMouseClass::Instance->XY1);
+
+			if (mouseCoords != CoordStruct::Empty) // Mouse in tactical
+			{
+				CoordStruct technoCoords = this->OwnerObject()->GetCoords();
+				const int offset = -static_cast<int>(technoCoords.Z * 1.25);
+				const double nowRadian = Math::atan2(technoCoords.Y + offset - mouseCoords.Y, mouseCoords.X - technoCoords.X - offset);
+				DirStruct unitIdleFacingDirection;
+				unitIdleFacingDirection.SetRadian<32>(nowRadian);
+				turret->SetDesired(unitIdleFacingDirection);
+			}
+
+			return;
+		}
+		else
+		{
+			this->StopRotateWithNewROT();
 		}
 	}
-	else if (this->UnitIdleActionSelected && pThis->IsSelected && pThis->Owner->IsControlledByCurrentPlayer()) //Turn to mouse
+
+	const Mission currentMission = pThis->GetCurrentMission();
+
+	if (!this->UnitIdleAction || pThis->Locomotor->Is_Moving()) // Turn to destination
 	{
-		pThis->unknown_bool_6AF = false;
-
-		if (this->UnitIdleActionTimer.IsTicking())
-			this->UnitIdleActionTimer.Stop();
-
-		if (this->UnitIdleActionGapTimer.IsTicking())
+		if (this->UnitIdleAction) //Reset turret ROT
 		{
-			this->UnitIdleActionGapTimer.Stop();
+			if (this->UnitIdleActionTimer.IsTicking())
+				this->UnitIdleActionTimer.Stop();
 
-			const DirStruct currentFacingDirection = turret->Current();
-			turret->DesiredFacing = currentFacingDirection;
-			turret->StartFacing = currentFacingDirection;
-			turret->RotationTimer.Start(0);
-
-			turret->SetROT(this->UnitIdleTurretROT);
-		}
-
-		const CoordStruct mouseCoords = TacticalClass::Instance->ClientToCoords(WWMouseClass::Instance->XY1);
-
-		if (mouseCoords != CoordStruct::Empty)
-		{
-			CoordStruct technoCoords = this->OwnerObject()->GetCoords();
-			const int offset = -static_cast<int>(technoCoords.Z * 1.25);
-			technoCoords.X += offset;
-			technoCoords.Y += offset;
-
-			const double nowRadian = Math::atan2(technoCoords.Y - mouseCoords.Y, mouseCoords.X - technoCoords.X);
-			this->UnitIdleFacingDirection.SetRadian<32>(nowRadian);
-		}
-
-		turret->SetDesired(this->UnitIdleFacingDirection);
+			if (this->UnitIdleActionGapTimer.IsTicking())
+			{
+				this->UnitIdleActionGapTimer.Stop();
+				this->StopRotateWithNewROT(this->UnitIdleTurretROT);
+			}
+		} // Then check original
 	}
-	else if (!this->UnitIdleAction) //Turn forward
+	else if (currentMission == Mission::Guard || currentMission == Mission::Sticky) // Look around
 	{
-		if (!turret->IsRotating() && !pThis->BunkerLinkedItem && (!pThis->Type->IsSimpleDeployer || !pThis->Deployed) && !pThis->IsAttackedByLocomotor
-			&& (Unsorted::CurrentFrame - pThis->unknown_int_120) >= (RulesClass::Instance->GuardAreaTargetingDelay + 5))
+		if (this->UnitIdleActionTimer.Completed()) // Set first direction
 		{
-			turret->SetDesired(pThis->Destination ? pThis->GetTargetDirection(pThis->Destination) : pThis->PrimaryFacing.Current());
-		}
-	}
-	else if (pThis->Locomotor->Is_Moving()) //Turn to destination
-	{
-		if (this->UnitIdleActionTimer.IsTicking())
-			this->UnitIdleActionTimer.Stop();
-
-		if (this->UnitIdleActionGapTimer.IsTicking())
-		{
-			this->UnitIdleActionGapTimer.Stop();
-
-			const DirStruct currentFacingDirection = turret->Current();
-			turret->DesiredFacing = currentFacingDirection;
-			turret->StartFacing = currentFacingDirection;
-			turret->RotationTimer.Start(0);
-
-			turret->SetROT(this->UnitIdleTurretROT);
-		}
-
-		if (!turret->IsRotating() && !pThis->BunkerLinkedItem && (!pThis->Type->IsSimpleDeployer || !pThis->Deployed) && !pThis->IsAttackedByLocomotor
-			&& (Unsorted::CurrentFrame - pThis->unknown_int_120) >= (RulesClass::Instance->GuardAreaTargetingDelay + 5))
-		{
-			turret->SetDesired(pThis->Destination ? pThis->GetTargetDirection(pThis->Destination) : pThis->PrimaryFacing.Current());
-		}
-	}
-	else if (pThis->GetCurrentMission() == Mission::Guard || pThis->GetCurrentMission() == Mission::Sticky) //Look around
-	{
-		pThis->unknown_bool_6AF = false;
-
-		if (this->UnitIdleActionTimer.Completed())
-		{
-			double const extraRadian = ScenarioClass::Instance->Random.RandomDouble() - 0.5;
 			this->UnitIdleActionTimer.Stop();
 			this->UnitIdleActionGapTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionIntervalMin, RulesExt::Global()->UnitIdleActionIntervalMax));
-			this->UnitIdleFacingDirection.SetRadian<32>(pThis->PrimaryFacing.Current().GetRadian<32>() + (pThis->BunkerLinkedItem ? extraRadian * Math::TwoPi : extraRadian));
 
-			turret->SetROT(ScenarioClass::Instance->Random.RandomRanged(2,4) >> 1);
-			turret->SetDesired(this->UnitIdleFacingDirection);
+			const bool noNeedTurnForward = pThis->BunkerLinkedItem || (pThis->Type->IsSimpleDeployer && pThis->Deployed);
+			const double extraRadian = ScenarioClass::Instance->Random.RandomDouble() - 0.5;
+
+			DirStruct unitIdleFacingDirection;
+			unitIdleFacingDirection.SetRadian<32>(pThis->PrimaryFacing.Current().GetRadian<32>() + (noNeedTurnForward ? extraRadian * Math::TwoPi : extraRadian));
+
+			this->StopRotateWithNewROT(ScenarioClass::Instance->Random.RandomRanged(2,4) >> 1);
+			turret->SetDesired(unitIdleFacingDirection);
 		}
-		else if (this->UnitIdleActionGapTimer.IsTicking())
+		else if (this->UnitIdleActionGapTimer.IsTicking()) // Check change direction
 		{
-			if (!this->UnitIdleActionGapTimer.HasTimeLeft())
+			if (!this->UnitIdleActionGapTimer.HasTimeLeft()) // Set next direction
 			{
-				double const extraRadian = ScenarioClass::Instance->Random.RandomDouble() - 0.5;
 				this->UnitIdleActionGapTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionIntervalMin, RulesExt::Global()->UnitIdleActionIntervalMax));
-				this->UnitIdleFacingDirection.SetRadian<32>(pThis->PrimaryFacing.Current().GetRadian<32>() + (pThis->BunkerLinkedItem ? extraRadian * Math::TwoPi : extraRadian));
 
-				turret->SetROT(ScenarioClass::Instance->Random.RandomRanged(2,4) >> 1);
-				turret->SetDesired(this->UnitIdleFacingDirection);
+				const bool noNeedTurnForward = pThis->BunkerLinkedItem || (pThis->Type->IsSimpleDeployer && pThis->Deployed);
+				const double extraRadian = ScenarioClass::Instance->Random.RandomDouble() - 0.5;
+
+				DirStruct unitIdleFacingDirection;
+				unitIdleFacingDirection.SetRadian<32>(pThis->PrimaryFacing.Current().GetRadian<32>() + (noNeedTurnForward ? extraRadian * Math::TwoPi : extraRadian));
+
+				this->StopRotateWithNewROT(ScenarioClass::Instance->Random.RandomRanged(2,4) >> 1);
+				turret->SetDesired(unitIdleFacingDirection);
 			}
 		}
-		else if (!this->UnitIdleActionTimer.IsTicking() && !turret->IsRotating())
+		else if (!this->UnitIdleActionTimer.IsTicking() && !pThis->unknown_bool_6AF) // In idle now
 		{
 			this->UnitIdleActionTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionRestartMin, RulesExt::Global()->UnitIdleActionRestartMax));
-			this->UnitIdleFacingDirection = pThis->PrimaryFacing.Current();
 
-			turret->SetROT(this->UnitIdleTurretROT);
-			turret->SetDesired(this->UnitIdleFacingDirection);
+			const bool noNeedTurnForward = pThis->BunkerLinkedItem || (pThis->Type->IsSimpleDeployer && pThis->Deployed);
+			const DirStruct unitIdleFacingDirection = noNeedTurnForward ? turret->Current() : pThis->PrimaryFacing.Current();
+
+			turret->SetDesired(unitIdleFacingDirection);
 		}
+
+		return;
 	}
-	else //Stop
+	else // Stop look around
 	{
-		pThis->unknown_bool_6AF = false;
-
-		if (this->UnitIdleActionTimer.IsTicking() || this->UnitIdleActionGapTimer.IsTicking())
-		{
+		if (this->UnitIdleActionTimer.IsTicking())
 			this->UnitIdleActionTimer.Stop();
-			this->UnitIdleActionGapTimer.Stop();
-		}
 
-		if (pThis->unknown_bool_6AF && pThis->GetCurrentMission() == Mission::Harmless)
+		if (this->UnitIdleActionGapTimer.IsTicking())
 		{
-			this->UnitIdleFacingDirection = turret->Current();
-
-			const DirStruct currentFacingDirection = turret->Current();
-			turret->DesiredFacing = currentFacingDirection;
-			turret->StartFacing = currentFacingDirection;
-			turret->RotationTimer.Start(0);
+			this->UnitIdleActionGapTimer.Stop();
+			this->StopRotateWithNewROT(this->UnitIdleTurretROT);
 		}
 	}
+
+	if (currentMission == Mission::Harmless && pThis->Owner == HouseClass::FindSpecial()) // Do nothing when driver is killed
+		return;
+
+	if (!pThis->unknown_bool_6AF && !pThis->BunkerLinkedItem && (!pThis->Type->IsSimpleDeployer || !pThis->Deployed)
+		&& (Unsorted::CurrentFrame - pThis->unknown_int_120) >= (RulesClass::Instance->GuardAreaTargetingDelay + 5)) // Original turn forward
+	{
+		auto const pWeaponStruct = pThis->GetTurretWeapon();
+
+		if (!pThis->Destination || (pWeaponStruct && pWeaponStruct->WeaponType && pWeaponStruct->TurretLocked))
+			turret->SetDesired(pThis->PrimaryFacing.Current());
+		else if (!pThis->IsAttackedByLocomotor)
+			turret->SetDesired(pThis->GetTargetDirection(pThis->Destination));
+	}
+}
+
+void TechnoExt::ExtData::StopRotateWithNewROT(int ROT)
+{
+	auto const turret = &this->OwnerObject()->SecondaryFacing;
+
+	const DirStruct currentFacingDirection = turret->Current();
+	turret->DesiredFacing = currentFacingDirection;
+	turret->StartFacing = currentFacingDirection;
+	turret->RotationTimer.Start(0);
+
+	if (ROT >= 0)
+		turret->SetROT(ROT);
 }
 
 void TechnoExt::ApplyGainedSelfHeal(TechnoClass* pThis)

@@ -176,7 +176,7 @@ void TechnoExt::ExtData::InitializeDisplayInfo()
 	}
 }
 
-void TechnoExt::ExtData::InitializeUnitAction()
+void TechnoExt::ExtData::InitializeUnitIdleAction()
 {
 	auto const pThis = this->OwnerObject();
 
