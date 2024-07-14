@@ -279,6 +279,8 @@ UnitIdlePointToMouse=           ; boolean
 ### Show Some Progress
 
 - You can now let the buildings with factories draw an extra bar below HP bar to show the progress of production by setting `FactoryProgressDisplay=true`, and buildings with main superweapon to show the progress of the superweapon by setting `MainSWProgressDisplay=true`.
+  - `FactoryProgressDisplay` draw the pips with frame 4 from `pips.shp`.
+  - `MainSWProgressDisplay` draw the pips with frame 6 from `pips.shp`.
 
 In `rulesmd.ini`:
 ```ini
