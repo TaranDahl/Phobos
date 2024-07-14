@@ -55,6 +55,9 @@ int WeaponTypeExt::ExtData::GetBurstDelay(int burstIndex) const
 
 bool WeaponTypeExt::ExtData::CheckTechnoKeepRange(TechnoClass* pFirer) const
 {
+	if (!pFirer)
+		return false;
+
 	if (pFirer->Owner && pFirer->Owner->IsControlledByHuman())
 	{
 		if (!this->KeepRange_AllowPlayer)
