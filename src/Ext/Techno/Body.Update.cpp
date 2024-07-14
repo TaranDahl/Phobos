@@ -630,6 +630,7 @@ void TechnoExt::ExtData::ApplyUnitIdleAction()
 				this->StopRotateWithNewROT(this->UnitIdleTurretROT);
 			}
 
+			this->UnitIdleIsSelected = true;
 			const CoordStruct mouseCoords = TacticalClass::Instance->ClientToCoords(WWMouseClass::Instance->XY1);
 
 			if (mouseCoords != CoordStruct::Empty) // Mouse in tactical
@@ -644,8 +645,9 @@ void TechnoExt::ExtData::ApplyUnitIdleAction()
 
 			return;
 		}
-		else
+		else if (this->UnitIdleIsSelected) // Immediately stop when is not selected
 		{
+			this->UnitIdleIsSelected = false;
 			this->StopRotateWithNewROT();
 		}
 	}
