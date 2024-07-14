@@ -2,7 +2,9 @@
 
 #include <TacticalClass.h>
 #include <SpawnManagerClass.h>
-#include <Ext/SWType/Body.h>
+#include <FactoryClass.h>
+#include <SuperClass.h>
+#include <Ext/BuildingType/Body.h>
 
 #include <Utilities/EnumFunctions.h>
 
