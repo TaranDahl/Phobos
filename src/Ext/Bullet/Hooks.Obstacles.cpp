@@ -200,14 +200,13 @@ DEFINE_HOOK(0x6F737F, TechnoClass_InRange_WeaponMinimumRange, 0x5)
 
 	GET(WeaponTypeClass*, pWeapon, EDX);
 
-	int minimumRange = 0;
+	auto pTechno = InRangeTemp::Techno;
+	int minimumRange = pWeapon->MinimumRange;
+	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
+	const int keepRange = pWeaponExt->KeepRange.Get();
 
-	if (pWeapon)
-	{
-		auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
-		const int keepRange = pWeaponExt->KeepRange.Get();
-		minimumRange = (keepRange > 0 && pWeaponExt->CheckTechnoKeepRange(InRangeTemp::Techno)) ? keepRange : pWeapon->MinimumRange;
-	}
+	if (keepRange > 0 && pWeaponExt->CheckTechnoKeepRange(pTechno))
+		minimumRange = keepRange;
 
 	R->ECX(minimumRange);
 
