@@ -63,10 +63,9 @@ DEFINE_HOOK(0x6F7248, TechnoClass_InRange_WeaponRange, 0x6)
 	GET(TechnoClass*, pThis, ESI);
 	GET(WeaponTypeClass*, pWeapon, EBX);
 
-	int range = 0;
-
+	int range = pWeapon->Range;
 	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
-	const int keepRange = pWeaponExt ? pWeaponExt->KeepRange.Get() : 0;
+	const int keepRange = pWeaponExt->KeepRange.Get();
 
 	if (keepRange < 0 && pWeaponExt->CheckTechnoKeepRange(pThis))
 		range = -keepRange;
