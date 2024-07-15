@@ -152,6 +152,13 @@ public:
 		~ExtContainer();
 	};
 
+	struct DrawFrameStruct
+	{
+		int Frame;
+		SHPStruct* SHP;
+		ConvertClass* Palette;
+	};
+
 	static ExtContainer ExtMap;
 
 	static bool LoadGlobals(PhobosStreamReader& Stm);
@@ -200,6 +207,9 @@ public:
 
 	static void DrawFactoryProgress(TechnoClass* pThis, RectangleStruct* pBounds);
 	static void DrawSuperProgress(TechnoClass* pThis, RectangleStruct* pBounds);
+	static void DrawIronCurtainProgress(TechnoClass* pThis, RectangleStruct* pBounds);
+	static void DrawVanillaStyleFootBar(int curLength, int maxLength, DrawFrameStruct* pips, DrawFrameStruct* background, Point2D* pLocation, RectangleStruct* pBounds);
+	static void DrawVanillaStyleBuildingBar(int curLength, int maxLength, DrawFrameStruct* filled, DrawFrameStruct* empty, Point2D* pLocation, RectangleStruct* pBounds);
 	static Point2D GetScreenLocation(TechnoClass* pThis);
 	static Point2D GetFootSelectBracketPosition(TechnoClass* pThis, Anchor anchor);
 	static Point2D GetBuildingSelectBracketPosition(TechnoClass* pThis, BuildingSelectBracketPosition bracketPosition);

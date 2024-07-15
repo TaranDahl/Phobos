@@ -138,6 +138,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->RecountBurst.Read(exINI, GameStrings::General, "RecountBurst");
 	this->FactoryProgressDisplay.Read(exINI, GameStrings::AudioVisual, "FactoryProgressDisplay");
 	this->MainSWProgressDisplay.Read(exINI, GameStrings::AudioVisual, "MainSWProgressDisplay");
+	this->InvulnerableDisplay.Read(exINI, GameStrings::AudioVisual, "InvulnerableDisplay");
 	this->DamageOwnerMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageOwnerMultiplier");
 	this->DamageAlliesMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageAlliesMultiplier");
 	this->DamageEnemiesMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageEnemiesMultiplier");
@@ -311,6 +312,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->RecountBurst)
 		.Process(this->FactoryProgressDisplay)
 		.Process(this->MainSWProgressDisplay)
+		.Process(this->InvulnerableDisplay)
 		.Process(this->DamageOwnerMultiplier)
 		.Process(this->DamageAlliesMultiplier)
 		.Process(this->DamageEnemiesMultiplier)

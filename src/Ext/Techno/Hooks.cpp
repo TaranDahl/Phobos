@@ -366,6 +366,7 @@ DEFINE_HOOK(0x6F5EE3, TechnoClass_DrawExtras_DrawAboveHealth, 0x9)
 	GET(TechnoClass*, pThis, EBP);
 	GET_STACK(RectangleStruct*, pBounds, STACK_OFFSET(0x98, 0x8));
 
+	TechnoExt::DrawIronCurtainProgress(pThis, pBounds);
 	TechnoExt::DrawFactoryProgress(pThis, pBounds);
 	TechnoExt::DrawSuperProgress(pThis, pBounds);
 

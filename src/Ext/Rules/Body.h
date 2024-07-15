@@ -96,6 +96,7 @@ public:
 		Valueable<bool> RecountBurst;
 		Valueable<bool> FactoryProgressDisplay;
 		Valueable<bool> MainSWProgressDisplay;
+		Valueable<bool> InvulnerableDisplay;
 		Valueable<double> DamageOwnerMultiplier;
 		Valueable<double> DamageAlliesMultiplier;
 		Valueable<double> DamageEnemiesMultiplier;
@@ -210,6 +211,7 @@ public:
 			, RecountBurst { false }
 			, FactoryProgressDisplay { false }
 			, MainSWProgressDisplay { false }
+			, InvulnerableDisplay { false }
 			, DamageOwnerMultiplier { 1.0 }
 			, DamageAlliesMultiplier { 1.0 }
 			, DamageEnemiesMultiplier { 1.0 }
