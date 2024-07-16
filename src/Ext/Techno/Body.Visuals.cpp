@@ -281,12 +281,13 @@ void TechnoExt::DrawSuperProgress(TechnoClass* pThis, RectangleStruct* pBounds)
 	BuildingTypeClass* const pBuildingType = pBuilding->Type;
 	const int superIndex = pBuildingType->SuperWeapon;
 	SuperClass* const pSuper = (superIndex != -1) ? pThis->Owner->Supers.GetItem(superIndex) : nullptr;
+	const int timeLeft = pSuper->RechargeTimer.TimeLeft;
 
-	if (!pSuper || !SWTypeExt::ExtMap.Find(pSuper->Type)->IsAvailable(pThis->Owner))
+	if (!pSuper || !timeLeft || !SWTypeExt::ExtMap.Find(pSuper->Type)->IsAvailable(pThis->Owner))
 		return;
 
 	const int maxLength = pBuildingType->GetFoundationHeight(false) * 15 >> 1;
-	const int curLength = Math::clamp(static_cast<int>((static_cast<double>(pSuper->RechargeTimer.TimeLeft - pSuper->RechargeTimer.GetTimeLeft()) / pSuper->RechargeTimer.TimeLeft) * maxLength), 0, maxLength);
+	const int curLength = Math::clamp(static_cast<int>((static_cast<double>(timeLeft - pSuper->RechargeTimer.GetTimeLeft()) / timeLeft) * maxLength), 0, maxLength);
 	Point2D position = TechnoExt::GetBuildingSelectBracketPosition(pBuilding, BuildingSelectBracketPosition::Top) + Point2D { 5, 3 + pBuildingType->PixelSelectionBracketDelta };
 	DrawFrameStruct filled { 5, FileSystem::PIPS_SHP , FileSystem::PALETTE_PAL };
 	DrawFrameStruct empty { 0, FileSystem::PIPS_SHP , FileSystem::PALETTE_PAL };
@@ -295,7 +296,7 @@ void TechnoExt::DrawSuperProgress(TechnoClass* pThis, RectangleStruct* pBounds)
 
 void TechnoExt::DrawIronCurtainProgress(TechnoClass* pThis, RectangleStruct* pBounds)
 {
-	if (!pThis->IsIronCurtained() || !RulesExt::Global()->InvulnerableDisplay)
+	if (!pThis->IsIronCurtained() || !RulesExt::Global()->InvulnerableDisplay || !pThis->IronCurtainTimer.TimeLeft)
 		return;
 
 	if (pThis->WhatAmI() == AbstractType::Building)
