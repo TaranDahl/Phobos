@@ -295,9 +295,7 @@ DEFINE_HOOK(0x50B669, HouseClass_ShouldDisableCameo, 0x5)
 	if (aresDisable || !pType)
 		return 0;
 
-	auto const pExt = TechnoTypeExt::ExtMap.Find(pType);
-
-	if (pExt->ActuallyUnbuildable)
+	if (TechnoTypeExt::ExtMap.Find(pType)->ActuallyUnbuildable)
 		R->EAX(true);
 
 	if (HouseExt::ReachedBuildLimit(pThis, pType, false))
