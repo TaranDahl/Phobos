@@ -772,6 +772,17 @@ ForbidParallelAIQueues.Aircraft=no  ; boolean
 ForbidParallelAIQueues.Building=no  ; boolean
 ```
 
+### Jumpjet Climbing Logic Enhancement
+
+- You can now let the jumpjets increase their height earlier by set `JumpjetClimbPredictHeight` to true or simply let them skip the stop check by set `JumpjetClimbWithoutCutOut` to true.
+
+In `rulesmd.ini`:
+```ini
+[General]
+JumpjetClimbPredictHeight=false  ; boolean
+JumpjetClimbWithoutCutOut=false  ; boolean
+```
+
 ## Terrains
 
 ### Customizable ore spawners
