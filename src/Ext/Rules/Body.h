@@ -87,6 +87,8 @@ public:
 		Valueable<double> HeightShadowScaling_MinScale;
 		double AirShadowBaseScale_log;
 
+		Valueable<bool> JumpjetClimbPredictHeight;
+		Valueable<bool> JumpjetClimbWithoutCutOut;
 		Valueable<bool> UnitIdleRotateTurret;
 		Valueable<bool> UnitIdlePointToMouse;
 		Valueable<int> UnitIdleActionRestartMin;
@@ -202,6 +204,8 @@ public:
 			, HeightShadowScaling_MinScale { 0.0 }
 			, AirShadowBaseScale_log { 0.693376137 }
 
+			, JumpjetClimbPredictHeight { false }
+			, JumpjetClimbWithoutCutOut { false }
 			, UnitIdleRotateTurret { false }
 			, UnitIdlePointToMouse { false }
 			, UnitIdleActionRestartMin { 150 }
