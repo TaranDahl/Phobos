@@ -296,7 +296,6 @@ InvulnerableDisplay.Others.Pips=17,18         ; integer, zero-based frame index 
 InvulnerableDisplay.Buildings.Pips=5,4        ; integer, zero-based frame index used for displaying buildings' ForceShield or IronCurtain remaining time
 ProgressDisplay.Others.PipsShape=PIPS.shp     ; filename - including the .shp extension
 ProgressDisplay.Buildings.PipsShape=PIPS.shp  ; filename - including the .shp extension
-
 ```
 
 ## Hotkey Commands
