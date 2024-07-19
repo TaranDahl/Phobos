@@ -107,8 +107,8 @@ public:
 		Valueable<int> MainSWProgressDisplay_Pips;
 		Valueable<Point2D> InvulnerableDisplay_Others_Pips;
 		Valueable<Point2D> InvulnerableDisplay_Buildings_Pips;
-		Nullable<SHPStruct*> ProgressDisplay_Others_PipsShape;
-		Nullable<SHPStruct*> ProgressDisplay_Buildings_PipsShape;
+		Valueable<SHPStruct*> ProgressDisplay_Others_PipsShape;
+		Valueable<SHPStruct*> ProgressDisplay_Buildings_PipsShape;
 		Valueable<double> DamageOwnerMultiplier;
 		Valueable<double> DamageAlliesMultiplier;
 		Valueable<double> DamageEnemiesMultiplier;
@@ -234,8 +234,8 @@ public:
 			, MainSWProgressDisplay_Pips { 5 }
 			, InvulnerableDisplay_Others_Pips { { 17, 18 } }
 			, InvulnerableDisplay_Buildings_Pips { { 5, 4 } }
-			, ProgressDisplay_Others_PipsShape {}
-			, ProgressDisplay_Buildings_PipsShape {}
+			, ProgressDisplay_Others_PipsShape { FileSystem::PIPS_SHP }
+			, ProgressDisplay_Buildings_PipsShape { FileSystem::PIPS_SHP }
 			, DamageOwnerMultiplier { 1.0 }
 			, DamageAlliesMultiplier { 1.0 }
 			, DamageEnemiesMultiplier { 1.0 }
