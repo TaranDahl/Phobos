@@ -99,6 +99,16 @@ public:
 		Valueable<bool> FactoryProgressDisplay;
 		Valueable<bool> MainSWProgressDisplay;
 		Valueable<bool> InvulnerableDisplay;
+		Valueable<Point2D> FactoryProgressDisplay_Offset;
+		Valueable<Point2D> MainSWProgressDisplay_Offset;
+		Valueable<Point2D> InvulnerableDisplay_Others_Offset;
+		Valueable<Point2D> InvulnerableDisplay_Buildings_Offset;
+		Valueable<int> FactoryProgressDisplay_Pips;
+		Valueable<int> MainSWProgressDisplay_Pips;
+		Valueable<Point2D> InvulnerableDisplay_Others_Pips;
+		Valueable<Point2D> InvulnerableDisplay_Buildings_Pips;
+		Nullable<SHPStruct*> ProgressDisplay_Others_PipsShape;
+		Nullable<SHPStruct*> ProgressDisplay_Buildings_PipsShape;
 		Valueable<double> DamageOwnerMultiplier;
 		Valueable<double> DamageAlliesMultiplier;
 		Valueable<double> DamageEnemiesMultiplier;
@@ -216,6 +226,16 @@ public:
 			, FactoryProgressDisplay { false }
 			, MainSWProgressDisplay { false }
 			, InvulnerableDisplay { false }
+			, FactoryProgressDisplay_Offset { { 0, 0 } }
+			, MainSWProgressDisplay_Offset { { 0, 0 } }
+			, InvulnerableDisplay_Others_Offset { { 0, 0 } }
+			, InvulnerableDisplay_Buildings_Offset { { 0, 0 } }
+			, FactoryProgressDisplay_Pips { 3 }
+			, MainSWProgressDisplay_Pips { 5 }
+			, InvulnerableDisplay_Others_Pips { { 17, 18 } }
+			, InvulnerableDisplay_Buildings_Pips { { 5, 4 } }
+			, ProgressDisplay_Others_PipsShape {}
+			, ProgressDisplay_Buildings_PipsShape {}
 			, DamageOwnerMultiplier { 1.0 }
 			, DamageAlliesMultiplier { 1.0 }
 			, DamageEnemiesMultiplier { 1.0 }
