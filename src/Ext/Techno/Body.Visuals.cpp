@@ -359,7 +359,7 @@ void TechnoExt::DrawIronCurtainProgress(TechnoClass* pThis, RectangleStruct* pBo
 			Math::clamp(static_cast<int>((static_cast<double>(pThis->IronCurtainTimer.GetTimeLeft()) / pThis->IronCurtainTimer.TimeLeft) * maxLength), 0, maxLength),
 			(pThis->ForceShielded ? 5 : 4),
 			Math::clamp(static_cast<int>(pBuilding->GetHealthPercentage() * maxLength), 0, maxLength),
-			((pThis->IsSelected || pThis->IsMouseHovering) ? (healthStatus == HealthState::Green ? 1 : (healthStatus == HealthState::Yellow ? 2 : 4)) : -1),
+			((pThis->IsSelected || pThis->IsMouseHovering) ? (healthStatus == HealthState::Green ? 1 : (healthStatus == HealthState::Yellow ? 2 : 4)) : 0),
 			maxLength,
 			0,
 			FileSystem::PIPS_SHP,
