@@ -314,6 +314,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->UnitIdleRotateTurret.Read(exINI, pSection, "UnitIdleRotateTurret");
 	this->UnitIdlePointToMouse.Read(exINI, pSection, "UnitIdlePointToMouse");
 	this->RecountBurst.Read(exINI, pSection, "RecountBurst");
+	this->UnitBaseNormal.Read(exINI, pSection, "UnitBaseNormal");
+	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
 	this->LeaveTransportKill.Read(exINI, pSection, "LeaveTransportKill");
 	this->LeaveTransportRearm.Read(exINI, pSection, "LeaveTransportRearmDelay");
 
@@ -687,8 +689,11 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->UnitIdleRotateTurret)
 		.Process(this->UnitIdlePointToMouse)
 		.Process(this->RecountBurst)
+		.Process(this->UnitBaseNormal)
+		.Process(this->UnitBaseForAllyBuilding)
 		.Process(this->LeaveTransportKill)
 		.Process(this->LeaveTransportRearm)
+
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)
 		.Process(this->Wake_Sinking)

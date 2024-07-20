@@ -549,3 +549,74 @@ DEFINE_HOOK(0x6F9FA9, TechnoClass_AI_PromoteAnim, 0x6)
 
 	return aresProcess();
 }
+
+DEFINE_HOOK(0x4A8FCA, MapClass_PassesProximityCheck_ExtraBaseNormal, 0x7)
+{
+	enum { Break = 0x4A9052, Continue = 0x4A902C };
+
+	GET(CellClass*, pCell, EAX);
+	GET_STACK(int, idxHouse, STACK_OFFSET(0x30, 0x8));
+
+	if (!Game::IsActive)
+	{
+		R->AL(false);
+		return Break;
+	}
+
+	ObjectClass* pObject = pCell->FirstObject;
+
+	if ( !pObject )
+		return Continue;
+
+	while (pObject)
+	{
+		pObject = pObject->NextObject;
+
+		if (TechnoClass* const pTechno = static_cast<TechnoClass*>(pObject))
+		{
+			HouseClass* const pOwner = pTechno->Owner;
+			AbstractType const absType = pTechno->WhatAmI();
+
+			if (pOwner->ArrayIndex == idxHouse)
+			{
+				if (absType == AbstractType::Building)
+				{
+					if (static_cast<BuildingClass*>(pTechno)->Type->BaseNormal)
+					{
+						R->AL(true);
+						return Break;
+					}
+				}
+				else if (absType == AbstractType::Unit)
+				{
+					if (TechnoExt::ExtMap.Find(pTechno)->TypeExtData->UnitBaseNormal)
+					{
+						R->AL(true);
+						return Break;
+					}
+				}
+			}
+			else if (RulesClass::Instance->BuildOffAlly && pOwner->IsAlliedWith(HouseClass::Array->Items[idxHouse]))
+			{
+				if (absType == AbstractType::Building)
+				{
+					if (static_cast<BuildingClass*>(pTechno)->Type->EligibileForAllyBuilding)
+					{
+						R->AL(true);
+						return Break;
+					}
+				}
+				else if (absType == AbstractType::Unit)
+				{
+					if (TechnoExt::ExtMap.Find(pTechno)->TypeExtData->UnitBaseForAllyBuilding)
+					{
+						R->AL(true);
+						return Break;
+					}
+				}
+			}
+		}
+	}
+
+	return Continue;
+}
