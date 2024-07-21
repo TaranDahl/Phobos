@@ -550,13 +550,29 @@ DEFINE_HOOK(0x6F9FA9, TechnoClass_AI_PromoteAnim, 0x6)
 	return aresProcess();
 }
 
-DEFINE_HOOK(0x4A8F1F, MapClass_PassesProximityCheck_BaseNormal, 0x5)
+DEFINE_HOOK(0x4A8EE2, MapClass_PassesProximityCheck_Recheck, 0x7)
 {
-	enum { SkipGameCode = 0x4A9054 };
+	enum { ContinueGameCode = 0x4A8F03, SkipGameCode = 0x4A905C };
+
+	GET(CellStruct*, foundationTopLeft, EDI);
+	const CellStruct foundationTopLeftBuffer = Make_Global<CellStruct>(0x8A03F8);
+
+	if (foundationTopLeft->X == foundationTopLeftBuffer.X && foundationTopLeft->Y == foundationTopLeftBuffer.Y)
+	{
+		if (!RulesExt::Global()->CheckUnitBaseNormal || Unsorted::CurrentFrame % 8 != 0)
+			return SkipGameCode;
+	}
+
+	return ContinueGameCode;
+}
+
+DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormal, 0x9)
+{
+	enum { SkipGameCode = 0x4A904E };
 
 	GET(BuildingTypeClass*, pBuildingType, ESI);
 	GET(CellStruct*, foundationTopLeft, EDI);
-	GET_STACK(int, idxHouse, STACK_OFFSET(0x28, 0x8));
+	GET_STACK(int, idxHouse, STACK_OFFSET(0x30, 0x8));
 
 	if (Game::IsActive)
 	{
@@ -595,18 +611,18 @@ DEFINE_HOOK(0x4A8F1F, MapClass_PassesProximityCheck_BaseNormal, 0x5)
 								{
 									if (pOwner->ArrayIndex == idxHouse && pBuilding->Type->BaseNormal)
 									{
-										R->AL(true);
+										R->Stack(STACK_OFFSET(0x30, 0xC), true);
 										return SkipGameCode;
 									}
 									else if (RulesClass::Instance->BuildOffAlly && pOwner->IsAlliedWith(HouseClass::Array->Items[idxHouse]) && pBuilding->Type->EligibileForAllyBuilding)
 									{
-										R->AL(true);
+										R->Stack(STACK_OFFSET(0x30, 0xC), true);
 										return SkipGameCode;
 									}
 								}
 							}
 						}
-						else if (absType == AbstractType::Unit)
+						else if (RulesExt::Global()->CheckUnitBaseNormal && absType == AbstractType::Unit)
 						{
 							UnitClass* const pUnit = static_cast<UnitClass*>(pObject);
 
@@ -616,12 +632,12 @@ DEFINE_HOOK(0x4A8F1F, MapClass_PassesProximityCheck_BaseNormal, 0x5)
 								{
 									if (pOwner->ArrayIndex == idxHouse && pTypeExt->UnitBaseNormal)
 									{
-										R->AL(true);
+										R->Stack(STACK_OFFSET(0x30, 0xC), true);
 										return SkipGameCode;
 									}
 									else if (RulesClass::Instance->BuildOffAlly && pOwner->IsAlliedWith(HouseClass::Array->Items[idxHouse]) && pTypeExt->UnitBaseForAllyBuilding)
 									{
-										R->AL(true);
+										R->Stack(STACK_OFFSET(0x30, 0xC), true);
 										return SkipGameCode;
 									}
 								}
@@ -635,6 +651,6 @@ DEFINE_HOOK(0x4A8F1F, MapClass_PassesProximityCheck_BaseNormal, 0x5)
 		}
 	}
 
-	R->AL(false);
+	R->Stack(STACK_OFFSET(0x30, 0xC), false);
 	return SkipGameCode;
 }
