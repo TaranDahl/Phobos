@@ -550,73 +550,91 @@ DEFINE_HOOK(0x6F9FA9, TechnoClass_AI_PromoteAnim, 0x6)
 	return aresProcess();
 }
 
-DEFINE_HOOK(0x4A8FCA, MapClass_PassesProximityCheck_ExtraBaseNormal, 0x7)
+DEFINE_HOOK(0x4A8F1F, MapClass_PassesProximityCheck_BaseNormal, 0x5)
 {
-	enum { Break = 0x4A9052, Continue = 0x4A902C };
+	enum { SkipGameCode = 0x4A9054 };
 
-	GET(CellClass*, pCell, EAX);
-	GET_STACK(int, idxHouse, STACK_OFFSET(0x30, 0x8));
+	GET(BuildingTypeClass*, pBuildingType, ESI);
+	GET(CellStruct*, foundationTopLeft, EDI);
+	GET_STACK(int, idxHouse, STACK_OFFSET(0x28, 0x8));
 
-	if (!Game::IsActive)
+	if (Game::IsActive)
 	{
-		R->AL(false);
-		return Break;
-	}
+		const short foundationWidth = pBuildingType->GetFoundationWidth();
+		const short foundationHeight = pBuildingType->GetFoundationHeight(false);
+		const short topLeftX = foundationTopLeft->X;
+		const short topLeftY = foundationTopLeft->Y;
+		const short bottomRightX = topLeftX + foundationWidth;
+		const short bottomRightY = topLeftY + foundationHeight;
 
-	ObjectClass* pObject = pCell->FirstObject;
+		const short buildingAdjacent = static_cast<short>(pBuildingType->Adjacent + 1);
+		const short leftX = topLeftX - buildingAdjacent;
+		const short topY = topLeftY - buildingAdjacent;
+		const short rightX = bottomRightX + buildingAdjacent;
+		const short bottomY = bottomRightY + buildingAdjacent;
 
-	if ( !pObject )
-		return Continue;
-
-	while (pObject)
-	{
-		pObject = pObject->NextObject;
-
-		if (TechnoClass* const pTechno = static_cast<TechnoClass*>(pObject))
+		for (short curX = leftX; curX < rightX; ++curX)
 		{
-			HouseClass* const pOwner = pTechno->Owner;
-			AbstractType const absType = pTechno->WhatAmI();
+			for (short curY = topY; curY < bottomY; ++curY)
+			{
+				if (CellClass* const pCell = MapClass::Instance->GetCellAt(CellStruct{curX, curY}))
+				{
+					ObjectClass* pObject = pCell->FirstObject;
 
-			if (pOwner->ArrayIndex == idxHouse)
-			{
-				if (absType == AbstractType::Building)
-				{
-					if (static_cast<BuildingClass*>(pTechno)->Type->BaseNormal)
+					while (pObject)
 					{
-						R->AL(true);
-						return Break;
-					}
-				}
-				else if (absType == AbstractType::Unit)
-				{
-					if (TechnoExt::ExtMap.Find(pTechno)->TypeExtData->UnitBaseNormal)
-					{
-						R->AL(true);
-						return Break;
-					}
-				}
-			}
-			else if (RulesClass::Instance->BuildOffAlly && pOwner->IsAlliedWith(HouseClass::Array->Items[idxHouse]))
-			{
-				if (absType == AbstractType::Building)
-				{
-					if (static_cast<BuildingClass*>(pTechno)->Type->EligibileForAllyBuilding)
-					{
-						R->AL(true);
-						return Break;
-					}
-				}
-				else if (absType == AbstractType::Unit)
-				{
-					if (TechnoExt::ExtMap.Find(pTechno)->TypeExtData->UnitBaseForAllyBuilding)
-					{
-						R->AL(true);
-						return Break;
+						AbstractType const absType = pObject->WhatAmI();
+
+						if (absType == AbstractType::Building)
+						{
+							if (curX < topLeftX || curX >= bottomRightX || curY < topLeftY || curY >= bottomRightY)
+							{
+								BuildingClass* const pBuilding = static_cast<BuildingClass*>(pObject);
+
+								if (HouseClass* const pOwner = pBuilding->Owner)
+								{
+									if (pOwner->ArrayIndex == idxHouse && pBuilding->Type->BaseNormal)
+									{
+										R->AL(true);
+										return SkipGameCode;
+									}
+									else if (RulesClass::Instance->BuildOffAlly && pOwner->IsAlliedWith(HouseClass::Array->Items[idxHouse]) && pBuilding->Type->EligibileForAllyBuilding)
+									{
+										R->AL(true);
+										return SkipGameCode;
+									}
+								}
+							}
+						}
+						else if (absType == AbstractType::Unit)
+						{
+							UnitClass* const pUnit = static_cast<UnitClass*>(pObject);
+
+							if (HouseClass* const pOwner = pUnit->Owner)
+							{
+								if (TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(static_cast<UnitClass*>(pObject)->Type))
+								{
+									if (pOwner->ArrayIndex == idxHouse && pTypeExt->UnitBaseNormal)
+									{
+										R->AL(true);
+										return SkipGameCode;
+									}
+									else if (RulesClass::Instance->BuildOffAlly && pOwner->IsAlliedWith(HouseClass::Array->Items[idxHouse]) && pTypeExt->UnitBaseForAllyBuilding)
+									{
+										R->AL(true);
+										return SkipGameCode;
+									}
+								}
+							}
+						}
+
+						pObject = pObject->NextObject;
 					}
 				}
 			}
 		}
 	}
 
-	return Continue;
+	R->AL(false);
+	return SkipGameCode;
 }
