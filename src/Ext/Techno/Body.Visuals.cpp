@@ -1,5 +1,5 @@
 #include "Body.h"
-
+#include <WWMouseClass.h>
 #include <TacticalClass.h>
 #include <SpawnManagerClass.h>
 #include <FactoryClass.h>
@@ -357,6 +357,33 @@ void TechnoExt::DrawSuperProgress(TechnoClass* pThis, RectangleStruct* pBounds)
 
 void TechnoExt::DrawIronCurtainProgress(TechnoClass* pThis, RectangleStruct* pBounds)
 {
+	if (pThis->WhatAmI() == AbstractType::Building) // Test only
+	{
+		BuildingClass* const pBuilding = abstract_cast<BuildingClass*>(pThis);
+
+		if (pBuilding->Type->Factory == AbstractType::BuildingType)
+		{
+			Point2D mousePosition = WWMouseClass::Instance->XY1 + Point2D { -70, -60 };
+
+			DrawFrameStruct pDrawT
+			{
+				(DisplayClass::Instance->unknown_1180 + 1) * 16,
+				18,
+				(DisplayClass::Instance->unknown_1181 + 1) * 16 + 32,
+				17,
+				64,
+				-1,
+				FileSystem::PIPS_SHP,
+				FileSystem::PIPBRD_SHP,
+				FileSystem::PALETTE_PAL,
+				&mousePosition,
+				pBounds
+			};
+
+			TechnoExt::DrawVanillaStyleFootBar(&pDrawT);
+		}
+	}
+
 	if (!pThis->IsIronCurtained() || !pThis->IronCurtainTimer.TimeLeft)
 		return;
 

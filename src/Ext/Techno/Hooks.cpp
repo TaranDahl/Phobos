@@ -9,6 +9,7 @@
 #include <Ext/WarheadType/Body.h>
 #include <Ext/WeaponType/Body.h>
 #include <Utilities/EnumFunctions.h>
+#include <Utilities/AresHelper.h>
 
 DEFINE_HOOK(0x6F9E50, TechnoClass_AI, 0x5)
 {
@@ -550,28 +551,52 @@ DEFINE_HOOK(0x6F9FA9, TechnoClass_AI_PromoteAnim, 0x6)
 	return aresProcess();
 }
 
-DEFINE_HOOK(0x4A8EE2, MapClass_PassesProximityCheck_Recheck, 0x7)
+/*
+unknown_1180 -> CurrentFoundation_InAdjacent
+When the cell which mouse is pointing at has changed, new command has given or try to click to place the current building
+
+unknown_1181 -> CurrentFoundation_NoShrouded
+When the cell which mouse is pointing at has changed or new command has given
+
+unknown_1190 -> LastBuilding
+When the left mouse button release, move the CurrentBuilding here and clear the CurrentBuilding
+
+unknown_1194 -> LastBuildingType
+When the left mouse button release, move the CurrentBuildingType here and clear the CurrentBuildingType
+
+unknown_1198 -> ? Last_unknown_11AC
+When the left mouse button release, move the unknown_11AC here and clear the unknown_11AC
+
+unknown_11AC -> ?
+
+*/
+// BaseNormal for units, rewrite the algorithm, it will immediately return as long as BaseNormal exists
+DEFINE_HOOK(0x4AACD9, MapClass_TacticalAction_BaseNormalRecheck, 0x5)
 {
-	enum { ContinueGameCode = 0x4A8F03, SkipGameCode = 0x4A905C };
+	enum { NeedRecheck = 0x4AACF5 };
 
-	GET(CellStruct*, foundationTopLeft, EDI);
-	const CellStruct foundationTopLeftBuffer = Make_Global<CellStruct>(0x8A03F8);
+	if (RulesExt::Global()->CheckUnitBaseNormal && Unsorted::CurrentFrame % 8 == 0)
+		return NeedRecheck;
 
-	if (foundationTopLeft->X == foundationTopLeftBuffer.X && foundationTopLeft->Y == foundationTopLeftBuffer.Y)
-	{
-		if (!RulesExt::Global()->CheckUnitBaseNormal || Unsorted::CurrentFrame % 8 != 0)
-			return SkipGameCode;
-	}
-
-	return ContinueGameCode;
+	return 0;
 }
 
-DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormal, 0x9)
+DEFINE_HOOK(0x4A9361, MapClass_CallBuildingPlaceCheck_BaseNormalRecheck, 0x5)
+{
+	enum { NeedRecheck = 0x4A9371 };
+
+	if (RulesExt::Global()->CheckUnitBaseNormal && Unsorted::CurrentFrame % 8 == 0)
+		return NeedRecheck;
+
+	return 0;
+}
+
+DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormalExtra, 0x9)
 {
 	enum { SkipGameCode = 0x4A904E };
 
-	GET(BuildingTypeClass*, pBuildingType, ESI);
 	GET(CellStruct*, foundationTopLeft, EDI);
+	GET(BuildingTypeClass*, pBuildingType, ESI);
 	GET_STACK(int, idxHouse, STACK_OFFSET(0x30, 0x8));
 
 	if (Game::IsActive)
@@ -611,12 +636,33 @@ DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormal, 0x9)
 								{
 									if (pOwner->ArrayIndex == idxHouse && pBuilding->Type->BaseNormal)
 									{
-										R->Stack(STACK_OFFSET(0x30, 0xC), true);
+										if (CAN_USE_ARES && AresHelper::CanUseAres) // Restore Ares MapClass_CanBuildingTypeBePlacedHere_Ignore
+										{
+											struct DummyAresBuildingExt // Temp Ares Building Ext
+											{
+												char _[0xE];
+												bool unknownExtBool;
+											};
+
+											struct DummyBuildingClass // Temp Building Class
+											{
+												char _[0x71C];
+												DummyAresBuildingExt* align_71C;
+											};
+
+											if (const DummyAresBuildingExt* pAresBuildingExt = reinterpret_cast<DummyBuildingClass*>(pBuilding)->align_71C)
+											{
+												R->Stack<bool>(STACK_OFFSET(0x30, 0xC), !pAresBuildingExt->unknownExtBool);
+												return SkipGameCode;
+											}
+										}
+
+										R->Stack<bool>(STACK_OFFSET(0x30, 0xC), true);
 										return SkipGameCode;
 									}
 									else if (RulesClass::Instance->BuildOffAlly && pOwner->IsAlliedWith(HouseClass::Array->Items[idxHouse]) && pBuilding->Type->EligibileForAllyBuilding)
 									{
-										R->Stack(STACK_OFFSET(0x30, 0xC), true);
+										R->Stack<bool>(STACK_OFFSET(0x30, 0xC), true);
 										return SkipGameCode;
 									}
 								}
@@ -632,12 +678,12 @@ DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormal, 0x9)
 								{
 									if (pOwner->ArrayIndex == idxHouse && pTypeExt->UnitBaseNormal)
 									{
-										R->Stack(STACK_OFFSET(0x30, 0xC), true);
+										R->Stack<bool>(STACK_OFFSET(0x30, 0xC), true);
 										return SkipGameCode;
 									}
 									else if (RulesClass::Instance->BuildOffAlly && pOwner->IsAlliedWith(HouseClass::Array->Items[idxHouse]) && pTypeExt->UnitBaseForAllyBuilding)
 									{
-										R->Stack(STACK_OFFSET(0x30, 0xC), true);
+										R->Stack<bool>(STACK_OFFSET(0x30, 0xC), true);
 										return SkipGameCode;
 									}
 								}
@@ -651,6 +697,6 @@ DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormal, 0x9)
 		}
 	}
 
-	R->Stack(STACK_OFFSET(0x30, 0xC), false);
+	R->Stack<bool>(STACK_OFFSET(0x30, 0xC), false);
 	return SkipGameCode;
 }
