@@ -191,6 +191,9 @@ void TechnoExt::ExtData::InitializeUnitIdleAction()
 	if (this->TypeExtData->UnitIdleRotateTurret.Get(RulesExt::Global()->UnitIdleRotateTurret))
 		this->UnitIdleAction = true;
 
+	if (!SessionClass::IsSingleplayer())
+		return;
+
 	if (this->TypeExtData->UnitIdlePointToMouse.Get(RulesExt::Global()->UnitIdlePointToMouse))
 		this->UnitIdleActionSelected = true;
 
