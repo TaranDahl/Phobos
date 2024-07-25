@@ -113,6 +113,8 @@ public:
 		Valueable<double> DamageAlliesMultiplier;
 		Valueable<double> DamageEnemiesMultiplier;
 		Valueable<bool> CheckUnitBaseNormal;
+		Valueable<bool> AlwaysExistTheCameo;
+		Valueable<bool> ExpandBuildingPlace;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -241,6 +243,8 @@ public:
 			, DamageAlliesMultiplier { 1.0 }
 			, DamageEnemiesMultiplier { 1.0 }
 			, CheckUnitBaseNormal { false }
+			, AlwaysExistTheCameo { false }
+			, ExpandBuildingPlace { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }

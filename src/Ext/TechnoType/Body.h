@@ -28,6 +28,7 @@ public:
 	public:
 		Valueable<bool> HealthBar_Hide;
 		Valueable<CSFText> UIDescription;
+		Valueable<CSFText> UIExtraDescription;
 		Valueable<bool> LowSelectionPriority;
 		PhobosFixedString<0x20> GroupAs;
 		Valueable<int> RadarJamRadius;
@@ -223,7 +224,7 @@ public:
 		ValueableVector<int> BuildLimitGroup_ExtraLimit_MaxCount;
 		Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
-		Valueable<bool> ActuallyUnbuildable;
+		Nullable<bool> AlwaysExistTheCameo;
 		Nullable<bool> UnitIdleRotateTurret;
 		Nullable<bool> UnitIdlePointToMouse;
 		Nullable<bool> RecountBurst;
@@ -264,6 +265,7 @@ public:
 		ExtData(TechnoTypeClass* OwnerObject) : Extension<TechnoTypeClass>(OwnerObject)
 			, HealthBar_Hide { false }
 			, UIDescription {}
+			, UIExtraDescription {}
 			, LowSelectionPriority { false }
 			, GroupAs { NONE_STR }
 			, RadarJamRadius { 0 }
@@ -455,7 +457,7 @@ public:
 			, BuildLimitGroup_ExtraLimit_MaxCount {}
 			, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
 
-			, ActuallyUnbuildable { false }
+			, AlwaysExistTheCameo {}
 			, UnitIdleRotateTurret {}
 			, UnitIdlePointToMouse {}
 			, RecountBurst {}

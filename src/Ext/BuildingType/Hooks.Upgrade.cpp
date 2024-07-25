@@ -74,17 +74,15 @@ int BuildLimitRemaining(HouseClass const* const pHouse, BuildingTypeClass const*
 		return -BuildLimit - pHouse->CountOwnedEver(pItem);
 }
 
-int CheckBuildLimit(HouseClass const* const pHouse, BuildingTypeClass const* const pItem, bool const includeQueued)
+CanBuildResult CheckBuildLimit(HouseClass const* const pHouse, BuildingTypeClass const* const pItem, bool const includeQueued)
 {
-	enum { NotReached = 1, ReachedPermanently = -1, ReachedTemporarily = 0 };
-
 	int BuildLimit = pItem->BuildLimit;
 	int Remaining = BuildLimitRemaining(pHouse, pItem);
 
 	if (BuildLimit >= 0 && Remaining <= 0)
-		return (includeQueued && FactoryClass::FindByOwnerAndProduct(pHouse, pItem)) ? NotReached : ReachedPermanently;
+		return (includeQueued && FactoryClass::FindByOwnerAndProduct(pHouse, pItem)) ? CanBuildResult::Buildable : CanBuildResult::Unbuildable;
 
-	return Remaining > 0 ? NotReached : ReachedTemporarily;
+	return Remaining > 0 ? CanBuildResult::Buildable : CanBuildResult::TemporarilyUnbuildable;
 
 }
 
@@ -96,23 +94,57 @@ DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x5)
 	GET_STACK(bool const, includeInProduction, 0xC);
 	GET(CanBuildResult const, resultOfAres, EAX);
 
-	if (auto const pBuilding = abstract_cast<BuildingTypeClass const* const>(pItem))
+	CanBuildResult canbuild = resultOfAres;
+
+	if (canbuild == CanBuildResult::Buildable)
 	{
-		if (auto pBuildingExt = BuildingTypeExt::ExtMap.Find(pBuilding))
+		if (auto const pBuilding = abstract_cast<BuildingTypeClass const* const>(pItem))
 		{
-			if (pBuildingExt->PowersUp_Buildings.size() > 0 && resultOfAres == CanBuildResult::Buildable)
-				R->EAX(CheckBuildLimit(pThis, pBuilding, includeInProduction));
+			if (auto pBuildingExt = BuildingTypeExt::ExtMap.Find(pBuilding))
+			{
+				if (pBuildingExt->PowersUp_Buildings.size() > 0)
+					canbuild = CheckBuildLimit(pThis, pBuilding, includeInProduction);
+			}
 		}
 	}
 
-	if (resultOfAres == CanBuildResult::Buildable)
+	if (canbuild == CanBuildResult::Buildable)
 	{
-		R->EAX(HouseExt::BuildLimitGroupCheck(pThis, pItem, buildLimitOnly, includeInProduction));
+		canbuild = HouseExt::BuildLimitGroupCheck(pThis, pItem, buildLimitOnly, includeInProduction);
 
 		if (HouseExt::ReachedBuildLimit(pThis, pItem, true))
-			R->EAX(CanBuildResult::TemporarilyUnbuildable);
+			canbuild = CanBuildResult::TemporarilyUnbuildable;
 	}
 
+	if (!buildLimitOnly && includeInProduction) // Any func who want to call CanBuild will change the list, so this must eliminate any unnecessary factors
+	{
+		TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(pItem);
+
+		if (pTypeExt->AlwaysExistTheCameo.Get(RulesExt::Global()->AlwaysExistTheCameo))
+		{
+			auto& vec = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->OwnedExistCameoTechnoTypes;
+
+			if (canbuild == CanBuildResult::Unbuildable) // Unbuildable + Satisfy basic limitations = Change it to TemporarilyUnbuildable
+			{
+				const int techLevel = pItem->TechLevel;
+
+				if (techLevel > 0 && techLevel <= RulesClass::Instance->TechLevel && pThis->CanExpectToBuild(pItem))
+				{
+					if (std::find(vec.begin(), vec.end(), pTypeExt) == vec.end()) // … + Not in the list = Need to add it into list
+						vec.push_back(pTypeExt);
+
+					canbuild = CanBuildResult::TemporarilyUnbuildable;
+				}
+			}
+			else if (std::find(vec.begin(), vec.end(), pTypeExt) != vec.end()) // Not Unbuildable + In the list = remove it from the list and play EVA
+			{
+				vec.erase(std::remove(vec.begin(), vec.end(), pTypeExt), vec.end());
+				VoxClass::Play(&Make_Global<const char>(0x83FA64)); // 0x83FA64 -> EVA_NewConstructionOptions
+			}
+		}
+	}
+
+	R->EAX(canbuild);
 	return 0;
 }
 

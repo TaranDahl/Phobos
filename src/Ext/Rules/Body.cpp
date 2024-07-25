@@ -155,6 +155,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->DamageAlliesMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageAlliesMultiplier");
 	this->DamageEnemiesMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageEnemiesMultiplier");
 	this->CheckUnitBaseNormal.Read(exINI, GameStrings::General, "CheckUnitBaseNormal");
+	this->AlwaysExistTheCameo.Read(exINI, GameStrings::General, "AlwaysExistTheCameo");
+	this->ExpandBuildingPlace.Read(exINI, GameStrings::General, "ExpandBuildingPlace");
 
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
 	this->ForbidParallelAIQueues_Aircraft.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Aircraft");
@@ -342,6 +344,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->DamageAlliesMultiplier)
 		.Process(this->DamageEnemiesMultiplier)
 		.Process(this->CheckUnitBaseNormal)
+		.Process(this->AlwaysExistTheCameo)
+		.Process(this->ExpandBuildingPlace)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
 		.Process(this->ForbidParallelAIQueues_Building)

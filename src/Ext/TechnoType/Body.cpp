@@ -129,6 +129,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->HealthBar_Hide.Read(exINI, pSection, "HealthBar.Hide");
 	this->UIDescription.Read(exINI, pSection, "UIDescription");
+	this->UIExtraDescription.Read(exINI, pSection, "UIExtraDescription");
 	this->LowSelectionPriority.Read(exINI, pSection, "LowSelectionPriority");
 	this->MindControlRangeLimit.Read(exINI, pSection, "MindControlRangeLimit");
 
@@ -310,7 +311,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildLimitGroup_ExtraLimit_MaxCount.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxCount");
 	this->BuildLimitGroup_ExtraLimit_MaxNum.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxNum");
 
-	this->ActuallyUnbuildable.Read(exINI, pSection, "ActuallyUnbuildable");
+	this->AlwaysExistTheCameo.Read(exINI, pSection, "AlwaysExistTheCameo");
 	this->UnitIdleRotateTurret.Read(exINI, pSection, "UnitIdleRotateTurret");
 	this->UnitIdlePointToMouse.Read(exINI, pSection, "UnitIdlePointToMouse");
 	this->RecountBurst.Read(exINI, pSection, "RecountBurst");
@@ -490,6 +491,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 	Stm
 		.Process(this->HealthBar_Hide)
 		.Process(this->UIDescription)
+		.Process(this->UIExtraDescription)
 		.Process(this->LowSelectionPriority)
 		.Process(this->MindControlRangeLimit)
 
@@ -685,7 +687,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxCount)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxNum)
 
-		.Process(this->ActuallyUnbuildable)
+		.Process(this->AlwaysExistTheCameo)
 		.Process(this->UnitIdleRotateTurret)
 		.Process(this->UnitIdlePointToMouse)
 		.Process(this->RecountBurst)

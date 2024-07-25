@@ -5,7 +5,7 @@
 #include <FactoryClass.h>
 #include <SuperClass.h>
 #include <Ext/SWType/Body.h>
-
+#include <Ext/House/Body.h>
 #include <Utilities/EnumFunctions.h>
 
 void TechnoExt::DrawSelfHealPips(TechnoClass* pThis, Point2D* pLocation, RectangleStruct* pBounds)
@@ -357,19 +357,22 @@ void TechnoExt::DrawSuperProgress(TechnoClass* pThis, RectangleStruct* pBounds)
 
 void TechnoExt::DrawIronCurtainProgress(TechnoClass* pThis, RectangleStruct* pBounds)
 {
-	if (pThis->WhatAmI() == AbstractType::Building) // Test only
+	if (pThis->WhatAmI() == AbstractType::Building) // Test only ===========================
 	{
 		BuildingClass* const pBuilding = abstract_cast<BuildingClass*>(pThis);
 
 		if (pBuilding->Type->Factory == AbstractType::BuildingType)
 		{
 			Point2D mousePosition = WWMouseClass::Instance->XY1 + Point2D { -70, -60 };
+			auto& vec = HouseExt::ExtMap.Find(pBuilding->Owner)->OwnedExistCameoTechnoTypes;
+			const int size = vec.size();
+			const int capacity = vec.capacity();
 
 			DrawFrameStruct pDrawT
 			{
-				(DisplayClass::Instance->unknown_1180 + 1) * 16,
+				size << 2,
 				18,
-				(DisplayClass::Instance->unknown_1181 + 1) * 16 + 32,
+				capacity << 2,
 				17,
 				64,
 				-1,
@@ -382,7 +385,7 @@ void TechnoExt::DrawIronCurtainProgress(TechnoClass* pThis, RectangleStruct* pBo
 
 			TechnoExt::DrawVanillaStyleFootBar(&pDrawT);
 		}
-	}
+	} // ===================================================================================
 
 	if (!pThis->IsIronCurtained() || !pThis->IronCurtainTimer.TimeLeft)
 		return;
