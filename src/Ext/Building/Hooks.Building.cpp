@@ -1,4 +1,3 @@
-
 #include "Body.h"
 #include <TerrainClass.h>
 #include <IsometricTileTypeClass.h>
@@ -132,7 +131,7 @@ DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormalExtra, 0x9)
 		}
 	}
 
-	R->Stack<bool>(STACK_OFFSET(0x30, 0xC), false);
+	R->Stack<bool>(STACK_OFFSET(0x30, 0xC), false); // Fit Kratos
 	return SkipGameCode;
 }
 
