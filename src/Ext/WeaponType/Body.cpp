@@ -275,25 +275,12 @@ int WeaponTypeExt::GetTechnoKeepRange(WeaponTypeClass* pThis, TechnoClass* pFire
 	if (!pThis || !pFirer)
 		return 0;
 
+	AbstractType const absType = pFirer->WhatAmI();
 	WeaponTypeExt::ExtData* const pExt = WeaponTypeExt::ExtMap.Find(pThis);
 	int keepRange = pExt->KeepRange.Get();
 
-	if (keepRange > 0)
-	{
-		if (!mode)
-			return 0;
-	}
-	else if (keepRange < 0)
-	{
-		if (mode)
-			return 0;
-
-		keepRange = -keepRange;
-	}
-	else
-	{
+	if (!keepRange || (absType != AbstractType::Infantry && absType != AbstractType::Unit))
 		return 0;
-	}
 
 	if (pFirer->Owner && pFirer->Owner->IsControlledByHuman())
 	{
@@ -317,7 +304,27 @@ int WeaponTypeExt::GetTechnoKeepRange(WeaponTypeClass* pThis, TechnoClass* pFire
 		}
 	}
 
-	return keepRange;
+	if (keepRange > 0)
+	{
+		if (mode)
+			return keepRange;
+		else
+			return absType == AbstractType::Infantry ? keepRange + 256 : keepRange + 128;
+	}
+	else if (keepRange < 0)
+	{
+		const int checkRange = -keepRange - 128;
+
+		if (pFirer->Target && pFirer->GetCoords().DistanceFrom(pFirer->Target->GetCoords()) >= checkRange)
+			keepRange = checkRange > 0 ? checkRange : 0;
+		else
+			keepRange = -keepRange;
+
+		if (mode)
+			return 0;
+		else
+			return keepRange;
+	}
 }
 
 // =============================
