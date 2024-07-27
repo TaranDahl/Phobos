@@ -38,6 +38,11 @@ public:
 		BuildingClass* Factory_NavyType;
 		BuildingClass* Factory_AircraftType;
 
+		BuildingClass* CurrentBuilding;
+		CellStruct CurrentBuildingTopLeft;
+		CDTimerClass CurrentBuildingTimer;
+		int CurrentBuildingTimes;
+
 		//Read from INI
 		bool RepairBaseNodes[3];
 
@@ -59,6 +64,10 @@ public:
 			, Factory_VehicleType { nullptr }
 			, Factory_NavyType { nullptr }
 			, Factory_AircraftType { nullptr }
+			, CurrentBuilding { nullptr }
+			, CurrentBuildingTopLeft {}
+			, CurrentBuildingTimer {}
+			, CurrentBuildingTimes { 20 }
 			, RepairBaseNodes { false,false,false }
 			, LastBuiltNavalVehicleType { -1 }
 			, ProducingNavalUnitTypeIndex { -1 }

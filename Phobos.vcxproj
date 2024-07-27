@@ -88,7 +88,6 @@
     <ClCompile Include="src\Ext\AnimType\Body.cpp" />
     <ClCompile Include="src\Ext\Building\Body.cpp" />
     <ClCompile Include="src\Ext\Building\Hooks.cpp" />
-    <ClCompile Include="src\Ext\Building\Hooks.Building.cpp" />
     <ClCompile Include="src\Ext\Building\Hooks.Grinding.cpp" />
     <ClCompile Include="src\Ext\Building\Hooks.Refinery.cpp" />
     <ClCompile Include="src\Ext\Building\Hooks.Selling.cpp" />
@@ -157,6 +156,7 @@
     <ClCompile Include="src\Utilities\Debug.cpp" />
     <ClCompile Include="src\Ext\BuildingType\Body.cpp" />
     <ClCompile Include="src\Ext\BuildingType\Hooks.cpp" />
+    <ClCompile Include="src\Ext\BuildingType\Hooks.Placing.cpp" />
     <ClCompile Include="src\Ext\WarheadType\Body.cpp" />
     <ClCompile Include="src\Ext\WarheadType\Hooks.cpp" />
     <ClCompile Include="src\Misc\FlyingStrings.cpp" />

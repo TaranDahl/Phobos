@@ -364,15 +364,15 @@ void TechnoExt::DrawIronCurtainProgress(TechnoClass* pThis, RectangleStruct* pBo
 		if (pBuilding->Type->Factory == AbstractType::BuildingType)
 		{
 			Point2D mousePosition = WWMouseClass::Instance->XY1 + Point2D { -70, -60 };
-			auto& vec = HouseExt::ExtMap.Find(pBuilding->Owner)->OwnedExistCameoTechnoTypes;
-			const int size = vec.size();
-			const int capacity = vec.capacity();
+			auto const ext = HouseExt::ExtMap.Find(pBuilding->Owner);
+			const int times = ext->CurrentBuildingTimes;
+			const int timer = ext->CurrentBuildingTimer.GetTimeLeft();
 
 			DrawFrameStruct pDrawT
 			{
-				size << 2,
+				times << 1,
 				18,
-				capacity << 2,
+				(timer << 2) + 40,
 				17,
 				64,
 				-1,
