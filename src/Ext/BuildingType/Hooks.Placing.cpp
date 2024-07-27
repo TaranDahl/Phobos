@@ -718,3 +718,5 @@ DEFINE_HOOK(0x4F8F87, HouseClass_AI_HangUpBuildingCheck, 0x6)
 
 	return 0;
 }
+
+// TODO speed=0, deployed, overlayWall, firestormWall, vanishTechno
