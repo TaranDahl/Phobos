@@ -306,9 +306,7 @@ int WeaponTypeExt::GetTechnoKeepRange(WeaponTypeClass* pThis, TechnoClass* pFire
 
 	if (keepRange > 0)
 	{
-		if (mode)
-			return keepRange;
-		else
+		if (!mode)
 			return absType == AbstractType::Infantry ? keepRange + 256 : keepRange + 128;
 	}
 	else if (keepRange < 0)
@@ -322,9 +320,9 @@ int WeaponTypeExt::GetTechnoKeepRange(WeaponTypeClass* pThis, TechnoClass* pFire
 
 		if (mode)
 			return 0;
-		else
-			return keepRange;
 	}
+
+	return keepRange;
 }
 
 // =============================
