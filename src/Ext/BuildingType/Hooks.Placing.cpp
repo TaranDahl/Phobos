@@ -4,10 +4,12 @@
 #include <TacticalClass.h>
 #include <IsometricTileTypeClass.h>
 #include <Ext/House/Body.h>
+#include <Ext/TechnoType/Body.h>
 #include <Ext/TerrainType/Body.h>
 #include <Utilities/EnumFunctions.h>
 #include <Utilities/AresHelper.h>
 
+// Draw placement preview Hook
 DEFINE_HOOK(0x6D504C, TacticalClass_DrawPlacement_PlacementPreview, 0x6)
 {
 	auto pRules = RulesExt::Global();
@@ -77,6 +79,7 @@ DEFINE_HOOK(0x6D504C, TacticalClass_DrawPlacement_PlacementPreview, 0x6)
 	return 0;
 }
 
+// Set placement grid translucency Hook
 DEFINE_HOOK(0x47EFAE, CellClass_Draw_It_SetPlacementGridTranslucency, 0x6)
 {
 	auto pRules = RulesExt::Global();
@@ -93,7 +96,51 @@ DEFINE_HOOK(0x47EFAE, CellClass_Draw_It_SetPlacementGridTranslucency, 0x6)
 	return 0;
 }
 
+// Buildable-upon TerrainTypes Hook #2 - Draw laser fence placement even if they are on the way.
+DEFINE_HOOK(0x6D57C1, TacticalClass_DrawLaserFencePlacement_BuildableTerrain, 0x9)
+{
+	enum { ContinueChecks = 0x6D57D2, DontDraw = 0x6D59A6 };
+
+	GET(CellClass*, pCell, ESI);
+
+	if (auto const pTerrain = pCell->GetTerrain(false))
+	{
+		auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type);
+
+		if (pTypeExt->CanBeBuiltOn)
+			return ContinueChecks;
+
+		return DontDraw;
+	}
+
+	return ContinueChecks;
+}
+
+// Buildable-upon TerrainTypes Hook #3 - Remove them when buildings are placed on them.
+DEFINE_HOOK(0x5684B1, MapClass_PlaceDown_BuildableUponTypes, 0x6)
+{
+	GET(ObjectClass*, pObject, EDI);
+	GET(CellClass*, pCell, EAX);
+
+	if (pObject->WhatAmI() == AbstractType::Building)
+	{
+		if (auto const pTerrain = pCell->GetTerrain(false))
+		{
+			auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type);
+
+			if (pTypeExt->CanBeBuiltOn)
+			{
+				pCell->RemoveContent(pTerrain, false);
+				TerrainTypeExt::Remove(pTerrain);
+			}
+		}
+	}
+
+	return 0;
+}
+
 /*
+DisplayClass:
 unknown_1180 -> CurrentFoundation_InAdjacent
 When the cell which mouse is pointing at has changed, new command has given or try to click to place the current building
 
@@ -107,24 +154,29 @@ CurrentFoundationCopy_TopLeftOffset -> CurrentFoundation_TopLeftOffset_Buffer
 When the left mouse button release, move the CurrentFoundation_TopLeftOffset to here and clear the CurrentFoundation_TopLeftOffset, and move itself back to CurrentFoundation_TopLeftOffset if place failed
 
 CurrentFoundationCopy_Data -> CurrentFoundation_Data_Buffer
-When the left mouse button release, move the CurrentFoundation_Data to here and clear the CurrentFoundation_Data, and move itself back to CurrentFoundation_Data if place failed
+When the left mouse button release, move the CurrentFoundation_Data to here and clear the CurrentFoundation_Data, and move itself back to CurrentFoundation_Data if place failed, otherwise clear itself
 
 unknown_1190 -> CurrentBuilding_Buffer
-When the left mouse button release, move the CurrentBuilding to here and clear the CurrentBuilding, and move itself back to CurrentBuilding if place failed
+When the left mouse button release, move the CurrentBuilding to here and clear the CurrentBuilding, and move itself back to CurrentBuilding if place failed, otherwise clear itself
 
 unknown_1194 -> CurrentBuildingType_Buffer
-When the left mouse button release, move the CurrentBuildingType to here and clear the CurrentBuildingType, and move itself back to CurrentBuildingType if place failed
+When the left mouse button release, move the CurrentBuildingType to here and clear the CurrentBuildingType, and move itself back to CurrentBuildingType if place failed, otherwise clear itself
 
 unknown_1198 -> CurrentBuildingTypeArrayIndex_Buffer
 When the left mouse button release, move the unknown_11AC to here and clear the unknown_11AC, and move itself back to unknown_11AC if place failed
 
 unknown_11AC -> CurrentBuildingTypeArrayIndex
 When the building that building type factory create is selected, this record the ArrayIndex of the current building type
+
+CellClass:
+AltFlags = AltCellFlags::Unknown_4 -> InBuildingProcess
+Vanilla only 1 frame between AddPlaceEvent and RespondToEvent
 */
+
 // BaseNormal for units Hook #1 - Rewrite the algorithm, it will immediately return as long as BaseNormal exists
 DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormalExtra, 0x9)
 {
-	enum { SkipGameCode = 0x4A904E };
+	enum { CheckCompleted = 0x4A904E };
 
 	GET(CellStruct*, pFoundationTopLeft, EDI);
 	GET(BuildingTypeClass*, pBuildingType, ESI);
@@ -184,17 +236,17 @@ DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormalExtra, 0x9)
 											if (const DummyAresBuildingExt* pAresBuildingExt = reinterpret_cast<DummyBuildingClass*>(pBuilding)->align_71C)
 											{
 												R->Stack<bool>(STACK_OFFSET(0x30, 0xC), !pAresBuildingExt->unknownExtBool);
-												return SkipGameCode;
+												return CheckCompleted;
 											}
 										}
 
 										R->Stack<bool>(STACK_OFFSET(0x30, 0xC), true);
-										return SkipGameCode;
+										return CheckCompleted;
 									}
 									else if (RulesClass::Instance->BuildOffAlly && pOwner->IsAlliedWith(HouseClass::Array->Items[idxHouse]) && pBuilding->Type->EligibileForAllyBuilding)
 									{
 										R->Stack<bool>(STACK_OFFSET(0x30, 0xC), true);
-										return SkipGameCode;
+										return CheckCompleted;
 									}
 								}
 							}
@@ -210,12 +262,12 @@ DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormalExtra, 0x9)
 									if (pOwner->ArrayIndex == idxHouse && pTypeExt->UnitBaseNormal)
 									{
 										R->Stack<bool>(STACK_OFFSET(0x30, 0xC), true);
-										return SkipGameCode;
+										return CheckCompleted;
 									}
 									else if (RulesClass::Instance->BuildOffAlly && pOwner->IsAlliedWith(HouseClass::Array->Items[idxHouse]) && pTypeExt->UnitBaseForAllyBuilding)
 									{
 										R->Stack<bool>(STACK_OFFSET(0x30, 0xC), true);
-										return SkipGameCode;
+										return CheckCompleted;
 									}
 								}
 							}
@@ -229,16 +281,14 @@ DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormalExtra, 0x9)
 	}
 
 	R->Stack<bool>(STACK_OFFSET(0x30, 0xC), false);
-	return SkipGameCode;
+	return CheckCompleted;
 }
 
 // BaseNormal for units Hook #2-1 - Let the game do the PassesProximityCheck when the cell which mouse is pointing at has not changed
 DEFINE_HOOK(0x4AACD9, MapClass_TacticalAction_BaseNormalRecheck, 0x5)
 {
-	enum { NeedRecheck = 0x4AACF5 };
-
 	if (RulesExt::Global()->CheckUnitBaseNormal && !(Unsorted::CurrentFrame % 8))
-		return NeedRecheck;
+		return 0x4AACF5;
 
 	return 0;
 }
@@ -246,39 +296,35 @@ DEFINE_HOOK(0x4AACD9, MapClass_TacticalAction_BaseNormalRecheck, 0x5)
 // BaseNormal for units Hook #2-2 - Let the game do the PassesProximityCheck when the cell which mouse is pointing at has not changed
 DEFINE_HOOK(0x4A9361, MapClass_CallBuildingPlaceCheck_BaseNormalRecheck, 0x5)
 {
-	enum { NeedRecheck = 0x4A9371 };
-
 	if (RulesExt::Global()->CheckUnitBaseNormal && !(Unsorted::CurrentFrame % 8))
-		return NeedRecheck;
+		return 0x4A9371;
 
 	return 0;
 }
 
-// Buildable-upon InfantryTypes and UnitTypes
-namespace BuildOnOccupiesHelpers
+// Buildable-upon TechnoTypes Helper
+namespace BuildOnOccupiersHelpers
 {
 	bool Exist = false;
 	bool Mouse = false;
 }
 
-// Buildable-upon TerrainTypes Hook #1 & #2 - Allow placing buildings and laser fences on top of them
-// Buildable-upon InfantryTypes and UnitTypes Hook #1 - Allow placing buildings on top of them
+// Buildable-upon TerrainTypes Hook #1 - Allow placing buildings on top of them
+// Buildable-upon TechnoTypes Hook #1 - Allow placing buildings on top of them
 DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 {
-	enum { SkipGameCode = 0x47C6D1, ContinueGameCode = 0x47C6A0 };
+	enum { CanNotExistHere = 0x47C6D1, CanExistHere = 0x47C6A0 };
 
 	GET(CellClass*, pCell, EDI);
 	GET(BuildingTypeClass*, pBuildingType, EAX);
 	GET_STACK(HouseClass*, pOwner, STACK_OFFSET(0x18, 0xC));
 
-	if (!RulesExt::Global()->ExpandBuildingPlace)
-		return 0;
-
+	const bool expand = RulesExt::Global()->ExpandBuildingPlace && pOwner && pOwner->IsControlledByHuman();
 	bool landFootOnly = false;
-	BuildOnOccupiesHelpers::Exist = false;
+	BuildOnOccupiersHelpers::Exist = false;
 
 	if (!Game::IsActive)
-		return ContinueGameCode;
+		return CanExistHere;
 
 	if (pBuildingType->LaserFence)
 	{
@@ -288,49 +334,45 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 		{
 			const AbstractType absType = pObject->WhatAmI();
 
-			if (absType == AbstractType::Building)
+			if (absType == AbstractType::Aircraft || absType == AbstractType::Building)
 			{
-				return SkipGameCode;
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pObject->GetTechnoType());
+
+				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
+					return CanNotExistHere;
+			}
+			else if (absType == AbstractType::Infantry || absType == AbstractType::Unit)
+			{
+				TechnoClass* const pTechno = static_cast<TechnoClass*>(pObject);
+				TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechnoType);
+
+				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
+				{
+					if (pTechno->Owner != pOwner || pTechnoType->Speed <= 0 || !expand)
+						return CanNotExistHere;
+					else
+						landFootOnly = true;
+				}
 			}
 			else if (absType == AbstractType::Terrain)
 			{
-				TerrainClass* const pTerrain = abstract_cast<TerrainClass*>(pObject);
-
-				if (auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type))
+				if (TerrainClass* const pTerrain = abstract_cast<TerrainClass*>(pObject))
 				{
-					if (!pTypeExt->CanBeBuiltOn)
-						return SkipGameCode;
+					auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type);
+
+					if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
+						return CanNotExistHere;
 				}
-			}
-			else if (absType == AbstractType::Infantry)
-			{
-				InfantryClass* const pInfantry = static_cast<InfantryClass*>(pObject);
-
-				if (pInfantry->Owner != pOwner)
-					return SkipGameCode;
-				else
-					landFootOnly = true;
-			}
-			else if (absType == AbstractType::Unit)
-			{
-				UnitClass* const pUnit = static_cast<UnitClass*>(pObject);
-
-				if (pUnit->Owner != pOwner)
-					return SkipGameCode;
-				else
-					landFootOnly = true;
 			}
 
 			pObject = pObject->NextObject;
 		}
 
 		if (landFootOnly)
-		{
-			BuildOnOccupiesHelpers::Exist = true;
-			return SkipGameCode;
-		}
+			BuildOnOccupiersHelpers::Exist = true;
 
-		return ContinueGameCode;
+		return CanExistHere;
 	}
 	else if (pBuildingType->LaserFencePost || pBuildingType->Gate)
 	{
@@ -342,57 +384,45 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 
 			if (absType == AbstractType::Aircraft)
 			{
-				return SkipGameCode;
-			}
-			else if (absType == AbstractType::Terrain)
-			{
-				TerrainClass* const pTerrain = abstract_cast<TerrainClass*>(pObject);
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pObject->GetTechnoType());
 
-				if (auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type))
-				{
-					if (!pTypeExt->CanBeBuiltOn)
-						return SkipGameCode;
-				}
-			}
-			else if (absType == AbstractType::Infantry)
-			{
-				InfantryClass* const pInfantry = static_cast<InfantryClass*>(pObject);
-
-				if (pInfantry->Owner != pOwner)
-					return SkipGameCode;
-				else
-					landFootOnly = true;
-			}
-			else if (absType == AbstractType::Unit)
-			{
-				UnitClass* const pUnit = static_cast<UnitClass*>(pObject);
-
-				if (pUnit->Owner != pOwner)
-					return SkipGameCode;
-				else
-					landFootOnly = true;
+				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
+					return CanNotExistHere;
 			}
 			else if (absType == AbstractType::Building)
 			{
-				break;
+				BuildingClass* const pBuilding = static_cast<BuildingClass*>(pObject);
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pBuilding->Type);
+
+				if (!pTypeExt || !pTypeExt->CanBeBuiltOn || !pBuilding->Type->LaserFence || pBuilding->GetOwningHouse() != pOwner)
+					return CanNotExistHere;
+			}
+			else if (absType == AbstractType::Infantry || absType == AbstractType::Unit)
+			{
+				TechnoClass* const pTechno = static_cast<TechnoClass*>(pObject);
+				TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechnoType);
+
+				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
+				{
+					if (pTechno->Owner != pOwner || pTechnoType->Speed <= 0 || !expand)
+						return CanNotExistHere;
+					else
+						landFootOnly = true;
+				}
+			}
+			else if (absType == AbstractType::Terrain)
+			{
+				if (TerrainClass* const pTerrain = abstract_cast<TerrainClass*>(pObject))
+				{
+					auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type);
+
+					if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
+						return CanNotExistHere;
+				}
 			}
 
 			pObject = pObject->NextObject;
-		}
-
-		if (pObject)
-		{
-			if (pObject->WhatAmI() == AbstractType::Building)
-			{
-				BuildingClass* const pBuilding = static_cast<BuildingClass*>(pObject);
-
-				if (!pBuilding->Type->LaserFence || pBuilding->GetOwningHouse() != pOwner)
-					return SkipGameCode;
-			}
-			else
-			{
-				return SkipGameCode;
-			}
 		}
 	}
 	else if (pBuildingType->ToTile)
@@ -408,21 +438,20 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 				const AbstractType absType = pObject->WhatAmI();
 
 				if (absType == AbstractType::Building || absType == AbstractType::Infantry || absType == AbstractType::Unit)
-					return SkipGameCode;
+				{
+					auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pObject->GetTechnoType());
+
+					if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
+						return CanNotExistHere;
+				}
 
 				pObject = pObject->NextObject;
 			}
 
-			if (landFootOnly)
-			{
-				BuildOnOccupiesHelpers::Exist = true;
-				return SkipGameCode;
-			}
-
-			return ContinueGameCode;
+			return CanExistHere;
 		}
 
-		return SkipGameCode;
+		return CanNotExistHere;
 	}
 	else
 	{
@@ -434,35 +463,34 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 
 			if (absType == AbstractType::Aircraft || absType == AbstractType::Building)
 			{
-				return SkipGameCode;
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pObject->GetTechnoType());
+
+				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
+					return CanNotExistHere;
+			}
+			else if (absType == AbstractType::Infantry || absType == AbstractType::Unit)
+			{
+				TechnoClass* const pTechno = static_cast<TechnoClass*>(pObject);
+				TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechnoType);
+
+				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
+				{
+					if (pTechno->Owner != pOwner || pTechnoType->Speed <= 0 || !expand)
+						return CanNotExistHere;
+					else
+						landFootOnly = true;
+				}
 			}
 			else if (absType == AbstractType::Terrain)
 			{
-				TerrainClass* const pTerrain = abstract_cast<TerrainClass*>(pObject);
-
-				if (auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type))
+				if (TerrainClass* const pTerrain = abstract_cast<TerrainClass*>(pObject))
 				{
-					if (!pTypeExt->CanBeBuiltOn)
-						return SkipGameCode;
+					auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type);
+
+					if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
+						return CanNotExistHere;
 				}
-			}
-			else if (absType == AbstractType::Infantry)
-			{
-				InfantryClass* const pInfantry = static_cast<InfantryClass*>(pObject);
-
-				if (pInfantry->Owner != pOwner)
-					return SkipGameCode;
-				else
-					landFootOnly = true;
-			}
-			else if (absType == AbstractType::Unit)
-			{
-				UnitClass* const pUnit = static_cast<UnitClass*>(pObject);
-
-				if (pUnit->Owner != pOwner)
-					return SkipGameCode;
-				else
-					landFootOnly = true;
 			}
 
 			pObject = pObject->NextObject;
@@ -470,22 +498,22 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 	}
 
 	if (landFootOnly)
-		BuildOnOccupiesHelpers::Exist = true;
+		BuildOnOccupiersHelpers::Exist = true;
 
-	return ContinueGameCode;
+	return CanExistHere;
 }
 
-// Buildable-upon InfantryTypes and UnitTypes Hook #2 - Draw yellow pips if there is only infantries and units on the cell
-DEFINE_HOOK(0x47EF52, CellClass_DrawPlacePip_DrawExtraYellowPips, 0x6)
+// Buildable-upon TechnoTypes Hook #2 - Draw yellow grid if there is only infantries and units on the cell
+DEFINE_HOOK(0x47EF52, CellClass_DrawPlaceGrid_DrawExtraYellowGrid, 0x6)
 {
-	R->EDI(BuildOnOccupiesHelpers::Exist);
+	R->EDI(BuildOnOccupiersHelpers::Exist);
 	return 0;
 }
 
-// Buildable-upon InfantryTypes and UnitTypes Hook #3 - Don not draw yellow pips if is placing
+// Buildable-upon TechnoTypes Hook #3 - Don not draw yellow grid if is placing
 DEFINE_JUMP(LJMP, 0x47EED6, 0x47EFB9);
 
-// Buildable-upon InfantryTypes and UnitTypes Hook #4 - Hang up place event if there is only infantries and units on the cell
+// Buildable-upon TechnoTypes Hook #4 - Hang up place event if there is only infantries and units on the cell
 DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 {
 	enum { CanBuild = 0x4FB23C, TemporarilyCanNotBuild = 0x4FB5BA, CanNotBuild = 0x4FB35F };
@@ -520,27 +548,29 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 
 					if (!pCell || !pCell->CanThisExistHere(pBuildingType->SpeedType, pBuildingType, pHouse))
 						canBuild = false;
-					else if (BuildOnOccupiesHelpers::Exist)
+					else if (BuildOnOccupiersHelpers::Exist)
 						noOccupy = false;
 				}
 			}
 
-			if (!canBuild)
+			if (!canBuild) // Can not build
 			{
 				if (pHouseExt->CurrentBuildingTimes == 20)
-					BuildOnOccupiesHelpers::Mouse = true;
+					BuildOnOccupiersHelpers::Mouse = true;
 
 				pHouseExt->CurrentBuilding = nullptr;
 				pHouseExt->CurrentBuildingTopLeft = CellStruct::Empty;
 				pHouseExt->CurrentBuildingTimes = 20;
 				return CanNotBuild;
 			}
-			else if (!noOccupy)
+			else if (!noOccupy) // Temporarily can not build
 			{
-				if (!(pHouseExt->CurrentBuildingTimes % 5))
+				if (!(pHouseExt->CurrentBuildingTimes % 5)) // Force occupiers leave
 				{
+					CellClass* pTempCell = nullptr;
+					int tempOccupiers = 0;
 					std::vector<CellClass*> checkedCells;
-					checkedCells.reserve((foundationHeight + 8) * (foundationWidth + 8));
+					checkedCells.reserve(((foundationHeight + foundationWidth) << 3) + 64); // Max size
 
 					for (short curX = topLeftX; curX < bottomRightX; ++curX)
 					{
@@ -553,64 +583,183 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 							{
 								AbstractType const absType = pObject->WhatAmI();
 
-								if (absType == AbstractType::Infantry || absType == AbstractType::Unit) // May still have other types
+								if (absType == AbstractType::Infantry)
 								{
-									FootClass* const pFoot = static_cast<FootClass*>(pObject);
-									CellClass* pCellDestination = nullptr;
-									CellStruct location { curX, curY };
+									InfantryClass* const pInfantry = static_cast<InfantryClass*>(pObject);
+									auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pInfantry->Type);
 
-									for (short times = 0, edge = 0, curLength = 1, maxLength = 1, pace = 1; times < 121; ++times)
+									if ((!pTypeExt || !pTypeExt->CanBeBuiltOn) && pInfantry->Owner == pHouse)
 									{
-										if (CellClass* const pCurCell = MapClass::Instance->GetCellAt(location))
+										CellClass* pCellDestination = nullptr;
+										CellStruct location { curX, curY };
+
+										if (pTempCell)
 										{
-											if (pFoot->IsCellOccupied(pCurCell, FacingType::None, -1, nullptr, false) == Move::OK
-												&& !(pCurCell->AltFlags & AltCellFlags::Unknown_4))
+											if (tempOccupiers >= 2)
 											{
-												pCurCell->AltFlags |= AltCellFlags::Unknown_4;
-												pCellDestination = pCurCell;
-												checkedCells.push_back(pCurCell);
-												break;
+												pTempCell->AltFlags |= AltCellFlags::Unknown_4;
+												pCellDestination = pTempCell;
+												checkedCells.push_back(pTempCell);
+												pTempCell = nullptr;
+												tempOccupiers = 0;
+											}
+											else
+											{
+												pCellDestination = pTempCell;
+												checkedCells.push_back(pTempCell);
+												++tempOccupiers;
+											}
+
+											break;
+										}
+										else
+										{
+											for (short times = 0, edge = 0, curLength = 1, maxLength = 1, pace = 1; times < 81; ++times)
+											{
+												if (CellClass* const pCurCell = MapClass::Instance->GetCellAt(location))
+												{
+													if (!(pCurCell->AltFlags & AltCellFlags::Unknown_4)
+														&& pInfantry->IsCellOccupied(pCurCell, FacingType::None, -1, nullptr, false) == Move::OK)
+													{
+														ObjectClass* pCurObject = pCurCell->FirstObject;
+														int occupiers = 0;
+
+														while (pCurObject)
+														{
+															if (pCurObject->WhatAmI() == AbstractType::Infantry)
+																++occupiers;
+
+															pCurObject = pCurObject->NextObject;
+														}
+
+														if (occupiers >= 2)
+														{
+															pCurCell->AltFlags |= AltCellFlags::Unknown_4;
+														}
+														else
+														{
+															++occupiers;
+															pTempCell = pCurCell;
+															tempOccupiers = occupiers;
+														}
+
+														pCellDestination = pCurCell;
+														checkedCells.push_back(pCurCell);
+														break;
+													}
+												}
+
+												if (edge) // Counter-clockwise
+													location.X += pace;
+												else
+													location.Y += pace;
+
+												if (curLength < maxLength)
+												{
+													++curLength;
+												}
+												else if (edge)
+												{
+													edge = 0;
+													curLength = 1;
+													++maxLength;
+													pace = -pace;
+												}
+												else
+												{
+													++edge;
+													curLength = 1;
+												}
 											}
 										}
 
-										if (edge) // Counter-clockwise
-											location.X += pace;
-										else
-											location.Y += pace;
+										if (pCellDestination)
+										{
+											pInfantry->SetTarget(nullptr);
+											pInfantry->SetDestination(nullptr, false);
+											pInfantry->ForceMission(Mission::None);
 
-										if (curLength < maxLength)
-										{
-											++curLength;
-										}
-										else if (edge)
-										{
-											edge = 0;
-											curLength = 1;
-											++maxLength;
-											pace = -pace;
+											if (pInfantry->IsDeployed())
+												pInfantry->QueueMission(Mission::Unload, true);
+
+											pInfantry->QueueMission(Mission::Move, false);
+											pInfantry->SetDestination(pCellDestination, true);
 										}
 										else
 										{
-											++edge;
-											curLength = 1;
+											curX = bottomRightX;
+											curY = bottomRightY;
+											pHouseExt->CurrentBuildingTimes = 0;
+											break;
 										}
 									}
+								}
+								else if (absType == AbstractType::Unit)
+								{
+									UnitClass* const pUnit = static_cast<UnitClass*>(pObject);
+									auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pUnit->Type);
 
-									if (pCellDestination)
+									if ((!pTypeExt || !pTypeExt->CanBeBuiltOn) && pUnit->Owner == pHouse)
 									{
-										pFoot->SetTarget(nullptr);
-										pFoot->SetDestination(nullptr, false);
-										pFoot->ForceMission(Mission::None);
+										CellClass* pCellDestination = nullptr;
+										CellStruct location { curX, curY };
 
-										pFoot->QueueMission(Mission::Move, false);
-										pFoot->SetDestination(pCellDestination, true);
-									}
-									else
-									{
-										curX = bottomRightX;
-										curY = bottomRightY;
-										pHouseExt->CurrentBuildingTimes = 0;
-										break;
+										for (short times = 0, edge = 0, curLength = 1, maxLength = 1, pace = 1; times < 81; ++times)
+										{
+											if (CellClass* const pCurCell = MapClass::Instance->GetCellAt(location))
+											{
+												if (!(pCurCell->AltFlags & AltCellFlags::Unknown_4)
+													&& pUnit->IsCellOccupied(pCurCell, FacingType::None, -1, nullptr, false) == Move::OK)
+												{
+													pCurCell->AltFlags |= AltCellFlags::Unknown_4;
+													pCellDestination = pCurCell;
+													checkedCells.push_back(pCurCell);
+													break;
+												}
+											}
+
+											if (edge) // Counter-clockwise
+												location.X += pace;
+											else
+												location.Y += pace;
+
+											if (curLength < maxLength)
+											{
+												++curLength;
+											}
+											else if (edge)
+											{
+												edge = 0;
+												curLength = 1;
+												++maxLength;
+												pace = -pace;
+											}
+											else
+											{
+												++edge;
+												curLength = 1;
+											}
+										}
+
+										if (pCellDestination)
+										{
+											pUnit->SetTarget(nullptr);
+											pUnit->SetDestination(nullptr, false);
+											pUnit->ForceMission(Mission::None);
+
+											if (pUnit->Deployed)
+												pUnit->QueueMission(Mission::Unload, true);
+
+											pUnit->QueueMission(Mission::Move, false);
+											pUnit->SetDestination(pCellDestination, true);
+										}
+										else
+										{
+											curX = bottomRightX;
+											curY = bottomRightY;
+											pHouseExt->CurrentBuildingTimes = 0;
+											break;
+										}
 									}
 								}
 
@@ -623,12 +772,12 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 						pCheckedCell->AltFlags &= ~AltCellFlags::Unknown_4;
 				}
 
-				if (!pHouseExt->CurrentBuilding)
+				if (!pHouseExt->CurrentBuilding) // Start
 				{
 					pHouseExt->CurrentBuilding = pBuilding;
 					pHouseExt->CurrentBuildingTopLeft = cell;
 				}
-				else
+				else // Continue
 				{
 					--pHouseExt->CurrentBuildingTimes;
 				}
@@ -637,14 +786,14 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 				{
 					pHouseExt->CurrentBuildingTimer.Start(8);
 					return TemporarilyCanNotBuild;
-				}
+				} // Time out
 
 				pHouseExt->CurrentBuilding = nullptr;
 				pHouseExt->CurrentBuildingTopLeft = CellStruct::Empty;
 				pHouseExt->CurrentBuildingTimes = 20;
 				return CanNotBuild;
 			}
-		}
+		} // Can Build
 
 		pHouseExt->CurrentBuilding = nullptr;
 		pHouseExt->CurrentBuildingTopLeft = CellStruct::Empty;
@@ -659,22 +808,20 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 	return CanNotBuild;
 }
 
-// Buildable-upon InfantryTypes and UnitTypes Hook #5 - Check whether need to skip the replace command
+// Buildable-upon TechnoTypes Hook #5 - Check whether need to skip the replace command
 DEFINE_HOOK(0x4FB395, HouseClass_UnitFromFactory_SkipMouseReturn, 0x6)
 {
-	enum { SkipGameCode = 0x4FB489 };
-
-	if (BuildOnOccupiesHelpers::Mouse)
+	if (BuildOnOccupiersHelpers::Mouse)
 	{
-		BuildOnOccupiesHelpers::Mouse = false;
+		BuildOnOccupiersHelpers::Mouse = false;
 		return 0;
 	}
 
 	R->EBX(0);
-	return SkipGameCode;
+	return 0x4FB489;
 }
 
-// Buildable-upon InfantryTypes and UnitTypes Hook #6 - Restart timer, reset cells' AltFlags and clear buffer when mouse click
+// Buildable-upon TechnoTypes Hook #6 - Restart timer, reset AltFlags and clear buffer when mouse click
 DEFINE_HOOK(0x4FB87C, HouseClass_BuildingCameoClick_StopLastEvent, 0x7)
 {
 	HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer);
@@ -693,7 +840,7 @@ DEFINE_HOOK(0x4FB87C, HouseClass_BuildingCameoClick_StopLastEvent, 0x7)
 	return 0;
 }
 
-// Buildable-upon InfantryTypes and UnitTypes Hook #7 - Check whether can place again in each house
+// Buildable-upon TechnoTypes Hook #7 - Check whether can place again in each house
 DEFINE_HOOK(0x4F8F87, HouseClass_AI_HangUpBuildingCheck, 0x6)
 {
 	GET(HouseClass*, pHouse, ESI);
@@ -719,4 +866,4 @@ DEFINE_HOOK(0x4F8F87, HouseClass_AI_HangUpBuildingCheck, 0x6)
 	return 0;
 }
 
-// TODO speed=0, deployed, overlayWall, firestormWall, vanishTechno
+// TODO overlayWall, firestormWall, laserFence, Scatter, vanishTechno, newSearchAlgorithm

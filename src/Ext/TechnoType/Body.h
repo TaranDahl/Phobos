@@ -228,6 +228,7 @@ public:
 		Nullable<bool> UnitIdleRotateTurret;
 		Nullable<bool> UnitIdlePointToMouse;
 		Nullable<bool> RecountBurst;
+		Valueable<bool> CanBeBuiltOn;
 		Valueable<bool> UnitBaseNormal;
 		Valueable<bool> UnitBaseForAllyBuilding;
 		Valueable<bool> LeaveTransportKill;
@@ -461,6 +462,7 @@ public:
 			, UnitIdleRotateTurret {}
 			, UnitIdlePointToMouse {}
 			, RecountBurst {}
+			, CanBeBuiltOn { false }
 			, UnitBaseNormal { false }
 			, UnitBaseForAllyBuilding { false }
 			, LeaveTransportKill { false }
