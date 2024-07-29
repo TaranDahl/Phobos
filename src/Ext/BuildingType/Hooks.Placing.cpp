@@ -1,6 +1,7 @@
 #include "Body.h"
 #include <EventClass.h>
 #include <TerrainClass.h>
+#include <AircraftClass.h>
 #include <TacticalClass.h>
 #include <IsometricTileTypeClass.h>
 #include <Ext/House/Body.h>
@@ -13,21 +14,24 @@
 DEFINE_HOOK(0x6D504C, TacticalClass_DrawPlacement_PlacementPreview, 0x6)
 {
 	auto pRules = RulesExt::Global();
-
-	if (!pRules->PlacementPreview || !Phobos::Config::ShowPlacementPreview)
-		return 0;
-
 	BuildingClass* pBuilding = specific_cast<BuildingClass*>(DisplayClass::Instance->CurrentBuilding);
 	CellStruct displayCell = DisplayClass::Instance->CurrentFoundation_CenterCell + DisplayClass::Instance->CurrentFoundation_TopLeftOffset;
 
-	if (!pBuilding) // Just for displaying auto place again
+	if (!pBuilding) // display auto placing when enabled buildable-upon TechnoTypes
 	{
 		HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer);
 		pBuilding = pHouseExt->CurrentBuilding;
 		displayCell = pHouseExt->CurrentBuildingTopLeft;
 	}
+	else if (!pRules->PlacementPreview || !Phobos::Config::ShowPlacementPreview)
+	{
+		return 0;
+	}
 
-	BuildingTypeClass* pType = pBuilding ? pBuilding->Type : nullptr;
+	if (!pBuilding)
+		return 0;
+
+	BuildingTypeClass* pType = pBuilding->Type;
 	auto pTypeExt = pType ? BuildingTypeExt::ExtMap.Find(pType) : nullptr;
 	bool isShow = pTypeExt && pTypeExt->PlacementPreview;
 
@@ -117,6 +121,7 @@ DEFINE_HOOK(0x6D57C1, TacticalClass_DrawLaserFencePlacement_BuildableTerrain, 0x
 }
 
 // Buildable-upon TerrainTypes Hook #3 - Remove them when buildings are placed on them.
+// Buildable-upon TechnoTypes Hook #8 - Remove some of them when buildings are placed on them.
 DEFINE_HOOK(0x5684B1, MapClass_PlaceDown_BuildableUponTypes, 0x6)
 {
 	GET(ObjectClass*, pObject, EDI);
@@ -124,15 +129,57 @@ DEFINE_HOOK(0x5684B1, MapClass_PlaceDown_BuildableUponTypes, 0x6)
 
 	if (pObject->WhatAmI() == AbstractType::Building)
 	{
-		if (auto const pTerrain = pCell->GetTerrain(false))
-		{
-			auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type);
+		ObjectClass* pCellObject = pCell->FirstObject;
 
-			if (pTypeExt->CanBeBuiltOn)
+		while (pCellObject)
+		{
+			AbstractType const absType = pCellObject->WhatAmI();
+
+			if (absType == AbstractType::Infantry || absType == AbstractType::Unit || absType == AbstractType::Aircraft)
 			{
-				pCell->RemoveContent(pTerrain, false);
-				TerrainTypeExt::Remove(pTerrain);
+				TechnoClass* const pTechno = static_cast<TechnoClass*>(pCellObject);
+				TechnoTypeClass* const pType = pTechno->GetTechnoType();
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+
+				if (pTypeExt && pTypeExt->CanBeBuiltOn)
+				{
+					pTechno->KillPassengers(nullptr);
+					pTechno->Stun();
+					pTechno->Limbo();
+					pTechno->UnInit();
+				}
+				else
+				{
+					pTechno->KillPassengers(nullptr);
+					pTechno->ReceiveDamage(&pTechno->Health, 0, RulesClass::Instance->C4Warhead, nullptr, true, false, nullptr);
+				}
 			}
+			else if (absType == AbstractType::Building)
+			{
+				BuildingClass* const pBuilding = static_cast<BuildingClass*>(pCellObject);
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pBuilding->Type);
+
+				if (pTypeExt && pTypeExt->CanBeBuiltOn)
+				{
+					pBuilding->KillOccupants(nullptr);
+					pBuilding->Stun();
+					pBuilding->Limbo();
+					pBuilding->UnInit();
+				}
+			}
+			else if (absType == AbstractType::Terrain)
+			{
+				TerrainClass* const pTerrain = abstract_cast<TerrainClass*>(pCellObject);
+				auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type);
+
+				if (pTypeExt && pTypeExt->CanBeBuiltOn)
+				{
+					pCell->RemoveContent(pTerrain, false);
+					TerrainTypeExt::Remove(pTerrain);
+				}
+			}
+
+			pCellObject = pCellObject->NextObject;
 		}
 	}
 
@@ -287,19 +334,13 @@ DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormalExtra, 0x9)
 // BaseNormal for units Hook #2-1 - Let the game do the PassesProximityCheck when the cell which mouse is pointing at has not changed
 DEFINE_HOOK(0x4AACD9, MapClass_TacticalAction_BaseNormalRecheck, 0x5)
 {
-	if (RulesExt::Global()->CheckUnitBaseNormal && !(Unsorted::CurrentFrame % 8))
-		return 0x4AACF5;
-
-	return 0;
+	return (RulesExt::Global()->CheckUnitBaseNormal && !(Unsorted::CurrentFrame % 8)) ? 0x4AACF5 : 0;
 }
 
 // BaseNormal for units Hook #2-2 - Let the game do the PassesProximityCheck when the cell which mouse is pointing at has not changed
 DEFINE_HOOK(0x4A9361, MapClass_CallBuildingPlaceCheck_BaseNormalRecheck, 0x5)
 {
-	if (RulesExt::Global()->CheckUnitBaseNormal && !(Unsorted::CurrentFrame % 8))
-		return 0x4A9371;
-
-	return 0;
+	return (RulesExt::Global()->CheckUnitBaseNormal && !(Unsorted::CurrentFrame % 8)) ? 0x4A9371 : 0;
 }
 
 // Buildable-upon TechnoTypes Helper
@@ -334,26 +375,14 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 		{
 			const AbstractType absType = pObject->WhatAmI();
 
-			if (absType == AbstractType::Aircraft || absType == AbstractType::Building)
+			if (absType == AbstractType::Building)
 			{
-				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pObject->GetTechnoType());
+				BuildingClass* const pBuilding = static_cast<BuildingClass*>(pObject);
+				BuildingTypeClass* const pType = pBuilding->Type;
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
 
 				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
 					return CanNotExistHere;
-			}
-			else if (absType == AbstractType::Infantry || absType == AbstractType::Unit)
-			{
-				TechnoClass* const pTechno = static_cast<TechnoClass*>(pObject);
-				TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
-				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechnoType);
-
-				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
-				{
-					if (pTechno->Owner != pOwner || pTechnoType->Speed <= 0 || !expand)
-						return CanNotExistHere;
-					else
-						landFootOnly = true;
-				}
 			}
 			else if (absType == AbstractType::Terrain)
 			{
@@ -368,11 +397,6 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 
 			pObject = pObject->NextObject;
 		}
-
-		if (landFootOnly)
-			BuildOnOccupiersHelpers::Exist = true;
-
-		return CanExistHere;
 	}
 	else if (pBuildingType->LaserFencePost || pBuildingType->Gate)
 	{
@@ -384,7 +408,8 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 
 			if (absType == AbstractType::Aircraft)
 			{
-				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pObject->GetTechnoType());
+				AircraftClass* const pAircraft = static_cast<AircraftClass*>(pObject);
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pAircraft->Type);
 
 				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
 					return CanNotExistHere;
@@ -392,9 +417,10 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 			else if (absType == AbstractType::Building)
 			{
 				BuildingClass* const pBuilding = static_cast<BuildingClass*>(pObject);
-				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pBuilding->Type);
+				BuildingTypeClass* const pType = pBuilding->Type;
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
 
-				if (!pTypeExt || !pTypeExt->CanBeBuiltOn || !pBuilding->Type->LaserFence || pBuilding->GetOwningHouse() != pOwner)
+				if ((!pTypeExt || !pTypeExt->CanBeBuiltOn) && (pBuilding->Owner != pOwner || !pType->LaserFence))
 					return CanNotExistHere;
 			}
 			else if (absType == AbstractType::Infantry || absType == AbstractType::Unit)
@@ -429,29 +455,37 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 	{
 		const int isoTileTypeIndex = pCell->IsoTileTypeIndex;
 
-		if (isoTileTypeIndex < 0 || isoTileTypeIndex >= IsometricTileTypeClass::Array->Count || IsometricTileTypeClass::Array->Items[isoTileTypeIndex]->Morphable)
+		if (isoTileTypeIndex >= 0 && isoTileTypeIndex < IsometricTileTypeClass::Array->Count && !IsometricTileTypeClass::Array->Items[isoTileTypeIndex]->Morphable)
+			return CanNotExistHere;
+
+		ObjectClass* pObject = pCell->FirstObject;
+
+		while (pObject)
 		{
-			ObjectClass* pObject = pCell->FirstObject;
+			const AbstractType absType = pObject->WhatAmI();
 
-			while (pObject)
+			if (absType == AbstractType::Building)
 			{
-				const AbstractType absType = pObject->WhatAmI();
+				BuildingClass* const pBuilding = static_cast<BuildingClass*>(pObject);
+				BuildingTypeClass* const pType = pBuilding->Type;
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
 
-				if (absType == AbstractType::Building || absType == AbstractType::Infantry || absType == AbstractType::Unit)
+				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
+					return CanNotExistHere;
+			}
+			else if (absType == AbstractType::Terrain)
+			{
+				if (TerrainClass* const pTerrain = abstract_cast<TerrainClass*>(pObject))
 				{
-					auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pObject->GetTechnoType());
+					auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type);
 
 					if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
 						return CanNotExistHere;
 				}
-
-				pObject = pObject->NextObject;
 			}
 
-			return CanExistHere;
+			pObject = pObject->NextObject;
 		}
-
-		return CanNotExistHere;
 	}
 	else
 	{
@@ -461,9 +495,19 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 		{
 			const AbstractType absType = pObject->WhatAmI();
 
-			if (absType == AbstractType::Aircraft || absType == AbstractType::Building)
+			if (absType == AbstractType::Aircraft)
 			{
-				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pObject->GetTechnoType());
+				AircraftClass* const pAircraft = static_cast<AircraftClass*>(pObject);
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pAircraft->Type);
+
+				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
+					return CanNotExistHere;
+			}
+			else if (absType == AbstractType::Building)
+			{
+				BuildingClass* const pBuilding = static_cast<BuildingClass*>(pObject);
+				BuildingTypeClass* const pType = pBuilding->Type;
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
 
 				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
 					return CanNotExistHere;
@@ -523,7 +567,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 	GET(BuildingClass*, pFactory, EDI);
 	GET_STACK(CellStruct, cell, STACK_OFFSET(0x3C, 0x10));
 
-	if (pTechno->WhatAmI() == AbstractType::Building)
+	if (pTechno->WhatAmI() == AbstractType::Building && RulesExt::Global()->ExpandBuildingPlace)
 	{
 		HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pHouse);
 		BuildingClass* const pBuilding = static_cast<BuildingClass*>(pTechno);
@@ -565,211 +609,234 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 			}
 			else if (!noOccupy) // Temporarily can not build
 			{
-				if (!(pHouseExt->CurrentBuildingTimes % 5)) // Force occupiers leave
+				while (!(pHouseExt->CurrentBuildingTimes % 5)) // Force occupiers leave
 				{
-					CellClass* pTempCell = nullptr;
-					int tempOccupiers = 0;
-					std::vector<CellClass*> checkedCells;
-					checkedCells.reserve(((foundationHeight + foundationWidth) << 3) + 64); // Max size
+					std::vector<CellClass*> optionalCells;
+					optionalCells.reserve(32);
+					CellStruct surroundCell { topLeftX - 1, topLeftY - 1 };
+
+					for (int i = 0; i < 4; ++i)
+					{
+						const int range = (i % 2) ? foundationHeight : foundationWidth;
+
+						for (int j = 0; j <= range; ++j)
+						{
+							if (CellClass* const pSurroundCell = MapClass::Instance->GetCellAt(surroundCell))
+							{
+								if (pSurroundCell->IsClearToMove(SpeedType::Amphibious, true, true, -1, MovementZone::Amphibious, -1, false))
+									optionalCells.push_back(pSurroundCell);
+							}
+
+							if (i % 2)
+								surroundCell.Y += static_cast<short>((i / 2) ? -1 : 1);
+							else
+								surroundCell.X += static_cast<short>((i / 2) ? -1 : 1);
+						}
+					}
+
+					if (optionalCells.size() <= 0)
+					{
+						pHouseExt->CurrentBuildingTimes = 1;
+						break;
+					}
+
+					std::vector<TechnoClass*> checkedTechnos;
+					checkedTechnos.reserve(32);
 
 					for (short curX = topLeftX; curX < bottomRightX; ++curX)
 					{
 						for (short curY = topLeftY; curY < bottomRightY; ++curY)
 						{
-							CellClass* const pCell = MapClass::Instance->GetCellAt(CellStruct{curX, curY});
-							ObjectClass* pObject = pCell->FirstObject;
-
-							while (pObject)
+							if (CellClass* const pCell = MapClass::Instance->GetCellAt(CellStruct{curX, curY}))
 							{
-								AbstractType const absType = pObject->WhatAmI();
+								ObjectClass* pObject = pCell->FirstObject;
 
-								if (absType == AbstractType::Infantry)
+								while (pObject)
 								{
-									InfantryClass* const pInfantry = static_cast<InfantryClass*>(pObject);
-									auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pInfantry->Type);
+									AbstractType const absType = pObject->WhatAmI();
 
-									if ((!pTypeExt || !pTypeExt->CanBeBuiltOn) && pInfantry->Owner == pHouse)
+									if (absType == AbstractType::Infantry || absType == AbstractType::Unit)
 									{
-										CellClass* pCellDestination = nullptr;
-										CellStruct location { curX, curY };
+										TechnoClass* const pCellTechno = static_cast<TechnoClass*>(pObject);
+										auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pCellTechno->GetTechnoType());
 
-										if (pTempCell)
+										if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
 										{
-											if (tempOccupiers >= 2)
-											{
-												pTempCell->AltFlags |= AltCellFlags::Unknown_4;
-												pCellDestination = pTempCell;
-												checkedCells.push_back(pTempCell);
-												pTempCell = nullptr;
-												tempOccupiers = 0;
-											}
-											else
-											{
-												pCellDestination = pTempCell;
-												checkedCells.push_back(pTempCell);
-												++tempOccupiers;
-											}
+											const Mission technoMission = pCellTechno->GetCurrentMission();
 
-											break;
-										}
-										else
-										{
-											for (short times = 0, edge = 0, curLength = 1, maxLength = 1, pace = 1; times < 81; ++times)
-											{
-												if (CellClass* const pCurCell = MapClass::Instance->GetCellAt(location))
-												{
-													if (!(pCurCell->AltFlags & AltCellFlags::Unknown_4)
-														&& pInfantry->IsCellOccupied(pCurCell, FacingType::None, -1, nullptr, false) == Move::OK)
-													{
-														ObjectClass* pCurObject = pCurCell->FirstObject;
-														int occupiers = 0;
-
-														while (pCurObject)
-														{
-															if (pCurObject->WhatAmI() == AbstractType::Infantry)
-																++occupiers;
-
-															pCurObject = pCurObject->NextObject;
-														}
-
-														if (occupiers >= 2)
-														{
-															pCurCell->AltFlags |= AltCellFlags::Unknown_4;
-														}
-														else
-														{
-															++occupiers;
-															pTempCell = pCurCell;
-															tempOccupiers = occupiers;
-														}
-
-														pCellDestination = pCurCell;
-														checkedCells.push_back(pCurCell);
-														break;
-													}
-												}
-
-												if (edge) // Counter-clockwise
-													location.X += pace;
-												else
-													location.Y += pace;
-
-												if (curLength < maxLength)
-												{
-													++curLength;
-												}
-												else if (edge)
-												{
-													edge = 0;
-													curLength = 1;
-													++maxLength;
-													pace = -pace;
-												}
-												else
-												{
-													++edge;
-													curLength = 1;
-												}
-											}
-										}
-
-										if (pCellDestination)
-										{
-											pInfantry->SetTarget(nullptr);
-											pInfantry->SetDestination(nullptr, false);
-											pInfantry->ForceMission(Mission::None);
-
-											if (pInfantry->IsDeployed())
-												pInfantry->QueueMission(Mission::Unload, true);
-
-											pInfantry->QueueMission(Mission::Move, false);
-											pInfantry->SetDestination(pCellDestination, true);
-										}
-										else
-										{
-											curX = bottomRightX;
-											curY = bottomRightY;
-											pHouseExt->CurrentBuildingTimes = 0;
-											break;
+											if (technoMission != Mission::Move && technoMission != Mission::AttackMove)
+												checkedTechnos.push_back(pCellTechno);
 										}
 									}
+
+									pObject = pObject->NextObject;
 								}
-								else if (absType == AbstractType::Unit)
-								{
-									UnitClass* const pUnit = static_cast<UnitClass*>(pObject);
-									auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pUnit->Type);
-
-									if ((!pTypeExt || !pTypeExt->CanBeBuiltOn) && pUnit->Owner == pHouse)
-									{
-										CellClass* pCellDestination = nullptr;
-										CellStruct location { curX, curY };
-
-										for (short times = 0, edge = 0, curLength = 1, maxLength = 1, pace = 1; times < 81; ++times)
-										{
-											if (CellClass* const pCurCell = MapClass::Instance->GetCellAt(location))
-											{
-												if (!(pCurCell->AltFlags & AltCellFlags::Unknown_4)
-													&& pUnit->IsCellOccupied(pCurCell, FacingType::None, -1, nullptr, false) == Move::OK)
-												{
-													pCurCell->AltFlags |= AltCellFlags::Unknown_4;
-													pCellDestination = pCurCell;
-													checkedCells.push_back(pCurCell);
-													break;
-												}
-											}
-
-											if (edge) // Counter-clockwise
-												location.X += pace;
-											else
-												location.Y += pace;
-
-											if (curLength < maxLength)
-											{
-												++curLength;
-											}
-											else if (edge)
-											{
-												edge = 0;
-												curLength = 1;
-												++maxLength;
-												pace = -pace;
-											}
-											else
-											{
-												++edge;
-												curLength = 1;
-											}
-										}
-
-										if (pCellDestination)
-										{
-											pUnit->SetTarget(nullptr);
-											pUnit->SetDestination(nullptr, false);
-											pUnit->ForceMission(Mission::None);
-
-											if (pUnit->Deployed)
-												pUnit->QueueMission(Mission::Unload, true);
-
-											pUnit->QueueMission(Mission::Move, false);
-											pUnit->SetDestination(pCellDestination, true);
-										}
-										else
-										{
-											curX = bottomRightX;
-											curY = bottomRightY;
-											pHouseExt->CurrentBuildingTimes = 0;
-											break;
-										}
-									}
-								}
-
-								pObject = pObject->NextObject;
 							}
 						}
 					}
 
-					for (auto const& pCheckedCell : checkedCells)
+					if (checkedTechnos.size() <= 0)
+						break;
+
+					// TODO
+					const CellStruct center { topLeftX + foundationWidth / 2 , topLeftY + foundationHeight / 2 };
+					std::sort(&checkedTechnos[0], &checkedTechnos[checkedTechnos.size()],[center](TechnoClass* pTechnoA, TechnoClass* pTechnoB){
+						return pTechnoA->GetMapCoords().DistanceFromSquared(center) > pTechnoB->GetMapCoords().DistanceFromSquared(center);
+					});
+
+					std::vector<CellClass*> checkedCells;
+					checkedCells.reserve(32);
+					std::vector<TechnoClass*> reCheckedTechnos;
+					reCheckedTechnos.reserve(16);
+					struct TechnoWithDestination
+					{
+						TechnoClass* techno;
+						CellClass* destination;
+					};
+					std::vector<TechnoWithDestination> finalOrder;
+					finalOrder.reserve(32);
+
+					do
+					{
+						for (auto const& pRecheckedTechno : reCheckedTechnos)
+							checkedTechnos.push_back(pRecheckedTechno);
+
+						reCheckedTechnos.clear();
+
+						for (auto const& pCheckedTechno : checkedTechnos)
+						{
+							const CellStruct location = pCheckedTechno->GetMapCoords();
+							std::sort(&optionalCells[0], &optionalCells[optionalCells.size()],[location](CellClass* pCellA, CellClass* pCellB){
+								return pCellA->MapCoords.DistanceFromSquared(location) < pCellB->MapCoords.DistanceFromSquared(location);
+							});
+
+							CellClass* pDestinationCell = nullptr;
+							std::vector<CellClass*> deleteCells;
+							deleteCells.reserve(8);
+
+							for (auto const& pOptionalCell : optionalCells)
+							{
+								ObjectClass* pCurObject = pOptionalCell->FirstObject;
+								std::vector<TechnoClass*> optionalTechnos;
+								optionalTechnos.reserve(4);
+								bool valid = true;
+
+								while (pCurObject)
+								{
+									AbstractType const absType = pCurObject->WhatAmI();
+
+									if (absType == AbstractType::Infantry || absType == AbstractType::Unit)
+									{
+										TechnoClass* const pCurTechno = static_cast<TechnoClass*>(pCurObject);
+
+										if (pCurTechno->Owner != pHouse)
+										{
+											deleteCells.push_back(pOptionalCell);
+											valid = false;
+											break;
+										}
+
+										optionalTechnos.push_back(pCurTechno);
+									}
+
+									pCurObject = pCurObject->NextObject;
+								}
+
+								if (valid)
+								{
+									for (auto const& pOptionalTechno : optionalTechnos)
+										reCheckedTechnos.push_back(pOptionalTechno);
+
+									pDestinationCell = pOptionalCell;
+									break;
+								}
+							}
+
+							for (auto const& pDeleteCell : deleteCells)
+							{
+								checkedCells.push_back(pDeleteCell);
+								pDestinationCell->AltFlags |= AltCellFlags::Unknown_4;
+								optionalCells.erase(std::remove(optionalCells.begin(), optionalCells.end(), pDeleteCell), optionalCells.end());
+							}
+
+							if (pDestinationCell)
+							{
+								checkedCells.push_back(pDestinationCell);
+								pDestinationCell->AltFlags |= AltCellFlags::Unknown_4;
+								optionalCells.erase(std::remove(optionalCells.begin(), optionalCells.end(), pDestinationCell), optionalCells.end());
+
+								CellStruct searchCell = pDestinationCell->MapCoords - CellStruct { 1, 1 };
+
+								for (int i = 0; i < 4; ++i)
+								{
+									for (int j = 0; j < 2; ++j)
+									{
+										if (CellClass* const pSearchCell = MapClass::Instance->GetCellAt(searchCell))
+										{
+											if (!(pSearchCell->AltFlags & AltCellFlags::Unknown_4) && pSearchCell->IsClearToMove(SpeedType::Amphibious, true, true, -1, MovementZone::Amphibious, -1, false))
+												optionalCells.push_back(pSearchCell);
+										}
+
+										if (i % 2)
+											searchCell.Y += static_cast<short>((i / 2) ? -1 : 1);
+										else
+											searchCell.X += static_cast<short>((i / 2) ? -1 : 1);
+									}
+								}
+
+								const TechnoWithDestination thisOrder { pCheckedTechno, pDestinationCell };
+								finalOrder.push_back(thisOrder);
+							}
+							else
+							{
+								pHouseExt->CurrentBuildingTimes = 1;
+								break;
+							}
+						}
+
+						checkedTechnos.clear();
+					}
+					while (reCheckedTechnos.size());
+
+					for (auto const& pCheckedCell : checkedCells) // Restore cell flag
 						pCheckedCell->AltFlags &= ~AltCellFlags::Unknown_4;
+
+					if (pHouseExt->CurrentBuildingTimes == 1)
+						break;
+
+					for (auto const& pThisOrder : finalOrder) // Confirm command
+					{
+						TechnoClass* const pCheckedTechno = pThisOrder.techno;
+						CellClass* const pDestinationCell = pThisOrder.destination;
+						AbstractType const absType = pCheckedTechno->WhatAmI();
+
+						pCheckedTechno->SetTarget(nullptr);
+						pCheckedTechno->SetDestination(nullptr, false);
+						pCheckedTechno->ForceMission(Mission::Guard);
+
+						if (absType == AbstractType::Infantry)
+						{
+							InfantryClass* const pInfantry = static_cast<InfantryClass*>(pCheckedTechno);
+
+							if (pInfantry->IsDeployed())
+								pInfantry->PlayAnim(Sequence::Undeploy, true);
+
+							pInfantry->SetDestination(pDestinationCell, false);
+							pInfantry->ClickedMission(Mission::Move, nullptr, pDestinationCell, nullptr);
+						}
+						else if (absType == AbstractType::Unit)
+						{
+							UnitClass* const pUnit = static_cast<UnitClass*>(pCheckedTechno);
+
+							if (pUnit->Deployed)
+								pUnit->Undeploy();
+
+							pUnit->SetDestination(pDestinationCell, false);
+							pUnit->QueueMission(Mission::Move, false);
+						}
+					}
+
+					break;
 				}
 
 				if (!pHouseExt->CurrentBuilding) // Start
@@ -811,6 +878,9 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 // Buildable-upon TechnoTypes Hook #5 - Check whether need to skip the replace command
 DEFINE_HOOK(0x4FB395, HouseClass_UnitFromFactory_SkipMouseReturn, 0x6)
 {
+	if (!RulesExt::Global()->ExpandBuildingPlace)
+		return 0;
+
 	if (BuildOnOccupiersHelpers::Mouse)
 	{
 		BuildOnOccupiersHelpers::Mouse = false;
@@ -866,4 +936,31 @@ DEFINE_HOOK(0x4F8F87, HouseClass_AI_HangUpBuildingCheck, 0x6)
 	return 0;
 }
 
-// TODO overlayWall, firestormWall, laserFence, Scatter, vanishTechno, newSearchAlgorithm
+// Laser fence use GetBuilding to check whether can build and draw, so no need to change
+// Buildable-upon TechnoTypes Hook #9-1 - Don't draw overlay wall grid when have occupiers
+DEFINE_HOOK(0x6D5D38, TacticalClass_DrawOverlayWallGrid_DisableWhenHaveTechnos, 0x8)
+{
+	GET(bool, valid, EAX);
+	return (!valid || BuildOnOccupiersHelpers::Exist) ? 0x6D5F0F : 0x6D5D40;
+}
+
+// Buildable-upon TechnoTypes Hook #9-2 - Don't draw firestorm wall grid when have occupiers
+DEFINE_HOOK(0x6D5A9D, TacticalClass_DrawFirestormWallGrid_DisableWhenHaveTechnos, 0x8)
+{
+	GET(bool, valid, EAX);
+	return (!valid || BuildOnOccupiersHelpers::Exist) ? 0x6D5C2F : 0x6D5AA5;
+}
+
+// Buildable-upon TechnoTypes Hook #9-3 - Don't place overlay wall grid when have occupiers
+DEFINE_HOOK(0x588873, MapClass_BuildingToWall_DisableWhenHaveTechnos, 0x8)
+{
+	GET(bool, valid, EAX);
+	return (!valid || BuildOnOccupiersHelpers::Exist) ? 0x588935 : 0x58887B;
+}
+
+// Buildable-upon TechnoTypes Hook #9-4 - Don't place firestorm wall grid when have occupiers
+DEFINE_HOOK(0x588664, MapClass_BuildingToFirestormWall_DisableWhenHaveTechnos, 0x8)
+{
+	GET(bool, valid, EAX);
+	return (!valid || BuildOnOccupiersHelpers::Exist) ? 0x588730 : 0x58866C;
+}

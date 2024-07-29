@@ -357,36 +357,6 @@ void TechnoExt::DrawSuperProgress(TechnoClass* pThis, RectangleStruct* pBounds)
 
 void TechnoExt::DrawIronCurtainProgress(TechnoClass* pThis, RectangleStruct* pBounds)
 {
-	if (pThis->WhatAmI() == AbstractType::Building) // Test only ===========================
-	{
-		BuildingClass* const pBuilding = abstract_cast<BuildingClass*>(pThis);
-
-		if (pBuilding->Type->Factory == AbstractType::BuildingType)
-		{
-			Point2D mousePosition = WWMouseClass::Instance->XY1 + Point2D { -70, -60 };
-			auto const ext = HouseExt::ExtMap.Find(pBuilding->Owner);
-			const int times = ext->CurrentBuildingTimes;
-			const int timer = ext->CurrentBuildingTimer.GetTimeLeft();
-
-			DrawFrameStruct pDrawT
-			{
-				times << 1,
-				18,
-				(timer << 2) + 40,
-				17,
-				64,
-				-1,
-				FileSystem::PIPS_SHP,
-				FileSystem::PIPBRD_SHP,
-				FileSystem::PALETTE_PAL,
-				&mousePosition,
-				pBounds
-			};
-
-			TechnoExt::DrawVanillaStyleFootBar(&pDrawT);
-		}
-	} // ===================================================================================
-
 	if (!pThis->IsIronCurtained() || !pThis->IronCurtainTimer.TimeLeft)
 		return;
 
