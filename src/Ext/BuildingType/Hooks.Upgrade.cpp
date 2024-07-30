@@ -116,7 +116,7 @@ DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x5)
 			canbuild = CanBuildResult::TemporarilyUnbuildable;
 	}
 
-	if (!buildLimitOnly && includeInProduction) // Any func who want to call CanBuild will change the list, so this must eliminate any unnecessary factors
+	if (!buildLimitOnly && includeInProduction && pThis->IsControlledByHuman()) // Any func who want to call CanBuild will change the list, so this must eliminate any unnecessary factors
 	{
 		TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(pItem);
 
@@ -139,7 +139,9 @@ DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x5)
 			else if (std::find(vec.begin(), vec.end(), pTypeExt) != vec.end()) // Not Unbuildable + In the list = remove it from the list and play EVA
 			{
 				vec.erase(std::remove(vec.begin(), vec.end(), pTypeExt), vec.end());
-				VoxClass::Play(&Make_Global<const char>(0x83FA64)); // 0x83FA64 -> EVA_NewConstructionOptions
+
+				if (pThis->IsControlledByCurrentPlayer())
+					VoxClass::Play(&Make_Global<const char>(0x83FA64)); // 0x83FA64 -> EVA_NewConstructionOptions
 			}
 		}
 	}
