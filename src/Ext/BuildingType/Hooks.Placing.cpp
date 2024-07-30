@@ -544,7 +544,7 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 	if (landFootOnly)
 		BuildOnOccupiersHelpers::Exist = true;
 
-	return CanExistHere;
+	return CanExistHere; // Continue check the overlays .etc
 }
 
 // Buildable-upon TechnoTypes Hook #2 -> sub_47EC90 - Draw yellow grid if there is only infantries and units on the cell
@@ -851,7 +851,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 						}
 					}
 
-					break;
+					break; // No cycle
 				}
 
 				if (!pHouseExt->CurrentBuilding) // Start

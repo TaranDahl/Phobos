@@ -101,6 +101,13 @@ DEFINE_HOOK(0x739E5A, UnitClass_ToggleSimpleDeploy_ChangeAmmo, 0x6) // undeployi
 	return Continue;
 }
 
+DEFINE_HOOK(0x73DE78, UnitClass_Unload_ChangeAmmo, 0x6) // converters
+{
+	enum { Continue = 0x73DE7E };
+	UnitDeployConvertHelpers::ChangeAmmoOnUnloading(R);
+	return Continue;
+}
+
 DEFINE_HOOK(0x73D6E6, UnitClass_Unload_KillPassenger, 0x6)
 {
 	GET(UnitClass*, pThis, ESI);
@@ -109,11 +116,4 @@ DEFINE_HOOK(0x73D6E6, UnitClass_Unload_KillPassenger, 0x6)
 		pThis->KillPassengers(pThis);
 
 	return 0;
-}
-
-DEFINE_HOOK(0x73DE78, UnitClass_Unload_ChangeAmmo, 0x6) // converters
-{
-	enum { Continue = 0x73DE7E };
-	UnitDeployConvertHelpers::ChangeAmmoOnUnloading(R);
-	return Continue;
 }
