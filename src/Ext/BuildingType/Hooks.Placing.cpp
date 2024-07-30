@@ -663,7 +663,12 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 										auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pCellTechno->GetTechnoType());
 
 										if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
-											checkedTechnos.push_back(pCellTechno);
+										{
+											const Mission technoMission = pCellTechno->GetCurrentMission();
+
+											if (technoMission != Mission::Move && technoMission != Mission::AttackMove)
+												checkedTechnos.push_back(pCellTechno);
+										}
 									}
 
 									pObject = pObject->NextObject;
@@ -671,6 +676,9 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 							}
 						}
 					}
+
+					if (checkedTechnos.size() <= 0) // All in moving
+						break;
 
 					// Step 3: Core, successively find the farthest techno and its closest valid destination.
 					const CellStruct center { topLeftX + foundationWidth / 2 , topLeftY + foundationHeight / 2 };
