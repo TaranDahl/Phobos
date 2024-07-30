@@ -232,7 +232,6 @@ public:
 		Valueable<bool> UnitBaseNormal;
 		Valueable<bool> UnitBaseForAllyBuilding;
 		Valueable<bool> LeaveTransportKill;
-		Valueable<int> LeaveTransportRearm;
 
 		Nullable<AnimTypeClass*> Wake;
 		Nullable<AnimTypeClass*> Wake_Grapple;
@@ -466,7 +465,6 @@ public:
 			, UnitBaseNormal { false }
 			, UnitBaseForAllyBuilding { false }
 			, LeaveTransportKill { false }
-			, LeaveTransportRearm { 0 }
 
 			, Wake { }
 			, Wake_Grapple { }

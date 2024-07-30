@@ -101,27 +101,12 @@ DEFINE_HOOK(0x739E5A, UnitClass_ToggleSimpleDeploy_ChangeAmmo, 0x6) // undeployi
 	return Continue;
 }
 
-DEFINE_HOOK(0x73D8D4, UnitClass_Unload_KillPassenger, 0x8)
+DEFINE_HOOK(0x73D6E6, UnitClass_Unload_KillPassenger, 0x6)
 {
 	GET(UnitClass*, pThis, ESI);
-	GET(FootClass*, pFoot, EDI);
 
-	auto const pThisExt = TechnoTypeExt::ExtMap.Find(pThis->Type);
-	int rearmDelay = pThisExt->LeaveTransportRearm;
-
-	if (rearmDelay > 0)
-	{
-		pThis->RearmTimer.Start(rearmDelay);
-		pThis->ChargeTurretDelay = rearmDelay;
-	}
-
-	if (pThisExt->LeaveTransportKill)
-	{
-		pFoot->KillPassengers(pThis);
-		pFoot->RegisterDestruction(pThis);
-		pFoot->UnInit();
-		R->EDI();
-	}
+	if (pThis->Type->Passengers > 0 && TechnoTypeExt::ExtMap.Find(pThis->Type)->LeaveTransportKill)
+		pThis->KillPassengers(pThis);
 
 	return 0;
 }

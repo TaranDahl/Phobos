@@ -319,7 +319,6 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->UnitBaseNormal.Read(exINI, pSection, "UnitBaseNormal");
 	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
 	this->LeaveTransportKill.Read(exINI, pSection, "LeaveTransportKill");
-	this->LeaveTransportRearm.Read(exINI, pSection, "LeaveTransportRearmDelay");
 
 	this->Wake.Read(exINI, pSection, "Wake");
 	this->Wake_Grapple.Read(exINI, pSection, "Wake.Grapple");
@@ -696,7 +695,6 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->UnitBaseNormal)
 		.Process(this->UnitBaseForAllyBuilding)
 		.Process(this->LeaveTransportKill)
-		.Process(this->LeaveTransportRearm)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)
