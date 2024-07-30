@@ -10,7 +10,7 @@
 #include <Utilities/EnumFunctions.h>
 #include <Utilities/AresHelper.h>
 
-// Draw placement preview Hook
+// Draw placement preview Hook -> sub_6D5030
 DEFINE_HOOK(0x6D504C, TacticalClass_DrawPlacement_PlacementPreview, 0x6)
 {
 	auto pRules = RulesExt::Global();
@@ -83,7 +83,7 @@ DEFINE_HOOK(0x6D504C, TacticalClass_DrawPlacement_PlacementPreview, 0x6)
 	return 0;
 }
 
-// Set placement grid translucency Hook
+// Set placement grid translucency Hook -> sub_47EC90
 DEFINE_HOOK(0x47EFAE, CellClass_Draw_It_SetPlacementGridTranslucency, 0x6)
 {
 	auto pRules = RulesExt::Global();
@@ -100,7 +100,7 @@ DEFINE_HOOK(0x47EFAE, CellClass_Draw_It_SetPlacementGridTranslucency, 0x6)
 	return 0;
 }
 
-// Buildable-upon TerrainTypes Hook #2 - Draw laser fence placement even if they are on the way.
+// Buildable-upon TerrainTypes Hook #2 -> sub_6D5730 - Draw laser fence placement even if they are on the way.
 DEFINE_HOOK(0x6D57C1, TacticalClass_DrawLaserFencePlacement_BuildableTerrain, 0x9)
 {
 	enum { ContinueChecks = 0x6D57D2, DontDraw = 0x6D59A6 };
@@ -120,8 +120,8 @@ DEFINE_HOOK(0x6D57C1, TacticalClass_DrawLaserFencePlacement_BuildableTerrain, 0x
 	return ContinueChecks;
 }
 
-// Buildable-upon TerrainTypes Hook #3 - Remove them when buildings are placed on them.
-// Buildable-upon TechnoTypes Hook #8 - Remove some of them when buildings are placed on them.
+// Buildable-upon TerrainTypes Hook #3 -> sub_5683C0 - Remove them when buildings are placed on them.
+// Buildable-upon TechnoTypes Hook #8 -> sub_5683C0 - Remove some of them when buildings are placed on them.
 DEFINE_HOOK(0x5684B1, MapClass_PlaceDown_BuildableUponTypes, 0x6)
 {
 	GET(ObjectClass*, pObject, EDI);
@@ -220,7 +220,7 @@ AltFlags = AltCellFlags::Unknown_4 -> InBuildingProcess
 Vanilla only 1 frame between AddPlaceEvent and RespondToEvent
 */
 
-// BaseNormal for units Hook #1 - Rewrite the algorithm, it will immediately return as long as BaseNormal exists
+// BaseNormal for units Hook #1 -> sub_4A8EB0 - Rewrite the algorithm, it will immediately return as long as BaseNormal exists
 DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormalExtra, 0x9)
 {
 	enum { CheckCompleted = 0x4A904E };
@@ -331,13 +331,13 @@ DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormalExtra, 0x9)
 	return CheckCompleted;
 }
 
-// BaseNormal for units Hook #2-1 - Let the game do the PassesProximityCheck when the cell which mouse is pointing at has not changed
+// BaseNormal for units Hook #2-1 -> sub_4AAC10 - Let the game do the PassesProximityCheck when the cell which mouse is pointing at has not changed
 DEFINE_HOOK(0x4AACD9, MapClass_TacticalAction_BaseNormalRecheck, 0x5)
 {
 	return (RulesExt::Global()->CheckUnitBaseNormal && !(Unsorted::CurrentFrame % 8)) ? 0x4AACF5 : 0;
 }
 
-// BaseNormal for units Hook #2-2 - Let the game do the PassesProximityCheck when the cell which mouse is pointing at has not changed
+// BaseNormal for units Hook #2-2 -> sub_4A91B0 - Let the game do the PassesProximityCheck when the cell which mouse is pointing at has not changed
 DEFINE_HOOK(0x4A9361, MapClass_CallBuildingPlaceCheck_BaseNormalRecheck, 0x5)
 {
 	return (RulesExt::Global()->CheckUnitBaseNormal && !(Unsorted::CurrentFrame % 8)) ? 0x4A9371 : 0;
@@ -350,8 +350,8 @@ namespace BuildOnOccupiersHelpers
 	bool Mouse = false;
 }
 
-// Buildable-upon TerrainTypes Hook #1 - Allow placing buildings on top of them
-// Buildable-upon TechnoTypes Hook #1 - Allow placing buildings on top of them
+// Buildable-upon TerrainTypes Hook #1 -> sub_47C620 - Allow placing buildings on top of them
+// Buildable-upon TechnoTypes Hook #1 -> sub_47C620 - Allow placing buildings on top of them
 DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 {
 	enum { CanNotExistHere = 0x47C6D1, CanExistHere = 0x47C6A0 };
@@ -547,17 +547,17 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 	return CanExistHere;
 }
 
-// Buildable-upon TechnoTypes Hook #2 - Draw yellow grid if there is only infantries and units on the cell
+// Buildable-upon TechnoTypes Hook #2 -> sub_47EC90 - Draw yellow grid if there is only infantries and units on the cell
 DEFINE_HOOK(0x47EF52, CellClass_DrawPlaceGrid_DrawExtraYellowGrid, 0x6)
 {
 	R->EDI(BuildOnOccupiersHelpers::Exist);
 	return 0;
 }
 
-// Buildable-upon TechnoTypes Hook #3 - Don not draw yellow grid if is placing
+// Buildable-upon TechnoTypes Hook #3 -> sub_47EC90 - Don not draw yellow grid if is placing
 DEFINE_JUMP(LJMP, 0x47EED6, 0x47EFB9);
 
-// Buildable-upon TechnoTypes Hook #4 - Hang up place event if there is only infantries and units on the cell
+// Buildable-upon TechnoTypes Hook #4 -> sub_4FB0E0 - Hang up place event if there is only infantries and units on the cell
 DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 {
 	enum { CanBuild = 0x4FB23C, TemporarilyCanNotBuild = 0x4FB5BA, CanNotBuild = 0x4FB35F };
@@ -678,16 +678,17 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 					if (checkedTechnos.size() <= 0)
 						break;
 
-					// TODO
+					// TODO Start from the farthest techno to search closest valid cell
 					const CellStruct center { topLeftX + foundationWidth / 2 , topLeftY + foundationHeight / 2 };
 					std::sort(&checkedTechnos[0], &checkedTechnos[checkedTechnos.size()],[center](TechnoClass* pTechnoA, TechnoClass* pTechnoB){
 						return pTechnoA->GetMapCoords().DistanceFromSquared(center) > pTechnoB->GetMapCoords().DistanceFromSquared(center);
 					});
 
 					std::vector<CellClass*> checkedCells;
-					checkedCells.reserve(32);
+					checkedCells.reserve(16);
 					std::vector<TechnoClass*> reCheckedTechnos;
 					reCheckedTechnos.reserve(16);
+
 					struct TechnoWithDestination
 					{
 						TechnoClass* techno;
@@ -696,7 +697,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 					std::vector<TechnoWithDestination> finalOrder;
 					finalOrder.reserve(32);
 
-					do
+					do // TODO One cell for 3 infantries
 					{
 						for (auto const& pRecheckedTechno : reCheckedTechnos)
 							checkedTechnos.push_back(pRecheckedTechno);
@@ -875,7 +876,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 	return CanNotBuild;
 }
 
-// Buildable-upon TechnoTypes Hook #5 - Check whether need to skip the replace command
+// Buildable-upon TechnoTypes Hook #5 -> sub_4FB0E0 - Check whether need to skip the replace command
 DEFINE_HOOK(0x4FB395, HouseClass_UnitFromFactory_SkipMouseReturn, 0x6)
 {
 	if (!RulesExt::Global()->ExpandBuildingPlace)
@@ -891,7 +892,7 @@ DEFINE_HOOK(0x4FB395, HouseClass_UnitFromFactory_SkipMouseReturn, 0x6)
 	return 0x4FB489;
 }
 
-// Buildable-upon TechnoTypes Hook #6 - Restart timer, reset AltFlags and clear buffer when mouse click
+// Buildable-upon TechnoTypes Hook #6 -> sub_4FB840 - Restart timer, reset AltFlags and clear buffer when mouse click
 DEFINE_HOOK(0x4FB87C, HouseClass_BuildingCameoClick_StopLastEvent, 0x7)
 {
 	HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer);
@@ -910,7 +911,7 @@ DEFINE_HOOK(0x4FB87C, HouseClass_BuildingCameoClick_StopLastEvent, 0x7)
 	return 0;
 }
 
-// Buildable-upon TechnoTypes Hook #7 - Check whether can place again in each house
+// Buildable-upon TechnoTypes Hook #7 -> sub_4F8440 - Check whether can place again in each house
 DEFINE_HOOK(0x4F8F87, HouseClass_AI_HangUpBuildingCheck, 0x6)
 {
 	GET(HouseClass*, pHouse, ESI);
@@ -937,28 +938,28 @@ DEFINE_HOOK(0x4F8F87, HouseClass_AI_HangUpBuildingCheck, 0x6)
 }
 
 // Laser fence use GetBuilding to check whether can build and draw, so no need to change
-// Buildable-upon TechnoTypes Hook #9-1 - Don't draw overlay wall grid when have occupiers
+// Buildable-upon TechnoTypes Hook #9-1 -> sub_6D5C50 - Don't draw overlay wall grid when have occupiers
 DEFINE_HOOK(0x6D5D38, TacticalClass_DrawOverlayWallGrid_DisableWhenHaveTechnos, 0x8)
 {
 	GET(bool, valid, EAX);
 	return (!valid || BuildOnOccupiersHelpers::Exist) ? 0x6D5F0F : 0x6D5D40;
 }
 
-// Buildable-upon TechnoTypes Hook #9-2 - Don't draw firestorm wall grid when have occupiers
+// Buildable-upon TechnoTypes Hook #9-2 -> sub_6D59D0 - Don't draw firestorm wall grid when have occupiers
 DEFINE_HOOK(0x6D5A9D, TacticalClass_DrawFirestormWallGrid_DisableWhenHaveTechnos, 0x8)
 {
 	GET(bool, valid, EAX);
 	return (!valid || BuildOnOccupiersHelpers::Exist) ? 0x6D5C2F : 0x6D5AA5;
 }
 
-// Buildable-upon TechnoTypes Hook #9-3 - Don't place overlay wall grid when have occupiers
+// Buildable-upon TechnoTypes Hook #9-3 -> sub_588750 - Don't place overlay wall when have occupiers
 DEFINE_HOOK(0x588873, MapClass_BuildingToWall_DisableWhenHaveTechnos, 0x8)
 {
 	GET(bool, valid, EAX);
 	return (!valid || BuildOnOccupiersHelpers::Exist) ? 0x588935 : 0x58887B;
 }
 
-// Buildable-upon TechnoTypes Hook #9-4 - Don't place firestorm wall grid when have occupiers
+// Buildable-upon TechnoTypes Hook #9-4 -> sub_588570 - Don't place firestorm wall when have occupiers
 DEFINE_HOOK(0x588664, MapClass_BuildingToFirestormWall_DisableWhenHaveTechnos, 0x8)
 {
 	GET(bool, valid, EAX);
