@@ -611,6 +611,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 			{
 				while (!(pHouseExt->CurrentBuildingTimes % 5)) // Force occupiers leave
 				{
+					// Step 1: Find the cells around the building.
 					std::vector<CellClass*> optionalCells;
 					optionalCells.reserve(32);
 					CellStruct surroundCell { topLeftX - 1, topLeftY - 1 };
@@ -634,12 +635,13 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 						}
 					}
 
-					if (optionalCells.size() <= 0)
+					if (optionalCells.size() <= 0) // There is no place for scattering
 					{
 						pHouseExt->CurrentBuildingTimes = 1;
 						break;
 					}
 
+					// Step 2: Find the technos inside of the building place grid.
 					std::vector<TechnoClass*> checkedTechnos;
 					checkedTechnos.reserve(32);
 
@@ -661,12 +663,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 										auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pCellTechno->GetTechnoType());
 
 										if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
-										{
-											const Mission technoMission = pCellTechno->GetCurrentMission();
-
-											if (technoMission != Mission::Move && technoMission != Mission::AttackMove)
-												checkedTechnos.push_back(pCellTechno);
-										}
+											checkedTechnos.push_back(pCellTechno);
 									}
 
 									pObject = pObject->NextObject;
@@ -675,14 +672,11 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 						}
 					}
 
-					if (checkedTechnos.size() <= 0)
-						break;
-
-					// TODO Start from the farthest techno to search closest valid cell
+					// Step 3: Core, successively find the farthest techno and its closest valid destination.
 					const CellStruct center { topLeftX + foundationWidth / 2 , topLeftY + foundationHeight / 2 };
 					std::sort(&checkedTechnos[0], &checkedTechnos[checkedTechnos.size()],[center](TechnoClass* pTechnoA, TechnoClass* pTechnoB){
 						return pTechnoA->GetMapCoords().DistanceFromSquared(center) > pTechnoB->GetMapCoords().DistanceFromSquared(center);
-					});
+					}); // TODO Start from the farthest techno
 
 					std::vector<CellClass*> checkedCells;
 					checkedCells.reserve(16);
@@ -699,22 +693,27 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 
 					do // TODO One cell for 3 infantries
 					{
+						// Step 3.1: Push the technos discovered just now back to the vector.
 						for (auto const& pRecheckedTechno : reCheckedTechnos)
 							checkedTechnos.push_back(pRecheckedTechno);
 
 						reCheckedTechnos.clear();
 
+						// Step 3.2: Check the vector.
 						for (auto const& pCheckedTechno : checkedTechnos)
 						{
+							// Step 3.2.1: Sort cells by distance from it.
 							const CellStruct location = pCheckedTechno->GetMapCoords();
 							std::sort(&optionalCells[0], &optionalCells[optionalCells.size()],[location](CellClass* pCellA, CellClass* pCellB){
 								return pCellA->MapCoords.DistanceFromSquared(location) < pCellB->MapCoords.DistanceFromSquared(location);
 							});
 
+							TechnoTypeClass* const pCheckedType = pCheckedTechno->GetTechnoType();
 							CellClass* pDestinationCell = nullptr;
 							std::vector<CellClass*> deleteCells;
 							deleteCells.reserve(8);
 
+							// Step 3.2.2: Check if this cell can be a valid destination, and push the technos on this valid cell back to the vector.
 							for (auto const& pOptionalCell : optionalCells)
 							{
 								ObjectClass* pCurObject = pOptionalCell->FirstObject;
@@ -730,7 +729,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 									{
 										TechnoClass* const pCurTechno = static_cast<TechnoClass*>(pCurObject);
 
-										if (pCurTechno->Owner != pHouse)
+										if (pCurTechno->Owner != pHouse) // Means invalid for all
 										{
 											deleteCells.push_back(pOptionalCell);
 											valid = false;
@@ -743,7 +742,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 									pCurObject = pCurObject->NextObject;
 								}
 
-								if (valid)
+								if (valid && pOptionalCell->IsClearToMove(pCheckedType->SpeedType, true, true, -1, pCheckedType->MovementZone, -1, false))
 								{
 									for (auto const& pOptionalTechno : optionalTechnos)
 										reCheckedTechnos.push_back(pOptionalTechno);
@@ -753,6 +752,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 								}
 							}
 
+							// Step 3.2.3: Mark the invalid cells, and erase them from the vector.
 							for (auto const& pDeleteCell : deleteCells)
 							{
 								checkedCells.push_back(pDeleteCell);
@@ -760,6 +760,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 								optionalCells.erase(std::remove(optionalCells.begin(), optionalCells.end(), pDeleteCell), optionalCells.end());
 							}
 
+							// Step 3.2.4: Mark the valid cell, and push its surrounded cells into vector.
 							if (pDestinationCell)
 							{
 								checkedCells.push_back(pDestinationCell);
@@ -774,8 +775,11 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 									{
 										if (CellClass* const pSearchCell = MapClass::Instance->GetCellAt(searchCell))
 										{
-											if (!(pSearchCell->AltFlags & AltCellFlags::Unknown_4) && pSearchCell->IsClearToMove(SpeedType::Amphibious, true, true, -1, MovementZone::Amphibious, -1, false))
+											if (!(pSearchCell->AltFlags & AltCellFlags::Unknown_4) && pSearchCell->IsClearToMove(SpeedType::Amphibious, true, true, -1, MovementZone::Amphibious, -1, false)
+												&& std::find(optionalCells.begin(), optionalCells.end(), pSearchCell) == optionalCells.end())
+											{
 												optionalCells.push_back(pSearchCell);
+											}
 										}
 
 										if (i % 2)
@@ -788,13 +792,14 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 								const TechnoWithDestination thisOrder { pCheckedTechno, pDestinationCell };
 								finalOrder.push_back(thisOrder);
 							}
-							else
+							else // Can not build
 							{
 								pHouseExt->CurrentBuildingTimes = 1;
 								break;
 							}
 						}
 
+						// Step 3.3: Prepare for next time.
 						checkedTechnos.clear();
 					}
 					while (reCheckedTechnos.size());
@@ -802,10 +807,11 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 					for (auto const& pCheckedCell : checkedCells) // Restore cell flag
 						pCheckedCell->AltFlags &= ~AltCellFlags::Unknown_4;
 
-					if (pHouseExt->CurrentBuildingTimes == 1)
+					if (pHouseExt->CurrentBuildingTimes == 1) // If there is someone cannot find any valid destination, no need to execute command any more
 						break;
 
-					for (auto const& pThisOrder : finalOrder) // Confirm command
+					// Step 4: Confirm command execution.
+					for (auto const& pThisOrder : finalOrder)
 					{
 						TechnoClass* const pCheckedTechno = pThisOrder.techno;
 						CellClass* const pDestinationCell = pThisOrder.destination;
@@ -903,6 +909,8 @@ DEFINE_HOOK(0x4FB87C, HouseClass_BuildingCameoClick_StopLastEvent, 0x7)
 		pHouseExt->CurrentBuildingTopLeft = CellStruct::Empty;
 		pHouseExt->CurrentBuildingTimes = 20;
 		pHouseExt->CurrentBuildingTimer.Stop();
+
+		// Reset AltFlags
 		reinterpret_cast<void(__thiscall*)(DisplayClass*, CellStruct)>(0x4A8D50)(DisplayClass::Instance, CellStruct::Empty);
 		DisplayClass::Instance->unknown_1190 = 0;
 		DisplayClass::Instance->unknown_1194 = 0;
