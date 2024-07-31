@@ -51,6 +51,7 @@ public:
 		int UnitIdleTurretROT; // If TypeExt get the Ares TurretROT, this can be replaced
 		CDTimerClass UnitIdleActionTimer;
 		CDTimerClass UnitIdleActionGapTimer;
+		CDTimerClass UnitAutoDeployTimer;
 		WeaponTypeClass* LastWeaponType;
 		CoordStruct LastWeaponFLH;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
@@ -107,6 +108,7 @@ public:
 			, UnitIdleIsSelected { 0 }
 			, UnitIdleActionTimer {}
 			, UnitIdleActionGapTimer {}
+			, UnitAutoDeployTimer {}
 			, LastWeaponType {}
 			, LastWeaponFLH {}
 			, FiringObstacleCell {}

@@ -1,5 +1,6 @@
 #include "Body.h"
 
+#include <TacticalClass.h>
 #include <Ext/Rules/Body.h>
 
 #include <Utilities/Macro.h>
@@ -59,6 +60,92 @@ DEFINE_HOOK(0x458623, BuildingClass_KillOccupiers_Replace_MuzzleFix, 0x7)
 		GET(int, nFiringIndex, EDI);
 		auto pTypeExt = BuildingTypeExt::ExtMap.Find(pType);
 		R->ECX(&pTypeExt->OccupierMuzzleFlashes[nFiringIndex]);
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x6D528A, TacticalClass_DrawPlacement_PlacementPreview, 0x6)
+{
+	auto pRules = RulesExt::Global();
+
+	if (!pRules->PlacementPreview || !Phobos::Config::ShowPlacementPreview)
+		return 0;
+
+	auto pBuilding = specific_cast<BuildingClass*>(DisplayClass::Instance->CurrentBuilding);
+	auto pType = pBuilding ? pBuilding->Type : nullptr;
+	auto pTypeExt = pType ? BuildingTypeExt::ExtMap.Find(pType) : nullptr;
+	bool isShow = pTypeExt && pTypeExt->PlacementPreview;
+
+	if (isShow)
+	{
+		CellClass* pCell = nullptr;
+		{
+			CellStruct nDisplayCell = Make_Global<CellStruct>(0x88095C);
+			CellStruct nDisplayCell_Offset = Make_Global<CellStruct>(0x880960);
+
+			pCell = MapClass::Instance->TryGetCellAt(nDisplayCell + nDisplayCell_Offset);
+			if (!pCell)
+				return 0;
+		}
+
+		int nImageFrame = 0;
+		SHPStruct* pImage = pTypeExt->PlacementPreview_Shape.GetSHP();
+		{
+			if (!pImage)
+			{
+				pImage = pType->LoadBuildup();
+				if (pImage)
+					nImageFrame = ((pImage->Frames / 2) - 1);
+				else
+					pImage = pType->GetImage();
+
+				if (!pImage)
+					return 0;
+			}
+
+			nImageFrame = Math::clamp(pTypeExt->PlacementPreview_ShapeFrame.Get(nImageFrame), 0, (int)pImage->Frames);
+		}
+
+
+			CoordStruct offset = pTypeExt->PlacementPreview_Offset;
+			int nHeight = offset.Z + pCell->GetFloorHeight({ 0, 0 });
+			Point2D nPoint = TacticalClass::Instance->CoordsToClient(
+				CellClass::Cell2Coord(pCell->MapCoords, nHeight)
+			).first;
+			nPoint.X += offset.X;
+			nPoint.Y += offset.Y;
+
+
+		BlitterFlags blitFlags = pTypeExt->PlacementPreview_Translucency.Get(pRules->PlacementPreview_Translucency) |
+			BlitterFlags::Centered | BlitterFlags::Nonzero | BlitterFlags::MultiPass;
+
+		ConvertClass* pPalette = pTypeExt->PlacementPreview_Remap.Get()
+			? pBuilding->GetDrawer()
+			: pTypeExt->PlacementPreview_Palette.GetOrDefaultConvert(FileSystem::UNITx_PAL());
+
+		DSurface* pSurface = DSurface::Temp;
+		RectangleStruct nRect = pSurface->GetRect();
+		nRect.Height -= 32; // account for bottom bar
+
+		CC_Draw_Shape(pSurface, pPalette, pImage, nImageFrame, &nPoint, &nRect, blitFlags,
+			0, 0, ZGradient::Ground, 1000, 0, nullptr, 0, 0, 0);
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x47EFAE, CellClass_Draw_It_SetPlacementGridTranslucency, 0x6)
+{
+	auto pRules = RulesExt::Global();
+	BlitterFlags translucency = (pRules->PlacementPreview && Phobos::Config::ShowPlacementPreview)
+		? pRules->PlacementGrid_TranslucencyWithPreview.Get(pRules->PlacementGrid_Translucency)
+		: pRules->PlacementGrid_Translucency;
+
+	if (translucency != BlitterFlags::None)
+	{
+		LEA_STACK(BlitterFlags*, blitFlags, STACK_OFFSET(0x68, -0x58));
+		*blitFlags |= translucency;
 	}
 
 	return 0;
