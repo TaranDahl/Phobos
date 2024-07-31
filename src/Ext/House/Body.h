@@ -26,6 +26,7 @@ public:
 		std::vector<TechnoExt::ExtData*> OwnedAutoDeathObjects;
 		std::vector<TechnoExt::ExtData*> OwnedTransportReloaders; // Objects that can reload ammo in limbo
 		std::vector<TechnoTypeExt::ExtData*> OwnedExistCameoTechnoTypes;
+		std::vector<UnitClass*> OwnedDeployingUnits;
 
 		CounterClass LimboAircraft;  // Currently owned aircraft in limbo
 		CounterClass LimboBuildings; // Currently owned buildings in limbo
@@ -55,6 +56,7 @@ public:
 			, OwnedAutoDeathObjects {}
 			, OwnedTransportReloaders {}
 			, OwnedExistCameoTechnoTypes {}
+			, OwnedDeployingUnits {}
 			, LimboAircraft {}
 			, LimboBuildings {}
 			, LimboInfantry {}

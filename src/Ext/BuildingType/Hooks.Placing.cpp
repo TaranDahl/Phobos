@@ -189,22 +189,22 @@ When the cell which mouse is pointing at has changed, new command has given or t
 unknown_1181 -> CurrentFoundation_NoShrouded
 When the cell which mouse is pointing at has changed or new command has given
 
-CurrentFoundationCopy_CenterCell -> CurrentFoundation_CenterCell_Buffer
+CurrentFoundationCopy_CenterCell
 When the left mouse button release, move the CurrentFoundation_CenterCell to here and clear the CurrentFoundation_CenterCell, and move itself back to CurrentFoundation_CenterCell if place failed
 
-CurrentFoundationCopy_TopLeftOffset -> CurrentFoundation_TopLeftOffset_Buffer
+CurrentFoundationCopy_TopLeftOffset
 When the left mouse button release, move the CurrentFoundation_TopLeftOffset to here and clear the CurrentFoundation_TopLeftOffset, and move itself back to CurrentFoundation_TopLeftOffset if place failed
 
-CurrentFoundationCopy_Data -> CurrentFoundation_Data_Buffer
-When the left mouse button release, move the CurrentFoundation_Data to here and clear the CurrentFoundation_Data, and move itself back to CurrentFoundation_Data if place failed, otherwise clear itself
+CurrentFoundationCopy_Data
+When the left mouse button release, move the CurrentFoundation_Data to here and clear the CurrentFoundation_Data, and move itself back to CurrentFoundation_Data if place failed
 
 unknown_1190 -> CurrentBuilding_Buffer
-When the left mouse button release, move the CurrentBuilding to here and clear the CurrentBuilding, and move itself back to CurrentBuilding if place failed, otherwise clear itself
+When the left mouse button release, move the CurrentBuilding to here and clear the CurrentBuilding, and move itself back to CurrentBuilding if place failed, otherwise it will clear itself
 
 unknown_1194 -> CurrentBuildingType_Buffer
-When the left mouse button release, move the CurrentBuildingType to here and clear the CurrentBuildingType, and move itself back to CurrentBuildingType if place failed, otherwise clear itself
+When the left mouse button release, move the CurrentBuildingType to here and clear the CurrentBuildingType, and move itself back to CurrentBuildingType if place failed, otherwise it will clear itself
 
-unknown_1198 -> CurrentBuildingTypeArrayIndex_Buffer
+unknown_1198 -> CurrentBuildingTypeArrayIndexCopy
 When the left mouse button release, move the unknown_11AC to here and clear the unknown_11AC, and move itself back to unknown_11AC if place failed
 
 unknown_11AC -> CurrentBuildingTypeArrayIndex
@@ -618,6 +618,9 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 				{
 					pHouseExt->CurrentBuilding = pBuilding;
 					pHouseExt->CurrentBuildingTopLeft = cell;
+
+					DisplayClass::Instance->unknown_1190 = 0;
+					DisplayClass::Instance->unknown_1194 = 0; // To solve the game crash at EIP:6D5529 when read saved game
 				}
 				else // Continue
 				{
@@ -627,8 +630,6 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 				if (pHouseExt->CurrentBuildingTimes > 0)
 				{
 					pHouseExt->CurrentBuildingTimer.Start(8);
-					DisplayClass::Instance->unknown_1190 = 0;
-					DisplayClass::Instance->unknown_1194 = 0; // Solve the read saved game error EIP:6D5529
 					return TemporarilyCanNotBuild;
 				} // Time out
 
@@ -711,6 +712,19 @@ DEFINE_HOOK(0x4F8F87, HouseClass_AI_HangUpBuildingCheck, 0x6)
 			);
 			EventClass::AddEvent(event);
 		}
+
+		if (!(Unsorted::CurrentFrame % 8) && pHouseExt->OwnedDeployingUnits.size() > 0)
+		{
+			auto& vec = pHouseExt->OwnedDeployingUnits;
+
+			for (auto const& pUnit : pHouseExt->OwnedDeployingUnits)
+			{
+				if (!pUnit || pUnit->Destination || pUnit->GetCurrentMission() != Mission::Guard)
+					vec.erase(std::remove(vec.begin(), vec.end(), pUnit), vec.end());
+				else
+					pUnit->Deploy();
+			}
+		}
 	}
 
 	return 0;
@@ -748,15 +762,17 @@ DEFINE_HOOK(0x588664, MapClass_BuildingToFirestormWall_DisableWhenHaveTechnos, 0
 // Buildable-upon TechnoTypes Hook #10-1 -> sub_7393C0 - Try to clean up the building space when is deploying
 DEFINE_HOOK(0x7394BE, UnitClass_TryToDeploy_CleanUpDeploySpace, 0x6)
 {
-	if (!RulesExt::Global()->ExpandBuildingPlace)
-		return 0;
-
 	enum { CanBuild = 0x73958A, TemporarilyCanNotBuild = 0x73950F, CanNotBuild = 0x7394E0 };
 
 	GET(UnitClass*, pUnit, EBP);
 	GET_STACK(CellStruct, cell, STACK_OFFSET(0x28, -0x14));
 
+	if (!RulesExt::Global()->ExpandBuildingPlace || !pUnit->Owner || !pUnit->Owner->IsControlledByHuman())
+		return 0;
+
 	BuildingTypeClass* const pBuildingType = pUnit->Type->DeploysInto;
+	HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pUnit->Owner);
+	auto& vec = pHouseExt->OwnedDeployingUnits;
 
 	if (!pBuildingType->PlaceAnywhere)
 	{
@@ -790,37 +806,52 @@ DEFINE_HOOK(0x7394BE, UnitClass_TryToDeploy_CleanUpDeploySpace, 0x6)
 
 		if (!canBuild)
 		{
+			if (vec.size() > 0)
+				vec.erase(std::remove(vec.begin(), vec.end(), pUnit), vec.end());
+
 			return CanNotBuild;
 		}
 		else if (!noOccupy)
 		{
-			const CellStruct topLeftCell {topLeftX, topLeftY};
-			const CellStruct foundationCell {foundationWidth, foundationHeight};
+			if (!(Unsorted::CurrentFrame % 40))
+			{
+				const CellStruct topLeftCell {topLeftX, topLeftY};
+				const CellStruct foundationCell {foundationWidth, foundationHeight};
 
-			for (auto const& pCheckedCell : checkedCells)
-				pCheckedCell->AltFlags |= AltCellFlags::Unknown_4;
+				for (auto const& pCheckedCell : checkedCells) // Set AltFlags seem like it is in placing
+					pCheckedCell->AltFlags |= AltCellFlags::Unknown_4;
 
-			BuildingTypeExt::CleanUpBuildingSpace(topLeftCell, foundationCell, pUnit->Owner, pUnit);
+				const bool noWay = BuildingTypeExt::CleanUpBuildingSpace(topLeftCell, foundationCell, pUnit->Owner, pUnit);
 
-			for (auto const& pCheckedCell : checkedCells)
-				pCheckedCell->AltFlags &= ~AltCellFlags::Unknown_4;
+				for (auto const& pCheckedCell : checkedCells) // Restore AltFlags
+					pCheckedCell->AltFlags &= ~AltCellFlags::Unknown_4;
 
-			// TODO Redeploy
+				if (noWay)
+				{
+					if (vec.size() > 0)
+						vec.erase(std::remove(vec.begin(), vec.end(), pUnit), vec.end());
 
-			return CanNotBuild;
+					return CanNotBuild;
+				}
+			}
+
+			if (vec.size() == 0 || std::find(vec.begin(), vec.end(), pUnit) == vec.end())
+				vec.push_back(pUnit);
+
+			return TemporarilyCanNotBuild;
 		}
 	}
+
+	if (vec.size() > 0)
+		vec.erase(std::remove(vec.begin(), vec.end(), pUnit), vec.end());
 
 	return CanBuild;
 }
 
-// Buildable-upon TechnoTypes Hook #10-2 -> sub_7393C0 - Skip vanilla scatter shit when is deploying
-DEFINE_JUMP(LJMP, 0x73950F, 0x73953B);
-
-// Buildable-upon TechnoTypes Hook #10-3 -> sub_73FD50 - Push the owner house into deploy check
-DEFINE_HOOK(0x73FF8F, UnitClass_WhatAction_ShowDeployCursor, 0x6)
+// Buildable-upon TechnoTypes Hook #10-2 -> sub_73FD50 - Push the owner house into deploy check
+DEFINE_HOOK(0x73FF8F, UnitClass_MouseOverObject_ShowDeployCursor, 0x6)
 {
-	if (RulesExt::Global()->ExpandBuildingPlace)
+	if (RulesExt::Global()->ExpandBuildingPlace) // This check is not so useful
 	{
 		GET(UnitClass*, pUnit, ESI);
 		LEA_STACK(HouseClass**, pHousePtr, STACK_OFFSET(0x20, -0x20));

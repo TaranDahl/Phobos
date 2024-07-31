@@ -298,7 +298,7 @@ bool BuildingTypeExt::CleanUpBuildingSpace(CellStruct topLeftCell, CellStruct fo
 	}
 	while (reCheckedTechnos.size());
 
-	for (auto const& pCheckedCell : checkedCells) // Restore cell flag
+	for (auto const& pCheckedCell : checkedCells) // Restore AltFlags
 		pCheckedCell->AltFlags &= ~AltCellFlags::Unknown_4;
 
 	// Step 4: Confirm command execution.
