@@ -17,54 +17,80 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	GET(TechnoClass*, pThis, ECX);
 	LEA_STACK(args_ReceiveDamage*, args, 0x4);
 
-	if (!*args->Damage || args->IgnoreDefenses)
-		return 0;
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+	int nDamageLeft = *args->Damage;
 
-	//Calculate Damage Multiplier
-	if (const auto pHouse = pThis->Owner)
+	if (!args->IgnoreDefenses)
 	{
-		const auto pWHExt = WarheadTypeExt::ExtMap.Find(args->WH);
-		const int sgnDamage = *args->Damage > 0 ? 1 : -1;
-		int calculateDamage = *args->Damage;
+		//Calculate Damage Multiplier
+		if (const auto pHouse = pThis->Owner)
+		{
+			const auto pWHExt = WarheadTypeExt::ExtMap.Find(args->WH);
+			const int sgnDamage = nDamageLeft > 0 ? 1 : -1;
 
-		if (pHouse == args->SourceHouse)
-		{
-			if (pWHExt->DamageOwnerMultiplier != 1.0)
-				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageOwnerMultiplier.Get(RulesExt::Global()->DamageOwnerMultiplier));
-		}
-		else if (pHouse->IsAlliedWith(args->SourceHouse))
-		{
-			if (pWHExt->DamageAlliesMultiplier != 1.0)
-				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageAlliesMultiplier.Get(RulesExt::Global()->DamageAlliesMultiplier));
-		}
-		else
-		{
-			if (pWHExt->DamageEnemiesMultiplier != 1.0)
-				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageEnemiesMultiplier.Get(RulesExt::Global()->DamageEnemiesMultiplier));
+			if (pHouse == args->SourceHouse)
+			{
+				if (pWHExt->DamageOwnerMultiplier != 1.0)
+					nDamageLeft = static_cast<int>(nDamageLeft * pWHExt->DamageOwnerMultiplier.Get(RulesExt::Global()->DamageOwnerMultiplier));
+			}
+			else if (pHouse->IsAlliedWith(args->SourceHouse))
+			{
+				if (pWHExt->DamageAlliesMultiplier != 1.0)
+					nDamageLeft = static_cast<int>(nDamageLeft * pWHExt->DamageAlliesMultiplier.Get(RulesExt::Global()->DamageAlliesMultiplier));
+			}
+			else
+			{
+				if (pWHExt->DamageEnemiesMultiplier != 1.0)
+					nDamageLeft = static_cast<int>(nDamageLeft * pWHExt->DamageEnemiesMultiplier.Get(RulesExt::Global()->DamageEnemiesMultiplier));
+			}
+
+			nDamageLeft = nDamageLeft ? nDamageLeft : sgnDamage;
 		}
 
-		*args->Damage = calculateDamage ? calculateDamage : sgnDamage;
+		//Shield Receive Damage
+		if (const auto pShieldData = pExt->Shield.get())
+		{
+			if (!pShieldData->IsActive())
+				return 0;
+
+			nDamageLeft = pShieldData->ReceiveDamage(args);
+
+			if (nDamageLeft >= 0)
+			{
+				*args->Damage = nDamageLeft;
+
+				if (auto pTag = pThis->AttachedTag)
+					pTag->RaiseEvent((TriggerEvent)PhobosTriggerEvent::ShieldBroken, pThis, CellStruct::Empty);
+			}
+
+			if (nDamageLeft == 0)
+				RD::SkipLowDamageCheck = true;
+		}
 	}
 
-	//Shield Receive Damage
-	const auto pExt = TechnoExt::ExtMap.Find(pThis);
-
-	if (const auto pShieldData = pExt->Shield.get())
+	if (pExt->AE.ReflectDamage && nDamageLeft > 0 && args->Attacker)
 	{
-		if (!pShieldData->IsActive())
-			return 0;
-
-		const int nDamageLeft = pShieldData->ReceiveDamage(args);
-		if (nDamageLeft >= 0)
+		for (auto& attachEffect : pExt->AttachedEffects)
 		{
-			*args->Damage = nDamageLeft;
+			if (!attachEffect->IsActive())
+				continue;
 
-			if (auto pTag = pThis->AttachedTag)
-				pTag->RaiseEvent((TriggerEvent)PhobosTriggerEvent::ShieldBroken, pThis, CellStruct::Empty);
+			auto const pType = attachEffect->GetType();
+
+			if (!pType->ReflectDamage)
+				continue;
+
+			int damage = static_cast<int>(nDamageLeft * pType->ReflectDamage_Multiplier);
+			auto const pWH = pType->ReflectDamage_Warhead.Get(RulesClass::Instance->C4Warhead);
+
+			if (EnumFunctions::CanTargetHouse(pType->ReflectDamage_AffectsHouses, pThis->Owner, args->SourceHouse))
+			{
+				if (pType->ReflectDamage_Warhead_Detonate)
+					WarheadTypeExt::DetonateAt(pWH, args->Attacker, pThis, damage, pThis->Owner);
+				else
+					args->Attacker->ReceiveDamage(&damage, 0, pWH, pThis, false, false, pThis->Owner);
+			}
 		}
-
-		if (nDamageLeft == 0)
-			RD::SkipLowDamageCheck = true;
 	}
 
 	return 0;

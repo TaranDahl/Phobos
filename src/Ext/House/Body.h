@@ -76,8 +76,6 @@ public:
 		{ }
 
 		bool OwnsLimboDeliveredBuilding(BuildingClass* pBuilding);
-		void UpdateAutoDeathObjectsInLimbo();
-		void UpdateTransportReloaders();
 		void AddToLimboTracking(TechnoTypeClass* pTechnoType);
 		void RemoveFromLimboTracking(TechnoTypeClass* pTechnoType);
 		int CountOwnedPresentAndLimboed(TechnoTypeClass* pTechnoType);
