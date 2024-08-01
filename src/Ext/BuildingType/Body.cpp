@@ -418,7 +418,7 @@ bool BuildingTypeExt::CleanUpBuildingSpace(CellStruct topLeftCell, CellStruct fo
 				pInfantry->PlayAnim(Sequence::Undeploy, true);
 
 			pInfantry->SetDestination(pDestinationCell, false);
-			pInfantry->ClickedMission(Mission::Move, nullptr, pDestinationCell, nullptr);
+			pInfantry->QueueMission(Mission::QMove, false);
 		}
 		else if (absType == AbstractType::Unit)
 		{
