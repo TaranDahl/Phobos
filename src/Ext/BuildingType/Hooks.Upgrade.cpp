@@ -138,8 +138,7 @@ DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x5)
 			}
 			else if (std::find(vec.begin(), vec.end(), pTypeExt) != vec.end()) // Not Unbuildable + In the list = remove it from the list and play EVA
 			{
-				vec.erase(std::remove(vec.begin(), vec.end(), pTypeExt), vec.end());
-				SidebarClass::Instance->RepaintSidebar(SidebarClass::Instance->ActiveTabIndex);
+				vec.erase(std::remove(vec.begin(), vec.end(), pTypeExt), vec.end()); // TODO Redraw sidebar
 
 				if (pThis->IsControlledByCurrentPlayer())
 					VoxClass::Play(&Make_Global<const char>(0x83FA64)); // 0x83FA64 -> EVA_NewConstructionOptions
