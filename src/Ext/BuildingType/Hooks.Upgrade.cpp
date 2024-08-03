@@ -94,59 +94,32 @@ DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x5)
 	GET_STACK(bool const, includeInProduction, 0xC);
 	GET(CanBuildResult const, resultOfAres, EAX);
 
-	CanBuildResult canbuild = resultOfAres;
+	CanBuildResult canBuild = resultOfAres;
 
-	if (canbuild == CanBuildResult::Buildable)
+	if (canBuild == CanBuildResult::Buildable)
 	{
 		if (auto const pBuilding = abstract_cast<BuildingTypeClass const* const>(pItem))
 		{
 			if (auto pBuildingExt = BuildingTypeExt::ExtMap.Find(pBuilding))
 			{
 				if (pBuildingExt->PowersUp_Buildings.size() > 0)
-					canbuild = CheckBuildLimit(pThis, pBuilding, includeInProduction);
+					canBuild = CheckBuildLimit(pThis, pBuilding, includeInProduction);
 			}
 		}
 	}
 
-	if (canbuild == CanBuildResult::Buildable)
+	if (canBuild == CanBuildResult::Buildable)
 	{
-		canbuild = HouseExt::BuildLimitGroupCheck(pThis, pItem, buildLimitOnly, includeInProduction);
+		canBuild = HouseExt::BuildLimitGroupCheck(pThis, pItem, buildLimitOnly, includeInProduction);
 
 		if (HouseExt::ReachedBuildLimit(pThis, pItem, true))
-			canbuild = CanBuildResult::TemporarilyUnbuildable;
+			canBuild = CanBuildResult::TemporarilyUnbuildable;
 	}
 
 	if (!buildLimitOnly && includeInProduction && pThis->IsControlledByHuman()) // Any func who want to call CanBuild will change the list, so this must eliminate any unnecessary factors
-	{
-		TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(pItem);
+		canBuild = BuildingTypeExt::CheckAlwaysExistCameo(pThis, pItem, canBuild);
 
-		if (pTypeExt->AlwaysExistTheCameo.Get(RulesExt::Global()->AlwaysExistTheCameo))
-		{
-			auto& vec = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->OwnedExistCameoTechnoTypes;
-
-			if (canbuild == CanBuildResult::Unbuildable) // Unbuildable + Satisfy basic limitations = Change it to TemporarilyUnbuildable
-			{
-				const int techLevel = pItem->TechLevel;
-
-				if (techLevel > 0 && techLevel <= RulesClass::Instance->TechLevel && pThis->CanExpectToBuild(pItem))
-				{
-					if (std::find(vec.begin(), vec.end(), pTypeExt) == vec.end()) // … + Not in the list = Need to add it into list
-						vec.push_back(pTypeExt);
-
-					canbuild = CanBuildResult::TemporarilyUnbuildable;
-				}
-			}
-			else if (std::find(vec.begin(), vec.end(), pTypeExt) != vec.end()) // Not Unbuildable + In the list = remove it from the list and play EVA
-			{
-				vec.erase(std::remove(vec.begin(), vec.end(), pTypeExt), vec.end()); // TODO Redraw sidebar
-
-				if (pThis->IsControlledByCurrentPlayer())
-					VoxClass::Play(&Make_Global<const char>(0x83FA64)); // 0x83FA64 -> EVA_NewConstructionOptions
-			}
-		}
-	}
-
-	R->EAX(canbuild);
+	R->EAX(canBuild);
 	return 0;
 }
 
