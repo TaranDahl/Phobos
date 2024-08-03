@@ -401,19 +401,11 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 		{
 			const AbstractType absType = pObject->WhatAmI();
 
-			if (absType == AbstractType::Aircraft)
+			if (absType == AbstractType::Aircraft || absType == AbstractType::Building)
 			{
-				AircraftClass* const pAircraft = static_cast<AircraftClass*>(pObject);
-				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pAircraft->Type);
-
-				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
-					return CanNotExistHere;
-			}
-			else if (absType == AbstractType::Building)
-			{
-				BuildingClass* const pBuilding = static_cast<BuildingClass*>(pObject);
-				BuildingTypeClass* const pType = pBuilding->Type;
-				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+				TechnoClass* const pTechno = static_cast<TechnoClass*>(pObject);
+				TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
+				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechnoType);
 
 				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
 					return CanNotExistHere;
@@ -476,7 +468,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 		BuildingTypeClass* const pBuildingType = pBuilding->Type;
 		HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pHouse);
 
-		if (!pBuildingType->PlaceAnywhere)
+		if (!pBuildingType->PlaceAnywhere && !pBuildingType->PowersUpBuilding[0])
 		{
 			bool canBuild = true;
 			bool noOccupy = true;
@@ -554,6 +546,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 	if (pTechno->Unlimbo(CoordStruct{ (topLeftCell.X << 8) + 128, (topLeftCell.Y << 8) + 128, 0 }, DirType::North))
 		return CanBuild;
 
+	BuildOnOccupiersHelpers::Mouse = true;
 	return CanNotBuild;
 }
 
@@ -801,7 +794,7 @@ DEFINE_HOOK(0x6D504C, TacticalClass_DrawPlacement_DrawPlacingPreview, 0x6)
 
 					if (pImage)
 					{
-						BlitterFlags blitFlags = TranslucencyLevel(50) | BlitterFlags::Centered | BlitterFlags::Nonzero | BlitterFlags::MultiPass;
+						BlitterFlags blitFlags = TranslucencyLevel(75) | BlitterFlags::Centered | BlitterFlags::Nonzero | BlitterFlags::MultiPass;
 						RectangleStruct rect = DSurface::Temp->GetRect();
 						rect.Height -= 32;
 						Point2D point = TacticalClass::Instance->CoordsToClient(CellClass::Cell2Coord(pCell->MapCoords, (1 + pCell->GetFloorHeight(Point2D::Empty)))).first;
@@ -837,7 +830,7 @@ DEFINE_HOOK(0x6D504C, TacticalClass_DrawPlacement_DrawPlacingPreview, 0x6)
 
 								if (pImage)
 								{
-									BlitterFlags blitFlags = TranslucencyLevel(50) | BlitterFlags::Centered | BlitterFlags::Nonzero | BlitterFlags::MultiPass;
+									BlitterFlags blitFlags = TranslucencyLevel(75) | BlitterFlags::Centered | BlitterFlags::Nonzero | BlitterFlags::MultiPass;
 									RectangleStruct rect = DSurface::Temp->GetRect();
 									rect.Height -= 32;
 									Point2D point = TacticalClass::Instance->CoordsToClient(CellClass::Cell2Coord(pCell->MapCoords, (1 + pCell->GetFloorHeight(Point2D::Empty)))).first;

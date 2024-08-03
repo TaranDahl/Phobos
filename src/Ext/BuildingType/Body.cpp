@@ -1,5 +1,6 @@
 #include "Body.h"
 #include <EventClass.h>
+#include <TunnelLocomotionClass.h>
 #include <Ext/House/Body.h>
 #include <Utilities/GeneralUtils.h>
 #include <Ext/SWType/Body.h>
@@ -517,8 +518,6 @@ bool BuildingTypeExt::CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, Cel
 
 			if (pUnit->Deployed)
 				pUnit->Undeploy();
-
-			// TODO
 
 			pUnit->SetDestination(pDestinationCell, false);
 			pUnit->QueueMission(Mission::Move, false);
