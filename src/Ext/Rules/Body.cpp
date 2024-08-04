@@ -158,6 +158,9 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->CheckUnitBaseNormal.Read(exINI, GameStrings::General, "CheckUnitBaseNormal");
 	this->AlwaysExistTheCameo.Read(exINI, GameStrings::General, "AlwaysExistTheCameo");
 	this->ExpandBuildingPlace.Read(exINI, GameStrings::General, "ExpandBuildingPlace");
+	this->CheckExpandPlaceGrid.Read(exINI, GameStrings::AudioVisual, "CheckExpandPlaceGrid");
+	this->ExpandLandGridFrames.Read(exINI, GameStrings::AudioVisual, "ExpandLandGridFrames");
+	this->ExpandWaterGridFrames.Read(exINI, GameStrings::AudioVisual, "ExpandWaterGridFrames");
 
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
 	this->ForbidParallelAIQueues_Aircraft.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Aircraft");
@@ -352,6 +355,9 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->CheckUnitBaseNormal)
 		.Process(this->AlwaysExistTheCameo)
 		.Process(this->ExpandBuildingPlace)
+		.Process(this->CheckExpandPlaceGrid)
+		.Process(this->ExpandLandGridFrames)
+		.Process(this->ExpandWaterGridFrames)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
 		.Process(this->ForbidParallelAIQueues_Building)

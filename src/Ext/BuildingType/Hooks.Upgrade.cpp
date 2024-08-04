@@ -116,7 +116,7 @@ DEFINE_HOOK(0x4F8361, HouseClass_CanBuild_UpgradesInteraction, 0x5)
 			canBuild = CanBuildResult::TemporarilyUnbuildable;
 	}
 
-	if (!buildLimitOnly && includeInProduction && pThis->IsControlledByHuman()) // Any func who want to call CanBuild will change the list, so this must eliminate any unnecessary factors
+	if (!buildLimitOnly && includeInProduction && pThis->IsControlledByHuman()) // Eliminate any non-producible calls to change the list safely
 		canBuild = BuildingTypeExt::CheckAlwaysExistCameo(pThis, pItem, canBuild);
 
 	R->EAX(canBuild);

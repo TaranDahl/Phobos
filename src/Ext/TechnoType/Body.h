@@ -226,6 +226,7 @@ public:
 		ValueableVector<int> BuildLimitGroup_ExtraLimit_MaxCount;
 		Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
+		Valueable<TechnoTypeClass*> PrerequisiteForCameo;
 		Nullable<bool> AlwaysExistTheCameo;
 		Nullable<bool> UnitIdleRotateTurret;
 		Nullable<bool> UnitIdlePointToMouse;
@@ -461,6 +462,7 @@ public:
 			, BuildLimitGroup_ExtraLimit_MaxCount {}
 			, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
 
+			, PrerequisiteForCameo {}
 			, AlwaysExistTheCameo {}
 			, UnitIdleRotateTurret {}
 			, UnitIdlePointToMouse {}

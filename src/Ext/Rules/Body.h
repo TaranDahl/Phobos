@@ -115,6 +115,9 @@ public:
 		Valueable<bool> CheckUnitBaseNormal;
 		Valueable<bool> AlwaysExistTheCameo;
 		Valueable<bool> ExpandBuildingPlace;
+		Valueable<bool> CheckExpandPlaceGrid;
+		Valueable<Vector3D<int>> ExpandLandGridFrames;
+		Valueable<Vector3D<int>> ExpandWaterGridFrames;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -250,6 +253,9 @@ public:
 			, CheckUnitBaseNormal { false }
 			, AlwaysExistTheCameo { false }
 			, ExpandBuildingPlace { false }
+			, CheckExpandPlaceGrid { false }
+			, ExpandLandGridFrames { { 1, 0, 0 } }
+			, ExpandWaterGridFrames { { 1, 0, 0 } }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }

@@ -125,7 +125,35 @@ CanBuildResult BuildingTypeExt::CheckAlwaysExistCameo(const HouseClass* const pH
 				if (pHouse->InForbiddenHouses(pType))
 					break;
 
-				// TODO
+				TechnoTypeClass* const cameoPrerequisite = pTypeExt->PrerequisiteForCameo;
+
+				if (!cameoPrerequisite)
+				{
+					const int sideIndex = pType->AIBasePlanningSide;
+
+					if (sideIndex != -1 && sideIndex != pHouse->Type->SideIndex)
+						break;
+				}
+				else if (cameoPrerequisite == pType)
+				{
+					break;
+				}
+				else if (!pHouse->CountOwnedAndPresent(cameoPrerequisite))
+				{
+					const int preTechLevel = cameoPrerequisite->TechLevel;
+
+					if (preTechLevel <= 0 || preTechLevel > Game::TechLevel)
+						break;
+
+					if (!pHouse->InOwners(cameoPrerequisite))
+						break;
+
+					if (!pHouse->InRequiredHouses(cameoPrerequisite))
+						break;
+
+					if (pHouse->InForbiddenHouses(cameoPrerequisite))
+						break;
+				}
 
 				if (std::find(vec.begin(), vec.end(), pTypeExt) == vec.end()) // … + Not in the list = Need to add it into list
 				{
@@ -210,7 +238,9 @@ bool BuildingTypeExt::CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, Cel
 
 					if ((!pTypeExt || !pTypeExt->CanBeBuiltOn) && pCellTechno != pExceptTechno) // No need to check house
 					{
-						if (static_cast<FootClass*>(pCellTechno)->GetCurrentSpeed() <= 0)
+						const FootClass* pFoot = static_cast<FootClass*>(pCellTechno);
+
+						if (pFoot->GetCurrentSpeed() <= 0 || (locomotion_cast<TunnelLocomotionClass*>(pFoot->Locomotor) && !pFoot->Locomotor->Is_Moving()))
 						{
 							if (absType == AbstractType::Infantry)
 								++infantryCount.X;
@@ -234,7 +264,7 @@ bool BuildingTypeExt::CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, Cel
 	std::vector<CellClass*> optionalCells;
 	optionalCells.reserve(24);
 
-	for (auto const& pCheckedCell : checkedCells) // TODO Looking forward to better algorithm
+	for (auto const& pCheckedCell : checkedCells)
 	{
 		CellStruct searchCell = pCheckedCell->MapCoords - CellStruct { 1, 1 };
 
@@ -244,7 +274,7 @@ bool BuildingTypeExt::CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, Cel
 			{
 				if (CellClass* const pSearchCell = MapClass::Instance->GetCellAt(searchCell))
 				{
-					if (std::find(checkedCells.begin(), checkedCells.end(), pSearchCell) == checkedCells.end()
+					if (std::find(checkedCells.begin(), checkedCells.end(), pSearchCell) == checkedCells.end() // TODO If there is a cellflag that can be used …
 						&& !pSearchCell->GetBuilding()
 						&& pSearchCell->IsClearToMove(SpeedType::Amphibious, true, true, -1, MovementZone::Amphibious, -1, false))
 					{
@@ -497,9 +527,6 @@ bool BuildingTypeExt::CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, Cel
 		TechnoClass* const pCheckedTechno = pThisOrder.techno;
 		CellClass* const pDestinationCell = pThisOrder.destination;
 		AbstractType const absType = pCheckedTechno->WhatAmI();
-
-		pCheckedTechno->SetTarget(nullptr);
-		pCheckedTechno->SetDestination(nullptr, false);
 		pCheckedTechno->ForceMission(Mission::Guard);
 
 		if (absType == AbstractType::Infantry)

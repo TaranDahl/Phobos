@@ -27,6 +27,7 @@ public:
 		std::vector<TechnoExt::ExtData*> OwnedTransportReloaders; // Objects that can reload ammo in limbo
 		std::vector<TechnoTypeExt::ExtData*> OwnedExistCameoTechnoTypes;
 		std::vector<UnitClass*> OwnedDeployingUnits;
+		std::vector<CellStruct> BaseNormalCells;
 
 		CounterClass LimboAircraft;  // Currently owned aircraft in limbo
 		CounterClass LimboBuildings; // Currently owned buildings in limbo
@@ -39,7 +40,7 @@ public:
 		BuildingClass* Factory_NavyType;
 		BuildingClass* Factory_AircraftType;
 
-		BuildingClass* CurrentBuilding;
+		BuildingTypeClass* CurrentBuildingType;
 		CellStruct CurrentBuildingTopLeft;
 		CDTimerClass CurrentBuildingTimer;
 		int CurrentBuildingTimes;
@@ -57,6 +58,7 @@ public:
 			, OwnedTransportReloaders {}
 			, OwnedExistCameoTechnoTypes {}
 			, OwnedDeployingUnits {}
+			, BaseNormalCells {}
 			, LimboAircraft {}
 			, LimboBuildings {}
 			, LimboInfantry {}
@@ -66,10 +68,10 @@ public:
 			, Factory_VehicleType { nullptr }
 			, Factory_NavyType { nullptr }
 			, Factory_AircraftType { nullptr }
-			, CurrentBuilding { nullptr }
+			, CurrentBuildingType { nullptr }
 			, CurrentBuildingTopLeft {}
 			, CurrentBuildingTimer {}
-			, CurrentBuildingTimes { 20 }
+			, CurrentBuildingTimes { 0 }
 			, RepairBaseNodes { false,false,false }
 			, LastBuiltNavalVehicleType { -1 }
 			, ProducingNavalUnitTypeIndex { -1 }

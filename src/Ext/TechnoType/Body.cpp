@@ -313,6 +313,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildLimitGroup_ExtraLimit_MaxCount.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxCount");
 	this->BuildLimitGroup_ExtraLimit_MaxNum.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxNum");
 
+	this->PrerequisiteForCameo.Read(exINI, pSection, "PrerequisiteForCameo");
 	this->AlwaysExistTheCameo.Read(exINI, pSection, "AlwaysExistTheCameo");
 	this->UnitIdleRotateTurret.Read(exINI, pSection, "UnitIdleRotateTurret");
 	this->UnitIdlePointToMouse.Read(exINI, pSection, "UnitIdlePointToMouse");
@@ -689,6 +690,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxCount)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxNum)
 
+		.Process(this->PrerequisiteForCameo)
 		.Process(this->AlwaysExistTheCameo)
 		.Process(this->UnitIdleRotateTurret)
 		.Process(this->UnitIdlePointToMouse)
