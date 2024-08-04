@@ -28,7 +28,6 @@ public:
 	public:
 		Valueable<bool> HealthBar_Hide;
 		Valueable<CSFText> UIDescription;
-		Valueable<CSFText> UIExtraDescription;
 		Valueable<bool> LowSelectionPriority;
 		PhobosFixedString<0x20> GroupAs;
 		Valueable<int> RadarJamRadius;
@@ -226,15 +225,16 @@ public:
 		ValueableVector<int> BuildLimitGroup_ExtraLimit_MaxCount;
 		Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
-		Valueable<TechnoTypeClass*> PrerequisiteForCameo;
-		Nullable<bool> AlwaysExistTheCameo;
+		Valueable<bool> LeaveTransportKill;
 		Nullable<bool> UnitIdleRotateTurret;
 		Nullable<bool> UnitIdlePointToMouse;
 		Nullable<bool> RecountBurst;
 		Valueable<bool> CanBeBuiltOn;
 		Valueable<bool> UnitBaseNormal;
 		Valueable<bool> UnitBaseForAllyBuilding;
-		Valueable<bool> LeaveTransportKill;
+		Nullable<bool> AlwaysExistTheCameo;
+		Valueable<TechnoTypeClass*> PrerequisiteForCameo;
+		Valueable<CSFText> UIExtraDescription;
 
 		Nullable<AnimTypeClass*> Wake;
 		Nullable<AnimTypeClass*> Wake_Grapple;
@@ -268,7 +268,6 @@ public:
 		ExtData(TechnoTypeClass* OwnerObject) : Extension<TechnoTypeClass>(OwnerObject)
 			, HealthBar_Hide { false }
 			, UIDescription {}
-			, UIExtraDescription {}
 			, LowSelectionPriority { false }
 			, GroupAs { NONE_STR }
 			, RadarJamRadius { 0 }
@@ -462,15 +461,16 @@ public:
 			, BuildLimitGroup_ExtraLimit_MaxCount {}
 			, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
 
-			, PrerequisiteForCameo {}
-			, AlwaysExistTheCameo {}
+			, LeaveTransportKill { false }
 			, UnitIdleRotateTurret {}
 			, UnitIdlePointToMouse {}
 			, RecountBurst {}
 			, CanBeBuiltOn { false }
 			, UnitBaseNormal { false }
 			, UnitBaseForAllyBuilding { false }
-			, LeaveTransportKill { false }
+			, AlwaysExistTheCameo {}
+			, PrerequisiteForCameo {}
+			, UIExtraDescription {}
 
 			, Wake { }
 			, Wake_Grapple { }

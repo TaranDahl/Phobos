@@ -129,7 +129,6 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->HealthBar_Hide.Read(exINI, pSection, "HealthBar.Hide");
 	this->UIDescription.Read(exINI, pSection, "UIDescription");
-	this->UIExtraDescription.Read(exINI, pSection, "UIExtraDescription");
 	this->LowSelectionPriority.Read(exINI, pSection, "LowSelectionPriority");
 	this->MindControlRangeLimit.Read(exINI, pSection, "MindControlRangeLimit");
 
@@ -313,15 +312,16 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildLimitGroup_ExtraLimit_MaxCount.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxCount");
 	this->BuildLimitGroup_ExtraLimit_MaxNum.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxNum");
 
-	this->PrerequisiteForCameo.Read(exINI, pSection, "PrerequisiteForCameo");
-	this->AlwaysExistTheCameo.Read(exINI, pSection, "AlwaysExistTheCameo");
+	this->LeaveTransportKill.Read(exINI, pSection, "LeaveTransportKill");
 	this->UnitIdleRotateTurret.Read(exINI, pSection, "UnitIdleRotateTurret");
 	this->UnitIdlePointToMouse.Read(exINI, pSection, "UnitIdlePointToMouse");
 	this->RecountBurst.Read(exINI, pSection, "RecountBurst");
 	this->CanBeBuiltOn.Read(exINI, pSection, "CanBeBuiltOn");
 	this->UnitBaseNormal.Read(exINI, pSection, "UnitBaseNormal");
+	this->AlwaysExistTheCameo.Read(exINI, pSection, "AlwaysExistTheCameo");
+	this->PrerequisiteForCameo.Read(exINI, pSection, "PrerequisiteForCameo");
 	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
-	this->LeaveTransportKill.Read(exINI, pSection, "LeaveTransportKill");
+	this->UIExtraDescription.Read(exINI, pSection, "UIExtraDescription");
 
 	this->Wake.Read(exINI, pSection, "Wake");
 	this->Wake_Grapple.Read(exINI, pSection, "Wake.Grapple");
@@ -492,7 +492,6 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 	Stm
 		.Process(this->HealthBar_Hide)
 		.Process(this->UIDescription)
-		.Process(this->UIExtraDescription)
 		.Process(this->LowSelectionPriority)
 		.Process(this->MindControlRangeLimit)
 
@@ -690,15 +689,16 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxCount)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxNum)
 
-		.Process(this->PrerequisiteForCameo)
-		.Process(this->AlwaysExistTheCameo)
+		.Process(this->LeaveTransportKill)
 		.Process(this->UnitIdleRotateTurret)
 		.Process(this->UnitIdlePointToMouse)
 		.Process(this->RecountBurst)
 		.Process(this->CanBeBuiltOn)
 		.Process(this->UnitBaseNormal)
 		.Process(this->UnitBaseForAllyBuilding)
-		.Process(this->LeaveTransportKill)
+		.Process(this->AlwaysExistTheCameo)
+		.Process(this->PrerequisiteForCameo)
+		.Process(this->UIExtraDescription)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)
