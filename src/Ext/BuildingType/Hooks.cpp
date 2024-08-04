@@ -2,7 +2,6 @@
 
 #include <TacticalClass.h>
 #include <Ext/Rules/Body.h>
-#include <Ext/House/Body.h>
 
 #include <Utilities/Macro.h>
 #include <Utilities/EnumFunctions.h>
