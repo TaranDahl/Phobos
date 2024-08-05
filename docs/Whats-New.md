@@ -425,7 +425,7 @@ New:
 - Extra warhead multiplier for different houses (by CrimRecya)
 - Units Rotate Turret When in Idle Action (by CrimRecya)
 - Jumpjet climbing logic enhancement (by CrimRecya)
-- Building placing and deploying logic enhancement (by CrimRecya)
+- Building placing and deploying logic enhancement, unit base normal, new placing grids and grey cameo preview (by CrimRecya)
 - Force shield effect sync on deploy & vs. organic targets effect customization to complement the Iron Curtain ones (by Starkku)
 - Map trigger action 41 (Play animation at waypoint) now uses additional parameter to determine if animation can play sound, deal damage etc. (by Starkku)
 - Allow restricting how many times per frame a single radiation site can damage a building (by Starkku)

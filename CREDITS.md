@@ -358,7 +358,7 @@ This page lists all the individual contributions to the project by their author.
   - Extra warhead multiplier for different houses
   - Units Rotate Turret When in Idle Action
   - Jumpjet climbing logic enhancement
-  - Building placing and deploying logic enhancement
+  - Building placing and deploying logic enhancement, unit base normal, new placing grids and grey cameo preview
 - **handama** - AI script action to jump back to previous script
 - **Ares developers**
   - YRpp and Syringe which are used, save/load, project foundation and generally useful code from Ares
