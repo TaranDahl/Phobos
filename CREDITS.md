@@ -357,7 +357,8 @@ This page lists all the individual contributions to the project by their author.
   - Display factories, superweapons and iron curtain progress on specific technos
   - Extra warhead multiplier for different houses
   - Units Rotate Turret When in Idle Action
-  - Jumpjet Climbing Logic Enhancement
+  - Jumpjet climbing logic enhancement
+  - Building placing and deploying logic enhancement
 - **handama** - AI script action to jump back to previous script
 - **Ares developers**
   - YRpp and Syringe which are used, save/load, project foundation and generally useful code from Ares
