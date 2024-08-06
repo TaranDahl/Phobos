@@ -17,44 +17,46 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	GET(TechnoClass*, pThis, ECX);
 	LEA_STACK(args_ReceiveDamage*, args, 0x4);
 
-	const auto pExt = TechnoExt::ExtMap.Find(pThis);
-	int nDamageLeft = *args->Damage;
+	if (!*args->Damage || args->IgnoreDefenses)
+		return 0;
 
-	if (!args->IgnoreDefenses)
+	//Calculate Damage Multiplier
+	if (const auto pHouse = pThis->Owner)
 	{
-		//Calculate Damage Multiplier
-		if (const auto pHouse = pThis->Owner)
+		const auto pWHExt = WarheadTypeExt::ExtMap.Find(args->WH);
+		const int sgnDamage = *args->Damage > 0 ? 1 : -1;
+		int calculateDamage = *args->Damage;
+
+		if (pHouse == args->SourceHouse)
 		{
-			const auto pWHExt = WarheadTypeExt::ExtMap.Find(args->WH);
-			const int sgnDamage = nDamageLeft > 0 ? 1 : -1;
-
-			if (pHouse == args->SourceHouse)
-			{
-				if (pWHExt->DamageOwnerMultiplier != 1.0)
-					nDamageLeft = static_cast<int>(nDamageLeft * pWHExt->DamageOwnerMultiplier.Get(RulesExt::Global()->DamageOwnerMultiplier));
-			}
-			else if (pHouse->IsAlliedWith(args->SourceHouse))
-			{
-				if (pWHExt->DamageAlliesMultiplier != 1.0)
-					nDamageLeft = static_cast<int>(nDamageLeft * pWHExt->DamageAlliesMultiplier.Get(RulesExt::Global()->DamageAlliesMultiplier));
-			}
-			else
-			{
-				if (pWHExt->DamageEnemiesMultiplier != 1.0)
-					nDamageLeft = static_cast<int>(nDamageLeft * pWHExt->DamageEnemiesMultiplier.Get(RulesExt::Global()->DamageEnemiesMultiplier));
-			}
-
-			nDamageLeft = nDamageLeft ? nDamageLeft : sgnDamage;
+			if (pWHExt->DamageOwnerMultiplier != 1.0)
+				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageOwnerMultiplier.Get(RulesExt::Global()->DamageOwnerMultiplier));
+		}
+		else if (pHouse->IsAlliedWith(args->SourceHouse))
+		{
+			if (pWHExt->DamageAlliesMultiplier != 1.0)
+				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageAlliesMultiplier.Get(RulesExt::Global()->DamageAlliesMultiplier));
+		}
+		else
+		{
+			if (pWHExt->DamageEnemiesMultiplier != 1.0)
+				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageEnemiesMultiplier.Get(RulesExt::Global()->DamageEnemiesMultiplier));
 		}
 
-		//Shield Receive Damage
+		*args->Damage = calculateDamage ? calculateDamage : sgnDamage;
+	}
+
+	//Shield Receive Damage
+	if (!args->IgnoreDefenses)
+	{
+		const auto pExt = TechnoExt::ExtMap.Find(pThis);
+
 		if (const auto pShieldData = pExt->Shield.get())
 		{
 			if (!pShieldData->IsActive())
 				return 0;
 
-			nDamageLeft = pShieldData->ReceiveDamage(args);
-
+			const int nDamageLeft = pShieldData->ReceiveDamage(args);
 			if (nDamageLeft >= 0)
 			{
 				*args->Damage = nDamageLeft;
