@@ -131,6 +131,8 @@ public:
 		Nullable<double> DamageAlliesMultiplier;
 		Nullable<double> DamageEnemiesMultiplier;
 
+		Nullable<bool> CombatAlert_Suppress;
+
 		ValueableVector<AttachEffectTypeClass*> AttachEffect_AttachTypes;
 		ValueableVector<AttachEffectTypeClass*> AttachEffect_RemoveTypes;
 		std::vector<std::string> AttachEffect_RemoveGroups;
@@ -148,6 +150,7 @@ public:
 		Valueable<bool> AffectsEnemies;
 		Nullable<bool> AffectsOwner;
 		Valueable<bool> EffectsRequireVerses;
+		Valueable<bool> Malicious;
 
 		double Crit_RandomBuffer;
 		double Crit_CurrentChance;
@@ -273,6 +276,8 @@ public:
 			, DamageAlliesMultiplier {}
 			, DamageEnemiesMultiplier {}
 
+			, CombatAlert_Suppress {}
+
 			, AttachEffect_AttachTypes {}
 			, AttachEffect_RemoveTypes {}
 			, AttachEffect_RemoveGroups {}
@@ -288,6 +293,7 @@ public:
 			, AffectsEnemies { true }
 			, AffectsOwner {}
 			, EffectsRequireVerses { true }
+			, Malicious { true }
 
 			, Crit_RandomBuffer { 0.0 }
 			, Crit_CurrentChance { 0.0 }

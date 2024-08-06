@@ -236,6 +236,10 @@ public:
 		Valueable<TechnoTypeClass*> PrerequisiteForCameo;
 		Valueable<CSFText> UIExtraDescription;
 
+		Valueable<bool> CombatAlert;
+		NullableIdx<VoxClass> CombatAlert_EVA;
+		Nullable<bool> CombatAlert_NotBuilding;
+
 		Nullable<AnimTypeClass*> Wake;
 		Nullable<AnimTypeClass*> Wake_Grapple;
 		Nullable<AnimTypeClass*> Wake_Sinking;
@@ -471,6 +475,10 @@ public:
 			, AlwaysExistTheCameo {}
 			, PrerequisiteForCameo {}
 			, UIExtraDescription {}
+
+			, CombatAlert { true }
+			, CombatAlert_EVA {}
+			, CombatAlert_NotBuilding {}
 
 			, Wake { }
 			, Wake_Grapple { }

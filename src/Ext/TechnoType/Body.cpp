@@ -323,6 +323,10 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
 	this->UIExtraDescription.Read(exINI, pSection, "UIExtraDescription");
 
+	this->CombatAlert_EVA.Read(exINI, pSection, "CombatAlert.EVA");
+	this->CombatAlert.Read(exINI, pSection, "CombatAlert");
+	this->CombatAlert_NotBuilding.Read(exINI, pSection, "CombatAlert.NotBuilding");
+
 	this->Wake.Read(exINI, pSection, "Wake");
 	this->Wake_Grapple.Read(exINI, pSection, "Wake.Grapple");
 	this->Wake_Sinking.Read(exINI, pSection, "Wake.Sinking");
@@ -699,6 +703,10 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AlwaysExistTheCameo)
 		.Process(this->PrerequisiteForCameo)
 		.Process(this->UIExtraDescription)
+
+		.Process(this->CombatAlert_EVA)
+		.Process(this->CombatAlert)
+		.Process(this->CombatAlert_NotBuilding)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)

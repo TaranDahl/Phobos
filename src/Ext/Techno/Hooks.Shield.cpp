@@ -6,6 +6,11 @@
 #include <Ext/TechnoType/Body.h>
 #include <Ext/WarheadType/Body.h>
 #include <Ext/TEvent/Body.h>
+#include <VoxClass.h>
+#include <RadarEventClass.h>
+#include <TacticalClass.h>
+#include <Ext/House/Body.h>
+#include <ScenarioClass.h>
 
 namespace RD
 {
@@ -16,6 +21,75 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 {
 	GET(TechnoClass*, pThis, ECX);
 	LEA_STACK(args_ReceiveDamage*, args, 0x4);
+
+	auto const pRules = RulesExt::Global();
+
+	if (pRules->CombatAlert && *args->Damage > 1)
+	{
+		do
+		{
+			const auto pHouse = pThis->Owner;
+
+			if (!pHouse || !pThis->IsOwnedByCurrentPlayer || !pThis->IsInPlayfield)
+				break;
+
+			const auto pSourceHouse = args->SourceHouse;
+
+			if (pRules->CombatAlert_SuppressIfAllyDamage && pHouse->IsAlliedWith(pSourceHouse))
+				break;
+
+			const auto pHouseExt = HouseExt::ExtMap.Find(pHouse);
+
+			if (pHouseExt->CombatAlertTimer.HasTimeLeft())
+				break;
+
+			const auto pWHExt = WarheadTypeExt::ExtMap.Find(args->WH);
+
+			if (pWHExt->CombatAlert_Suppress.Get(!pWHExt->Malicious))
+				break;
+
+			const auto pType = pThis->GetTechnoType();
+			const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+
+			if (!pTypeExt || !pTypeExt->CombatAlert)
+				break;
+
+			const auto pBuilding = pThis->WhatAmI() == AbstractType::Building ? static_cast<BuildingClass*>(pThis) : nullptr;
+
+			if (pRules->CombatAlert_IgnoreBuilding && pBuilding && !pTypeExt->CombatAlert_NotBuilding.Get(pBuilding->Type->IsVehicle()))
+				break;
+
+			const CoordStruct coordInMap = pThis->GetCoords();
+
+			if (pRules->CombatAlert_SuppressIfInScreen)
+			{
+				TacticalClass* const pTactical = TacticalClass::Instance;
+				const Point2D coordInScreen = pTactical->CoordsToScreen(coordInMap) - pTactical->TacticalPos;
+				const RectangleStruct screenArea = DSurface::Composite->GetRect();
+
+				if (screenArea.Width >= coordInScreen.X && screenArea.Height >= coordInScreen.Y && coordInScreen.X >= 0 && coordInScreen.Y >= 0) // check if the unit is in screen
+					break;
+			}
+
+			pHouseExt->CombatAlertTimer.Start(pRules->CombatAlert_Interval);
+			RadarEventClass::Create(RadarEventType::Combat, CellClass::Coord2Cell(coordInMap));
+
+			if (!pRules->CombatAlert_MakeAVoice) // No one want to play two sound at a time, I guess?
+				break;
+			else if (pRules->CombatAlert_UseFeedbackVoice && pType->VoiceFeedback.Count > 0) // Use VoiceFeedback first
+				VocClass::PlayGlobal(pType->VoiceFeedback.GetItem(0), 0x2000, 1.0);
+			else if (pRules->CombatAlert_UseAttackVoice && pType->VoiceAttack.Count > 0) // Use VoiceAttack then
+				VocClass::PlayGlobal(pType->VoiceAttack.GetItem(0), 0x2000, 1.0);
+			else if (!pRules->CombatAlert_UseEVA) // Use Eva finally
+				break;
+
+			const int index = pTypeExt->CombatAlert_EVA.Get(VoxClass::FindIndex((const char*)"EVA_UnitsInCombat"));
+
+			if (index != -1)
+				VoxClass::PlayIndex(index);
+		}
+		while (false);
+	}
 
 	if (!*args->Damage || args->IgnoreDefenses)
 		return 0;
@@ -30,17 +104,17 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 		if (pHouse == args->SourceHouse)
 		{
 			if (pWHExt->DamageOwnerMultiplier != 1.0)
-				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageOwnerMultiplier.Get(RulesExt::Global()->DamageOwnerMultiplier));
+				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageOwnerMultiplier.Get(pRules->DamageOwnerMultiplier));
 		}
 		else if (pHouse->IsAlliedWith(args->SourceHouse))
 		{
 			if (pWHExt->DamageAlliesMultiplier != 1.0)
-				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageAlliesMultiplier.Get(RulesExt::Global()->DamageAlliesMultiplier));
+				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageAlliesMultiplier.Get(pRules->DamageAlliesMultiplier));
 		}
 		else
 		{
 			if (pWHExt->DamageEnemiesMultiplier != 1.0)
-				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageEnemiesMultiplier.Get(RulesExt::Global()->DamageEnemiesMultiplier));
+				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageEnemiesMultiplier.Get(pRules->DamageEnemiesMultiplier));
 		}
 
 		*args->Damage = calculateDamage ? calculateDamage : sgnDamage;

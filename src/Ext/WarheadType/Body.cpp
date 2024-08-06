@@ -239,6 +239,8 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->DamageAlliesMultiplier.Read(exINI, pSection, "DamageAlliesMultiplier");
 	this->DamageEnemiesMultiplier.Read(exINI, pSection, "DamageEnemiesMultiplier");
 
+	this->CombatAlert_Suppress.Read(exINI, pSection, "CombatAlert.Suppress");
+
 	this->AttachEffect_AttachTypes.Read(exINI, pSection, "AttachEffect.AttachTypes");
 	this->AttachEffect_RemoveTypes.Read(exINI, pSection, "AttachEffect.RemoveTypes");
 	exINI.ParseStringList(this->AttachEffect_RemoveGroups, pSection, "AttachEffect.RemoveGroups");
@@ -282,6 +284,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->AffectsEnemies.Read(exINI, pSection, "AffectsEnemies");
 	this->AffectsOwner.Read(exINI, pSection, "AffectsOwner");
 	this->EffectsRequireVerses.Read(exINI, pSection, "EffectsRequireVerses");
+	this->Malicious.Read(exINI, pSection, "Malicious");
 
 	// List all Warheads here that respect CellSpread
 	// Used in WarheadTypeExt::ExtData::Detonate
@@ -444,6 +447,12 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 
 		.Process(this->Convert_Pairs)
 
+		.Process(this->DamageOwnerMultiplier)
+		.Process(this->DamageAlliesMultiplier)
+		.Process(this->DamageEnemiesMultiplier)
+
+		.Process(this->CombatAlert_Suppress)
+
 		.Process(this->AttachEffect_AttachTypes)
 		.Process(this->AttachEffect_RemoveTypes)
 		.Process(this->AttachEffect_RemoveGroups)
@@ -459,14 +468,11 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->InflictLocomotor)
 		.Process(this->RemoveInflictedLocomotor)
 
-		.Process(this->DamageOwnerMultiplier)
-		.Process(this->DamageAlliesMultiplier)
-		.Process(this->DamageEnemiesMultiplier)
-
 		// Ares tags
 		.Process(this->AffectsEnemies)
 		.Process(this->AffectsOwner)
 		.Process(this->EffectsRequireVerses)
+		.Process(this->Malicious)
 
 		.Process(this->WasDetonatedOnAllMapObjects)
 		.Process(this->RemainingAnimCreationInterval)

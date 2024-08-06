@@ -40,6 +40,8 @@ public:
 		BuildingClass* Factory_NavyType;
 		BuildingClass* Factory_AircraftType;
 
+		CDTimerClass CombatAlertTimer;
+
 		BuildingTypeClass* CurrentBuildingType;
 		CellStruct CurrentBuildingTopLeft;
 		CDTimerClass CurrentBuildingTimer;
@@ -72,6 +74,7 @@ public:
 			, CurrentBuildingTopLeft {}
 			, CurrentBuildingTimer {}
 			, CurrentBuildingTimes { 0 }
+			, CombatAlertTimer {}
 			, RepairBaseNodes { false,false,false }
 			, LastBuiltNavalVehicleType { -1 }
 			, ProducingNavalUnitTypeIndex { -1 }
