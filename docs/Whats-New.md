@@ -450,6 +450,8 @@ New:
 - Allow customizing extra tint intensity for Iron Curtain & Force Shield (by Starkku)
 - Option to enable parsing 8-bit RGB values from `[ColorAdd]` instead of RGB565 (by Starkku)
 - Customizing height at which subterranean units travel (by Starkku)
+- Option for Warhead damage to penetrate Iron Curtain or Force Shield (by Starkku)
+- Option for Warhead to remove all shield types at once (by Starkku)
 
 Vanilla fixes:
 - Allow AI to repair structures built from base nodes/trigger action 125/SW delivery in single player missions (by Trsdy)
@@ -517,6 +519,7 @@ Vanilla fixes:
 - Units & buildings with `DecloakToFire=false` weapons can now cloak while targeting & reloading (by Starkku)
 - Units with `Sensors=true` will no longer reveal ally buildings (by Starkku)
 - Air units are now reliably included by target scan with large range and Warhead detonation by large `CellSpread` (by Starkku)
+- Weapons with `AA=true` Projectile can now correctly fire at air units when both firer and target are over a bridge (by Starkku)
 
 Ares fixes:
 - Taking over Ares' AlphaImage respawn logic to reduce lags from it (by NetsuNegi)
