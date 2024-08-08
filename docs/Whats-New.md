@@ -421,7 +421,7 @@ New:
 - Enhanced Straight trajectory (by CrimRecya)
 - New Disperse trajectory (by CrimRecya)
 - New Engrave trajectory (by CrimRecya)
-- Display factories, superweapons and iron curtain progress on specific technos (by CrimRecya)
+- Display factories, superweapons, iron curtain and temporal progress on specific technos (by CrimRecya)
 - Extra warhead multiplier for different houses (by CrimRecya)
 - Units Rotate Turret When in Idle Action (by CrimRecya)
 - Jumpjet climbing logic enhancement (by CrimRecya)

@@ -356,7 +356,7 @@ This page lists all the individual contributions to the project by their author.
   - Enhanced Straight trajectory
   - New Disperse trajectory
   - New Engrave trajectory
-  - Display factories, superweapons and iron curtain progress on specific technos
+  - Display factories, superweapons, iron curtain and temporal progress on specific technos
   - Extra warhead multiplier for different houses
   - Units Rotate Turret When in Idle Action
   - Jumpjet climbing logic enhancement
