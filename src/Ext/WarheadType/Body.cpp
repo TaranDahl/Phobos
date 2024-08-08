@@ -477,6 +477,7 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->WasDetonatedOnAllMapObjects)
 		.Process(this->RemainingAnimCreationInterval)
 		.Process(this->PossibleCellSpreadDetonate)
+		.Process(this->Reflected)
 		;
 }
 

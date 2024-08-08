@@ -187,6 +187,9 @@ public:
 		Valueable<bool> CombatAlert_UseAttackVoice;
 		Valueable<bool> CombatAlert_UseEVA;
 
+		Nullable<Vector3D<float>> VoxelLightSource;
+		// Nullable<Vector3D<float>> VoxelShadowLightSource;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -331,6 +334,8 @@ public:
 			, CombatAlert_UseFeedbackVoice { true }
 			, CombatAlert_UseAttackVoice { true }
 			, CombatAlert_UseEVA { true }
+			, VoxelLightSource { }
+			// , VoxelShadowLightSource { }
 		{ }
 
 		virtual ~ExtData() = default;
@@ -345,6 +350,8 @@ public:
 
 		virtual void LoadFromStream(PhobosStreamReader& Stm) override;
 		virtual void SaveToStream(PhobosStreamWriter& Stm) override;
+
+		void ReplaceVoxelLightSources();
 
 	private:
 		template <typename T>

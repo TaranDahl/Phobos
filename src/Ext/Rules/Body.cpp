@@ -225,6 +225,11 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->CombatAlert_UseAttackVoice.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseAttackVoice");
 	this->CombatAlert_UseEVA.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseEVA");
 
+	this->VoxelLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelLightSource");
+	// this->VoxelShadowLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelShadowLightSource");
+
+	this->ReplaceVoxelLightSources();
+
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
 	for (int i = 0; i < itemsCount; ++i)
@@ -432,6 +437,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->CombatAlert_UseFeedbackVoice)
 		.Process(this->CombatAlert_UseAttackVoice)
 		.Process(this->CombatAlert_UseEVA)
+		.Process(this->VoxelLightSource)
+		// .Process(this->VoxelShadowLightSource)
 		;
 }
 
@@ -439,6 +446,8 @@ void RulesExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
 {
 	Extension<RulesClass>::LoadFromStream(Stm);
 	this->Serialize(Stm);
+
+	this->ReplaceVoxelLightSources();
 }
 
 void RulesExt::ExtData::SaveToStream(PhobosStreamWriter& Stm)
@@ -446,6 +455,32 @@ void RulesExt::ExtData::SaveToStream(PhobosStreamWriter& Stm)
 	Extension<RulesClass>::SaveToStream(Stm);
 	this->Serialize(Stm);
 }
+
+void RulesExt::ExtData::ReplaceVoxelLightSources()
+{
+	bool needCacheFlush = false;
+
+	if (this->VoxelLightSource.isset())
+	{
+		needCacheFlush = true;
+		auto source = this->VoxelLightSource.Get().Normalized();
+		Game::VoxelLightSource = Matrix3D::VoxelDefaultMatrix.get() * source;
+	}
+
+	/*
+	// doesn't really impact anything from my testing - Kerbiter
+	if (this->VoxelShadowLightSource.isset())
+	{
+		needCacheFlush = true;
+		auto source = this->VoxelShadowLightSource.Get().Normalized();
+		Game::VoxelShadowLightSource = Matrix3D::VoxelDefaultMatrix.get() * source;
+	}
+	*/
+
+	if (needCacheFlush)
+		Game::DestroyVoxelCaches();
+}
+
 
 bool RulesExt::LoadGlobals(PhobosStreamReader& Stm)
 {
