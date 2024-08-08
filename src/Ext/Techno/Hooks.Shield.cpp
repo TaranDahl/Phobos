@@ -30,7 +30,7 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 		{
 			const auto pHouse = pThis->Owner;
 
-			if (!pHouse || !pThis->IsOwnedByCurrentPlayer || !pThis->IsInPlayfield)
+			if (!pHouse || (!pThis->IsOwnedByCurrentPlayer && !pHouse->IsInPlayerControl) || !pThis->IsInPlayfield)
 				break;
 
 			const auto pSourceHouse = args->SourceHouse;
@@ -73,6 +73,7 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 
 			pHouseExt->CombatAlertTimer.Start(pRules->CombatAlert_Interval);
 			RadarEventClass::Create(RadarEventType::Combat, CellClass::Coord2Cell(coordInMap));
+			int index = -1;
 
 			if (!pRules->CombatAlert_MakeAVoice) // No one want to play two sound at a time, I guess?
 				break;
@@ -80,10 +81,8 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 				VocClass::PlayGlobal(pType->VoiceFeedback.GetItem(0), 0x2000, 1.0);
 			else if (pRules->CombatAlert_UseAttackVoice && pType->VoiceAttack.Count > 0) // Use VoiceAttack then
 				VocClass::PlayGlobal(pType->VoiceAttack.GetItem(0), 0x2000, 1.0);
-			else if (!pRules->CombatAlert_UseEVA) // Use Eva finally
-				break;
-
-			const int index = pTypeExt->CombatAlert_EVA.Get(VoxClass::FindIndex((const char*)"EVA_UnitsInCombat"));
+			else if (pRules->CombatAlert_UseEVA) // Use Eva finally
+				index = pTypeExt->CombatAlert_EVA.Get(VoxClass::FindIndex((const char*)"EVA_UnitsInCombat"));
 
 			if (index != -1)
 				VoxClass::PlayIndex(index);
