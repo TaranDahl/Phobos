@@ -23,8 +23,6 @@ public:
 	public:
 		std::map<BuildingTypeExt::ExtData*, int> PowerPlantEnhancers;
 		std::vector<BuildingClass*> OwnedLimboDeliveredBuildings;
-		std::vector<TechnoExt::ExtData*> OwnedAutoDeathObjects;
-		std::vector<TechnoExt::ExtData*> OwnedTransportReloaders; // Objects that can reload ammo in limbo
 		std::vector<TechnoTypeExt::ExtData*> OwnedExistCameoTechnoTypes;
 		std::vector<UnitClass*> OwnedDeployingUnits;
 		std::vector<CellStruct> BaseNormalCells;
@@ -56,8 +54,6 @@ public:
 		ExtData(HouseClass* OwnerObject) : Extension<HouseClass>(OwnerObject)
 			, PowerPlantEnhancers {}
 			, OwnedLimboDeliveredBuildings {}
-			, OwnedAutoDeathObjects {}
-			, OwnedTransportReloaders {}
 			, OwnedExistCameoTechnoTypes {}
 			, OwnedDeployingUnits {}
 			, BaseNormalCells {}

@@ -520,8 +520,6 @@ void HouseExt::ExtData::Serialize(T& Stm)
 	Stm
 		.Process(this->PowerPlantEnhancers)
 		.Process(this->OwnedLimboDeliveredBuildings)
-		.Process(this->OwnedAutoDeathObjects)
-		.Process(this->OwnedTransportReloaders)
 		.Process(this->OwnedExistCameoTechnoTypes)
 		.Process(this->OwnedDeployingUnits)
 		.Process(this->BaseNormalCells)
