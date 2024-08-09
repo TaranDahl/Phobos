@@ -2,6 +2,7 @@
 
 #include <BitFont.h>
 
+#include <TunnelLocomotionClass.h>
 #include <Utilities/EnumFunctions.h>
 
 BuildingExt::ExtContainer BuildingExt::ExtMap;
@@ -341,6 +342,47 @@ bool BuildingExt::ExtData::HandleInfiltrate(HouseClass* pInfiltratorHouse,int mo
 	}
 
 	return true;
+}
+
+void BuildingExt::ExtData::KickOutStuckUnits()
+{
+	if (Unsorted::CurrentFrame % 8)
+		return;
+
+	auto const pThis = this->OwnerObject();
+
+	if (!pThis->Factory)
+		return;
+
+	auto const pType = pThis->Type;
+
+	if (pType->Factory != AbstractType::UnitType)
+		return;
+
+	auto const cell = pThis->GetMapCoords();
+
+	for (auto pFoundation = pType->GetFoundationData(true); *pFoundation != CellStruct { 0x7FFF, 0x7FFF }; ++pFoundation)
+	{
+		CellStruct searchCell = cell + *pFoundation;
+
+		if (CellClass* const pCell = MapClass::Instance->GetCellAt(searchCell))
+		{
+			ObjectClass* pObject = pCell->FirstObject;
+
+			while (pObject)
+			{
+				if (pObject->WhatAmI() == AbstractType::Unit)
+				{
+					UnitClass* const pUnit = static_cast<UnitClass*>(pObject);
+
+					if (pUnit->GetCurrentSpeed() <= 0 || (locomotion_cast<TunnelLocomotionClass*>(pUnit->Locomotor) && !pUnit->Locomotor->Is_Moving()))
+						pUnit->SetLocation(pUnit->GetCoords() + CoordStruct{ 256, 0, 0 });
+				}
+
+				pObject = pObject->NextObject;
+			}
+		}
+	}
 }
 
 // =============================
