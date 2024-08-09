@@ -7,8 +7,8 @@
 #include <BulletClass.h>
 #include <Helpers/Macro.h>
 
-#include "BombardTrajectory.h"
 #include "StraightTrajectory.h"
+#include "BombardTrajectory.h"
 #include "DisperseTrajectory.h"
 #include "EngraveTrajectory.h"
 #include "ParabolaTrajectory.h"

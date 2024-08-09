@@ -6,21 +6,18 @@ class TracingTrajectoryType final : public PhobosTrajectoryType
 {
 public:
 	TracingTrajectoryType() : PhobosTrajectoryType(TrajectoryFlag::Tracing)
-		, SourceCoord { { 0, 0 } }
-		, TargetCoord { { 0, 0 } }
-		, MirrorCoord { true }
 		, TheDuration { 0 }
+		, RelockDelay { 20 }
+		, RelockRange { 5.0 }
+		, AddedRange { 5.0 }
+		, NoRelockROF { 0 }
 		, IsLaser { true }
-		, IsSupported { false }
+		, TargetLaser { true }
+		, FinishLaser { true }
 		, IsHouseColor { false }
-		, IsSingleColor { false }
-		, LaserInnerColor { { 0, 0, 0 } }
-		, LaserOuterColor { { 0, 0, 0 } }
-		, LaserOuterSpread { { 0, 0, 0 } }
-		, LaserThickness { 3 }
-		, LaserDuration { 1 }
-		, LaserDelay { 1 }
-		, DamageDelay { 2 }
+		, LaserColor { { 0, 0, 0 } }
+		, BlazeDelay { 20 }
+		, DamageDelay { 5 }
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -28,20 +25,17 @@ public:
 	virtual PhobosTrajectory* CreateInstance() const override;
 	virtual void Read(CCINIClass* const pINI, const char* pSection) override;
 
-	Valueable<Point2D> SourceCoord;
-	Valueable<Point2D> TargetCoord;
-	Valueable<bool> MirrorCoord;
 	Valueable<int> TheDuration;
+	Valueable<int> RelockDelay;
+	Valueable<double> RelockRange;
+	Valueable<double> AddedRange;
+	Valueable<int> NoRelockROF;
 	Valueable<bool> IsLaser;
-	Valueable<bool> IsSupported;
+	Valueable<bool> TargetLaser;
+	Valueable<bool> FinishLaser;
 	Valueable<bool> IsHouseColor;
-	Valueable<bool> IsSingleColor;
-	Valueable<ColorStruct> LaserInnerColor;
-	Valueable<ColorStruct> LaserOuterColor;
-	Valueable<ColorStruct> LaserOuterSpread;
-	Valueable<int> LaserThickness;
-	Valueable<int> LaserDuration;
-	Valueable<int> LaserDelay;
+	Valueable<ColorStruct> LaserColor;
+	Valueable<int> BlazeDelay;
 	Valueable<int> DamageDelay;
 };
 
@@ -49,53 +43,39 @@ class TracingTrajectory final : public PhobosTrajectory
 {
 public:
 	TracingTrajectory() : PhobosTrajectory(TrajectoryFlag::Tracing)
-		, SourceCoord {}
-		, TargetCoord {}
-		, MirrorCoord { true }
 		, TheDuration { 0 }
+		, RelockDelay { 20 }
+		, RelockRange { 5.0 }
+		, AddedRange { 5.0 }
+		, NoRelockROF { 0 }
 		, IsLaser { true }
-		, IsSupported { false }
+		, TargetLaser { true }
+		, FinishLaser { true }
 		, IsHouseColor { false }
-		, IsSingleColor { false }
-		, LaserInnerColor {}
-		, LaserOuterColor {}
-		, LaserOuterSpread {}
-		, LaserThickness { 3 }
-		, LaserDuration { 1 }
-		, LaserDelay { 1 }
-		, DamageDelay { 2 }
-		, LaserTimer {}
+		, LaserColor {}
+		, BlazeDelay { 20 }
+		, DamageDelay { 5 }
+		, RelockTimer {}
+		, BlazeTimer {}
 		, DamageTimer {}
-		, TechnoInLimbo { false }
-		, NotMainWeapon { false }
-		, FLHCoord {}
-		, BuildingCoord {}
-		, TemporaryCoord {}
 	{}
 
 	TracingTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Tracing)
-		, SourceCoord {}
-		, TargetCoord {}
-		, MirrorCoord { true }
 		, TheDuration { 0 }
+		, RelockDelay { 20 }
+		, RelockRange { 5.0 }
+		, AddedRange { 5.0 }
+		, NoRelockROF { 0 }
 		, IsLaser { true }
-		, IsSupported { false }
+		, TargetLaser { true }
+		, FinishLaser { true }
 		, IsHouseColor { false }
-		, IsSingleColor { false }
-		, LaserInnerColor {}
-		, LaserOuterColor {}
-		, LaserOuterSpread {}
-		, LaserThickness { 3 }
-		, LaserDuration { 1 }
-		, LaserDelay { 1 }
-		, DamageDelay { 2 }
-		, LaserTimer {}
+		, LaserColor {}
+		, BlazeDelay { 20 }
+		, DamageDelay { 5 }
+		, RelockTimer {}
+		, BlazeTimer {}
 		, DamageTimer {}
-		, TechnoInLimbo { false }
-		, NotMainWeapon { false }
-		, FLHCoord {}
-		, BuildingCoord {}
-		, TemporaryCoord {}
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -108,35 +88,22 @@ public:
 	virtual TrajectoryCheckReturnType OnAITargetCoordCheck(BulletClass* pBullet) override;
 	virtual TrajectoryCheckReturnType OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno) override;
 
-	Point2D SourceCoord;
-	Point2D TargetCoord;
-	bool MirrorCoord;
 	int TheDuration;
+	int RelockDelay;
+	double RelockRange;
+	double AddedRange;
+	int NoRelockROF;
 	bool IsLaser;
-	bool IsSupported;
+	bool TargetLaser;
+	bool FinishLaser;
 	bool IsHouseColor;
-	bool IsSingleColor;
-	ColorStruct LaserInnerColor;
-	ColorStruct LaserOuterColor;
-	ColorStruct LaserOuterSpread;
-	int LaserThickness;
-	int LaserDuration;
-	int LaserDelay;
+	ColorStruct LaserColor;
+	int BlazeDelay;
 	int DamageDelay;
-	CDTimerClass LaserTimer;
+	CDTimerClass RelockTimer;
+	CDTimerClass BlazeTimer;
 	CDTimerClass DamageTimer;
-	bool TechnoInLimbo;
-	bool NotMainWeapon;
-	CoordStruct FLHCoord;
-	CoordStruct BuildingCoord;
-	CoordStruct TemporaryCoord;
 
 private:
-	void GetTechnoFLHCoord(BulletClass* pBullet, TechnoClass* pTechno);
-	void CheckMirrorCoord(TechnoClass* pTechno);
-	void SetTracingDirection(BulletClass* pBullet, CoordStruct theSource, CoordStruct theTarget);
-	int GetFloorCoordHeight(BulletClass* pBullet, CoordStruct coord);
-	bool PlaceOnCorrectHeight(BulletClass* pBullet);
-	void DrawTracingLaser(BulletClass* pBullet, TechnoClass* pTechno, HouseClass* pOwner);
-	void DetonateLaserWarhead(BulletClass* pBullet, TechnoClass* pTechno, HouseClass* pOwner);
+
 };

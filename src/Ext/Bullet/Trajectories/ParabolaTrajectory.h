@@ -6,21 +6,16 @@ class ParabolaTrajectoryType final : public PhobosTrajectoryType
 {
 public:
 	ParabolaTrajectoryType() : PhobosTrajectoryType(TrajectoryFlag::Parabola)
-		, SourceCoord { { 0, 0 } }
-		, TargetCoord { { 0, 0 } }
+		, DetonationDistance { Leptons(102) }
+		, TargetSnapDistance { Leptons(128) }
+		, OffsetCoord { { 0, 0, 0 } }
+		, RotateCoord { 0 }
 		, MirrorCoord { true }
-		, TheDuration { 0 }
-		, IsLaser { true }
-		, IsSupported { false }
-		, IsHouseColor { false }
-		, IsSingleColor { false }
-		, LaserInnerColor { { 0, 0, 0 } }
-		, LaserOuterColor { { 0, 0, 0 } }
-		, LaserOuterSpread { { 0, 0, 0 } }
-		, LaserThickness { 3 }
-		, LaserDuration { 1 }
-		, LaserDelay { 1 }
-		, DamageDelay { 2 }
+		, UseDisperseBurst { false }
+		, LeadTimeCalculate { true }
+		, ThrowHeight { 0 }
+		, LaunchAngle { 0 }
+		, AxisOfRotation { { 0, 0, 0 } }
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -28,74 +23,45 @@ public:
 	virtual PhobosTrajectory* CreateInstance() const override;
 	virtual void Read(CCINIClass* const pINI, const char* pSection) override;
 
-	Valueable<Point2D> SourceCoord;
-	Valueable<Point2D> TargetCoord;
+	Valueable<Leptons> DetonationDistance;
+	Valueable<Leptons> TargetSnapDistance;
+	Valueable<CoordStruct> OffsetCoord;
+	Valueable<int> RotateCoord;
 	Valueable<bool> MirrorCoord;
-	Valueable<int> TheDuration;
-	Valueable<bool> IsLaser;
-	Valueable<bool> IsSupported;
-	Valueable<bool> IsHouseColor;
-	Valueable<bool> IsSingleColor;
-	Valueable<ColorStruct> LaserInnerColor;
-	Valueable<ColorStruct> LaserOuterColor;
-	Valueable<ColorStruct> LaserOuterSpread;
-	Valueable<int> LaserThickness;
-	Valueable<int> LaserDuration;
-	Valueable<int> LaserDelay;
-	Valueable<int> DamageDelay;
+	Valueable<bool> UseDisperseBurst;
+	Valueable<bool> LeadTimeCalculate;
+	Valueable<int> ThrowHeight;
+	Valueable<int> LaunchAngle;
+	Valueable<CoordStruct> AxisOfRotation;
 };
 
 class ParabolaTrajectory final : public PhobosTrajectory
 {
 public:
 	ParabolaTrajectory() : PhobosTrajectory(TrajectoryFlag::Parabola)
-		, SourceCoord {}
-		, TargetCoord {}
+		, DetonationDistance { Leptons(102) }
+		, TargetSnapDistance { Leptons(128) }
+		, OffsetCoord {}
+		, RotateCoord { 0 }
 		, MirrorCoord { true }
-		, TheDuration { 0 }
-		, IsLaser { true }
-		, IsSupported { false }
-		, IsHouseColor { false }
-		, IsSingleColor { false }
-		, LaserInnerColor {}
-		, LaserOuterColor {}
-		, LaserOuterSpread {}
-		, LaserThickness { 3 }
-		, LaserDuration { 1 }
-		, LaserDelay { 1 }
-		, DamageDelay { 2 }
-		, LaserTimer {}
-		, DamageTimer {}
-		, TechnoInLimbo { false }
-		, NotMainWeapon { false }
-		, FLHCoord {}
-		, BuildingCoord {}
-		, TemporaryCoord {}
+		, UseDisperseBurst { false }
+		, LeadTimeCalculate { true }
+		, ThrowHeight { 0 }
+		, LaunchAngle { 0 }
+		, AxisOfRotation {}
 	{}
 
 	ParabolaTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Parabola)
-		, SourceCoord {}
-		, TargetCoord {}
+		, DetonationDistance { Leptons(102) }
+		, TargetSnapDistance { Leptons(128) }
+		, OffsetCoord {}
+		, RotateCoord { 0 }
 		, MirrorCoord { true }
-		, TheDuration { 0 }
-		, IsLaser { true }
-		, IsSupported { false }
-		, IsHouseColor { false }
-		, IsSingleColor { false }
-		, LaserInnerColor {}
-		, LaserOuterColor {}
-		, LaserOuterSpread {}
-		, LaserThickness { 3 }
-		, LaserDuration { 1 }
-		, LaserDelay { 1 }
-		, DamageDelay { 2 }
-		, LaserTimer {}
-		, DamageTimer {}
-		, TechnoInLimbo { false }
-		, NotMainWeapon { false }
-		, FLHCoord {}
-		, BuildingCoord {}
-		, TemporaryCoord {}
+		, UseDisperseBurst { false }
+		, LeadTimeCalculate { true }
+		, ThrowHeight { 0 }
+		, LaunchAngle { 0 }
+		, AxisOfRotation {}
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -108,35 +74,17 @@ public:
 	virtual TrajectoryCheckReturnType OnAITargetCoordCheck(BulletClass* pBullet) override;
 	virtual TrajectoryCheckReturnType OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno) override;
 
-	Point2D SourceCoord;
-	Point2D TargetCoord;
+	Leptons DetonationDistance;
+	Leptons TargetSnapDistance;
+	CoordStruct OffsetCoord;
+	int RotateCoord;
 	bool MirrorCoord;
-	int TheDuration;
-	bool IsLaser;
-	bool IsSupported;
-	bool IsHouseColor;
-	bool IsSingleColor;
-	ColorStruct LaserInnerColor;
-	ColorStruct LaserOuterColor;
-	ColorStruct LaserOuterSpread;
-	int LaserThickness;
-	int LaserDuration;
-	int LaserDelay;
-	int DamageDelay;
-	CDTimerClass LaserTimer;
-	CDTimerClass DamageTimer;
-	bool TechnoInLimbo;
-	bool NotMainWeapon;
-	CoordStruct FLHCoord;
-	CoordStruct BuildingCoord;
-	CoordStruct TemporaryCoord;
+	bool UseDisperseBurst;
+	bool LeadTimeCalculate;
+	int ThrowHeight;
+	int LaunchAngle;
+	CoordStruct AxisOfRotation;
 
 private:
-	void GetTechnoFLHCoord(BulletClass* pBullet, TechnoClass* pTechno);
-	void CheckMirrorCoord(TechnoClass* pTechno);
-	void SetParabolaDirection(BulletClass* pBullet, CoordStruct theSource, CoordStruct theTarget);
-	int GetFloorCoordHeight(BulletClass* pBullet, CoordStruct coord);
-	bool PlaceOnCorrectHeight(BulletClass* pBullet);
-	void DrawParabolaLaser(BulletClass* pBullet, TechnoClass* pTechno, HouseClass* pOwner);
-	void DetonateLaserWarhead(BulletClass* pBullet, TechnoClass* pTechno, HouseClass* pOwner);
+
 };
