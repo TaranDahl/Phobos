@@ -11,6 +11,8 @@
 #include "StraightTrajectory.h"
 #include "DisperseTrajectory.h"
 #include "EngraveTrajectory.h"
+#include "ParabolaTrajectory.h"
+#include "TracingTrajectory.h"
 
 bool PhobosTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 {
@@ -40,6 +42,10 @@ void PhobosTrajectoryType::CreateType(PhobosTrajectoryType*& pType, CCINIClass* 
 		pNewType = DLLCreate<DisperseTrajectoryType>();
 	else if (_stricmp(Phobos::readBuffer, "Engrave") == 0)
 		pNewType = DLLCreate<EngraveTrajectoryType>();
+	else if (_stricmp(Phobos::readBuffer, "Parabola") == 0)
+		pNewType = DLLCreate<ParabolaTrajectoryType>();
+	else if (_stricmp(Phobos::readBuffer, "Tracing") == 0)
+		pNewType = DLLCreate<TracingTrajectoryType>();
 	else
 		bUpdateType = false;
 
@@ -76,6 +82,12 @@ PhobosTrajectoryType* PhobosTrajectoryType::LoadFromStream(PhobosStreamReader& S
 			break;
 		case TrajectoryFlag::Engrave:
 			pType = DLLCreate<EngraveTrajectoryType>();
+			break;
+		case TrajectoryFlag::Parabola:
+			pType = DLLCreate<ParabolaTrajectoryType>();
+			break;
+		case TrajectoryFlag::Tracing:
+			pType = DLLCreate<TracingTrajectoryType>();
 			break;
 		default:
 			return nullptr;
@@ -160,6 +172,12 @@ PhobosTrajectory* PhobosTrajectory::LoadFromStream(PhobosStreamReader& Stm)
 			break;
 		case TrajectoryFlag::Engrave:
 			pTraj = DLLCreate<EngraveTrajectory>();
+			break;
+		case TrajectoryFlag::Parabola:
+			pTraj = DLLCreate<ParabolaTrajectory>();
+			break;
+		case TrajectoryFlag::Tracing:
+			pTraj = DLLCreate<TracingTrajectory>();
 			break;
 		default:
 			return nullptr;

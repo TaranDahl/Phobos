@@ -848,6 +848,7 @@ Trajectory.Disperse.WeaponToGround=false        ; boolean
 #### Engrave trajectory
 
 - Visually, like the thermal lance. Calling it 'trajectory' may not be appropriate. It does not read the settings on the weapon.
+  - `Trajectory.Straight.ApplyRangeModifiers` controls whether any applicable weapon range modifiers from the firer are applied to the engrave process.
   - `Trajectory.Engrave.SourceCoord` controls the starting point of engraving line segment. Taking the target as the coordinate center. Specifically, it will start from the firing position when set to 0,0 . The height of the point will always at ground level.
   - `Trajectory.Engrave.TargetCoord` controls the end point of engraving line segment. Taking the target as the coordinate center. The height of the point will always at ground level.
     - `Trajectory.Engrave.MirrorCoord` controls whether `Trajectory.Engrave.SourceCoord` and `Trajectory.Engrave.TargetCoord` need to mirror the lateral value to adapt to the current FLH.
@@ -867,6 +868,7 @@ Trajectory.Disperse.WeaponToGround=false        ; boolean
 In `rulesmd.ini`:
 ```ini
 Trajectory=Engrave                             ; Trajectory type
+Trajectory.Engrave.ApplyRangeModifiers=false   ; boolean
 Trajectory.Engrave.SourceCoord=0,0             ; integer - Forward,Lateral
 Trajectory.Engrave.TargetCoord=0,0             ; integer - Forward,Lateral
 Trajectory.Engrave.MirrorCoord=true            ; boolean
@@ -887,6 +889,10 @@ Trajectory.Engrave.DamageDelay=2               ; integer
 ```{note}
 - It's best not to let it be intercepted.
 ```
+
+#### Parabola trajectory
+
+#### Tracing trajectory
 
 ### Shrapnel enhancements
 

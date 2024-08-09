@@ -305,15 +305,14 @@ DEFINE_HOOK(0x467CCA, BulletClass_AI_TargetSnapChecks, 0x6)
 	}
 	else if (auto const pExt = BulletAITemp::ExtData)
 	{
-		if (pExt->Trajectory)
+		if (pExt->Trajectory && (pExt->Trajectory->Flag == TrajectoryFlag::Straight
+			|| pExt->Trajectory->Flag == TrajectoryFlag::Disperse
+			|| pExt->Trajectory->Flag == TrajectoryFlag::Engrave
+			|| pExt->Trajectory->Flag == TrajectoryFlag::Parabola
+			|| pExt->Trajectory->Flag == TrajectoryFlag::Tracing))
 		{
-			if (pExt->Trajectory->Flag == TrajectoryFlag::Straight
-				|| pExt->Trajectory->Flag == TrajectoryFlag::Disperse
-				|| pExt->Trajectory->Flag == TrajectoryFlag::Engrave)
-			{
-				R->EAX(pThis->Type);
-				return SkipChecks;
-			}
+			R->EAX(pThis->Type);
+			return SkipChecks;
 		}
 	}
 
@@ -341,7 +340,9 @@ DEFINE_HOOK(0x468E61, BulletClass_Explode_TargetSnapChecks1, 0x6)
 		if (pExt->Trajectory && !pExt->SnappedToTarget
 			&& (pExt->Trajectory->Flag == TrajectoryFlag::Straight
 			|| pExt->Trajectory->Flag == TrajectoryFlag::Disperse
-			|| pExt->Trajectory->Flag == TrajectoryFlag::Engrave))
+			|| pExt->Trajectory->Flag == TrajectoryFlag::Engrave
+			|| pExt->Trajectory->Flag == TrajectoryFlag::Parabola
+			|| pExt->Trajectory->Flag == TrajectoryFlag::Tracing))
 		{
 			R->EAX(pThis->Type);
 			return SkipChecks;
@@ -375,7 +376,9 @@ DEFINE_HOOK(0x468E9F, BulletClass_Explode_TargetSnapChecks2, 0x6)
 		if (pExt->Trajectory && !pExt->SnappedToTarget
 			&& (pExt->Trajectory->Flag == TrajectoryFlag::Straight
 			|| pExt->Trajectory->Flag == TrajectoryFlag::Disperse
-			|| pExt->Trajectory->Flag == TrajectoryFlag::Engrave))
+			|| pExt->Trajectory->Flag == TrajectoryFlag::Engrave
+			|| pExt->Trajectory->Flag == TrajectoryFlag::Parabola
+			|| pExt->Trajectory->Flag == TrajectoryFlag::Tracing))
 		{
 			return SkipSetCoordinate;
 		}
@@ -394,7 +397,9 @@ DEFINE_HOOK(0x468D3F, BulletClass_ShouldExplode_AirTarget, 0x6)
 	{
 		if (pExt->Trajectory && (pExt->Trajectory->Flag == TrajectoryFlag::Straight
 			|| pExt->Trajectory->Flag == TrajectoryFlag::Disperse
-			|| pExt->Trajectory->Flag == TrajectoryFlag::Engrave))
+			|| pExt->Trajectory->Flag == TrajectoryFlag::Engrave
+			|| pExt->Trajectory->Flag == TrajectoryFlag::Parabola
+			|| pExt->Trajectory->Flag == TrajectoryFlag::Tracing))
 		{
 			return SkipCheck;
 		}
