@@ -325,6 +325,17 @@ DEFINE_HOOK(0x443CCA, BuildingClass_KickOutUnit_AircraftType_Phobos, 0xA)
 	return 0;
 }
 
+DEFINE_HOOK(0x4444A0, BuildingClass_KickOutUnit_NoKickOutInConstruction, 0x7)
+{
+	enum { OfCourse = 0x444565, NoChance = 0x4444B3};
+
+	GET(BuildingClass* const, pThis, ESI);
+
+	const Mission mission = pThis->GetCurrentMission();
+
+	return (mission == Mission::Unload || mission == Mission::Construction) ? NoChance : OfCourse;
+}
+
 // Ares didn't have something like 0x7397E4 in its UnitDelivery code
 DEFINE_HOOK(0x44FBBF, CreateBuildingFromINIFile_AfterCTOR_BeforeUnlimbo, 0x8)
 {

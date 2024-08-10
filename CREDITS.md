@@ -345,7 +345,6 @@ This page lists all the individual contributions to the project by their author.
   - Recreate the weed-charging of SWs like the TS Chemical Missile
   - Allow to change the speed of gas particles
 - **NaotoYuuki**
-  - Allow trajectory projectiles to use `Inaccurate` & `BallisticScatter` keys
   - Vertical & meteor trajectory projectile prototypes
 - **CrimRecya**
   - Technos will maintain a suitable distance after firing
@@ -362,7 +361,10 @@ This page lists all the individual contributions to the project by their author.
   - Units Rotate Turret When in Idle Action
   - Jumpjet climbing logic enhancement
   - Building placing and deploying logic enhancement, unit base normal, new placing grids and grey cameo preview
-- **TaranDahl** - Raise alert when technos are taking damage
+  - Units will not always stuck in the factory
+- **TaranDahl**
+  - Raise alert when technos are taking damage
+  - Units are now unable to kick out from a factory that is in construction process
 - **handama** - AI script action to jump back to previous script
 - **Ares developers**
   - YRpp and Syringe which are used, save/load, project foundation and generally useful code from Ares

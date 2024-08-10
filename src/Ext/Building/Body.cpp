@@ -362,37 +362,33 @@ void BuildingExt::ExtData::KickOutStuckUnits()
 
 	if (CellClass* const pCell = MapClass::Instance->GetCellAt(cell))
 	{
-		ObjectClass* pObject = pCell->FirstObject;
-
-		while (pObject)
+		for (ObjectClass* pObject = pCell->FirstObject; pObject; pObject = pObject->NextObject)
 		{
 			if (pObject->WhatAmI() == AbstractType::Unit)
 			{
 				UnitClass* const pUnit = static_cast<UnitClass*>(pObject);
 
-				do
+				if (pUnit->Destination || pUnit->GetHeight() || pThis->Owner != pUnit->Owner)
+					continue;
+
+				if (pUnit->unknown_int_120 > 0 && (Unsorted::CurrentFrame - pUnit->unknown_int_120) > 120) // Unable to kick out
 				{
-					if (pUnit->Destination || pUnit->GetHeight())
-						break;
+					if (HouseClass* const pOwner = pUnit->Owner)
+						pOwner->GiveMoney(pUnit->Type->GetActualCost(pOwner));
 
-					if (pUnit->unknown_int_120 > 0 && (Unsorted::CurrentFrame - pUnit->unknown_int_120) > 120) // Unable to kick out
-					{
-						pUnit->KillPassengers(nullptr);
-						pUnit->Stun();
-						pUnit->Limbo();
-						pUnit->UnInit();
-						break;
-					}
-
-					pUnit->unknown_int_120 = Unsorted::CurrentFrame;
-					pThis->SendCommand(RadioCommand::RequestLink, pUnit);
-					pThis->SendCommand(RadioCommand::RequestTether, pUnit);
-					pThis->QueueMission(Mission::Unload, false);
+					pUnit->KillPassengers(nullptr);
+					pUnit->Stun();
+					pUnit->Limbo();
+					pUnit->UnInit();
+					continue;
 				}
-				while (false);
-			}
 
-			pObject = pObject->NextObject;
+				pUnit->unknown_int_120 = Unsorted::CurrentFrame;
+				pThis->SendCommand(RadioCommand::RequestLink, pUnit);
+				pThis->SendCommand(RadioCommand::RequestTether, pUnit);
+				pThis->QueueMission(Mission::Unload, false);
+				break;
+			}
 		}
 	}
 }
