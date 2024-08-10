@@ -2,7 +2,6 @@
 
 #include <BitFont.h>
 
-#include <TunnelLocomotionClass.h>
 #include <Utilities/EnumFunctions.h>
 
 BuildingExt::ExtContainer BuildingExt::ExtMap;
@@ -346,41 +345,54 @@ bool BuildingExt::ExtData::HandleInfiltrate(HouseClass* pInfiltratorHouse,int mo
 
 void BuildingExt::ExtData::KickOutStuckUnits()
 {
-	if (Unsorted::CurrentFrame % 8)
+	if (Unsorted::CurrentFrame % 15)
 		return;
 
-	auto const pThis = this->OwnerObject();
+	BuildingClass* const pThis = this->OwnerObject();
 
-	if (!pThis->Factory)
+	if (pThis->GetCurrentMission() == Mission::Unload)
 		return;
 
-	auto const pType = pThis->Type;
+	BuildingTypeClass* const pType = pThis->Type;
 
 	if (pType->Factory != AbstractType::UnitType)
 		return;
 
-	auto const cell = pThis->GetMapCoords();
+	CellStruct cell = CellClass::Coord2Cell(pThis->GetCenterCoords());
 
-	for (auto pFoundation = pType->GetFoundationData(true); *pFoundation != CellStruct { 0x7FFF, 0x7FFF }; ++pFoundation)
+	if (CellClass* const pCell = MapClass::Instance->GetCellAt(cell))
 	{
-		CellStruct searchCell = cell + *pFoundation;
+		ObjectClass* pObject = pCell->FirstObject;
 
-		if (CellClass* const pCell = MapClass::Instance->GetCellAt(searchCell))
+		while (pObject)
 		{
-			ObjectClass* pObject = pCell->FirstObject;
-
-			while (pObject)
+			if (pObject->WhatAmI() == AbstractType::Unit)
 			{
-				if (pObject->WhatAmI() == AbstractType::Unit)
+				UnitClass* const pUnit = static_cast<UnitClass*>(pObject);
+
+				do
 				{
-					UnitClass* const pUnit = static_cast<UnitClass*>(pObject);
+					if (pUnit->Destination || pUnit->GetHeight())
+						break;
 
-					if (pUnit->GetCurrentSpeed() <= 0 || (locomotion_cast<TunnelLocomotionClass*>(pUnit->Locomotor) && !pUnit->Locomotor->Is_Moving()))
-						pUnit->SetLocation(pUnit->GetCoords() + CoordStruct{ 256, 0, 0 });
+					if (pUnit->unknown_int_120 > 0 && (Unsorted::CurrentFrame - pUnit->unknown_int_120) > 40) // Unable to kick out
+					{
+						pUnit->KillPassengers(nullptr);
+						pUnit->Stun();
+						pUnit->Limbo();
+						pUnit->UnInit();
+						break;
+					}
+
+					pUnit->unknown_int_120 = Unsorted::CurrentFrame;
+					pThis->SendCommand(RadioCommand::RequestLink, pUnit);
+					pThis->SendCommand(RadioCommand::RequestTether, pUnit);
+					pThis->QueueMission(Mission::Unload, false);
 				}
-
-				pObject = pObject->NextObject;
+				while (false);
 			}
+
+			pObject = pObject->NextObject;
 		}
 	}
 }
