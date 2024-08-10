@@ -886,22 +886,22 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 				check = false;
 				pThis = this->LastCasualty[i].pCasualty;
 				thisTime = this->LastCasualty[i].RemainTime;
-				i += 1;
+				++i;
 			}
 			else if (this->LastCasualty[i].pCasualty > validTechnos[j])
 			{
 				check = true;
 				pThis = validTechnos[j];
 				thisTime = 20;
-				j += 1;
+				++j;
 			}
 			else
 			{
 				check = false;
 				pThis = this->LastCasualty[i].pCasualty;
 				thisTime = 20;
-				i += 1;
-				j += 1;
+				++i;
+				++j;
 			}
 		}
 		else if (i < iMax)
@@ -909,14 +909,14 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 			check = false;
 			pThis = this->LastCasualty[i].pCasualty;
 			thisTime = this->LastCasualty[i].RemainTime;
-			i += 1;
+			++i;
 		}
 		else if (j < jMax)
 		{
 			check = true;
 			pThis = validTechnos[j];
 			thisTime = 20;
-			j += 1;
+			++j;
 		}
 		else
 		{
@@ -972,7 +972,7 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 		}
 		else if (this->ProximityImpact > 0)
 		{
-			this->ProximityImpact--;
+			--this->ProximityImpact;
 		}
 	}
 }
@@ -1008,12 +1008,12 @@ std::vector<CellClass*> StraightTrajectory::GetCellsInProximityRadius(BulletClas
 			cornerIndex = i;
 	}
 
-	cor1Cell = corner[cornerIndex++];
-	cornerIndex %= 4;
-	cor2Cell = corner[cornerIndex++];
-	cornerIndex %= 4;
-	cor3Cell = corner[cornerIndex++];
-	cornerIndex %= 4;
+	cor1Cell = corner[cornerIndex];
+	++cornerIndex %= 4;
+	cor2Cell = corner[cornerIndex];
+	++cornerIndex %= 4;
+	cor3Cell = corner[cornerIndex];
+	++cornerIndex %= 4;
 	cor4Cell = corner[cornerIndex];
 
 	std::vector<CellStruct> recCells = this->GetCellsInRectangle(cor1Cell, cor4Cell, cor2Cell, cor3Cell);
