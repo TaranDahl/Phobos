@@ -638,7 +638,7 @@ void StraightTrajectory::BulletDetonateLastCheck(BulletClass* pBullet, HouseClas
 			CellClass* pCurCell = MapClass::Instance->GetCellAt(sourceCell);
 			double cellDistance = locationDistance;
 
-			for (size_t i = 0; i < largePace; i++)
+			for (size_t i = 0; i < largePace; ++i)
 			{
 				if (this->SubjectToGround && (curCoord.Z + 15) < MapClass::Instance->GetCellFloorHeight(curCoord))
 				{
@@ -877,7 +877,7 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 	int thisTime = 0;
 	bool check = false;
 
-	for (size_t k = 0; k < capacity; k++) //Merge
+	for (size_t k = 0; k < capacity; ++k) //Merge
 	{
 		if (i < iMax && j < jMax)
 		{
@@ -1002,7 +1002,7 @@ std::vector<CellClass*> StraightTrajectory::GetCellsInProximityRadius(BulletClas
 	int cornerIndex = 0;
 	CellStruct corner[4] = {cor1Cell, cor2Cell, cor3Cell, cor4Cell};
 
-	for (int i = 1; i < 4; i++)
+	for (int i = 1; i < 4; ++i)
 	{
 		if (corner[cornerIndex].Y > corner[i].Y)
 			cornerIndex = i;
