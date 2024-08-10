@@ -877,28 +877,28 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 	int thisTime = 0;
 	bool check = false;
 
-	for (size_t k = 0; k < capacity; ++k) //Merge
+	for (size_t k = 0; k < capacity; ++k) //Merge, and avoid using wild pointers
 	{
 		if (i < iMax && j < jMax)
 		{
 			if (this->LastCasualty[i].pCasualty < validTechnos[j])
 			{
-				check = false;
+				check = false; // Don't know whether wild
 				pThis = this->LastCasualty[i].pCasualty;
 				thisTime = this->LastCasualty[i].RemainTime;
 				++i;
 			}
 			else if (this->LastCasualty[i].pCasualty > validTechnos[j])
 			{
-				check = true;
+				check = true; // Not duplicated and not wild
 				pThis = validTechnos[j];
 				thisTime = 20;
 				++j;
 			}
-			else
+			else // this->LastCasualty[i].pCasualty == validTechnos[j]
 			{
-				check = false;
-				pThis = this->LastCasualty[i].pCasualty;
+				check = false; // Duplicated and not wild
+				pThis = validTechnos[j];
 				thisTime = 20;
 				++i;
 				++j;
@@ -906,29 +906,29 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 		}
 		else if (i < iMax)
 		{
-			check = false;
+			check = false; // Don't know whether wild
 			pThis = this->LastCasualty[i].pCasualty;
 			thisTime = this->LastCasualty[i].RemainTime;
 			++i;
 		}
 		else if (j < jMax)
 		{
-			check = true;
+			check = true; // Not duplicated and not wild
 			pThis = validTechnos[j];
 			thisTime = 20;
 			++j;
 		}
 		else
 		{
-			break;
+			break; // No technos left
 		}
 
 		if (pThis && pThis != pLast)
 		{
-			if (check)
+			if (check) // Not duplicated pointer, and not wild pointer
 				casualtyChecked.push_back(pThis);
 
-			if (--thisTime > 0)
+			if (--thisTime > 0) // Record 20 frames
 			{
 				const CasualtyData thisCasualty {pThis, thisTime};
 				casualty.push_back(thisCasualty);
@@ -938,7 +938,7 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 		}
 	}
 
-	this->LastCasualty = casualty;
+	this->LastCasualty = casualty; // Record vector for next check
 
 	//Step 4: Detonate warheads in sequence based on distance.
 	const size_t casualtySize = casualtyChecked.size();

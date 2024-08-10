@@ -375,7 +375,7 @@ void BuildingExt::ExtData::KickOutStuckUnits()
 					if (pUnit->Destination || pUnit->GetHeight())
 						break;
 
-					if (pUnit->unknown_int_120 > 0 && (Unsorted::CurrentFrame - pUnit->unknown_int_120) > 40) // Unable to kick out
+					if (pUnit->unknown_int_120 > 0 && (Unsorted::CurrentFrame - pUnit->unknown_int_120) > 120) // Unable to kick out
 					{
 						pUnit->KillPassengers(nullptr);
 						pUnit->Stun();
