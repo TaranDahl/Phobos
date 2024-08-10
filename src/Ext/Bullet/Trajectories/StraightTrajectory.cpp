@@ -809,23 +809,13 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 			if (technoType != AbstractType::Building && distance > this->ProximityRadius)
 				continue;
 
-			if (thisSize < vectSize)
+			if (thisSize >= vectSize)
 			{
-				validTechnos.push_back(pTechno);
-			}
-			else
-			{
-				std::vector<TechnoClass*> validTechnosBuffer;
 				vectSize += cellSize;
-				validTechnosBuffer.reserve(vectSize);
-
-				for (auto const& pTechnoBuffer : validTechnos)
-					validTechnosBuffer.push_back(pTechnoBuffer);
-
-				validTechnos = validTechnosBuffer;
-				validTechnos.push_back(pTechno);
+				validTechnos.reserve(vectSize);
 			}
 
+			validTechnos.push_back(pTechno);
 			thisSize += 1;
 		}
 	}
@@ -858,23 +848,13 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 			if (distance > this->ProximityRadius)
 				continue;
 
-			if (thisSize < vectSize)
+			if (thisSize >= vectSize)
 			{
-				validTechnos.push_back(pTechno);
-			}
-			else
-			{
-				std::vector<TechnoClass*> validTechnosBuffer;
 				vectSize += cellSize;
-				validTechnosBuffer.reserve(vectSize);
-
-				for (auto const& pTechnoBuffer : validTechnos)
-					validTechnosBuffer.push_back(pTechnoBuffer);
-
-				validTechnos = validTechnosBuffer;
-				validTechnos.push_back(pTechno);
+				validTechnos.reserve(vectSize);
 			}
 
+			validTechnos.push_back(pTechno);
 			thisSize += 1;
 		}
 	}
