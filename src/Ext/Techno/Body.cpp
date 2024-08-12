@@ -503,6 +503,8 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->LastWeaponFLH)
 		.Process(this->FiringObstacleCell)
 		.Process(this->OriginalPassengerOwner)
+		.Process(this->HasCarryoverWarpInDelay)
+		.Process(this->LastWarpInDelay)
 		;
 }
 

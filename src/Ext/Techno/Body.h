@@ -60,6 +60,8 @@ public:
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
 		// as neither is guaranteed to point to the house the TechnoClass had prior to entering transport and cannot be safely overridden.
 		HouseClass* OriginalPassengerOwner;
+		bool HasCarryoverWarpInDelay; // Converted from object with Teleport Locomotor to one with a different Locomotor while still phasing in.
+		int LastWarpInDelay;          // Last-warp in delay for this unit, used by HasCarryoverWarpInDelay.
 
 		ExtData(TechnoClass* OwnerObject) : Extension<TechnoClass>(OwnerObject)
 			, TypeExtData { nullptr }
@@ -96,6 +98,8 @@ public:
 			, LastWeaponFLH {}
 			, FiringObstacleCell {}
 			, OriginalPassengerOwner {}
+			, HasCarryoverWarpInDelay { false }
+			, LastWarpInDelay { 0 }
 		{ }
 
 		void OnEarlyUpdate();
