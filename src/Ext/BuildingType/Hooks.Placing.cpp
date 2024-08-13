@@ -123,6 +123,10 @@ When the building type cameo clicked, this record the ArrayIndex of the owner ho
 CellClass:
 AltFlags = AltCellFlags::Unknown_4 -> InBuildingProcess
 Vanilla only between AddPlaceEvent and RespondToEvent
+
+BuildingClass:
+unknown_timer_550 -> KickOutBusyTimer
+Only start when factory update's kick out result is busy, and only check in factory update
 */
 
 // BaseNormal for units Hook #1 -> sub_4A8EB0 - Rewrite and add functions in

@@ -135,6 +135,9 @@ public:
 		Nullable<double> DamageEnemiesMultiplier;
 
 		Nullable<bool> CombatAlert_Suppress;
+		Valueable<bool> AffectsOnFloor;
+		Valueable<bool> AffectsInAir;
+		Valueable<bool> CellSpread_Cylinder;
 
 		ValueableVector<AttachEffectTypeClass*> AttachEffect_AttachTypes;
 		ValueableVector<AttachEffectTypeClass*> AttachEffect_RemoveTypes;
@@ -283,6 +286,9 @@ public:
 			, DamageEnemiesMultiplier {}
 
 			, CombatAlert_Suppress {}
+			, AffectsOnFloor { true }
+			, AffectsInAir { true }
+			, CellSpread_Cylinder { false }
 
 			, AttachEffect_AttachTypes {}
 			, AttachEffect_RemoveTypes {}

@@ -237,8 +237,16 @@ public:
 		Valueable<CSFText> UIExtraDescription;
 
 		Valueable<bool> CombatAlert;
-		NullableIdx<VoxClass> CombatAlert_EVA;
 		Nullable<bool> CombatAlert_NotBuilding;
+		Nullable<bool> CombatAlert_UseFeedbackVoice;
+		Nullable<bool> CombatAlert_UseAttackVoice;
+		Nullable<bool> CombatAlert_UseEVA;
+		NullableIdx<VoxClass> CombatAlert_EVA;
+
+		Valueable<int> Spawner_RecycleRange;
+		Valueable<CoordStruct> Spawner_RecycleFLH;
+		Valueable<bool> Spawner_RecycleOnTurret;
+		Valueable<AnimTypeClass*> Spawner_RecycleAnim;
 
 		Nullable<AnimTypeClass*> Wake;
 		Nullable<AnimTypeClass*> Wake_Grapple;
@@ -477,8 +485,16 @@ public:
 			, UIExtraDescription {}
 
 			, CombatAlert { true }
-			, CombatAlert_EVA {}
 			, CombatAlert_NotBuilding {}
+			, CombatAlert_UseFeedbackVoice {}
+			, CombatAlert_UseAttackVoice {}
+			, CombatAlert_UseEVA {}
+			, CombatAlert_EVA {}
+
+			, Spawner_RecycleRange { -1 }
+			, Spawner_RecycleFLH { { 0, 0, 0 } }
+			, Spawner_RecycleOnTurret { false }
+			, Spawner_RecycleAnim { nullptr }
 
 			, Wake { }
 			, Wake_Grapple { }

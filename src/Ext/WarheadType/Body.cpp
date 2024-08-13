@@ -242,6 +242,9 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->DamageEnemiesMultiplier.Read(exINI, pSection, "DamageEnemiesMultiplier");
 
 	this->CombatAlert_Suppress.Read(exINI, pSection, "CombatAlert.Suppress");
+	this->AffectsOnFloor.Read(exINI, pSection, "AffectsOnFloor");
+	this->AffectsInAir.Read(exINI, pSection, "AffectsInAir");
+	this->CellSpread_Cylinder.Read(exINI, pSection, "CellSpread.Cylinder");
 
 	this->AttachEffect_AttachTypes.Read(exINI, pSection, "AttachEffect.AttachTypes");
 	this->AttachEffect_RemoveTypes.Read(exINI, pSection, "AttachEffect.RemoveTypes");
@@ -456,6 +459,9 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->DamageEnemiesMultiplier)
 
 		.Process(this->CombatAlert_Suppress)
+		.Process(this->AffectsOnFloor)
+		.Process(this->AffectsInAir)
+		.Process(this->CellSpread_Cylinder)
 
 		.Process(this->AttachEffect_AttachTypes)
 		.Process(this->AttachEffect_RemoveTypes)

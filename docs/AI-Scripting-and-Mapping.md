@@ -18,12 +18,19 @@ This page describes all AI scripting and mapping related additions and changes i
 
 ### Base node repairing
 
-- In singleplayer campaign missions you can now decide whether AI can repair the base nodes / buildings delivered by SW (Ares) by setting `RepairBaseNodes`.
+- In singleplayer campaign missions you can now decide whether AI can repair the base nodes / buildings delivered by SW (Ares).
+  - You can control it globally by setting `[General]->RepairBaseNodes` in rulesmd.ini, or locally by setting the flag with same name in `[Some House]` in certain map file. The global one will be overriden if the local one is set.
+
+In rulesmd.ini:
+```ini
+[General]
+RepairBaseNodes=false,false,false  ; list of 3 booleans indicating whether AI repair basenodes in Easy / Normal / Difficult game diffculty.
+```
 
 In map file:
 ```ini
 [Country House]
-RepairBaseNodes=false,false,false  ; list of 3 booleans indicating whether AI repair basenodes in Easy / Normal / Difficult game diffculty.
+RepairBaseNodes=                   ; list of 3 booleans indicating whether AI repair basenodes in Easy / Normal / Difficult game diffculty.
 ```
 
 ### Default loading screen and briefing offsets
@@ -71,7 +78,7 @@ Ranking.OverParMessage=   ; CSF entry key
 
 ### Show briefing dialog on startup
 
-- You can now have the briefing dialog screen show up on singleplayer campaign mission startup by setting `ShowBriefing` to true in map file's `[Basic]` section, or in the map file's section in `missionmd.ini` (latter takes precedence over former if available). This can be disabled by user by setting `ShowBriefing` to false in `Ra2MD.ini`. 
+- You can now have the briefing dialog screen show up on singleplayer campaign mission startup by setting `ShowBriefing` to true in map file's `[Basic]` section, or in the map file's section in `missionmd.ini` (latter takes precedence over former if available). This can be disabled by user by setting `ShowBriefing` to false in `Ra2MD.ini`.
   - `BriefingTheme` (In order of precedence from highest to lowest: `missionmd.ini`, map file, side entry in `rulesmd.ini`) can be used to define a custom theme to play on this briefing screen. If not set, the loading screen theme will keep playing until the scenario starts properly.
   - String labels for the startup briefing dialog screen's resume button as well as the button's status bar text can be customized by setting `ShowBriefingResumeButtonLabel` and `ShowBriefingResumeButtonStatusLabel` respectively. They default to the same labels used by the briefing screen dialog when opened otherwise.
 

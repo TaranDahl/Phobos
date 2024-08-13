@@ -304,3 +304,28 @@ DEFINE_HOOK(0x6A640B, SideBarClass_AddCameo_DoNotPlayEVA, 0x5)
 
 	return 0;
 }
+
+// Sell all and all in.
+DEFINE_HOOK(0x4FD8F7, HouseClass_UpdateAI_OnLastLegs, 0x10)
+{
+	enum { SkipGameCode = 0x4FD907 };
+
+	GET(HouseClass*, pThis, EBX);
+
+	auto const pRules = RulesExt::Global();
+
+	if (pRules->AISellAllOnLastLegs)
+	{
+		auto const pExt = HouseExt::ExtMap.Find(pThis);
+
+		if (pRules->AISellAllDelay <= 0 || !pExt || pExt->AISellAllDelayTimer.Completed())
+			pThis->Fire_Sale();
+		else if (!pExt->AISellAllDelayTimer.HasStarted())
+			pExt->AISellAllDelayTimer.Start(pRules->AISellAllDelay);
+	}
+
+	if (pRules->AIAllInOnLastLegs)
+		pThis->All_To_Hunt();
+
+	return SkipGameCode;
+}

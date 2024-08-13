@@ -57,6 +57,7 @@ public:
 		Valueable<Leptons> KeepRange;
 		Valueable<bool> KeepRange_AllowAI;
 		Valueable<bool> KeepRange_AllowPlayer;
+		Nullable<bool> AlwaysCylinderRangefinding;
 		Valueable<bool> KickOutPassengers;
 
 		ExtData(WeaponTypeClass* OwnerObject) : Extension<WeaponTypeClass>(OwnerObject)
@@ -96,6 +97,7 @@ public:
 			, KeepRange { Leptons(0) }
 			, KeepRange_AllowAI { false }
 			, KeepRange_AllowPlayer { false }
+			, AlwaysCylinderRangefinding {}
 			, KickOutPassengers { true }
 		{ }
 

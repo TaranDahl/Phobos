@@ -1,6 +1,7 @@
 #include "Body.h"
 
 #include <SpawnManagerClass.h>
+#include <Ext/WeaponType/Body.h>
 
 DEFINE_HOOK(0x6B0B9C, SlaveManagerClass_Killed_DecideOwner, 0x6)
 {
@@ -97,4 +98,101 @@ DEFINE_HOOK(0x6B7600, SpawnManagerClass_AI_InitDestination, 0x6)
 	}
 
 	return R->Origin() == 0x6B7600 ? SkipGameCode1 : SkipGameCode2;
+}
+
+// I must not regroup my forces.
+DEFINE_HOOK(0x739920, UnitClass_TryToDeploy_DisableRegroupAtNewConYard, 0x6)
+{
+	enum { SkipRegroup = 0x73992B };
+	return RulesExt::Global()->RegroupWhenMCVDeploy ? 0 : SkipRegroup;
+}
+
+DEFINE_HOOK(0x6F7891, TechnoClass_IsCloseEnough_CylinderRangefinding, 0x7)
+{
+	enum { SkipGameCode = 0x6F789A };
+
+	GET(WeaponTypeClass* const, pWeaponType, EDI);
+	GET(TechnoClass* const, pThis, ESI);
+
+	bool bAlwaysCylinderRangefinding = RulesExt::Global()->AlwaysCylinderRangefinding;
+
+	if (auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeaponType))
+		bAlwaysCylinderRangefinding = pWeaponExt->AlwaysCylinderRangefinding.Get(bAlwaysCylinderRangefinding);
+
+	R->AL(bAlwaysCylinderRangefinding ? true : pThis->IsInAir());
+	return SkipGameCode;
+}
+
+bool __fastcall BuildingTypeClass_CanUseWaypoint(BuildingTypeClass* pThis)
+{
+	return RulesExt::Global()->BuildingWaypoint;
+}
+DEFINE_JUMP(VTABLE, 0x7E4610, GET_OFFSET(BuildingTypeClass_CanUseWaypoint))
+
+bool __fastcall AircraftTypeClass_CanUseWaypoint(AircraftTypeClass* pThis)
+{
+	return RulesExt::Global()->AircraftWaypoint;
+}
+DEFINE_JUMP(VTABLE, 0x7E2908, GET_OFFSET(AircraftTypeClass_CanUseWaypoint))
+
+DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
+{
+	//enum { RecycleIsOk = 0x6B77FF, RecycleIsNotOk = 0x6B7838 };
+
+	GET(SpawnManagerClass* const, pThis, ESI);
+	GET(AircraftClass* const, pSpawned, EDI);
+	GET(CellStruct* const, pSpawnerMapCrd, EBP);
+
+	if (!pThis)
+		return 0;
+
+	auto const pSpawner = pThis->Owner;
+
+	if (!pSpawner || !pSpawned)
+		return 0;
+
+	auto const pSpawnerType = pSpawner->GetTechnoType();
+	auto const pSpawnedMapCrd = pSpawned->GetMapCoords();
+
+	if (!pSpawnerType)
+		return 0;
+
+	auto const pSpawnerExt = TechnoTypeExt::ExtMap.Find(pSpawnerType);
+
+	if (!pSpawnerExt)
+		return 0;
+
+	auto const SpawnerCrd = pSpawner->GetCoords();
+	auto const SpawnedCrd = pSpawned->GetCoords();
+	auto const DeltaCrd = SpawnedCrd - SpawnerCrd;
+	const int RecycleRange = pSpawnerExt->Spawner_RecycleRange;
+
+	do
+	{
+		if (RecycleRange < 0)
+		{
+			if (pSpawner->WhatAmI() == AbstractType::Building)
+			{
+				if (DeltaCrd.X > 182 || DeltaCrd.Y > 182 || DeltaCrd.Z >= 20)
+					break;
+			}
+			else if (pSpawnedMapCrd.X != pSpawnerMapCrd->X || pSpawnedMapCrd.Y != pSpawnerMapCrd->Y || DeltaCrd.Z >= 20)
+			{
+				break;
+			}
+		}
+		else if (Math::sqrt(DeltaCrd.X * DeltaCrd.X + DeltaCrd.Y * DeltaCrd.Y + DeltaCrd.Z * DeltaCrd.Z) > RecycleRange)
+		{
+			break;
+		}
+
+		if (pSpawnerExt->Spawner_RecycleAnim)
+			GameCreate<AnimClass>(pSpawnerExt->Spawner_RecycleAnim, SpawnedCrd);
+
+		pSpawned->SetLocation(SpawnerCrd);
+		R->EAX(pSpawnerMapCrd);
+	}
+	while (false);
+
+	return 0;
 }

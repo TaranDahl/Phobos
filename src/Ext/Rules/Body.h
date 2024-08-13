@@ -186,6 +186,14 @@ public:
 		Valueable<bool> CombatAlert_UseFeedbackVoice;
 		Valueable<bool> CombatAlert_UseAttackVoice;
 		Valueable<bool> CombatAlert_UseEVA;
+		Valueable<bool> BuildingWaypoint;
+		Valueable<bool> AircraftWaypoint;
+		Valueable<bool> AlwaysCylinderRangefinding;
+		Valueable<bool> RegroupWhenMCVDeploy;
+		Valueable<bool> AISellAllOnLastLegs;
+		Valueable<int> AISellAllDelay;
+		Valueable<bool> AIAllInOnLastLegs;
+		ValueableVector<bool> RepairBaseNodes;
 
 		Nullable<Vector3D<float>> VoxelLightSource;
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
@@ -334,6 +342,14 @@ public:
 			, CombatAlert_UseFeedbackVoice { true }
 			, CombatAlert_UseAttackVoice { true }
 			, CombatAlert_UseEVA { true }
+			, BuildingWaypoint { false }
+			, AircraftWaypoint { false }
+			, AlwaysCylinderRangefinding { false }
+			, RegroupWhenMCVDeploy { true }
+			, AISellAllOnLastLegs { true }
+			, AISellAllDelay { 0 }
+			, AIAllInOnLastLegs { true }
+			, RepairBaseNodes {}
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 		{ }

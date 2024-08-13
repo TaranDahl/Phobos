@@ -1087,6 +1087,8 @@ EVA.GrantOneTimeLaunched=        ; EVA entry
   - `Spawner.ExtraLimitRange` adds extra pursuit range on top of the weapon range.
 - `Spawner.DelayFrames` can be used to set the minimum number of game frames in between each spawn ejecting from the spawner. By default this is 9 frames for missiles and 20 for everything else.
 - If `Spawner.AttackImmediately` is set to true, spawned aircraft will assume attack mission immediately after being spawned instead of waiting for the remaining aircraft to spawn first.
+- `Spawner.RecycleRange` defines the range (in lepton) that the spawned is considered close enough to the spawner to be recycled.
+- `Spawner.RecycleAnim` can be used to play an anim on the spawned location when it is recycled.
 
 In `rulesmd.ini`:
 ```ini
@@ -1095,6 +1097,8 @@ Spawner.LimitRange=false         ; boolean
 Spawner.ExtraLimitRange=0        ; integer, range in cells
 Spawner.DelayFrames=             ; integer, game frames
 Spawner.AttackImmediately=false  ; boolean
+Spawner.RecycleRange=-1          ; integer, range in lepton
+Spawner.RecycleAnim=             ; Animation
 ```
 
 ### Automatic passenger deletion
@@ -1481,10 +1485,10 @@ Promote.EliteAnimation=           ; Animation
   - Technos hitted by a warhead with `[SOMEWARHEAD]->CombatAlert.Suppress` setted to `true` will not raise a radar event or EVA. This flag is default to the inverse value of ares flag `[SOMEWARHEAD]->Malicious`.
 - And the following flags controlls the effect of a combat alert.
   - `[AudioVisual]->CombatAlert.MakeAVoice` decides whether to play some sound effect with the combat alert. Set it to `true` will enable the following flags, otherwise they will be ignored.
-  - `[AudioVisual]->CombatAlert.UseFeedbackVoice` decides whether to use the sound defined by `VoiceFeedback`.
-  - `[AudioVisual]->CombatAlert.UseAttackVoice` decides whether to use the sound defined by `VoiceAttack`.
-  - `[AudioVisual]->CombatAlert.UseEVA` decides whether to play an EVA. The EVA is default to `EVA_UnitsInCombat`, and can be specified through `[SOMETECHNO]->CombatAlert.EVA`.
-  - The sound effect is taken at order, feedback first, attack then, eva finally. The flags in `[AudioVisual]` controlls whether to check it.
+  - `[SOMETECHNO]->CombatAlert.UseFeedbackVoice` decides whether to use the sound defined by `VoiceFeedback`. Default to `[AudioVisual]->CombatAlert.UseFeedbackVoice`.
+  - `[SOMETECHNO]->CombatAlert.UseAttackVoice` decides whether to use the sound defined by `VoiceAttack`. Default to `[AudioVisual]->CombatAlert.UseAttackVoice`.
+  - `[SOMETECHNO]->CombatAlert.UseEVA` decides whether to play an EVA. Default to `[AudioVisual]->CombatAlert.UseEVA`. The EVA to play is default to `EVA_UnitsInCombat`, and can be specified through `[SOMETECHNO]->CombatAlert.EVA`.
+  - The sound effect is taken **at order**, feedback first, attack then, eva finally. The flags in `[AudioVisual]` controlls whether to check it globally, and can be specify per techno.
   - An example: You set `CombatAlert.UseFeedbackVoice` and `CombatAlert.UseEVA` to `true` and `CombatAlert.UseAttackVoice` to `false`. A unit with `VoiceFeedback` `VoiceAttack` and `CombatAlert.EVA` are all set will play `VoiceFeedback`. A unit with `VoiceAttack` set will play `EVA_UnitsInCombat`.
 
 In `rulesmd.ini`:
@@ -1501,9 +1505,12 @@ CombatAlert.UseAttackVoice=true        ;boolean
 CombatAlert.UseEVA=true                ;boolean
 
 [SOMETECHNO]
-CombatAlert=true                     ;boolean
-CombatAlert.EVA=EVA_UnitsInCombat    ;EVA entry
-CombatAlert.NotBuilding=false        ;boolean
+CombatAlert=true                       ;boolean
+CombatAlert.NotBuilding=false          ;boolean
+CombatAlert.UseFeedbackVoice=true      ;boolean
+CombatAlert.UseAttackVoice=true        ;boolean
+CombatAlert.UseEVA=true                ;boolean
+CombatAlert.EVA=EVA_UnitsInCombat      ;EVA entry
 
 [SOMEWARHEAD]
 CombatAlert.Suppress=   ;boolean
@@ -1517,6 +1524,18 @@ In `rulesmd.ini`:
 [SOMETECHNO]
 Convert.HumanToComputer =   ; TechnoType
 Convert.ComputerToHuman =   ; TechnoType
+```
+
+### Waypoint for buildings and aircrafts
+
+- In vanilla, buildings and aircrafts is forbiddened to use waypoint. Now you can turn it on by the following flags.
+- P.S.: We have no idea about the reason why ww turn this off. In fact this has **not** been tested throughly. So, use it with caution.
+
+In `rulesmd.ini`:
+```ini
+[General]
+BuildingWaypoint=false    ; boolean
+AircraftWaypoint=false    ; boolean
 ```
 
 ### Recount burst index
@@ -1564,6 +1583,21 @@ In `rulesmd.ini`:
 ```ini
 [SOMEWARHEAD]            ; Warhead
 RemoveMindControl=false  ; boolean
+```
+
+### CellSpread enhancement
+
+- In vanilla, the damage area of an AOE warhead is spherical. In some case, e.g. you want to make a warhead superweapon buff all units in an area, the affectted range for air units is always smaller than ground units. Now you can use a new flag `CellSpread.Cylinder` to overcome this problem.
+- `AffectsInAir` allow you to make a warhead only damage the units with height more than 208.
+- `AffectsOnFloor` allow you to make a warhead only damage the units with height less than 208.
+- Noting that these features work independently with the ares flag `DamageAirThreshold`. A warhead with `CellSpread.Cylinder` detonating on floor will not affect units in air, unless it has `DamageAirThreshold = -1`.
+
+In `rulesmd.ini`:
+```ini
+[SOMEWARHEAD]              ; Warhead
+CellSpread.Cylinder=false  ; boolean
+AffectsInAir=true          ; boolean
+AffectsOnFloor=true        ; boolean
 ```
 
 ### Chance-based extra damage or Warhead detonation / 'critical hits'
@@ -1875,6 +1909,21 @@ FeedbackWeapon=  ; WeaponType
 ### Radiation enhancements
 
 - In addition to allowing custom radiation types, several enhancements are also available to the default radiation type defined in `[Radiation]`, such as ability to set owner & invoker or deal damage against buildings. See [Custom Radiation Types](#custom-radiation-types) for more details.
+
+### Range finding in cylinder
+
+- In vanilla, technos in air will ignore the distance in Z axis when checking if the target is in range. Now you can use the following flags to make technos always range finding like that.
+- `[General]->AlwaysCylinderRangefinding` controls this globally, and can be customized per weapon type.
+- Mind that set the flags to `false` meaning "use default" rather than "disable". Technos in air will always range finding in cylinder like vanilla, despite what you set.
+
+In `rulesmd.ini`:
+```ini
+[General]                         ; WeaponType
+AlwaysCylinderRangefinding=false  ; boolean
+
+[SOMEWEAPON]                      ; WeaponType
+AlwaysCylinderRangefinding=       ; boolean
+```
 
 ### Strafing aircraft weapon customization
 

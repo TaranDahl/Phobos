@@ -77,11 +77,11 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 
 			if (!pRules->CombatAlert_MakeAVoice) // No one want to play two sound at a time, I guess?
 				break;
-			else if (pRules->CombatAlert_UseFeedbackVoice && pType->VoiceFeedback.Count > 0) // Use VoiceFeedback first
+			else if (pTypeExt->CombatAlert_UseFeedbackVoice.Get(pRules->CombatAlert_UseFeedbackVoice) && pType->VoiceFeedback.Count > 0) // Use VoiceFeedback first
 				VocClass::PlayGlobal(pType->VoiceFeedback.GetItem(0), 0x2000, 1.0);
-			else if (pRules->CombatAlert_UseAttackVoice && pType->VoiceAttack.Count > 0) // Use VoiceAttack then
+			else if (pTypeExt->CombatAlert_UseAttackVoice.Get(pRules->CombatAlert_UseAttackVoice) && pType->VoiceAttack.Count > 0) // Use VoiceAttack then
 				VocClass::PlayGlobal(pType->VoiceAttack.GetItem(0), 0x2000, 1.0);
-			else if (pRules->CombatAlert_UseEVA) // Use Eva finally
+			else if (pTypeExt->CombatAlert_UseEVA.Get(pRules->CombatAlert_UseEVA)) // Use Eva finally
 				index = pTypeExt->CombatAlert_EVA.Get(VoxClass::FindIndex((const char*)"EVA_UnitsInCombat"));
 
 			if (index != -1)
@@ -120,27 +120,24 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	}
 
 	//Shield Receive Damage
-	if (!args->IgnoreDefenses)
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (const auto pShieldData = pExt->Shield.get())
 	{
-		const auto pExt = TechnoExt::ExtMap.Find(pThis);
+		if (!pShieldData->IsActive())
+			return 0;
 
-		if (const auto pShieldData = pExt->Shield.get())
+		const int nDamageLeft = pShieldData->ReceiveDamage(args);
+		if (nDamageLeft >= 0)
 		{
-			if (!pShieldData->IsActive())
-				return 0;
+			*args->Damage = nDamageLeft;
 
-			const int nDamageLeft = pShieldData->ReceiveDamage(args);
-			if (nDamageLeft >= 0)
-			{
-				*args->Damage = nDamageLeft;
-
-				if (auto pTag = pThis->AttachedTag)
-					pTag->RaiseEvent((TriggerEvent)PhobosTriggerEvent::ShieldBroken, pThis, CellStruct::Empty);
-			}
-
-			if (nDamageLeft == 0)
-				RD::SkipLowDamageCheck = true;
+			if (auto pTag = pThis->AttachedTag)
+				pTag->RaiseEvent((TriggerEvent)PhobosTriggerEvent::ShieldBroken, pThis, CellStruct::Empty);
 		}
+
+		if (nDamageLeft == 0)
+			RD::SkipLowDamageCheck = true;
 	}
 
 	return 0;

@@ -365,7 +365,20 @@ This page lists all the individual contributions to the project by their author.
   - Units will not always stuck in the factory
 - **TaranDahl**
   - Raise alert when technos are taking damage
+  - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller
+  - `Spawner.RecycleRange`
+  - `Spawner.RecycleAnim`
+  - Fixed the bug that spawned can not return to buildings with foundation bigger than 1x1
+  - `CellSpread.Cylinder`
+  - `AffectsInAir` and `AffectsOnFloor`
+  - Fixes infantries with `OpportunityFire=yes` can not fire while moving
+  - Parasite returning bug fix
+  - Enable waypoint for buildings and aircrafts
+  - Weapon range finding in cylinder
   - Units are now unable to kick out from a factory that is in construction process
+  - Skirmish AI "sell all and all in" behavior dehardcode
+  - Skirmish AI "regroup when mcv deploy" behavior dehardcode
+  - Global value of `RepairBaseNodes`
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude

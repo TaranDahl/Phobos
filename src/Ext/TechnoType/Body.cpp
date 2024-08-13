@@ -323,9 +323,17 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
 	this->UIExtraDescription.Read(exINI, pSection, "UIExtraDescription");
 
-	this->CombatAlert_EVA.Read(exINI, pSection, "CombatAlert.EVA");
 	this->CombatAlert.Read(exINI, pSection, "CombatAlert");
 	this->CombatAlert_NotBuilding.Read(exINI, pSection, "CombatAlert.NotBuilding");
+	this->CombatAlert_UseFeedbackVoice.Read(exINI, pSection, "CombatAlert.UseFeedbackVoice");
+	this->CombatAlert_UseAttackVoice.Read(exINI, pSection, "CombatAlert.UseAttackVoice");
+	this->CombatAlert_UseEVA.Read(exINI, pSection, "CombatAlert.UseEVA");
+	this->CombatAlert_EVA.Read(exINI, pSection, "CombatAlert.EVA");
+
+	this->Spawner_RecycleRange.Read(exINI, pSection, "Spawner.RecycleRange");
+	this->Spawner_RecycleFLH.Read(exINI, pSection, "Spawner.FLH");
+	this->Spawner_RecycleOnTurret.Read(exINI, pSection, "Spawner.RecycleOnTurret");
+	this->Spawner_RecycleAnim.Read(exINI, pSection, "Spawner.RecycleAnim");
 
 	this->Wake.Read(exINI, pSection, "Wake");
 	this->Wake_Grapple.Read(exINI, pSection, "Wake.Grapple");
@@ -704,9 +712,17 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->PrerequisiteForCameo)
 		.Process(this->UIExtraDescription)
 
-		.Process(this->CombatAlert_EVA)
 		.Process(this->CombatAlert)
 		.Process(this->CombatAlert_NotBuilding)
+		.Process(this->CombatAlert_UseFeedbackVoice)
+		.Process(this->CombatAlert_UseAttackVoice)
+		.Process(this->CombatAlert_UseEVA)
+		.Process(this->CombatAlert_EVA)
+
+		.Process(this->Spawner_RecycleRange)
+		.Process(this->Spawner_RecycleFLH)
+		.Process(this->Spawner_RecycleOnTurret)
+		.Process(this->Spawner_RecycleAnim)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)
