@@ -152,7 +152,7 @@ DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 		return 0;
 
 	auto const pSpawnerType = pSpawner->GetTechnoType();
-	auto const pSpawnedMapCrd = pSpawned->GetMapCoords();
+	auto const spawnedMapCrd = pSpawned->GetMapCoords();
 
 	if (!pSpawnerType)
 		return 0;
@@ -162,34 +162,34 @@ DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 	if (!pSpawnerExt)
 		return 0;
 
-	auto const SpawnerCrd = pSpawner->GetCoords();
-	auto const SpawnedCrd = pSpawned->GetCoords();
-	auto const DeltaCrd = SpawnedCrd - SpawnerCrd;
-	const int RecycleRange = pSpawnerExt->Spawner_RecycleRange;
+	auto const spawnerCrd = pSpawner->GetCoords();
+	auto const spawnedCrd = pSpawned->GetCoords();
+	auto const deltaCrd = spawnedCrd - spawnerCrd;
+	const int recycleRange = pSpawnerExt->Spawner_RecycleRange;
 
 	do
 	{
-		if (RecycleRange < 0)
+		if (recycleRange < 0)
 		{
 			if (pSpawner->WhatAmI() == AbstractType::Building)
 			{
-				if (DeltaCrd.X > 182 || DeltaCrd.Y > 182 || DeltaCrd.Z >= 20)
+				if (deltaCrd.X > 182 || deltaCrd.Y > 182 || deltaCrd.Z >= 20)
 					break;
 			}
-			else if (pSpawnedMapCrd.X != pSpawnerMapCrd->X || pSpawnedMapCrd.Y != pSpawnerMapCrd->Y || DeltaCrd.Z >= 20)
+			else if (spawnedMapCrd != *pSpawnerMapCrd || deltaCrd.Z >= 20)
 			{
 				break;
 			}
 		}
-		else if (Math::sqrt(DeltaCrd.X * DeltaCrd.X + DeltaCrd.Y * DeltaCrd.Y + DeltaCrd.Z * DeltaCrd.Z) > RecycleRange)
+		else if (deltaCrd.Magnitude() > recycleRange)
 		{
 			break;
 		}
 
 		if (pSpawnerExt->Spawner_RecycleAnim)
-			GameCreate<AnimClass>(pSpawnerExt->Spawner_RecycleAnim, SpawnedCrd);
+			GameCreate<AnimClass>(pSpawnerExt->Spawner_RecycleAnim, spawnedCrd);
 
-		pSpawned->SetLocation(SpawnerCrd);
+		pSpawned->SetLocation(spawnerCrd);
 		R->EAX(pSpawnerMapCrd);
 	}
 	while (false);

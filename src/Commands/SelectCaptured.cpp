@@ -46,11 +46,8 @@ void SelectCapturedCommandClass::Execute(WWKey eInput) const
 	{
 		if (auto pTechno = abstract_cast<TechnoClass*>(pCurrentObject))
 		{
-			Point2D coordInScreen { 0 , 0 };
-			CoordStruct coordInMap { 0 , 0 , 0 };
-			pTechno->GetCoords( &coordInMap );
-			TacticalClass::Instance->CoordsToScreen( &coordInScreen , &coordInMap );
-			coordInScreen -= TacticalClass::Instance->TacticalPos;
+			TacticalClass* const pTactical = TacticalClass::Instance;
+			const Point2D coordInScreen = pTactical->CoordsToScreen(pTechno->GetCoords()) - pTactical->TacticalPos;
 			RectangleStruct screenArea = DSurface::Composite->GetRect();
 
 			if (screenArea.Width >= coordInScreen.X && screenArea.Height >= coordInScreen.Y && coordInScreen.X >=0 && coordInScreen.Y >= 0 // the unit is in the current screen
