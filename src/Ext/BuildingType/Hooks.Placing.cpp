@@ -561,7 +561,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 			{
 				if (canBuild)
 				{
-					if (true || noOccupy)
+					if (noOccupy)
 						break; // Can Build
 
 					do
