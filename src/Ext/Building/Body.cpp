@@ -371,7 +371,7 @@ void BuildingExt::KickOutStuckUnits(BuildingClass* pThis)
 							continue;
 
 						pUnit->Limbo();
-						pUnit->Unlimbo(CellClass::Cell2Coord(CellStruct{ curX, static_cast<short>(bottomRight.Y + 2) }), static_cast<DirType>(0));
+						pUnit->Unlimbo(CellClass::Cell2Coord(CellStruct{ curX, ++curY }), DirType::East);
 						break; // one after another
 					}
 				}
