@@ -1831,7 +1831,7 @@ In `rulesmd.ini`:
 NotHuman.DeathSequence=  ; integer (1 to 5)
 ```
 
-### Extra warhead multiplier for different houses
+### Damage multiplier for different houses
 
 - Warheads are now able to define the extra damage multiplier for owner house, ally houses and enemy houses. The values in warheads are default to respective `[CombatDamage]` -> `DamageXXMultiplier`, which all default to 1.0 .Note that this will not affect damage with ignore defenses.
 

@@ -424,7 +424,7 @@ New:
 - New Parabola trajectory (by CrimRecya)
 - New Tracing trajectory (by CrimRecya)
 - Display factories, superweapons, iron curtain and temporal progress on specific technos (by CrimRecya)
-- Extra warhead multiplier for different houses (by CrimRecya)
+- Damage multiplier for different houses (by CrimRecya)
 - Units Rotate Turret When in Idle Action (by CrimRecya)
 - Jumpjet climbing logic enhancement (by CrimRecya)
 - Building placing and deploying logic enhancement, unit base normal, new placing grids and grey cameo preview (by CrimRecya)

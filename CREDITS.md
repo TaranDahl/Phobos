@@ -358,7 +358,7 @@ This page lists all the individual contributions to the project by their author.
   - New Parabola trajectory
   - New Tracing trajectory
   - Display factories, superweapons, iron curtain and temporal progress on specific technos
-  - Extra warhead multiplier for different houses
+  - Damage multiplier for different houses
   - Units Rotate Turret When in Idle Action
   - Jumpjet climbing logic enhancement
   - Building placing and deploying logic enhancement, unit base normal, new placing grids and grey cameo preview
