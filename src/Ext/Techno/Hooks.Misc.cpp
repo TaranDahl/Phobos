@@ -135,6 +135,14 @@ bool __fastcall AircraftTypeClass_CanUseWaypoint(AircraftTypeClass* pThis)
 }
 DEFINE_JUMP(VTABLE, 0x7E2908, GET_OFFSET(AircraftTypeClass_CanUseWaypoint))
 
+bool __fastcall AircraftTypeClass_CanAttackMove(AircraftTypeClass* pThis)
+{
+	return true;
+}
+DEFINE_JUMP(VTABLE, 0x7E290C, GET_OFFSET(AircraftTypeClass_CanAttackMove))
+
+DEFINE_JUMP(VTABLE, 0x7E2668, 0x445F00) // Redirect AircraftClass::SelectAutoTarget to BuildingClass::SelectAutoTarget
+
 DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 {
 	//enum { RecycleIsOk = 0x6B77FF, RecycleIsNotOk = 0x6B7838 };
