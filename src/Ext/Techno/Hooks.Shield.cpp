@@ -101,20 +101,11 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 		int calculateDamage = *args->Damage;
 
 		if (pHouse == args->SourceHouse)
-		{
-			if (pWHExt->DamageOwnerMultiplier != 1.0)
-				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageOwnerMultiplier.Get(pRules->DamageOwnerMultiplier));
-		}
+			calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageOwnerMultiplier.Get(pRules->DamageOwnerMultiplier));
 		else if (pHouse->IsAlliedWith(args->SourceHouse))
-		{
-			if (pWHExt->DamageAlliesMultiplier != 1.0)
-				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageAlliesMultiplier.Get(pRules->DamageAlliesMultiplier));
-		}
+			calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageAlliesMultiplier.Get(pRules->DamageAlliesMultiplier));
 		else
-		{
-			if (pWHExt->DamageEnemiesMultiplier != 1.0)
-				calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageEnemiesMultiplier.Get(pRules->DamageEnemiesMultiplier));
-		}
+			calculateDamage = static_cast<int>(*args->Damage * pWHExt->DamageEnemiesMultiplier.Get(pRules->DamageEnemiesMultiplier));
 
 		*args->Damage = calculateDamage ? calculateDamage : sgnDamage;
 	}
