@@ -149,7 +149,7 @@ AbstractClass* __fastcall AircraftClass_SelectAutoTarget(AircraftClass* pThis, v
 		targetFlags |= reinterpret_cast<TargetFlags(__thiscall*)(WeaponTypeClass*)>(0x772A90)(pPrimaryWeapon);
 
 	AbstractClass* const pTarget = reinterpret_cast<AbstractClass*(__thiscall*)(TechnoClass*, TargetFlags, CoordStruct*, bool)>(0x6F8DF0)(pThis, targetFlags, pSelectCoords, onlyTargetHouseEnemy);
-	return (pTarget && pThis->IsCloseEnoughToAttack(pTarget)) ? pTarget : nullptr;
+	return (pTarget && pThis->IsCloseEnoughToAttack(pTarget)) ? pTarget : nullptr; // TODO looking forward to more suitable place
 }
 DEFINE_JUMP(VTABLE, 0x7E2668, GET_OFFSET(AircraftClass_SelectAutoTarget))
 

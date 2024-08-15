@@ -117,8 +117,8 @@ When the left mouse button release, move the CurrentBuildingType to here and cle
 unknown_1198 -> CurrentBuildingTypeArrayIndexCopy
 When the left mouse button release, move the unknown_11AC to here and clear the unknown_11AC, and move itself back to unknown_11AC if place failed
 
-unknown_11AC -> CurrentBuildingOwnerHouseArrayIndex
-When the building type cameo clicked, this record the ArrayIndex of the owner house of the building product
+unknown_11AC -> CurrentBuildingTypeArrayIndex
+When the building type cameo clicked, this record the ArrayIndex of the building type product
 
 CellClass:
 AltFlags = AltCellFlags::Unknown_4 -> InBuildingProcess
