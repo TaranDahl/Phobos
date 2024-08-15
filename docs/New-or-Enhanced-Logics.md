@@ -921,7 +921,7 @@ Shrapnel.UseWeaponTargeting=false  ; boolean
 
 - It is now possible to make projectiles consider either land or water as obstacles that block their path by setting `SubjectToLand/Water` to true, respectively. Weapons firing such projectiles will consider targets blocked by such obstacles as out of range and will attempt to reposition themselves so they can fire without being blocked by the said obstacles before firing and if `SubjectToLand/Water.Detonate` is set to true, the projectiles will detonate if they somehow manage to collide with the said obstacles.
   - `Level=true` projectiles detonate on tiles belonging to non-water tilesets by default, but will not consider such tiles as true obstacles. This behaviour can be overridden by setting these keys.
-- As for `SubjectToGround`, if set it to true ,it will predict will predict the height of the connecting straight line from the bullet's source coordinates to target coordinates. If the predicted height is lower than the ground height of the current predicted position, the firer will also consider targets blocked by such obstacles as out of range and will attempt to reposition themselves.
+- As for `SubjectToGround`, if set it to true ,it will predict the height of the connecting straight line from the bullet's source coordinates to target coordinates. If the predicted height is lower than the ground height of the current predicted position, the firer will also consider targets blocked by such obstacles as out of range and will attempt to reposition themselves.
 
 In `rulesmd.ini`:
 ```ini
@@ -1833,7 +1833,7 @@ NotHuman.DeathSequence=  ; integer (1 to 5)
 
 ### Damage multiplier for different houses
 
-- Warheads are now able to define the extra damage multiplier for owner house, ally houses and enemy houses. The values in warheads are default to respective `[CombatDamage]` -> `DamageXXMultiplier`, which all default to 1.0 .Note that this will not affect damage with ignore defenses.
+- Warheads are now able to define the extra damage multiplier for owner house, ally houses and enemy houses. If the warhead's own `DamageXXMultiplier` are not set, these will default to respective `[CombatDamage]` -> `DamageXXMultiplier` which all default to 1.0 .Note that `DamageAlliesMultiplier` won't affect your own units like `AffectsAllies` did, and this function will not affect damage with ignore defenses like `Suicide`.etc .
 
 In `rulesmd.ini`:
 ```ini
