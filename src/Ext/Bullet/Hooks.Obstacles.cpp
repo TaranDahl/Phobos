@@ -95,7 +95,7 @@ public:
 
 		const int extraHeight = pTechno->GetHeight();
 
-		if (extraHeight > 200)
+		if (extraHeight > Unsorted::CellHeight)
 		{
 			subjectToGround = false;
 			return sourceCoords;
