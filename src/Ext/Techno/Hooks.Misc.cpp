@@ -141,7 +141,17 @@ bool __fastcall AircraftTypeClass_CanAttackMove(AircraftTypeClass* pThis)
 }
 DEFINE_JUMP(VTABLE, 0x7E290C, GET_OFFSET(AircraftTypeClass_CanAttackMove))
 
-DEFINE_JUMP(VTABLE, 0x7E2668, 0x445F00) // Redirect AircraftClass::SelectAutoTarget to BuildingClass::SelectAutoTarget
+AbstractClass* __fastcall AircraftClass_SelectAutoTarget(AircraftClass* pThis, void* _, TargetFlags targetFlags, CoordStruct* pSelectCoords, bool onlyTargetHouseEnemy)
+{
+	if (WeaponTypeClass* const pSecondaryWeapon = pThis->GetWeapon(1)->WeaponType)
+		targetFlags |= reinterpret_cast<TargetFlags(__thiscall*)(WeaponTypeClass*)>(0x772A90)(pSecondaryWeapon);
+	else if (WeaponTypeClass* const pPrimaryWeapon = pThis->GetWeapon(0)->WeaponType)
+		targetFlags |= reinterpret_cast<TargetFlags(__thiscall*)(WeaponTypeClass*)>(0x772A90)(pPrimaryWeapon);
+
+	AbstractClass* const pTarget = reinterpret_cast<AbstractClass*(__thiscall*)(TechnoClass*, TargetFlags, CoordStruct*, bool)>(0x6F8DF0)(pThis, targetFlags, pSelectCoords, onlyTargetHouseEnemy);
+	return (pTarget && pThis->IsCloseEnoughToAttack(pTarget)) ? pTarget : nullptr;
+}
+DEFINE_JUMP(VTABLE, 0x7E2668, GET_OFFSET(AircraftClass_SelectAutoTarget))
 
 DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 {
