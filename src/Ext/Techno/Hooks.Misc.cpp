@@ -98,3 +98,35 @@ DEFINE_HOOK(0x6B7600, SpawnManagerClass_AI_InitDestination, 0x6)
 
 	return R->Origin() == 0x6B7600 ? SkipGameCode1 : SkipGameCode2;
 }
+
+//DEFINE_HOOK(0x63A4D4, UnknownClass_PlanWaypoint_ContinuePlanningWaypoint1, 0x7)
+//{
+//	return 0x63A573;
+//}
+
+DEFINE_HOOK(0x63745D, UnknownClass_PlanWaypoint_ContinuePlanningWaypoint1, 0x6)
+{
+	enum { SkipDeselect = 0x637468, DoNotSkip = 0 };
+
+	GET(int, planResult, ESI);
+
+	if (planResult == 0)
+		return SkipDeselect;
+	else
+		return DoNotSkip;
+}
+
+DEFINE_HOOK(0x637479, UnknownClass_PlanWaypoint_DisableMessage1, 0x5)
+{
+	return 0x63748A;
+}
+
+DEFINE_HOOK(0x637491, UnknownClass_PlanWaypoint_DisableMessage2, 0x5)
+{
+	return 0x637524;
+}
+
+DEFINE_HOOK(0x638D73, UnknownClass_CheckLastWaypoint_ContinuePlanningWaypoint2, 0x5)
+{
+	return 0x638D8D;
+}
