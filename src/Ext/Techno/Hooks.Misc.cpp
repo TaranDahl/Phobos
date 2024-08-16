@@ -133,7 +133,7 @@ DEFINE_HOOK(0x6FC22A, TechnoClass_GetFireError_TargetingIronCurtain, 0x6)
 	GET(TechnoClass*, pThis, ESI);
 	GET(ObjectClass*, pTarget, EBP);
 
-	if (!pThis->IsIronCurtained())
+	if (!pTarget->IsIronCurtained())
 	{
 		return GoOtherChecks;
 	}
