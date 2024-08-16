@@ -98,3 +98,56 @@ DEFINE_HOOK(0x6B7600, SpawnManagerClass_AI_InitDestination, 0x6)
 
 	return R->Origin() == 0x6B7600 ? SkipGameCode1 : SkipGameCode2;
 }
+
+DEFINE_HOOK(0x702B31, TechnoClass_ReceiveDamage_ReturnFireCheck, 0x7)
+{
+	enum { SkipReturnFire = 0x702B47, NotSkip = 0 };
+
+	GET(TechnoClass*, pThis, ESI);
+
+	auto pOwner = pThis->Owner;
+
+	if ((pOwner->IsHumanPlayer || pOwner->IsInPlayerControl) && true) //RulesExt::Global()->PlayerReturnFire_Smarter)
+	{
+		auto mission = pThis->CurrentMission;
+		auto pTarget = pThis->Target;
+		auto pThisFoot = abstract_cast<FootClass*>(pThis);
+		bool isJJMoving = pThisFoot->GetHeight() > Unsorted::CellHeight && mission == Mission::Move && pThisFoot->Locomotor->Is_Moving_Now(); // I have really no idea about how to check this perfectly.
+		auto isMoving = isJJMoving || mission == Mission::Move && pThisFoot->GetHeight() <= 0;
+
+		if ( pTarget || isMoving)
+		{
+			return SkipReturnFire;
+		}
+		else
+			return NotSkip;
+	}
+
+	return NotSkip;
+}
+
+DEFINE_HOOK(0x6FC22A, TechnoClass_GetFireError_TargetingIronCurtain, 0x6)
+{
+	enum { CantFire = 0x6FC86A, GoOtherChecks = 0x6FC24D };
+
+	GET(TechnoClass*, pThis, ESI);
+	GET(ObjectClass*, pTarget, EBP);
+
+	if (!pThis->IsIronCurtained())
+	{
+		return GoOtherChecks;
+	}
+
+	auto pOwner = pThis->Owner;
+	bool isPlayer = pOwner->IsHumanPlayer || pOwner->IsInPlayerControl;
+
+	if (isPlayer && false
+		|| !isPlayer && true)
+	{
+		return GoOtherChecks;
+	}
+	else
+	{
+		return CantFire;
+	}
+}
