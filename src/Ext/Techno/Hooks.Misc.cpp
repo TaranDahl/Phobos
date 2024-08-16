@@ -143,13 +143,18 @@ DEFINE_JUMP(VTABLE, 0x7E290C, GET_OFFSET(AircraftTypeClass_CanAttackMove))
 
 AbstractClass* __fastcall AircraftClass_SelectAutoTarget(AircraftClass* pThis, void* _, TargetFlags targetFlags, CoordStruct* pSelectCoords, bool onlyTargetHouseEnemy)
 {
-	if (WeaponTypeClass* const pSecondaryWeapon = pThis->GetWeapon(1)->WeaponType)
+	WeaponTypeClass* const pPrimaryWeapon = pThis->GetWeapon(0)->WeaponType;
+	WeaponTypeClass* const pSecondaryWeapon = pThis->GetWeapon(1)->WeaponType;
+
+	if (pSecondaryWeapon) // Vanilla secondary first
 		targetFlags |= reinterpret_cast<TargetFlags(__thiscall*)(WeaponTypeClass*)>(0x772A90)(pSecondaryWeapon);
-	else if (WeaponTypeClass* const pPrimaryWeapon = pThis->GetWeapon(0)->WeaponType)
+	else if (pPrimaryWeapon)
 		targetFlags |= reinterpret_cast<TargetFlags(__thiscall*)(WeaponTypeClass*)>(0x772A90)(pPrimaryWeapon);
 
 	AbstractClass* const pTarget = reinterpret_cast<AbstractClass*(__thiscall*)(TechnoClass*, TargetFlags, CoordStruct*, bool)>(0x6F8DF0)(pThis, targetFlags, pSelectCoords, onlyTargetHouseEnemy);
-	return (pTarget && pThis->IsCloseEnoughToAttack(pTarget)) ? pTarget : nullptr; // TODO looking forward to more suitable place
+	const int range = pThis->SelectWeapon(pTarget) ? pSecondaryWeapon->Range : pPrimaryWeapon->Range; // No need to check pTarget
+
+	return (!pThis->vt_entry_4C4() || (pTarget && pThis->GetCoords().DistanceFrom(pTarget->GetCoords()) < (range << 1))) ? pTarget : nullptr; // Should check distance if in AttackMove
 }
 DEFINE_JUMP(VTABLE, 0x7E2668, GET_OFFSET(AircraftClass_SelectAutoTarget))
 
