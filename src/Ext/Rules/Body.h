@@ -197,6 +197,7 @@ public:
 
 		Nullable<Vector3D<float>> VoxelLightSource;
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
+		Valueable<bool> UseFixedVoxelLighting;
 
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
@@ -352,6 +353,7 @@ public:
 			, RepairBaseNodes {}
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
+			, UseFixedVoxelLighting { false }
 		{ }
 
 		virtual ~ExtData() = default;
