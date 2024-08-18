@@ -396,3 +396,21 @@ DEFINE_HOOK(0x4511D6, BuildingClass_AnimationAI_SellBuildup, 0x7)
 
 	return pTypeExt->SellBuildupLength == pThis->Animation.Value ? Continue : Skip;
 }
+
+DEFINE_HOOK(0x450630, BuildingClass_Update_PlayerAutoRepair, 0x9)
+{
+	GET(BuildingClass*, pThis, ECX);
+
+	auto const pOwner = pThis->Owner;
+	auto const mission = pThis->CurrentMission;
+
+	if (pThis->Health < pThis->GetTechnoType()->Strength
+		&& pThis->CanBeRepaired()
+		&& mission != Mission::Construction && mission != Mission::Selling
+		&& (pOwner->IsHumanPlayer || pOwner->IsControlledByHuman()) && true)
+	{
+		pThis->IsBeingRepaired = true;
+	}
+
+	return 0;
+}
