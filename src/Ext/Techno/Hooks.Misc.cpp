@@ -135,41 +135,6 @@ bool __fastcall AircraftTypeClass_CanUseWaypoint(AircraftTypeClass* pThis)
 }
 DEFINE_JUMP(VTABLE, 0x7E2908, GET_OFFSET(AircraftTypeClass_CanUseWaypoint))
 
-bool __fastcall AircraftTypeClass_CanAttackMove(AircraftTypeClass* pThis)
-{
-	return true;
-}
-DEFINE_JUMP(VTABLE, 0x7E290C, GET_OFFSET(AircraftTypeClass_CanAttackMove))
-
-AbstractClass* __fastcall AircraftClass_SelectAutoTarget(AircraftClass* pThis, void* _, TargetFlags targetFlags, CoordStruct* pSelectCoords, bool onlyTargetHouseEnemy)
-{
-	if (pThis->vt_entry_4C4() && !pThis->Ammo)
-		return pThis->GetCell(); // Return to airbase if in AttackMove but no ammo
-
-	WeaponTypeClass* const pPrimaryWeapon = pThis->GetWeapon(0)->WeaponType;
-	WeaponTypeClass* const pSecondaryWeapon = pThis->GetWeapon(1)->WeaponType;
-
-	if (pSecondaryWeapon) // Vanilla secondary first
-		targetFlags |= reinterpret_cast<TargetFlags(__thiscall*)(WeaponTypeClass*)>(0x772A90)(pSecondaryWeapon);
-	else if (pPrimaryWeapon)
-		targetFlags |= reinterpret_cast<TargetFlags(__thiscall*)(WeaponTypeClass*)>(0x772A90)(pPrimaryWeapon);
-
-	AbstractClass* const pTarget = reinterpret_cast<AbstractClass*(__thiscall*)(TechnoClass*, TargetFlags, CoordStruct*, bool)>(0x6F8DF0)(pThis, targetFlags, pSelectCoords, onlyTargetHouseEnemy);
-	const int range = pThis->SelectWeapon(pTarget) ? pSecondaryWeapon->Range : pPrimaryWeapon->Range; // No need to check pTarget
-
-	return (!pThis->vt_entry_4C4() || (pTarget && pThis->GetCoords().DistanceFrom(pTarget->GetCoords()) < (range << 1))) ? pTarget : nullptr; // Should check distance if in AttackMove
-}
-DEFINE_JUMP(VTABLE, 0x7E2668, GET_OFFSET(AircraftClass_SelectAutoTarget))
-
-DEFINE_HOOK(0x4DF3BA, FootClass_UpdateAttackMove_ShouldLoseCurrentTarget, 0x6)
-{
-	enum { LoseCurrentTarget = 0x4DF3D3, HoldCurrentTarget = 0x4DF4AB };
-
-	GET(FootClass* const, pThis, ESI);
-
-	return (pThis->WhatAmI() == AbstractType::Aircraft || pThis->vt_entry_3B4(reinterpret_cast<DWORD>(pThis->Target))) ? HoldCurrentTarget : LoseCurrentTarget;
-}
-
 DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 {
 	//enum { RecycleIsOk = 0x6B77FF, RecycleIsNotOk = 0x6B7838 };
