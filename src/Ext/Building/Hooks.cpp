@@ -397,7 +397,7 @@ DEFINE_HOOK(0x4511D6, BuildingClass_AnimationAI_SellBuildup, 0x7)
 	return pTypeExt->SellBuildupLength == pThis->Animation.Value ? Continue : Skip;
 }
 
-DEFINE_HOOK(0x450630, BuildingClass_Update_PlayerAutoRepair, 0x9)
+DEFINE_HOOK(0x450630, BuildingClass_UpdateRepair_PlayerAutoRepair, 0x9)
 {
 	GET(BuildingClass*, pThis, ECX);
 
