@@ -99,10 +99,28 @@ DEFINE_HOOK(0x6B7600, SpawnManagerClass_AI_InitDestination, 0x6)
 	return R->Origin() == 0x6B7600 ? SkipGameCode1 : SkipGameCode2;
 }
 
-// still lose target when stop. no idea about why.
 DEFINE_HOOK(0x6F50A9, TechnoClass_UpdatePosition_TemporalLetGo, 0x7)
 {
 	enum { LetGo = 0x6F50B4, SkipLetGo = 0x6F50B9 };
+
+	GET(TechnoClass*, pThis, ESI);
+	GET(TemporalClass*, pTemporal, ECX);
+
+	if (!pTemporal)
+		return SkipLetGo;
+
+	if (!pTemporal->Target)
+		return SkipLetGo;
+
+	if (false)
+		return LetGo;
+	else
+		return SkipLetGo;
+}
+
+DEFINE_HOOK(0x709A43, TechnoClass_EnterIdleMode_TemporalLetGo, 0x7)
+{
+	enum { LetGo = 0x709A54, SkipLetGo = 0x709A59 };
 
 	GET(TechnoClass*, pThis, ESI);
 	GET(TemporalClass*, pTemporal, ECX);
