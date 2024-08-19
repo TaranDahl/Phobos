@@ -144,6 +144,9 @@ public:
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
 		Valueable<bool> UseFixedVoxelLighting;
 
+		Valueable<bool> PlayerAttackIronCurtain;
+		Valueable<bool> AIAttackIronCurtain;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -245,6 +248,8 @@ public:
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 			, UseFixedVoxelLighting { false }
+			, PlayerAttackIronCurtain { true }
+			, AIAttackIronCurtain { false }
 		{ }
 
 		virtual ~ExtData() = default;

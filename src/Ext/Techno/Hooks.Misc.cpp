@@ -133,16 +133,18 @@ DEFINE_HOOK(0x6FC22A, TechnoClass_GetFireError_TargetingIronCurtain, 0x6)
 	GET(TechnoClass*, pThis, ESI);
 	GET(ObjectClass*, pTarget, EBP);
 
-	if (!pTarget->IsIronCurtained())
+	auto const pRules = RulesExt::Global();
+	auto pOwner = pThis->Owner;
+
+	if (!pTarget->IsIronCurtained() ||
+		pTarget->IsIronCurtained() && pOwner->IsAlliedWith(pTarget))
 	{
 		return GoOtherChecks;
 	}
 
-	auto pOwner = pThis->Owner;
 	bool isPlayer = pOwner->IsHumanPlayer || pOwner->IsInPlayerControl;
 
-	if (isPlayer && false
-		|| !isPlayer && true)
+	if (isPlayer ? pRules->PlayerAttackIronCurtain : pRules->AIAttackIronCurtain)
 	{
 		return GoOtherChecks;
 	}
