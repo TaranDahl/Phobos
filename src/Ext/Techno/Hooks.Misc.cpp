@@ -1,5 +1,6 @@
 #include "Body.h"
 
+#include <Ext/WeaponType/Body.h>
 #include <SpawnManagerClass.h>
 
 DEFINE_HOOK(0x6B0B9C, SlaveManagerClass_Killed_DecideOwner, 0x6)
@@ -132,24 +133,22 @@ DEFINE_HOOK(0x6FC22A, TechnoClass_GetFireError_TargetingIronCurtain, 0x6)
 
 	GET(TechnoClass*, pThis, ESI);
 	GET(ObjectClass*, pTarget, EBP);
+	GET_STACK(int, wpIdx, STACK_OFFSET(0x20, 0x8));
 
 	auto const pRules = RulesExt::Global();
 	auto pOwner = pThis->Owner;
 
-	if (!pTarget->IsIronCurtained() ||
-		pTarget->IsIronCurtained() && pOwner->IsAlliedWith(pTarget))
-	{
+	if (!pTarget->IsIronCurtained())
 		return GoOtherChecks;
-	}
 
+	auto pWpExt = WeaponTypeExt::ExtMap.Find(pThis->GetWeapon(wpIdx)->WeaponType);
 	bool isPlayer = pOwner->IsHumanPlayer || pOwner->IsInPlayerControl;
+	bool isHealing = pThis->CombatDamage(wpIdx) < 0;
 
 	if (isPlayer ? pRules->PlayerAttackIronCurtain : pRules->AIAttackIronCurtain)
-	{
 		return GoOtherChecks;
-	}
+	else if (pWpExt && pWpExt->AttackIronCurtain.Get(isHealing))
+		return GoOtherChecks;
 	else
-	{
 		return CantFire;
-	}
 }
