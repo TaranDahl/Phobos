@@ -417,7 +417,15 @@ DEFINE_HOOK(0x450630, BuildingClass_UpdateRepair_PlayerAutoRepair, 0x9)
 
 // Skip the `IsStrange` check.
 // No idea about the reason why WW hardcoded this.
-DEFINE_HOOK(0x452652, BuildingClass_CanBeRepaired_Dehardcode, 0xA)
+DEFINE_HOOK(0x452652, BuildingClass_CanBeRepaired_SideBarRepair, 0xA)
 {
 	return 0x452664;
 }
+
+/*
+// Not only restricted by mouse. Needs more investigation.
+DEFINE_HOOK(0x51E4D5, InfantryClass_MouseOverObject_EngiRepair, 0xA)
+{
+	return 0x51E4E7;
+}
+*/
