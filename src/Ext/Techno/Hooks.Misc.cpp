@@ -108,23 +108,23 @@ DEFINE_HOOK(0x702B31, TechnoClass_ReceiveDamage_ReturnFireCheck, 0x7)
 
 	auto pOwner = pThis->Owner;
 
-	if ((pOwner->IsHumanPlayer || pOwner->IsInPlayerControl) && true) //RulesExt::Global()->PlayerReturnFire_Smarter)
-	{
-		auto mission = pThis->CurrentMission;
-		auto pTarget = pThis->Target;
-		auto pThisFoot = abstract_cast<FootClass*>(pThis);
-		bool isJJMoving = pThisFoot->GetHeight() > Unsorted::CellHeight && mission == Mission::Move && pThisFoot->Locomotor->Is_Moving_Now(); // I have really no idea about how to check this perfectly.
-		auto isMoving = isJJMoving || mission == Mission::Move && pThisFoot->GetHeight() <= 0;
+	if (!(pOwner->IsHumanPlayer || pOwner->IsInPlayerControl) || !RulesExt::Global()->PlayerReturnFire_Smarter)
+		return NotSkip;
 
-		if ( pTarget || isMoving)
-		{
-			return SkipReturnFire;
-		}
-		else
-			return NotSkip;
-	}
+	auto pTarget = pThis->Target;
 
-	return NotSkip;
+	if (pTarget)
+		return SkipReturnFire;
+
+	auto mission = pThis->CurrentMission;
+	auto pThisFoot = abstract_cast<FootClass*>(pThis);
+	bool isJJMoving = pThisFoot != 0 ? pThisFoot->GetHeight() > Unsorted::CellHeight && mission == Mission::Move && pThisFoot->Locomotor->Is_Moving_Now() : 0; // I have really no idea about how to check this perfectly.
+	bool isMoving = pThisFoot != 0 ? isJJMoving || mission == Mission::Move && pThisFoot->GetHeight() <= 0 : 0;
+
+	if (isMoving)
+		return SkipReturnFire;
+	else
+		return NotSkip;
 }
 
 DEFINE_HOOK(0x6FC22A, TechnoClass_GetFireError_TargetingIronCurtain, 0x6)
