@@ -188,12 +188,13 @@ public:
 		Valueable<bool> CombatAlert_UseEVA;
 		Valueable<bool> BuildingWaypoint;
 		Valueable<bool> AircraftWaypoint;
-		Valueable<bool> AlwaysCylinderRangefinding;
-		Valueable<bool> RegroupWhenMCVDeploy;
-		Valueable<bool> AISellAllOnLastLegs;
-		Valueable<int> AISellAllDelay;
-		Valueable<bool> AIAllInOnLastLegs;
+		Valueable<bool> CylinderRangefinding;
+		Valueable<bool> GatherWhenMCVDeploy;
+		Valueable<bool> AIFireSale;
+		Valueable<int> AIFireSaleDelay;
+		Valueable<bool> AIAllToHunt;
 		ValueableVector<bool> RepairBaseNodes;
+		Valueable<bool> MCVRedeploysInCampaign;
 
 		Nullable<Vector3D<float>> VoxelLightSource;
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
@@ -345,12 +346,13 @@ public:
 			, CombatAlert_UseEVA { true }
 			, BuildingWaypoint { false }
 			, AircraftWaypoint { false }
-			, AlwaysCylinderRangefinding { false }
-			, RegroupWhenMCVDeploy { true }
-			, AISellAllOnLastLegs { true }
-			, AISellAllDelay { 0 }
-			, AIAllInOnLastLegs { true }
+			, CylinderRangefinding { false }
+			, GatherWhenMCVDeploy { true }
+			, AIFireSale { true }
+			, AIFireSaleDelay { 0 }
+			, AIAllToHunt { true }
 			, RepairBaseNodes {}
+			, MCVRedeploysInCampaign { false }
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 			, UseFixedVoxelLighting { false }

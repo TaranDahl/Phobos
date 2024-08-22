@@ -104,7 +104,7 @@ DEFINE_HOOK(0x6B7600, SpawnManagerClass_AI_InitDestination, 0x6)
 DEFINE_HOOK(0x739920, UnitClass_TryToDeploy_DisableRegroupAtNewConYard, 0x6)
 {
 	enum { SkipRegroup = 0x73992B };
-	return RulesExt::Global()->RegroupWhenMCVDeploy ? 0 : SkipRegroup;
+	return RulesExt::Global()->GatherWhenMCVDeploy ? 0 : SkipRegroup;
 }
 
 DEFINE_HOOK(0x6F7891, TechnoClass_IsCloseEnough_CylinderRangefinding, 0x7)
@@ -114,12 +114,12 @@ DEFINE_HOOK(0x6F7891, TechnoClass_IsCloseEnough_CylinderRangefinding, 0x7)
 	GET(WeaponTypeClass* const, pWeaponType, EDI);
 	GET(TechnoClass* const, pThis, ESI);
 
-	bool alwaysCylinderRangefinding = RulesExt::Global()->AlwaysCylinderRangefinding;
+	bool cylinder = RulesExt::Global()->CylinderRangefinding;
 
 	if (auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeaponType))
-		alwaysCylinderRangefinding = pWeaponExt->AlwaysCylinderRangefinding.Get(alwaysCylinderRangefinding);
+		cylinder = pWeaponExt->CylinderRangefinding.Get(cylinder);
 
-	R->AL(alwaysCylinderRangefinding ? true : pThis->IsInAir());
+	R->AL(cylinder ? true : pThis->IsInAir());
 	return SkipGameCode;
 }
 

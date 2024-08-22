@@ -236,13 +236,13 @@ public:
 		Valueable<TechnoTypeClass*> PrerequisiteForCameo;
 		Valueable<CSFText> UIExtraDescription;
 
-		Valueable<bool> CombatAlert;
+		Nullable<bool> CombatAlert;
 		Nullable<bool> CombatAlert_NotBuilding;
 		Nullable<bool> CombatAlert_UseFeedbackVoice;
 		Nullable<bool> CombatAlert_UseAttackVoice;
 		Nullable<bool> CombatAlert_UseEVA;
 		NullableIdx<VoxClass> CombatAlert_EVA;
-
+		Valueable<bool> FiringByPassMovingCheck;
 		Valueable<int> Spawner_RecycleRange;
 		Valueable<CoordStruct> Spawner_RecycleFLH;
 		Valueable<bool> Spawner_RecycleOnTurret;
@@ -484,13 +484,13 @@ public:
 			, PrerequisiteForCameo {}
 			, UIExtraDescription {}
 
-			, CombatAlert { true }
+			, CombatAlert {}
 			, CombatAlert_NotBuilding {}
 			, CombatAlert_UseFeedbackVoice {}
 			, CombatAlert_UseAttackVoice {}
 			, CombatAlert_UseEVA {}
 			, CombatAlert_EVA {}
-
+			, FiringByPassMovingCheck { false }
 			, Spawner_RecycleRange { -1 }
 			, Spawner_RecycleFLH { { 0, 0, 0 } }
 			, Spawner_RecycleOnTurret { false }

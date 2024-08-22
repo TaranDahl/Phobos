@@ -51,7 +51,7 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 			const auto pType = pThis->GetTechnoType();
 			const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
 
-			if (!pTypeExt || !pTypeExt->CombatAlert)
+			if (!pTypeExt || !pTypeExt->CombatAlert.Get(!pType->Insignificant && !pType->Spawned))
 				break;
 
 			const auto pBuilding = pThis->WhatAmI() == AbstractType::Building ? static_cast<BuildingClass*>(pThis) : nullptr;

@@ -434,7 +434,7 @@ New:
 - Play an anim when recycling a spawned (by TaranDahl)
 - CellSpread in cylinder shape (by TaranDahl)
 - CellSpread damage check if victim is in air (by TaranDahl)
-- Enable waypoint for buildings and aircrafts (by TaranDahl)
+- Toggle waypoint for building and aircraft (by TaranDahl)
 - Weapon range finding in cylinder (by TaranDahl)
 - Skirmish AI "sell all and all in" behavior dehardcode (by TaranDahl)
 - Skirmish AI "regroup when mcv deploy" behavior dehardcode (by TaranDahl)
@@ -536,7 +536,7 @@ Vanilla fixes:
 - Air units are now reliably included by target scan with large range and Warhead detonation by large `CellSpread` (by Starkku)
 - Weapons with `AA=true` Projectile can now correctly fire at air units when both firer and target are over a bridge (by Starkku)
 - Buildings with foundation bigger than 1x1 can now recycle spawned correctly (by TaranDahl)
-- Fixed infantries with `OpportunityFire=yes` can not fire while moving (by TaranDahl)
+- Infantry firing while moving (by TaranDahl)
 - Fix the bug that parasite will vanish if it missed its target when its previous cell is occupied (by TaranDahl)
 - Units are now unable to kick out from a factory that is in construction process, and will not always stuck in the factory (by CrimRecya & TaranDahl)
 

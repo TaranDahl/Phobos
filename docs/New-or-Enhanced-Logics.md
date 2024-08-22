@@ -1479,7 +1479,7 @@ Promote.EliteAnimation=           ; Animation
 - In Vanilla, non-building technos will not generate radar events or EVAs when attacked, so players can hardly notice them until they are destroyed. You can now receive a radar event (and optionally a sound effect) when your units is attacked, so you can respond to the combats in time.
 - `[AudioVisual]->CombatAlert` is a global switch, set it to `true` to enable the entire logic.
 - These flags controlls when to trigger a combat alert.
-  - You can disable this logic on specific techno by setting `[SOMETECHNO]->CombatAlert` to `false`. You may hope to disable it on insignificant technos, like the spawns or slaves.
+- You can disable this logic on specific techno by setting `[SOMETECHNO]->CombatAlert` to `false`. It is defaultly disabled for technos with `Insignificant=yes` or `Spawned=yes`.
   - `[AudioVisual]->CombatAlert.IgnoreBuilding` will turn the logic off on buildings. You can override it for specific building by setting `[SOMETECHNO]->CombatAlert.NotBuilding` to true. You may hope to use it on veh-buildings.
   - `[AudioVisual]->CombatAlert.SuppressIfInScreen` decides whether to disable the logic for the units in the current screen.
   - `[AudioVisual]->CombatAlert.Interval` decides the time interval (in frames) between alerts, to prevent the alert from being anonying. It is default to 150 frames.
@@ -1528,10 +1528,10 @@ Convert.HumanToComputer =   ; TechnoType
 Convert.ComputerToHuman =   ; TechnoType
 ```
 
-### Waypoint for buildings and aircrafts
+### Waypoint for building and aircraft
 
-- In vanilla, buildings and aircrafts is forbiddened to use waypoint. Now you can turn it on by the following flags.
-- P.S.: We have no idea about the reason why ww turn this off. In fact this has **not** been tested throughly. So, use it with caution.
+- In vanilla, building and aircraft is forbiddened to use waypoint. Now you can turn it on by the following flags.
+- P.S.: The waypoint for building seems working fine, but for aircraft there are visible problems. It may be improved in the future. For now you can try it, but at your own risk.
 
 In `rulesmd.ini`:
 ```ini
@@ -1915,16 +1915,16 @@ FeedbackWeapon=  ; WeaponType
 ### Range finding in cylinder
 
 - In vanilla, technos in air will ignore the distance in Z axis when checking if the target is in range. Now you can use the following flags to make technos always range finding like that.
-- `[General]->AlwaysCylinderRangefinding` controls this globally, and can be customized per weapon type.
+- `[General]->CylinderRangefinding` controls this globally, and can be customized per weapon type.
 - Mind that set the flags to `false` meaning "use default" rather than "disable". Technos in air will always range finding in cylinder like vanilla, despite what you set.
 
 In `rulesmd.ini`:
 ```ini
 [General]                         ; WeaponType
-AlwaysCylinderRangefinding=false  ; boolean
+CylinderRangefinding=false        ; boolean
 
 [SOMEWEAPON]                      ; WeaponType
-AlwaysCylinderRangefinding=       ; boolean
+CylinderRangefinding=             ; boolean
 ```
 
 ### Strafing aircraft weapon customization

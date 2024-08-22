@@ -373,9 +373,9 @@ This page lists all the individual contributions to the project by their author.
   - Fixed the bug that spawned can not return to buildings with foundation bigger than 1x1
   - `CellSpread.Cylinder`
   - `AffectsInAir` and `AffectsOnFloor`
-  - Fixes infantries with `OpportunityFire=yes` can not fire while moving
+  - Infantry fire while moving
   - Parasite returning bug fix
-  - Enable waypoint for buildings and aircrafts
+  - Toggle waypoint for building and aircraft
   - Weapon range finding in cylinder
   - Units are now unable to kick out from a factory that is in construction process
   - Skirmish AI "sell all and all in" behavior dehardcode

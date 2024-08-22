@@ -329,7 +329,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->CombatAlert_UseAttackVoice.Read(exINI, pSection, "CombatAlert.UseAttackVoice");
 	this->CombatAlert_UseEVA.Read(exINI, pSection, "CombatAlert.UseEVA");
 	this->CombatAlert_EVA.Read(exINI, pSection, "CombatAlert.EVA");
-
+	this->FiringByPassMovingCheck.Read(exINI, pSection, "FiringByPassMovingCheck");
 	this->Spawner_RecycleRange.Read(exINI, pSection, "Spawner.RecycleRange");
 	this->Spawner_RecycleFLH.Read(exINI, pSection, "Spawner.FLH");
 	this->Spawner_RecycleOnTurret.Read(exINI, pSection, "Spawner.RecycleOnTurret");
@@ -718,7 +718,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->CombatAlert_UseAttackVoice)
 		.Process(this->CombatAlert_UseEVA)
 		.Process(this->CombatAlert_EVA)
-
+		.Process(this->FiringByPassMovingCheck)
 		.Process(this->Spawner_RecycleRange)
 		.Process(this->Spawner_RecycleFLH)
 		.Process(this->Spawner_RecycleOnTurret)

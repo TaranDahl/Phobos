@@ -226,12 +226,13 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->CombatAlert_UseEVA.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseEVA");
 	this->BuildingWaypoint.Read(exINI, GameStrings::General, "BuildingWaypoint");
 	this->AircraftWaypoint.Read(exINI, GameStrings::General, "AircraftWaypoint");
-	this->AlwaysCylinderRangefinding.Read(exINI, GameStrings::General, "AlwaysCylinderRangefinding");
-	this->RegroupWhenMCVDeploy.Read(exINI, GameStrings::General, "RegroupWhenMCVDeploy");
-	this->AISellAllOnLastLegs.Read(exINI, GameStrings::General, "AISellAllOnLastLegs");
-	this->AISellAllDelay.Read(exINI, GameStrings::General, "AISellAllDelay");
-	this->AIAllInOnLastLegs.Read(exINI, GameStrings::General, "AIAllInOnLastLegs");
+	this->CylinderRangefinding.Read(exINI, GameStrings::General, "CylinderRangefinding");
+	this->GatherWhenMCVDeploy.Read(exINI, GameStrings::General, "GatherWhenMCVDeploy");
+	this->AIFireSale.Read(exINI, GameStrings::General, "AIFireSale");
+	this->AIFireSaleDelay.Read(exINI, GameStrings::General, "AIFireSaleDelay");
+	this->AIAllToHunt.Read(exINI, GameStrings::General, "AIAllToHunt");
 	this->RepairBaseNodes.Read(exINI, GameStrings::General, "RepairBaseNodes");
+	this->MCVRedeploysInCampaign.Read(exINI, GameStrings::General, "MCVRedeploysInCampaign");
 
 	this->VoxelLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelLightSource");
 	// this->VoxelShadowLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelShadowLightSource");
@@ -449,12 +450,13 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->CombatAlert_UseEVA)
 		.Process(this->AircraftWaypoint)
 		.Process(this->BuildingWaypoint)
-		.Process(this->AlwaysCylinderRangefinding)
-		.Process(this->RegroupWhenMCVDeploy)
-		.Process(this->AISellAllOnLastLegs)
-		.Process(this->AISellAllDelay)
-		.Process(this->AIAllInOnLastLegs)
+		.Process(this->CylinderRangefinding)
+		.Process(this->GatherWhenMCVDeploy)
+		.Process(this->AIFireSale)
+		.Process(this->AIFireSaleDelay)
+		.Process(this->AIAllToHunt)
 		.Process(this->RepairBaseNodes)
+		.Process(this->MCVRedeploysInCampaign)
 		.Process(this->VoxelLightSource)
 		// .Process(this->VoxelShadowLightSource)
 		.Process(this->UseFixedVoxelLighting)

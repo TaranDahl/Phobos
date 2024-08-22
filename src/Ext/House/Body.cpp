@@ -545,7 +545,7 @@ void HouseExt::ExtData::Serialize(T& Stm)
 		.Process(this->LastBuiltNavalVehicleType)
 		.Process(this->ProducingNavalUnitTypeIndex)
 		.Process(this->CombatAlertTimer)
-		.Process(this->AISellAllDelayTimer)
+		.Process(this->AIFireSaleDelayTimer)
 		;
 }
 

@@ -163,7 +163,6 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Setting `[AudioVisual]` -> `ColorAddUse8BitRGB` to true makes game treat values from `[ColorAdd]` as 8-bit RGB (0-255) instead of RGB565 (0-31 for red & blue, 0-63 for green). This works for `LaserTargetColor`, `IronCurtainColor`, `BerserkColor` and `ForceShieldColor`.
 - Weapons with `AA=true` Projectile can now correctly fire at air units when both firer and target are over a bridge.
 - Buildings with foundation bigger than 1x1 can now recycle spawned correctly.
-- Infantries with `OpportunityFire=yes` now can fire while moving correctly. Mind that they are still restricted by their sequence. The walking infantries can only fire in the frames that they are in the cell they are heading to. The flying infantries have no such restriction.
 - Fix the bug that parasite will vanish if it missed its target when its previous cell is occupied.
 - Units are now unable to kick out from a factory that is in construction process, and will not always stuck in the factory. If the unit is not able to kick out from the factory, the unit will be removed and the cost will be given back to its house.
 - Fixed disguised units not using the correct palette if target has custom palette.
@@ -632,6 +631,19 @@ Explodes.KillPassengers=true ; boolean
 Explodes.DuringBuildup=true  ; boolean
 ```
 
+### Infantry firing while moving
+- In vanilla, there is a hardcoded behavior that the infantries can not fire until they stop, even if they have `OpportunityFire=yes` set. Now you can bypass this restriction by using the following flag.
+  - Mind that you still need `OpportunityFire=yes` to make them acquire target when moving. However, if `OpportunityFire=no` is set, they can still do that if you use the "ctrl+shift" command, just like the units on the ground do.
+  - Additionally, the behavior that "rocketeers can not fire when they have buildings beneath them" is also caused by this hardcode. You can use the flag to bypass this behavior as well.
+  - The vanilla flag `JumpJetTurn` will affect the visual behavior when the infantry is firing while moving. You need to set it to **no** if you want to make the infantry always facing the target during the attack.
+  - Setting this flag on types except infantry is useless.
+
+In `rulesmd.ini`:
+```ini
+[SOMETECHNO]                 ; InfantryType
+FiringByPassMovingCheck=true ; boolean
+```
+
 ### Iron Curtain & Force Shield effects on organics customization
 
 - In vanilla game, when Iron Curtain is applied on `Organic=true` units like squids or infantry, they could only get killed instantly by `C4Warhead`. This behavior is now unhardcoded and can be set with `IronCurtain.EffectOnOrganics` globally and on per-TechnoType basis with `IronCurtain.Effect`. Following values are respected:
@@ -759,19 +771,19 @@ NoWobbles=false  ; boolean
 ### Skirmish AI behavior dehardcode
 
 - In vanilla, there is a hardcoded behavior that when an skirmish AI player has no factory and has not taken damage for a while, it will sell its buildings and set its units to hunt. This can be customized now.
-  - `[General]->AISellAllOnLastLegs` and `[General]->AIAllInOnLastLegs` control whether the AI will act selling and hunting respectively.
-  - `[General]->AISellAllDelay` defines a timer, it will only work if `[General]->AISellAllOnLastLegs` is set to `true`. When the first time the AI reaches the trigger condition of vanilla behavior, the timer starts and prevents the selling behavior from happening until the timer is expired.
+  - `[General]->AIFireSale` and `[General]->AIAllToHunt` control whether the AI will act selling and hunting respectively.
+  - `[General]->AIFireSaleDelay` defines a timer, it will only work if `[General]->AIFireSale` is set to `true`. When the first time the AI reaches the trigger condition of vanilla behavior, the timer starts and prevents the selling behavior from happening until the timer is expired.
   - You can use these flags to make the AIs "all in" before they are defeated.
-- Another hardcoded behavior is that, when the AI deploys a MCV, it will regroup all of its forces to that place. This can be toggle off now.
-  - `[General]->RegroupWhenMCVDeploy` controls this behavior.
+- Another hardcoded behavior is that, when the AI deploys a MCV, it will gather all of its forces to that place. This can be toggle off now.
+  - `[General]->GatherWhenMCVDeploy` controls this behavior.
 
 In `rulesmd.ini`:
 ```ini
 [General]
-AISellAllOnLastLegs=true   ; boolean
-AISellAllDelay=0           ; integer, number of frames
-AIAllInOnLastLegs=true     ; boolean
-RegroupWhenMCVDeploy=true  ; boolean
+AIFireSale=true           ; boolean
+AIFireSaleDelay=0         ; integer, number of frames
+AIAllToHunt=true          ; boolean
+GatherWhenMCVDeploy=true  ; boolean
 ```
 
 ### Subterranean unit travel height
