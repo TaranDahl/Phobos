@@ -292,9 +292,6 @@ DEFINE_HOOK(0x54DAC4, JumpjetLocomotionClass_EndPiggyback_Blyat, 0x6)
 	return 0;
 }
 
-
-#pragma region JumpjetRush
-
 // Let the jumpjet increase their height earlier or simply skip the stop check
 namespace JumpjetRushHelpers
 {
@@ -400,5 +397,3 @@ DEFINE_HOOK(0x54D4C0, JumpjetLocomotionClass_sub_54D0F0_NoStuck, 0x6)
 
 	return 0;
 }
-
-#pragma endregion
