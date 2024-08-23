@@ -45,7 +45,7 @@ DEFINE_HOOK(0x5684B1, MapClass_PlaceDown_BuildableUponTypes, 0x6)
 		{
 			const AbstractType absType = pCellObject->WhatAmI();
 
-			if (absType == AbstractType::Infantry || absType == AbstractType::Unit || absType == AbstractType::Aircraft)
+			if (absType == AbstractType::Infantry || absType == AbstractType::Unit || absType == AbstractType::Aircraft || absType == AbstractType::Building)
 			{
 				TechnoClass* const pTechno = static_cast<TechnoClass*>(pCellObject);
 				TechnoTypeClass* const pType = pTechno->GetTechnoType();
@@ -57,19 +57,6 @@ DEFINE_HOOK(0x5684B1, MapClass_PlaceDown_BuildableUponTypes, 0x6)
 					pTechno->Stun();
 					pTechno->Limbo();
 					pTechno->UnInit();
-				}
-			}
-			else if (absType == AbstractType::Building)
-			{
-				BuildingClass* const pBuilding = static_cast<BuildingClass*>(pCellObject);
-				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pBuilding->Type);
-
-				if (pTypeExt && pTypeExt->CanBeBuiltOn)
-				{
-					pBuilding->KillOccupants(nullptr);
-					pBuilding->Stun();
-					pBuilding->Limbo();
-					pBuilding->UnInit();
 				}
 			}
 			else if (absType == AbstractType::Terrain)
