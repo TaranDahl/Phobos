@@ -411,8 +411,7 @@ void BuildingExt::KickOutStuckUnits(BuildingClass* pThis, bool inside)
 					if (pThis->Owner == pUnit->Owner
 						&& pUnit->CurrentMission != Mission::Enter
 						&& pUnit->PrimaryFacing.Current() == DirStruct(DirType::East)
-						&& pUnit->GetCurrentSpeed() <= 0
-						&& pUnit->GetCoords().DistanceFromSquared(pCell->GetCoords()) > 256)
+						&& pUnit->GetCurrentSpeed() <= 0)
 					{
 						const int height = pUnit->GetHeight();
 
@@ -422,13 +421,8 @@ void BuildingExt::KickOutStuckUnits(BuildingClass* pThis, bool inside)
 						if (TeamClass* const pTeam = pUnit->Team)
 							pTeam->LiberateMember(pUnit);
 
-						if (CellClass* const pFocus = MapClass::Instance->TryGetCellAt(doorCell))
-						{
-							pUnit->SetDestination(pFocus, true);
-							pUnit->SetFocus(pFocus);
-							pUnit->QueueMission(Mission::Move, true);
-						}
-
+						pUnit->SetDestination(MapClass::Instance->TryGetCellAt(doorCell), true);
+						pUnit->QueueMission(Mission::Move, true);
 						return; // one after another
 					}
 				}
