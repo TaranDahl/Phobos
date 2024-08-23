@@ -976,7 +976,9 @@ DEFINE_HOOK(0x4F8DB1, HouseClass_AI_CheckHangUpBuilding, 0x6)
 			}
 
 			for (auto const& pUnit : deleteTechnos)
+			{
 				vec.erase(std::remove(vec.begin(), vec.end(), pUnit), vec.end());
+			}
 		}
 	}
 
