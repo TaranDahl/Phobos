@@ -343,45 +343,77 @@ bool BuildingExt::ExtData::HandleInfiltrate(HouseClass* pInfiltratorHouse,int mo
 	return true;
 }
 
-void BuildingExt::KickOutStuckUnits(BuildingClass* pThis)
+void BuildingExt::KickOutStuckUnits(BuildingClass* pThis, bool inside)
 {
-	if (TechnoClass* const pTechno = pThis->GetNthLink())
+	if (inside)
 	{
-		if (UnitClass* const pUnit = abstract_cast<UnitClass*>(pTechno))
+		if (TechnoClass* const pTechno = pThis->GetNthLink())
 		{
-			if (pUnit->CurrentMission != Mission::Enter)
+			if (UnitClass* const pUnit = abstract_cast<UnitClass*>(pTechno))
 			{
-				if (TeamClass* const pTeam = pUnit->Team)
-					pTeam->LiberateMember(pUnit);
+				if (pUnit->CurrentMission != Mission::Enter)
+				{
+					if (TeamClass* const pTeam = pUnit->Team)
+						pTeam->LiberateMember(pUnit);
 
-				pUnit->SetDestination(nullptr, false);
-				pUnit->ForceMission(Mission::Guard);
-				pThis->QueueMission(Mission::Unload, false);
-				return; // one after another
+					pUnit->ForceMission(Mission::Guard);
+					pThis->QueueMission(Mission::Unload, false);
+					return; // one after another
+				}
+			}
+		}
+
+		BuildingTypeClass* const pType = pThis->Type;
+		const CellStruct foundation { pType->GetFoundationWidth(), pType->GetFoundationHeight(false) };
+		const CellStruct topLeft = pThis->GetMapCoords() + CellStruct { 1, 1 };
+		const CellStruct bottomRight = topLeft + foundation - CellStruct { 2, 2 };
+
+		for (short curX = topLeft.X; curX < bottomRight.X; ++curX)
+		{
+			for (short curY = topLeft.Y; curY < bottomRight.Y; ++curY)
+			{
+				if (CellClass* const pCell = MapClass::Instance->GetCellAt(CellStruct{ curX, curY }))
+				{
+					for (ObjectClass* pObject = pCell->FirstObject; pObject; pObject = pObject->NextObject)
+					{
+						if (UnitClass* const pUnit = abstract_cast<UnitClass*>(pObject))
+						{
+							if (pThis->Owner != pUnit->Owner || pUnit->CurrentMission == Mission::Enter)
+								continue;
+
+							const int height = pUnit->GetHeight();
+
+							if (height < 0 || height > Unsorted::CellHeight)
+								continue;
+
+							if (TeamClass* const pTeam = pUnit->Team)
+								pTeam->LiberateMember(pUnit);
+
+							pThis->SendCommand(RadioCommand::RequestLink, pUnit);
+							pThis->QueueMission(Mission::Unload, false);
+							return; // one after another
+						}
+					}
+				}
 			}
 		}
 	}
-
-//	CoordStruct buffer = CoordStruct::Empty;
-//	CellClass* const pCell = MapClass::Instance->GetCellAt(*pThis->GetExitCoords(&buffer, 0));
-	BuildingTypeClass* const pType = pThis->Type;
-	const CellStruct foundation { pType->GetFoundationWidth(), pType->GetFoundationHeight(false) };
-	const CellStruct topLeft = pThis->GetMapCoords() + CellStruct { 1, 1 };
-	const CellStruct bottomRight = topLeft + foundation - CellStruct { 2, 2 };
-
-	for (short curX = topLeft.X; curX < bottomRight.X; ++curX)
+	else if (!pThis->Owner->IsControlledByHuman()) // Seems like only AI's units might stuck at the door
 	{
-		for (short curY = topLeft.Y; curY < bottomRight.Y; ++curY)
-		{
-			if (CellClass* const pCell = MapClass::Instance->GetCellAt(CellStruct{ curX, curY }))
-			{
-				for (ObjectClass* pObject = pCell->FirstObject; pObject; pObject = pObject->NextObject)
-				{
-					if (UnitClass* const pUnit = abstract_cast<UnitClass*>(pObject))
-					{
-						if (pThis->Owner != pUnit->Owner || pUnit->CurrentMission == Mission::Enter)
-							continue;
+		const CellStruct doorCell = pThis->GetMapCoords() + pThis->Type->FoundationOutside[10];
 
+		if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(doorCell - CellStruct{ 1, 0 }))
+		{
+			for (ObjectClass* pObject = pCell->FirstObject; pObject; pObject = pObject->NextObject)
+			{
+				if (UnitClass* const pUnit = abstract_cast<UnitClass*>(pObject))
+				{
+					if (pThis->Owner == pUnit->Owner
+						&& pUnit->CurrentMission != Mission::Enter
+						&& pUnit->PrimaryFacing.Current() == DirStruct(DirType::East)
+						&& pUnit->GetCurrentSpeed() <= 0
+						&& pUnit->GetCoords().DistanceFromSquared(pCell->GetCoords()) > 256)
+					{
 						const int height = pUnit->GetHeight();
 
 						if (height < 0 || height > Unsorted::CellHeight)
@@ -390,10 +422,13 @@ void BuildingExt::KickOutStuckUnits(BuildingClass* pThis)
 						if (TeamClass* const pTeam = pUnit->Team)
 							pTeam->LiberateMember(pUnit);
 
-						pUnit->SetDestination(nullptr, false);
-						pUnit->ForceMission(Mission::Guard);
-						pThis->SendCommand(RadioCommand::RequestLink, pUnit);
-						pThis->QueueMission(Mission::Unload, false);
+						if (CellClass* const pFocus = MapClass::Instance->TryGetCellAt(doorCell))
+						{
+							pUnit->SetDestination(pFocus, true);
+							pUnit->SetFocus(pFocus);
+							pUnit->QueueMission(Mission::Move, true);
+						}
+
 						return; // one after another
 					}
 				}
