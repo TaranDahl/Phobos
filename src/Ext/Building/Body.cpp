@@ -343,9 +343,9 @@ bool BuildingExt::ExtData::HandleInfiltrate(HouseClass* pInfiltratorHouse,int mo
 	return true;
 }
 
-void BuildingExt::KickOutStuckUnits(BuildingClass* pThis)
+bool BuildingExt::KickOutStuckUnits(BuildingClass* pThis)
 {
-/*	if (TechnoClass* const pTechno = pThis->GetNthLink())
+	if (TechnoClass* const pTechno = pThis->GetNthLink())
 	{
 		if (UnitClass* const pUnit = abstract_cast<UnitClass*>(pTechno))
 		{
@@ -354,75 +354,14 @@ void BuildingExt::KickOutStuckUnits(BuildingClass* pThis)
 				if (TeamClass* const pTeam = pUnit->Team)
 					pTeam->LiberateMember(pUnit);
 
-				pUnit->ForceMission(Mission::Guard);
 				pThis->QueueMission(Mission::Unload, false);
-				return; // one after another
 			}
 		}
+
+		return true;
 	}
 
-	BuildingTypeClass* const pType = pThis->Type;
-	const CellStruct foundation { pType->GetFoundationWidth(), pType->GetFoundationHeight(false) };
-	const CellStruct mapCell = pThis->GetMapCoords();
-	const CellStruct topLeft = mapCell + CellStruct { 1, 1 };
-	const CellStruct bottomRight = topLeft + foundation - CellStruct { 2, 2 };
-
-	for (short curX = topLeft.X; curX < bottomRight.X; ++curX)
-	{
-		for (short curY = topLeft.Y; curY < bottomRight.Y; ++curY)
-		{
-			if (CellClass* const pCell = MapClass::Instance->GetCellAt(CellStruct{ curX, curY }))
-			{
-				for (ObjectClass* pObject = pCell->FirstObject; pObject; pObject = pObject->NextObject)
-				{
-					if (UnitClass* const pUnit = abstract_cast<UnitClass*>(pObject))
-					{
-						if (pThis->Owner != pUnit->Owner || pUnit->CurrentMission == Mission::Enter)
-							continue;
-
-						const int height = pUnit->GetHeight();
-
-						if (height < 0 || height > Unsorted::CellHeight)
-							continue;
-
-						if (TeamClass* const pTeam = pUnit->Team)
-							pTeam->LiberateMember(pUnit);
-
-						pThis->SendCommand(RadioCommand::RequestLink, pUnit);
-						pThis->QueueMission(Mission::Unload, false);
-						return; // one after another
-					}
-				}
-			}
-		}
-	}
-
-	const CellStruct doorCell = mapCell + pType->FoundationOutside[10];
-	CellStruct curCell = doorCell;
-
-	for (int i = 0; i < 2; ++i)
-	{
-		--curCell.X;
-
-		if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(curCell))
-		{
-			for (ObjectClass* pObject = pCell->FirstObject; pObject; pObject = pObject->NextObject)
-			{
-				if (UnitClass* const pUnit = abstract_cast<UnitClass*>(pObject))
-				{
-					if (pThis->Owner == pUnit->Owner
-						&& pUnit->CurrentMission != Mission::Enter
-						&& pThis->ContainsLink(pUnit))
-					{
-						pThis->SendCommand(RadioCommand::NotifyUnlink, pUnit);
-						pUnit->SetDestination(MapClass::Instance->TryGetCellAt(doorCell), false);
-						pUnit->QueueMission(Mission::Move, false);
-						return; // one after another
-					}
-				}
-			}
-		}
-	}*/
+	return false;
 }
 
 // =============================
