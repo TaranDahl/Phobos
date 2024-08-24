@@ -349,7 +349,7 @@ void BuildingExt::KickOutStuckUnits(BuildingClass* pThis)
 	{
 		if (UnitClass* const pUnit = abstract_cast<UnitClass*>(pTechno))
 		{
-			if (pUnit->CurrentMission != Mission::Move && pUnit->GetCurrentSpeed() <= 0)
+			if (!pUnit->unknown_bool_418 && pUnit->GetCurrentSpeed() <= 0)
 			{
 				if (TeamClass* const pTeam = pUnit->Team)
 					pTeam->LiberateMember(pUnit);
@@ -359,6 +359,7 @@ void BuildingExt::KickOutStuckUnits(BuildingClass* pThis)
 				else
 					pThis->SendCommand(RadioCommand::NotifyUnlink, pUnit);
 
+				pUnit->QueueMission(Mission::Guard, false);
 				return; // one after another
 			}
 		}
@@ -372,7 +373,7 @@ void BuildingExt::KickOutStuckUnits(BuildingClass* pThis)
 		{
 			if (UnitClass* const pUnit = abstract_cast<UnitClass*>(pObject))
 			{
-				if (pThis->Owner != pUnit->Owner || pUnit->PrimaryFacing.Current() != DirStruct(DirType::East))
+				if (pThis->Owner != pUnit->Owner || pUnit->unknown_bool_418)
 					continue;
 
 				const int height = pUnit->GetHeight();
