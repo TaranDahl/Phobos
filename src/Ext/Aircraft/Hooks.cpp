@@ -344,7 +344,7 @@ DEFINE_HOOK(0x415EEE, AircraftClass_Fire_KickOutPassengers, 0x6)
 	return SkipKickOutPassengers;
 }
 
-// Aircraft mission hard code are all disposable, no ammo, target died or arrived destination all will call the aircraft return airbase
+// Aircraft mission hard code are all disposable that no ammo, target died or arrived destination all will call the aircraft return airbase
 #pragma region AircraftMissionExpand
 
 // AreaGuard: return when no ammo or first target died
