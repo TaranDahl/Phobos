@@ -104,5 +104,5 @@ public:
 	static bool CanGrindTechno(BuildingClass* pBuilding, TechnoClass* pTechno);
 	static bool DoGrindingExtras(BuildingClass* pBuilding, TechnoClass* pTechno, int refund);
 	static bool CanUndeployOnSell(BuildingClass* pThis);
-	static void KickOutStuckUnits(BuildingClass* pThis, bool inside);
+	static void KickOutStuckUnits(BuildingClass* pThis);
 };

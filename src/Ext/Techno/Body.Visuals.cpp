@@ -812,25 +812,34 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 	}
 	case DisplayInfoType::ROF:
 	{
-		if (!pThis->GetWeapon(0) || !pThis->GetWeapon(0)->WeaponType)
+		value = pThis->MissionStatus;
+		maxValue = 100 + value;
+
+/*		if (!pThis->GetWeapon(0) || !pThis->GetWeapon(0)->WeaponType)
 			return;
 
 		value = pThis->RearmTimer.GetTimeLeft();
-		maxValue = pThis->ChargeTurretDelay;
+		maxValue = pThis->ChargeTurretDelay;*/
 		break;
 	}
 	case DisplayInfoType::Reload:
 	{
-		if (pType->Ammo <= 0)
+		value = (int)pThis->GetCurrentMission();
+		maxValue = 200 + value;
+
+/*		if (pType->Ammo <= 0)
 			return;
 
 		value = (pThis->Ammo >= pType->Ammo) ? 0 : pThis->ReloadTimer.GetTimeLeft();
-		maxValue = pThis->ReloadTimer.TimeLeft;
+		maxValue = pThis->ReloadTimer.TimeLeft;*/
 		break;
 	}
 	case DisplayInfoType::SpawnTimer:
 	{
-		if (pThis->SpawnManager == nullptr || pType->Spawns == nullptr || pType->SpawnsNumber <= 0)
+		value = pThis->GetNthLink() ? 30 : 0;
+		maxValue = 300 + value;
+
+/*		if (pThis->SpawnManager == nullptr || pType->Spawns == nullptr || pType->SpawnsNumber <= 0)
 			return;
 
 		value = 0;
@@ -845,13 +854,16 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 				if (thisValue < value)
 					value = thisValue;
 			}
-		}
+		}*/
 
 		break;
 	}
 	case DisplayInfoType::GattlingTimer:
 	{
-		if (!pType->IsGattling)
+		value = pThis->unknown_bool_418 ? 40 : 0;
+		maxValue = 400 + value;
+
+/*		if (!pType->IsGattling)
 			return;
 
 		const int thisStage = pThis->CurrentGattlingStage;
@@ -881,7 +893,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 				value = pThis->GattlingValue;
 				maxValue = pType->WeaponStage[thisStage];
 			}
-		}
+		}*/
 
 		break;
 	}

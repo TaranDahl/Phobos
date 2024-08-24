@@ -337,10 +337,8 @@ DEFINE_HOOK(0x450248, BuildingClass_UpdateFactory_KickOutStuckUnits, 0x6)
 		{
 			const Mission mission = pThis->CurrentMission;
 
-			if (mission == Mission::Guard)
-				BuildingExt::KickOutStuckUnits(pThis, true);
-			else if (mission == Mission::Unload && pThis->MissionStatus == 1)
-				BuildingExt::KickOutStuckUnits(pThis, false);
+			if (mission == Mission::Guard || (mission == Mission::Unload && pThis->MissionStatus == 1))
+				BuildingExt::KickOutStuckUnits(pThis);
 		}
 	}
 
