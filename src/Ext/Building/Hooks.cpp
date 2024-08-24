@@ -325,6 +325,16 @@ DEFINE_HOOK(0x443CCA, BuildingClass_KickOutUnit_AircraftType_Phobos, 0xA)
 }
 
 // Should not kick out units if the factory building is in construction process or have link
+DEFINE_HOOK(0x4444FA, BuildingClass_KickOutUnit_SearchOtherFactoriesFix, 0x6)
+{
+	enum { ThisIsOK = 0x444504, ThisIsNotOK = 0x44451F};
+
+	GET(BuildingClass* const, pThis, EBP);
+
+	return (pThis->Factory || BuildingExt::KickOutStuckUnits(pThis)) ? ThisIsNotOK : ThisIsOK;
+}
+
+// Should not kick out units if the factory building is in construction process or have link
 DEFINE_HOOK(0x4444A0, BuildingClass_KickOutUnit_KickOutUnitsFix, 0xA)
 {
 	enum { ThisIsOK = 0x444565, ThisIsNotOK = 0x4444B3};
