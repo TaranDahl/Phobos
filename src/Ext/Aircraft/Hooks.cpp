@@ -365,10 +365,11 @@ int __fastcall AircraftClass_Mission_AreaGuard(AircraftClass* pThis)
 
 				if (pThis->TargetAndEstimateDamage(reinterpret_cast<DWORD>(&coords), static_cast<DWORD>(TargetFlags::unknown_1)))
 					break;
-				else if (!pThis->HasAnyLink() || flying)
-					pThis->EnterIdleMode(false, true);
+				else if (!flying && pThis->HasAnyLink())
+					return 30;
 
-				return 30;
+				pThis->EnterIdleMode(false, true);
+				return 1;
 			}
 		}
 
