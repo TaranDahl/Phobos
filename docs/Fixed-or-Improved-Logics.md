@@ -190,6 +190,7 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Allowed `AuxBuilding` to count building upgrades.
 - Fix the bug that parasite will vanish if it missed its target when its previous cell is occupied.
 - Prevent the units with locomotors that cause problems from entering the tank bunker.
+- Fixed `MovementZone=Subterannean` harvesters being unable to find docks if in area enclosed by water, cliffs etc.
 
 ## Fixes / interactions with other extensions
 

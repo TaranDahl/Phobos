@@ -455,4 +455,36 @@ DEFINE_HOOK(0x70FB73, FootClass_IsBunkerableNow_Dehardcode, 0x6)
 	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
 	return pTypeExt->BunkerableAnyway ? CanEnter : 0;
 }
+
 #pragma endregion
+
+// issue #112 Make FireOnce=yes work on other TechnoTypes
+// Author: Starkku
+DEFINE_HOOK(0x4C7512, EventClass_Execute_StopCommand, 0x6)
+{
+	GET(TechnoClass* const, pThis, ESI);
+
+	auto const pUnit = abstract_cast<UnitClass*>(pThis);
+
+	if (pUnit)
+	{
+		// Reset target for deploy weapons.
+		if (pUnit->CurrentMission == Mission::Unload && pUnit->Type->DeployFire && !pUnit->Type->IsSimpleDeployer)
+		{
+			pUnit->SetTarget(nullptr);
+			pThis->QueueMission(Mission::Guard, true);
+		}
+
+		auto const pType = pUnit->Type;
+
+		// Reset subterranean harvester rally point info.
+		if ((pType->Harvester || pType->Weeder) && pType->MovementZone == MovementZone::Subterrannean)
+		{
+			auto const pExt = TechnoExt::ExtMap.Find(pUnit);
+			pExt->SubterraneanHarvFreshFromFactory = false;
+			pExt->SubterraneanHarvRallyDest = nullptr;
+		}
+	}
+
+	return 0;
+}
