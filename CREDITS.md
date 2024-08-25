@@ -365,6 +365,7 @@ This page lists all the individual contributions to the project by their author.
   - Jumpjet climbing logic enhancement
   - Building placing and deploying logic enhancement, unit base normal, new placing grids and grey cameo preview
   - Units will not always stuck in the factory
+  - Optimize aircrafts stop action and allow they using area guard and attack moving
 - **TaranDahl**
   - Raise alert when technos are taking damage
   - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller

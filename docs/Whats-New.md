@@ -429,6 +429,7 @@ New:
 - Units Rotate Turret When in Idle Action (by CrimRecya)
 - Jumpjet climbing logic enhancement (by CrimRecya)
 - Building placing and deploying logic enhancement, unit base normal, new placing grids and grey cameo preview (by CrimRecya)
+- Optimize aircrafts stop action and allow they using area guard and attack moving (by CrimRecya)
 - Raise alert when technos are taking damage (by TaranDahl)
 - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller. (by TaranDahl)
 - Recycle spawned in long-range (by TaranDahl)
