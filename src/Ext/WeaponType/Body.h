@@ -53,6 +53,7 @@ public:
 		ValueableVector<int> AttachEffect_RequiredMaxCounts;
 		ValueableVector<int> AttachEffect_DisallowedMinCounts;
 		ValueableVector<int> AttachEffect_DisallowedMaxCounts;
+		Valueable<bool> AttachEffect_CheckOnFirer;
 		Valueable<bool> AttachEffect_IgnoreFromSameSource;
 		Valueable<Leptons> KeepRange;
 		Valueable<bool> KeepRange_AllowAI;
@@ -93,6 +94,7 @@ public:
 			, AttachEffect_RequiredMaxCounts {}
 			, AttachEffect_DisallowedMinCounts {}
 			, AttachEffect_DisallowedMaxCounts {}
+			, AttachEffect_CheckOnFirer { false }
 			, AttachEffect_IgnoreFromSameSource { false }
 			, KeepRange { Leptons(0) }
 			, KeepRange_AllowAI { false }

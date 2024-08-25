@@ -67,7 +67,8 @@ This page describes all the engine features that are either new and introduced b
   - `AttachEffect.Required/DisallowedGroups` have the same effect except applied with/to all types that have one of the listed groups in their `Groups` listing.
   - `AttachEffect.(Required|Disallowed)MinCounts & (Required|Disallowed)MaxCounts` can be used to set the minimum and maximum number of instances required / disallowed to be on the Techno for `Cumulative=true` types (ignored for other types) respectively.
   - `AttachEffect.IgnoreFromSameSource` can be set to true to ignore effects that have been attached by the firer of the weapon and its Warhead.
-
+  - `AttachEffect.CheckOnFirer` is set to true makes it so that the required / disallowed attached effects are checked from the firer of the weapon instead of the target.
+  
 In `rulesmd.ini`:
 ```ini
 [AttachEffectTypes]
@@ -139,6 +140,7 @@ AttachEffect.RequiredMaxCounts=                ; integer - maximum required inst
 AttachEffect.DisallowedMinCounts=              ; integer - minimum disallowed instance count (comma-separated) for cumulative types in order from first to last.
 AttachEffect.DisallowedMaxCounts=              ; integer - maximum disallowed instance count (comma-separated) for cumulative types in order from first to last.
 AttachEffect.IgnoreFromSameSource=false        ; boolean
+AttachEffect.CheckOnFirer=false                ; boolean
 
 [SOMEWARHEAD]
 AttachEffect.AttachTypes=                      ; List of AttachEffectTypes
@@ -314,6 +316,7 @@ Shield.Penetrate=false                      ; boolean
 Shield.Break=false                          ; boolean
 Shield.BreakAnim=                           ; Animation
 Shield.HitAnim=                             ; Animation
+Shield.SkipHitAnim=false                    ; boolean
 Shield.HitFlash=true                        ; boolean
 Shield.BreakWeapon=                         ; WeaponType
 Shield.AbsorbPercent=                       ; floating point value
@@ -390,6 +393,7 @@ Shield.InheritStateOnReplace=false          ; boolean
   - `Shield.Break` allows the warhead to always break shields of TechnoTypes. This is done before damage is dealt.
   - `Shield.BreakAnim` will be displayed instead of ShieldType `BreakAnim` if the shield is broken by the Warhead, either through damage or `Shield.Break`.
   - `Shield.HitAnim` will be displayed instead of ShieldType `HitAnim` if set when Warhead hits the shield.
+  - If `Shield.SkipHitAnim` is set to true, no hit anim is shown when the Warhead damages the shield whatsoever.
   - `Shield.BreakWeapon` will be fired instead of ShieldType `BreakWeapon` if the shield is broken by the Warhead, either through damage or `Shield.Break`.
   - `Shield.AbsorbPercent` overrides the `AbsorbPercent` value set in the ShieldType that is being damaged.
   - `Shield.PassPercent` overrides the `PassPercent` value set in the ShieldType that is being damaged.
@@ -1612,6 +1616,7 @@ AffectsOnFloor=true        ; boolean
   - `Crit.AffectBelowPercent` can be used to set minimum percentage of their maximum `Strength` that targets must have left to be affected by a critical hit.
   - `Crit.AnimList` can be used to set a list of animations used instead of Warhead's `AnimList` if Warhead deals a critical hit to even one target. If `Crit.AnimList.PickRandom` is set (defaults to `AnimList.PickRandom`) then the animation is chosen randomly from the list.
     - `Crit.AnimOnAffectedTargets`, if set, makes the animation(s) from `Crit.AnimList` play on each affected target *in addition* to animation from Warhead's `AnimList` playing as normal instead of replacing `AnimList` animation.
+  - `Crit.ActiveChanceAnims` can be used to set animation to be always displayed at the Warhead's detonation coordinates if the current Warhead has a chance to critically hit. If more than one animation is listed, a random one is selected.
   - `Crit.SuppressWhenIntercepted`, if set, prevents critical hits from occuring at all if the warhead was detonated from a [projectile that was intercepted](#projectile-interception-logic).
   - `ImmuneToCrit` can be set on TechnoTypes and ShieldTypes to make them immune to critical hits.
 
@@ -1627,6 +1632,7 @@ Crit.AffectsHouses=all              ; list of Affected House Enumeration (none|o
 Crit.AffectBelowPercent=1.0         ; floating point value, percents or absolute (0.0-1.0)
 Crit.AnimList=                      ; list of animations
 Crit.AnimList.PickRandom=           ; boolean
+Crit.ActiveChanceAnims=             ; list of animations
 Crit.AnimOnAffectedTargets=false    ; boolean
 Crit.SuppressWhenIntercepted=false  ; boolean
 

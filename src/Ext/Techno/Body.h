@@ -60,8 +60,9 @@ public:
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
 		// as neither is guaranteed to point to the house the TechnoClass had prior to entering transport and cannot be safely overridden.
 		HouseClass* OriginalPassengerOwner;
-		bool HasCarryoverWarpInDelay; // Converted from object with Teleport Locomotor to one with a different Locomotor while still phasing in.
-		int LastWarpInDelay;          // Last-warp in delay for this unit, used by HasCarryoverWarpInDelay.
+		bool HasCarryoverWarpInDelay;          // Converted from object with Teleport Locomotor to one with a different Locomotor while still phasing in.
+		int LastWarpInDelay;                   // Last-warp in delay for this unit, used by HasCarryoverWarpInDelay.
+		CellClass* SubterraneanHarvRallyPoint; // Subterranean harvester's rally point on exit from factory.
 
 		ExtData(TechnoClass* OwnerObject) : Extension<TechnoClass>(OwnerObject)
 			, TypeExtData { nullptr }
@@ -100,6 +101,7 @@ public:
 			, OriginalPassengerOwner {}
 			, HasCarryoverWarpInDelay { false }
 			, LastWarpInDelay { 0 }
+			, SubterraneanHarvRallyPoint { nullptr }
 		{ }
 
 		void OnEarlyUpdate();
@@ -194,6 +196,11 @@ public:
 	static int GetCustomTintColor(TechnoClass* pThis);
 	static int GetCustomTintIntensity(TechnoClass* pThis);
 	static void ApplyCustomTintValues(TechnoClass* pThis, int& color, int& intensity);
+	static Point2D GetScreenLocation(TechnoClass* pThis);
+	static Point2D GetFootSelectBracketPosition(TechnoClass* pThis, Anchor anchor);
+	static Point2D GetBuildingSelectBracketPosition(TechnoClass* pThis, BuildingSelectBracketPosition bracketPosition);
+	static void ProcessDigitalDisplays(TechnoClass* pThis);
+	static void GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType, int& value, int& maxValue);
 
 	// WeaponHelpers.cpp
 	static int PickWeaponIndex(TechnoClass* pThis, TechnoClass* pTargetTechno, AbstractClass* pTarget, int weaponIndexOne, int weaponIndexTwo, bool allowFallback = true, bool allowAAFallback = true);
@@ -215,4 +222,5 @@ public:
 	static Point2D GetBuildingSelectBracketPosition(TechnoClass* pThis, BuildingSelectBracketPosition bracketPosition);
 	static void ProcessDigitalDisplays(TechnoClass* pThis);
 	static void GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType, int& value, int& maxValue);
+	static int GetWeaponIndexAgainstWall(TechnoClass* pThis, OverlayTypeClass* pWallOverlayType);
 };
