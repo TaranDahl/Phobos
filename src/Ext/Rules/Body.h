@@ -145,6 +145,9 @@ public:
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
 		Valueable<bool> UseFixedVoxelLighting;
 
+		NullableIdx<VoxClass> EVA_WeCaptureABuilding;
+		NullableIdx<VoxClass> EVA_OurBuildingIsCaptured;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -247,6 +250,8 @@ public:
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 			, UseFixedVoxelLighting { false }
+			, EVA_WeCaptureABuilding {}
+			, EVA_OurBuildingIsCaptured {}
 		{ }
 
 		virtual ~ExtData() = default;

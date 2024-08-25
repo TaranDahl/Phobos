@@ -396,3 +396,15 @@ DEFINE_HOOK(0x4511D6, BuildingClass_AnimationAI_SellBuildup, 0x7)
 
 	return pTypeExt->SellBuildupLength == pThis->Animation.Value ? Continue : Skip;
 }
+
+DEFINE_HOOK(0x448480, BuildingClass_SetOwningHouse_CapturedEVA, 0x5)
+{
+	GET(HouseClass*, pToHouse, EBX);
+
+	if (pToHouse->IsControlledByCurrentPlayer()) // Not necessary to per techno customize this, I guess?
+		VoxClass::PlayIndex(RulesExt::Global()->EVA_WeCaptureABuilding.Get(VoxClass::FindIndex((const char*)"EVA_BuildingCaptured")));
+	else
+		VoxClass::PlayIndex(RulesExt::Global()->EVA_OurBuildingIsCaptured.Get(VoxClass::FindIndex((const char*)"EVA_BuildingCaptured")));
+
+	return 0x44848F;
+}

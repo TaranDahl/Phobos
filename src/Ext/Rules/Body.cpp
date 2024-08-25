@@ -186,6 +186,9 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->UseFixedVoxelLighting.Read(exINI, GameStrings::AudioVisual, "UseFixedVoxelLighting");
 
+	this->EVA_WeCaptureABuilding.Read(exINI, GameStrings::AudioVisual, "EVA.WeCaptureABuilding");
+	this->EVA_OurBuildingIsCaptured.Read(exINI, GameStrings::AudioVisual, "EVA_OurBuildingIsCaptured");
+
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
 	for (int i = 0; i < itemsCount; ++i)
@@ -352,6 +355,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->VoxelLightSource)
 		// .Process(this->VoxelShadowLightSource)
 		.Process(this->UseFixedVoxelLighting)
+		.Process(this->EVA_WeCaptureABuilding)
+		.Process(this->EVA_OurBuildingIsCaptured)
 		;
 }
 
