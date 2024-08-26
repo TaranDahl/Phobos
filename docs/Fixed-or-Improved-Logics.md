@@ -167,7 +167,6 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Units are now unable to kick out from a factory that is in construction process, and will not always stuck in the factory. If the unit is not able to kick out from the factory, the unit will be removed and the cost will be given back to its house.
 - Fixed disguised units not using the correct palette if target has custom palette.
 - Now, when a `stop` command (S) is issued to an aircraft, the aircraft will immediately return to the airport. When a `guard` command (G) is issued, the aircraft will search for targets around the current location and return immediately when target is not found, target is destroyed or ammos are depleted (Note that if the target is destroyed but ammos are not depleted yet, it will also return because the aircraft's command is one-time). When a `attack move` command (Ctrl+Shift) is issued, the aircraft will move towards the destination and search for nearby targets on the route for attack. Once ammos are depleted or the destination is reached, it will return (Note that if the  automatically selected target is destroyed but ammos are not depleted yet during the process, the aircraft will continue to go to the destination).
-- Fixed `MovementZone=Subterannean` harvesters being unable to find docks if in area enclosed by water, cliffs etc.
 
 ## Fixes / interactions with other extensions
 

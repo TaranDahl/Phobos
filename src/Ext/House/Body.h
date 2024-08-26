@@ -40,6 +40,7 @@ public:
 
 		CDTimerClass CombatAlertTimer;
 		CDTimerClass AIFireSaleDelayTimer;
+		CDTimerClass AISuperWeaponDelayTimer;
 
 		BuildingTypeClass* CurrentBuildingType;
 		CellStruct CurrentBuildingTopLeft;
@@ -73,6 +74,7 @@ public:
 			, CurrentBuildingTimes { 0 }
 			, CombatAlertTimer {}
 			, AIFireSaleDelayTimer {}
+			, AISuperWeaponDelayTimer {}
 			, RepairBaseNodes { false,false,false }
 			, LastBuiltNavalVehicleType { -1 }
 			, ProducingNavalUnitTypeIndex { -1 }

@@ -505,7 +505,6 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->OriginalPassengerOwner)
 		.Process(this->HasCarryoverWarpInDelay)
 		.Process(this->LastWarpInDelay)
-		.Process(this->SubterraneanHarvRallyPoint)
 		;
 }
 
