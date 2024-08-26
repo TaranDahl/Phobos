@@ -185,7 +185,10 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 		if (!weights3.size())
 			break;
 
-		this->SW_GrantOneTime_RandomWeightsData.push_back(std::move(weights3));
+		if (this->SW_GrantOneTime_RandomWeightsData.size() > i)
+			this->SW_GrantOneTime_RandomWeightsData[i] = std::move(weights3);
+		else
+			this->SW_GrantOneTime_RandomWeightsData.push_back(std::move(weights3));
 	}
 	ValueableVector<int> weights3;
 	weights3.Read(exINI, pSection, "SW.GrantOneTime.RandomWeights");
