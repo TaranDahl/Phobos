@@ -49,7 +49,6 @@ public:
 		, MirrorCoord { true }
 		, UseDisperseBurst { false }
 		, AxisOfRotation {}
-		, LastTargetCoord {}
 	{}
 
 	ParabolaTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Parabola)
@@ -63,7 +62,6 @@ public:
 		, MirrorCoord { true }
 		, UseDisperseBurst { false }
 		, AxisOfRotation {}
-		, LastTargetCoord {}
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -86,7 +84,6 @@ public:
 	bool MirrorCoord;
 	bool UseDisperseBurst;
 	CoordStruct AxisOfRotation;
-	CoordStruct LastTargetCoord;
 
 private:
 	void PrepareForOpenFire(BulletClass* pBullet);

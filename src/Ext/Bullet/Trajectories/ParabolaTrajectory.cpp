@@ -78,7 +78,6 @@ bool ParabolaTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 		.Process(this->MirrorCoord)
 		.Process(this->UseDisperseBurst)
 		.Process(this->AxisOfRotation)
-		.Process(this->LastTargetCoord)
 		;
 
 	return true;
@@ -99,7 +98,6 @@ bool ParabolaTrajectory::Save(PhobosStreamWriter& Stm) const
 		.Process(this->MirrorCoord)
 		.Process(this->UseDisperseBurst)
 		.Process(this->AxisOfRotation)
-		.Process(this->LastTargetCoord)
 		;
 
 	return true;
@@ -119,7 +117,6 @@ void ParabolaTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bu
 	this->MirrorCoord = pType->MirrorCoord;
 	this->UseDisperseBurst = pType->UseDisperseBurst;
 	this->AxisOfRotation = pType->AxisOfRotation;
-	this->LastTargetCoord = pBullet->TargetCoords;
 	this->PrepareForOpenFire(pBullet);
 }
 
