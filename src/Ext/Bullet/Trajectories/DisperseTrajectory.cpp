@@ -1226,14 +1226,8 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 			{
 				ParabolaTrajectory* const pTrajectory = static_cast<ParabolaTrajectory*>(pBulletExt->Trajectory);
 
-				//The parabola trajectory bullets has LeadTimeCalculate=true are not calculate its velocity yet.
-				if (pTrajectory->LeadTimeCalculate && (!pTarget || pTarget->WhatAmI() != AbstractType::Building))
-				{
-					pTrajectory->CurrentBurst = curBurst;
-					pTrajectory->CountOfBurst = maxBurst;
-					pTrajectory->UseDisperseBurst = false;
-				}
-				else if (pTrajectory->UseDisperseBurst && pTrajectory->RotateCoord != 0 && maxBurst > 1)
+				//The created bullet's velocity calculation has been completed, so we should stack the calculations.
+				if (pTrajectory->UseDisperseBurst && pTrajectory->RotateCoord != 0 && maxBurst > 1)
 				{
 					const CoordStruct createBulletTargetToSource = pCreateBullet->TargetCoords - pCreateBullet->SourceCoords;
 					const double rotateAngle = Math::atan2(createBulletTargetToSource.Y , createBulletTargetToSource.X);

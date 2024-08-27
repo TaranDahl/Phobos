@@ -15,7 +15,6 @@ public:
 		, RotateCoord { 0 }
 		, MirrorCoord { true }
 		, UseDisperseBurst { false }
-		, LeadTimeCalculate { true }
 		, AxisOfRotation { { 0, 0, 0 } }
 	{}
 
@@ -33,7 +32,6 @@ public:
 	Valueable<int> RotateCoord;
 	Valueable<bool> MirrorCoord;
 	Valueable<bool> UseDisperseBurst;
-	Valueable<bool> LeadTimeCalculate;
 	Valueable<CoordStruct> AxisOfRotation;
 };
 
@@ -50,12 +48,8 @@ public:
 		, RotateCoord { 0 }
 		, MirrorCoord { true }
 		, UseDisperseBurst { false }
-		, LeadTimeCalculate { true }
 		, AxisOfRotation {}
 		, LastTargetCoord {}
-		, CurrentBurst { 0 }
-		, CountOfBurst { 0 }
-		, WaitOneFrame {}
 	{}
 
 	ParabolaTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Parabola)
@@ -68,12 +62,8 @@ public:
 		, RotateCoord { 0 }
 		, MirrorCoord { true }
 		, UseDisperseBurst { false }
-		, LeadTimeCalculate { true }
 		, AxisOfRotation {}
 		, LastTargetCoord {}
-		, CurrentBurst { 0 }
-		, CountOfBurst { 0 }
-		, WaitOneFrame {}
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -95,18 +85,12 @@ public:
 	int RotateCoord;
 	bool MirrorCoord;
 	bool UseDisperseBurst;
-	bool LeadTimeCalculate;
 	CoordStruct AxisOfRotation;
 	CoordStruct LastTargetCoord;
-	int CurrentBurst;
-	int CountOfBurst;
-	CDTimerClass WaitOneFrame;
 
 private:
 	void PrepareForOpenFire(BulletClass* pBullet);
-	void CalculateBulletVelocityLeadTime(BulletClass* pBullet, CoordStruct* pSourceCoords);
-	void CalculateBulletVelocityRightNow(BulletClass* pBullet, CoordStruct* pSourceCoords);
-	bool BulletPrepareCheck(BulletClass* pBullet);
+	void CalculateBulletVelocity(BulletClass* pBullet, CoordStruct* pSourceCoords);
 	double CheckEquation(double horizontalDistance, int distanceCoordsZ, double velocity, double gravity, double radian);
 	double SearchVelocity(double horizontalDistance, int distanceCoordsZ, double gravity, double radian);
 };
