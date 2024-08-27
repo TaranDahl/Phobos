@@ -202,9 +202,8 @@ void ParabolaTrajectory::PrepareForOpenFire(BulletClass* pBullet)
 	{
 		auto const pTypeExt = BulletTypeExt::ExtMap.Find(pBullet->Type);
 		const double offsetMult = 0.0004 * theSourceCoords.DistanceFrom(theTargetCoords);
-		const int offsetDefault = RulesClass::Instance->BallisticScatter;
-		const int offsetMin = static_cast<int>(offsetMult * pTypeExt->BallisticScatter_Min.Get(Leptons(offsetDefault / 2)));
-		const int offsetMax = static_cast<int>(offsetMult * pTypeExt->BallisticScatter_Max.Get(Leptons(offsetDefault)));
+		const int offsetMin = static_cast<int>(offsetMult * pTypeExt->BallisticScatter_Min.Get(Leptons(0)));
+		const int offsetMax = static_cast<int>(offsetMult * pTypeExt->BallisticScatter_Max.Get(Leptons(RulesClass::Instance->BallisticScatter)));
 		const int offsetDistance = ScenarioClass::Instance->Random.RandomRanged(offsetMin, offsetMax);
 		theTargetCoords = MapClass::GetRandomCoordsNear(theTargetCoords, offsetDistance, false);
 	}
