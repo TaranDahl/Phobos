@@ -33,6 +33,12 @@ public:
 	Valueable<bool> MirrorCoord;
 	Valueable<bool> UseDisperseBurst;
 	Valueable<CoordStruct> AxisOfRotation;
+	// TODO Valueable<bool> LeadTimeCalculate;
+	// TODO Valueable<int> BounceTimes;
+	// TODO Valueable<bool> BounceOnWater;
+	// TODO Valueable<bool> BounceDetonate;
+	// TODO Valueable<double> BounceAttenuation;
+	// TODO Valueable<double> ElasticCoefficient;
 };
 
 class ParabolaTrajectory final : public PhobosTrajectory
