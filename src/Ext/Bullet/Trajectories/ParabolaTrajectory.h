@@ -8,13 +8,14 @@ public:
 	ParabolaTrajectoryType() : PhobosTrajectoryType(TrajectoryFlag::Parabola)
 		, DetonationDistance { Leptons(102) }
 		, TargetSnapDistance { Leptons(128) }
+		, OpenFireMode { 0 }
+		, ThrowHeight { 600 }
+		, LaunchAngle { 30.0 }
 		, OffsetCoord { { 0, 0, 0 } }
 		, RotateCoord { 0 }
 		, MirrorCoord { true }
 		, UseDisperseBurst { false }
 		, LeadTimeCalculate { true }
-		, ThrowHeight { 0 }
-		, LaunchAngle { 0 }
 		, AxisOfRotation { { 0, 0, 0 } }
 	{}
 
@@ -25,13 +26,14 @@ public:
 
 	Valueable<Leptons> DetonationDistance;
 	Valueable<Leptons> TargetSnapDistance;
+	Valueable<int> OpenFireMode;
+	Valueable<int> ThrowHeight;
+	Valueable<double> LaunchAngle;
 	Valueable<CoordStruct> OffsetCoord;
 	Valueable<int> RotateCoord;
 	Valueable<bool> MirrorCoord;
 	Valueable<bool> UseDisperseBurst;
 	Valueable<bool> LeadTimeCalculate;
-	Valueable<int> ThrowHeight;
-	Valueable<int> LaunchAngle;
 	Valueable<CoordStruct> AxisOfRotation;
 };
 
@@ -41,27 +43,37 @@ public:
 	ParabolaTrajectory() : PhobosTrajectory(TrajectoryFlag::Parabola)
 		, DetonationDistance { Leptons(102) }
 		, TargetSnapDistance { Leptons(128) }
+		, OpenFireMode { 0 }
+		, ThrowHeight { 600 }
+		, LaunchAngle { 30.0 }
 		, OffsetCoord {}
 		, RotateCoord { 0 }
 		, MirrorCoord { true }
 		, UseDisperseBurst { false }
 		, LeadTimeCalculate { true }
-		, ThrowHeight { 0 }
-		, LaunchAngle { 0 }
 		, AxisOfRotation {}
+		, LastTargetCoord {}
+		, CurrentBurst { 0 }
+		, CountOfBurst { 0 }
+		, WaitOneFrame {}
 	{}
 
 	ParabolaTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Parabola)
 		, DetonationDistance { Leptons(102) }
 		, TargetSnapDistance { Leptons(128) }
+		, OpenFireMode { 0 }
+		, ThrowHeight { 600 }
+		, LaunchAngle { 30.0 }
 		, OffsetCoord {}
 		, RotateCoord { 0 }
 		, MirrorCoord { true }
 		, UseDisperseBurst { false }
 		, LeadTimeCalculate { true }
-		, ThrowHeight { 0 }
-		, LaunchAngle { 0 }
 		, AxisOfRotation {}
+		, LastTargetCoord {}
+		, CurrentBurst { 0 }
+		, CountOfBurst { 0 }
+		, WaitOneFrame {}
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -76,15 +88,25 @@ public:
 
 	Leptons DetonationDistance;
 	Leptons TargetSnapDistance;
+	int OpenFireMode;
+	int ThrowHeight;
+	double LaunchAngle;
 	CoordStruct OffsetCoord;
 	int RotateCoord;
 	bool MirrorCoord;
 	bool UseDisperseBurst;
 	bool LeadTimeCalculate;
-	int ThrowHeight;
-	int LaunchAngle;
 	CoordStruct AxisOfRotation;
+	CoordStruct LastTargetCoord;
+	int CurrentBurst;
+	int CountOfBurst;
+	CDTimerClass WaitOneFrame;
 
 private:
-
+	void PrepareForOpenFire(BulletClass* pBullet);
+	void CalculateBulletVelocityLeadTime(BulletClass* pBullet, CoordStruct* pSourceCoords);
+	void CalculateBulletVelocityRightNow(BulletClass* pBullet, CoordStruct* pSourceCoords);
+	bool BulletPrepareCheck(BulletClass* pBullet);
+	double CheckEquation(double horizontalDistance, int distanceCoordsZ, double velocity, double gravity, double radian);
+	double SearchVelocity(double horizontalDistance, int distanceCoordsZ, double gravity, double radian);
 };
