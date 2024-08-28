@@ -34,11 +34,7 @@ public:
 	Valueable<bool> UseDisperseBurst;
 	Valueable<CoordStruct> AxisOfRotation;
 	// TODO Valueable<bool> LeadTimeCalculate;
-	// TODO Valueable<int> BounceTimes;
-	// TODO Valueable<bool> BounceOnWater;
-	// TODO Valueable<bool> BounceDetonate;
-	// TODO Valueable<double> BounceAttenuation;
-	// TODO Valueable<double> ElasticCoefficient;
+	// The faster the projectile's speed, the worse the visual effect of bounce function.
 };
 
 class ParabolaTrajectory final : public PhobosTrajectory
@@ -55,6 +51,7 @@ public:
 		, MirrorCoord { true }
 		, UseDisperseBurst { false }
 		, AxisOfRotation {}
+		, ShouldDetonate { false }
 	{}
 
 	ParabolaTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Parabola)
@@ -68,6 +65,7 @@ public:
 		, MirrorCoord { true }
 		, UseDisperseBurst { false }
 		, AxisOfRotation {}
+		, ShouldDetonate { false }
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -90,6 +88,7 @@ public:
 	bool MirrorCoord;
 	bool UseDisperseBurst;
 	CoordStruct AxisOfRotation;
+	bool ShouldDetonate;
 
 private:
 	void PrepareForOpenFire(BulletClass* pBullet);

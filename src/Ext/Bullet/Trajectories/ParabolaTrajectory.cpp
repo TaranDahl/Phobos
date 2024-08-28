@@ -78,6 +78,7 @@ bool ParabolaTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 		.Process(this->MirrorCoord)
 		.Process(this->UseDisperseBurst)
 		.Process(this->AxisOfRotation)
+		.Process(this->ShouldDetonate)
 		;
 
 	return true;
@@ -98,6 +99,7 @@ bool ParabolaTrajectory::Save(PhobosStreamWriter& Stm) const
 		.Process(this->MirrorCoord)
 		.Process(this->UseDisperseBurst)
 		.Process(this->AxisOfRotation)
+		.Process(this->ShouldDetonate)
 		;
 
 	return true;
@@ -117,18 +119,23 @@ void ParabolaTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bu
 	this->MirrorCoord = pType->MirrorCoord;
 	this->UseDisperseBurst = pType->UseDisperseBurst;
 	this->AxisOfRotation = pType->AxisOfRotation;
+	this->ShouldDetonate = false;
 	this->PrepareForOpenFire(pBullet);
 }
 
 bool ParabolaTrajectory::OnAI(BulletClass* pBullet)
 {
-	if (this->DetonationDistance > 0 && pBullet->TargetCoords.DistanceFrom(pBullet->Location) < this->DetonationDistance)
-		return true;
-
-	if (MapClass::Instance->GetCellFloorHeight(pBullet->Location) >= pBullet->Location.Z)
+	if (this->ShouldDetonate || (this->DetonationDistance > 0 && pBullet->TargetCoords.DistanceFrom(pBullet->Location) < this->DetonationDistance))
 		return true;
 
 	pBullet->Velocity.Z -= BulletTypeExt::GetAdjustedGravity(pBullet->Type);
+	const int cellHeight = MapClass::Instance->GetCellFloorHeight(pBullet->Location);
+
+	if (cellHeight >= pBullet->Location.Z + static_cast<int>(pBullet->Velocity.Z) && pBullet->Velocity.Z < 0.0) // Make it fall on the ground without penetrating underground
+	{
+		pBullet->Velocity *= (cellHeight - pBullet->Location.Z) / pBullet->Velocity.Z;
+		this->ShouldDetonate = true;
+	}
 
 	if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(pBullet->Location))
 		return false;
@@ -154,7 +161,7 @@ void ParabolaTrajectory::OnAIPreDetonate(BulletClass* pBullet)
 
 void ParabolaTrajectory::OnAIVelocity(BulletClass* pBullet, BulletVelocity* pSpeed, BulletVelocity* pPosition)
 {
-	pSpeed->Z += BulletTypeExt::GetAdjustedGravity(pBullet->Type); // We don't want to take the gravity into account
+	pSpeed->Z += BulletTypeExt::GetAdjustedGravity(pBullet->Type); // Seems like this is useless
 }
 
 TrajectoryCheckReturnType ParabolaTrajectory::OnAITargetCoordCheck(BulletClass* pBullet)
@@ -333,6 +340,8 @@ void ParabolaTrajectory::CalculateBulletVelocity(BulletClass* pBullet, CoordStru
 		break;
 	}
 	}
+
+	pBullet->Velocity.Z += gravity / 2; // Offset the gravity effect of the first time update
 }
 
 double ParabolaTrajectory::CheckEquation(double horizontalDistance, int distanceCoordsZ, double velocity, double gravity, double radian)
@@ -350,10 +359,10 @@ double ParabolaTrajectory::CheckEquation(double horizontalDistance, int distance
 
 double ParabolaTrajectory::SearchVelocity(double horizontalDistance, int distanceCoordsZ, double gravity, double radian)
 {
-	const double delta = 1.0;
-	double velocity = 50.0;
+	const double delta = 1e-6;
+	double velocity = gravity * 16.0;
 
-	for (int i = 0; i < 8; ++i) // Newton iteration method
+	for (int i = 0; i < 10; ++i) // Newton iteration method
 	{
 		const double differential = this->CheckEquation(horizontalDistance, distanceCoordsZ, velocity, gravity, radian);
 		const double dDifferential = (this->CheckEquation(horizontalDistance, distanceCoordsZ, (velocity + delta), gravity, radian) - differential) / delta;
@@ -370,5 +379,5 @@ double ParabolaTrajectory::SearchVelocity(double horizontalDistance, int distanc
 		velocity = velocityNew;
 	}
 
-	return 100.0; // Unsolvable
+	return 1.0; // Unsolvable
 }
