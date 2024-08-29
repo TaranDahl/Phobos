@@ -331,16 +331,22 @@ DEFINE_HOOK(0x46A290, BulletClass_Logics_Extras, 0x5)
 
 // todo1 : fix this hook to replace the TEST one.
 // todo2 : flag AU on projectile.
-/*
+
 DEFINE_HOOK(0x70023E, TechnoClass_MouseOverObject_AttackUnderGround, 0x8)
 {
 	enum { FireIsOK = 0x700246, FireIsNotOK = 0x70056C };
 
+	Debug::LogAndMessage("Here\n");
+
 	//GET(ObjectClass*, pObject, EDI);
-	GET(int, isSurfaced, EAX);
+	GET(bool, isSurfaced, EAX);
+	GET_STACK(WeaponStruct*, pWpStru, STACK_OFFSET(0x1C, -0x8));
 
 	Debug::LogAndMessage("%d\n", isSurfaced);
-	if (!((bool)isSurfaced) || pWpType->Projectile->AU)
+
+	auto pProjExt = BulletTypeExt::ExtMap.Find(pWpStru->WeaponType->Projectile);
+
+	if (!isSurfaced && false)//!(pProjExt && pProjExt->AU))
 	{
 		return FireIsNotOK;
 	}
@@ -348,13 +354,13 @@ DEFINE_HOOK(0x70023E, TechnoClass_MouseOverObject_AttackUnderGround, 0x8)
 	{
 		return FireIsOK;
 	}
-}*/
-
+}
+/*
 DEFINE_HOOK(0x70023B, TEST, 0x5)
 {
 	return 0x700246;
 }
-
+*/
 // todo3 : ares changed the layer check of temporal wh, handle this.
 /*
 DEFINE_HOOK(, BulletClass_Logics_TemporalUnderGround, )
@@ -365,6 +371,7 @@ DEFINE_HOOK(, BulletClass_Logics_TemporalUnderGround, )
 
 // todo4 : auto target related impl.
 // todo5 : overwrite bHitted in the vanilla function.
+// todo6 : toggle wh anim when detonating underground, or play on surface.
 DEFINE_HOOK(0x4899DA, MapClass_DamageArea_DamageUnderGround, 0x7)
 {
 	GET_STACK(bool, isNullified, STACK_OFFSET(0xE0, -0xC9));
@@ -382,7 +389,7 @@ DEFINE_HOOK(0x4899DA, MapClass_DamageArea_DamageUnderGround, 0x7)
 	}
 
 	bool cylinder = pWHExt->CellSpread_Cylinder;
-	int spread = pWH->CellSpread;
+	float spread = pWH->CellSpread;
 	for (auto const& pTechno : *TechnoClass::Array)
 	{
 		if (pTechno->InWhichLayer() == Layer::Underground && // Layer.
@@ -394,11 +401,11 @@ DEFINE_HOOK(0x4899DA, MapClass_DamageArea_DamageUnderGround, 0x7)
 			auto technoCoords = pTechno->GetCoords();
 			if (cylinder)
 			{
-				dist = Math::sqrt(technoCoords.X - pCrd->X + technoCoords.Y - pCrd->Y);
+				dist = (int)Math::sqrt(technoCoords.X - pCrd->X + technoCoords.Y - pCrd->Y);
 			}
 			else
 			{
-				dist = technoCoords.DistanceFrom(*pCrd);
+				dist = (int)technoCoords.DistanceFrom(*pCrd);
 			}
 			if (dist <= spread * 256)
 			{
