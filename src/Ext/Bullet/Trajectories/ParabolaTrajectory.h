@@ -11,6 +11,12 @@ public:
 		, OpenFireMode { 0 }
 		, ThrowHeight { 600 }
 		, LaunchAngle { 30.0 }
+		, LeadTimeCalculate { false }
+		, BounceTimes { 0 }
+		, BounceOnWater { false }
+		, BounceDetonate { false }
+		, BounceAttenuation { 0.7 }
+		, BounceCoefficient { 0.7 }
 		, OffsetCoord { { 0, 0, 0 } }
 		, RotateCoord { 0 }
 		, MirrorCoord { true }
@@ -28,12 +34,17 @@ public:
 	Valueable<int> OpenFireMode;
 	Valueable<int> ThrowHeight;
 	Valueable<double> LaunchAngle;
+	Valueable<bool> LeadTimeCalculate;
+	Valueable<int> BounceTimes;
+	Valueable<bool> BounceOnWater;
+	Valueable<bool> BounceDetonate;
+	Valueable<double> BounceAttenuation;
+	Valueable<double> BounceCoefficient;
 	Valueable<CoordStruct> OffsetCoord;
 	Valueable<int> RotateCoord;
 	Valueable<bool> MirrorCoord;
 	Valueable<bool> UseDisperseBurst;
 	Valueable<CoordStruct> AxisOfRotation;
-	// TODO Valueable<bool> LeadTimeCalculate;
 	// The faster the projectile's speed, the worse the visual effect of bounce function.
 };
 
@@ -46,12 +57,24 @@ public:
 		, OpenFireMode { 0 }
 		, ThrowHeight { 600 }
 		, LaunchAngle { 30.0 }
+		, LeadTimeCalculate { false }
+		, BounceTimes { 0 }
+		, BounceOnWater { false }
+		, BounceDetonate { false }
+		, BounceAttenuation { 0.7 }
+		, BounceCoefficient { 0.7 }
 		, OffsetCoord {}
 		, RotateCoord { 0 }
 		, MirrorCoord { true }
 		, UseDisperseBurst { false }
 		, AxisOfRotation {}
 		, ShouldDetonate { false }
+		, ShouldBounce { false }
+		, LastTargetCoord {}
+		, CurrentBurst { 0 }
+		, CountOfBurst { 0 }
+		, WaitOneFrame {}
+		, LastVelocity {}
 	{}
 
 	ParabolaTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Parabola)
@@ -60,12 +83,24 @@ public:
 		, OpenFireMode { 0 }
 		, ThrowHeight { 600 }
 		, LaunchAngle { 30.0 }
+		, LeadTimeCalculate { false }
+		, BounceTimes { 0 }
+		, BounceOnWater { false }
+		, BounceDetonate { false }
+		, BounceAttenuation { 0.7 }
+		, BounceCoefficient { 0.7 }
 		, OffsetCoord {}
 		, RotateCoord { 0 }
 		, MirrorCoord { true }
 		, UseDisperseBurst { false }
 		, AxisOfRotation {}
 		, ShouldDetonate { false }
+		, ShouldBounce { false }
+		, LastTargetCoord {}
+		, CurrentBurst { 0 }
+		, CountOfBurst { 0 }
+		, WaitOneFrame {}
+		, LastVelocity {}
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -83,16 +118,37 @@ public:
 	int OpenFireMode;
 	int ThrowHeight;
 	double LaunchAngle;
+	bool LeadTimeCalculate;
+	int BounceTimes;
+	bool BounceOnWater;
+	bool BounceDetonate;
+	double BounceAttenuation;
+	double BounceCoefficient;
 	CoordStruct OffsetCoord;
 	int RotateCoord;
 	bool MirrorCoord;
 	bool UseDisperseBurst;
 	CoordStruct AxisOfRotation;
 	bool ShouldDetonate;
+	bool ShouldBounce;
+	CoordStruct LastTargetCoord;
+	int CurrentBurst;
+	int CountOfBurst;
+	CDTimerClass WaitOneFrame;
+	BulletVelocity LastVelocity;
 
 private:
 	void PrepareForOpenFire(BulletClass* pBullet);
-	void CalculateBulletVelocity(BulletClass* pBullet, CoordStruct* pSourceCoords);
-	double CheckEquation(double horizontalDistance, int distanceCoordsZ, double velocity, double gravity, double radian);
-	double SearchVelocity(double horizontalDistance, int distanceCoordsZ, double gravity, double radian);
+	bool BulletPrepareCheck(BulletClass* pBullet);
+	void CalculateBulletVelocityRightNow(BulletClass* pBullet, CoordStruct* pSourceCoords);
+	void CalculateBulletVelocityLeadTime(BulletClass* pBullet, CoordStruct* pSourceCoords);
+	double SearchVelocity(double horizontalDistance, int distanceCoordsZ, double radian, double gravity);
+	double CheckVelocityEquation(double horizontalDistance, int distanceCoordsZ, double velocity, double radian, double gravity);
+	double SolveFixedSpeedMeetTime(CoordStruct* pSourceCrd, CoordStruct* pTargetCrd, CoordStruct* pOffsetCrd, double horizontalSpeed);
+	double SearchFixedHeightMeetTime(CoordStruct* pSourceCrd, CoordStruct* pTargetCrd, CoordStruct* pOffsetCrd, double gravity);
+	double CheckFixedHeightEquation(CoordStruct* pSourceCrd, CoordStruct* pTargetCrd, CoordStruct* pOffsetCrd, double meetTime, double gravity);
+	double SearchFixedAngleMeetTime(CoordStruct* pSourceCrd, CoordStruct* pTargetCrd, CoordStruct* pOffsetCrd, double radian, double gravity);
+	double CheckFixedAngleEquation(CoordStruct* pSourceCrd, CoordStruct* pTargetCrd, CoordStruct* pOffsetCrd, double meetTime, double radian, double gravity);
+	BulletVelocity GetGroundNormalVector(BulletClass* pBullet, CellClass* pCell);
+	bool CheckCellIsCliff(CellStruct cell);
 };
