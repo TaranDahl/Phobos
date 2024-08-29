@@ -119,7 +119,7 @@ DEFINE_HOOK(0x702B31, TechnoClass_ReceiveDamage_ReturnFireCheck, 0x7)
 	auto mission = pThis->CurrentMission;
 	auto pThisFoot = abstract_cast<FootClass*>(pThis);
 	bool isJJMoving = pThisFoot != 0 ? pThisFoot->GetHeight() > Unsorted::CellHeight && mission == Mission::Move && pThisFoot->Locomotor->Is_Moving_Now() : 0; // I have really no idea about how to check this perfectly.
-	bool isMoving = pThisFoot != 0 ? isJJMoving || mission == Mission::Move && pThisFoot->GetHeight() <= 0 : 0;
+	bool isMoving = pThisFoot != 0 ? isJJMoving || (mission == Mission::Move && pThisFoot->GetHeight() <= 0) : 0;
 
 	if (isMoving)
 		return SkipReturnFire;
