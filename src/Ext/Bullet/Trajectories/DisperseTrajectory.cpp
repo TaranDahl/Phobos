@@ -1187,7 +1187,7 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 				pTrajectory->FirepowerMult = this->FirepowerMult;
 
 				//The straight trajectory bullets has LeadTimeCalculate=true are not calculate its velocity yet.
-				if (pTrajectory->LeadTimeCalculate && (!pTarget || pTarget->WhatAmI() != AbstractType::Building))
+				if (pTrajectory->LeadTimeCalculate && (!pTarget || (pTarget->AbstractFlags & AbstractFlags::Foot) == AbstractFlags::None))
 				{
 					pTrajectory->CurrentBurst = curBurst;
 					pTrajectory->CountOfBurst = maxBurst;

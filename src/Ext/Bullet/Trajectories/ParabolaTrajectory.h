@@ -15,8 +15,8 @@ public:
 		, BounceTimes { 0 }
 		, BounceOnWater { false }
 		, BounceDetonate { false }
-		, BounceAttenuation { 0.7 }
-		, BounceCoefficient { 0.7 }
+		, BounceAttenuation { 0.8 }
+		, BounceCoefficient { 0.8 }
 		, OffsetCoord { { 0, 0, 0 } }
 		, RotateCoord { 0 }
 		, MirrorCoord { true }
@@ -61,8 +61,8 @@ public:
 		, BounceTimes { 0 }
 		, BounceOnWater { false }
 		, BounceDetonate { false }
-		, BounceAttenuation { 0.7 }
-		, BounceCoefficient { 0.7 }
+		, BounceAttenuation { 0.8 }
+		, BounceCoefficient { 0.8 }
 		, OffsetCoord {}
 		, RotateCoord { 0 }
 		, MirrorCoord { true }
@@ -87,8 +87,8 @@ public:
 		, BounceTimes { 0 }
 		, BounceOnWater { false }
 		, BounceDetonate { false }
-		, BounceAttenuation { 0.7 }
-		, BounceCoefficient { 0.7 }
+		, BounceAttenuation { 0.8 }
+		, BounceCoefficient { 0.8 }
 		, OffsetCoord {}
 		, RotateCoord { 0 }
 		, MirrorCoord { true }
