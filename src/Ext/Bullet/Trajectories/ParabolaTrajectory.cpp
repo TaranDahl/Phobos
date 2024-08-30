@@ -256,15 +256,13 @@ bool ParabolaTrajectory::OnAI(BulletClass* pBullet)
 
 		const int futureHeight = MapClass::Instance->GetCellFloorHeight(futureCoords);
 
-		if (futureHeight >= futureCoords.Z) // Make it fall on the ground without penetrating underground
+		if (futureHeight >= futureCoords.Z)
 		{
 			this->LastVelocity = pBullet->Velocity;
 			const double mult = abs((pBullet->Location.Z - futureHeight) / pBullet->Velocity.Z);
 
-			if (mult < 1.0)
+			if (mult < 1.0) // Make it fall on the ground without penetrating underground
 				pBullet->Velocity *= mult;
-			else
-				pBullet->Velocity.Z += futureHeight - futureCoords.Z;
 
 			break;
 		}
@@ -418,7 +416,7 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 	case 1:
 	case 4:
 	{
-		leadTime = static_cast<int>(sqrt((this->ThrowHeight << 1) / gravity) * 2 + 1.5);
+		leadTime = static_cast<int>(sqrt((this->ThrowHeight << 1) / gravity) * 2);
 		break;
 	}
 	case 2:
@@ -438,12 +436,12 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 
 		const double mult = sin(2 * radian);
 		double velocity = abs(mult) > 1e-10 ? sqrt(horizontalDistance * gravity / mult) : 0.0;
-		velocity += distanceCoords.Z / gravity;
+		velocity += 2 * distanceCoords.Z / gravity;
 
 		if (velocity < 1e-10)
 			break;
 
-		leadTime = static_cast<int>(horizontalDistance / (velocity * factor) + 1.5);
+		leadTime = static_cast<int>(horizontalDistance / (velocity * factor));
 		break;
 	}
 	default:
@@ -457,7 +455,7 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 		double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
 		horizontalSpeed = horizontalSpeed > 256.0 ? 256.0 : horizontalSpeed;
 
-		leadTime = static_cast<int>(horizontalDistance / horizontalSpeed + 1.5);
+		leadTime = static_cast<int>(horizontalDistance / horizontalSpeed);
 		break;
 	}
 	}
@@ -718,7 +716,7 @@ BulletVelocity ParabolaTrajectory::GetGroundNormalVector(BulletClass* pBullet, C
 	CoordStruct checkPoint { subX, subY, pCell->GetFloorHeight(Point2D{ subX, subY }) };
 	CoordStruct surfaceX = checkPoint - CoordStruct{ subX + 13, subY, pCell->GetFloorHeight(Point2D{ subX + 13, subY }) };
 	CoordStruct surfaceY = checkPoint - CoordStruct{ subX, subY + 13, pCell->GetFloorHeight(Point2D{ subX, subY + 13 }) };
-	CoordStruct normalVector = surfaceX.CrossProduct(surfaceY).Normalized();
+	CoordStruct normalVector = surfaceY.CrossProduct(surfaceX).Normalized();
 
 	return BulletVelocity{ static_cast<double>(normalVector.X), static_cast<double>(normalVector.Y), static_cast<double>(normalVector.Z) };
 }
