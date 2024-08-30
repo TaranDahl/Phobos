@@ -187,7 +187,7 @@ void ParabolaTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bu
 			this->OffsetCoord.Y = -(this->OffsetCoord.Y);
 	}
 
-	if (!this->LeadTimeCalculate || (pBullet->Target && (pBullet->Target->AbstractFlags & AbstractFlags::Foot) != AbstractFlags::None))
+	if (!this->LeadTimeCalculate || !abstract_cast<FootClass*>(pBullet->Target))
 		this->PrepareForOpenFire(pBullet);
 	else
 		this->WaitOneFrame.Start(1);
