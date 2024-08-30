@@ -416,7 +416,8 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 	case 1: // Fixed max height and aim at the target
 	{
 		const double meetTime = this->SearchFixedHeightMeetTime(pSourceCoords, &targetCoords, &offsetCoords, gravity);
-		const CoordStruct distanceCoords = pBullet->TargetCoords + (targetCoords - this->LastTargetCoord) * meetTime - *pSourceCoords;
+		pBullet->TargetCoords += (targetCoords - this->LastTargetCoord) * meetTime;
+		const CoordStruct distanceCoords = pBullet->TargetCoords - *pSourceCoords;
 
 		if (meetTime <= 0.0 || distanceCoords.Magnitude() <= 0.0)
 			break;
@@ -433,8 +434,10 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 	{
 		double radian = this->LaunchAngle * Math::Pi / 180.0;
 		radian = (radian >= Math::HalfPi || radian <= -Math::HalfPi) ? (Math::HalfPi / 3) : radian;
+
 		const double meetTime = this->SearchFixedAngleMeetTime(pSourceCoords, &targetCoords, &offsetCoords, radian, gravity);
-		const CoordStruct distanceCoords = pBullet->TargetCoords + (targetCoords - this->LastTargetCoord) * meetTime - *pSourceCoords;
+		pBullet->TargetCoords += (targetCoords - this->LastTargetCoord) * meetTime;
+		const CoordStruct distanceCoords = pBullet->TargetCoords - *pSourceCoords;
 
 		if (meetTime <= 0.0 || distanceCoords.Magnitude() <= 0.0)
 			break;
@@ -451,8 +454,10 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 	{
 		double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
 		horizontalSpeed = horizontalSpeed > 256.0 ? 256.0 : horizontalSpeed;
+
 		const double meetTime = this->SolveFixedSpeedMeetTime(pSourceCoords, &targetCoords, &offsetCoords, horizontalSpeed);
-		const CoordStruct distanceCoords = pBullet->TargetCoords + (targetCoords - this->LastTargetCoord) * meetTime - *pSourceCoords;
+		pBullet->TargetCoords += (targetCoords - this->LastTargetCoord) * meetTime;
+		const CoordStruct distanceCoords = pBullet->TargetCoords - *pSourceCoords;
 
 		if (meetTime <= 0.0 || distanceCoords.Magnitude() <= 0.0)
 			break;
@@ -471,7 +476,8 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 	case 4: // Fixed max height and fixed fire angle
 	{
 		const double meetTime = this->SearchFixedHeightMeetTime(pSourceCoords, &targetCoords, &offsetCoords, gravity);
-		const CoordStruct distanceCoords = pBullet->TargetCoords + (targetCoords - this->LastTargetCoord) * meetTime - *pSourceCoords;
+		pBullet->TargetCoords += (targetCoords - this->LastTargetCoord) * meetTime;
+		const CoordStruct distanceCoords = pBullet->TargetCoords - *pSourceCoords;
 
 		if (meetTime <= 0.0 || distanceCoords.Magnitude() <= 0.0)
 			break;
@@ -482,6 +488,7 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 
 		double radian = this->LaunchAngle * Math::Pi / 180.0;
 		radian = (radian >= Math::HalfPi || radian <= 0.0) ? (Math::HalfPi / 3) : radian;
+
 		const double horizontalDistance = Point2D{ distanceCoords.X, distanceCoords.Y }.Magnitude();
 		const double mult = (pBullet->Velocity.Z / tan(radian)) / horizontalDistance;
 
@@ -493,8 +500,10 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 	{
 		double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
 		horizontalSpeed = horizontalSpeed > 256.0 ? 256.0 : horizontalSpeed;
+
 		const double meetTime = this->SolveFixedSpeedMeetTime(pSourceCoords, &targetCoords, &offsetCoords, horizontalSpeed);
-		const CoordStruct distanceCoords = pBullet->TargetCoords + (targetCoords - this->LastTargetCoord) * meetTime - *pSourceCoords;
+		pBullet->TargetCoords += (targetCoords - this->LastTargetCoord) * meetTime;
+		const CoordStruct distanceCoords = pBullet->TargetCoords - *pSourceCoords;
 
 		if (meetTime <= 0.0 || distanceCoords.Magnitude() <= 0.0)
 			break;
@@ -515,8 +524,10 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 	{
 		double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
 		horizontalSpeed = horizontalSpeed > 256.0 ? 256.0 : horizontalSpeed;
+
 		const double meetTime = this->SolveFixedSpeedMeetTime(pSourceCoords, &targetCoords, &offsetCoords, horizontalSpeed);
-		const CoordStruct distanceCoords = pBullet->TargetCoords + (targetCoords - this->LastTargetCoord) * meetTime - *pSourceCoords;
+		pBullet->TargetCoords += (targetCoords - this->LastTargetCoord) * meetTime;
+		const CoordStruct distanceCoords = pBullet->TargetCoords - *pSourceCoords;
 
 		if (meetTime <= 0.0 || distanceCoords.Magnitude() <= 0.0)
 			break;
@@ -531,6 +542,7 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 	}
 	}
 
+	pBullet->TargetCoords = targetCoords + offsetCoords;
 	this->CalculateBulletVelocityRightNow(pBullet, pSourceCoords, gravity);
 }
 
@@ -674,14 +686,14 @@ double ParabolaTrajectory::SolveFixedSpeedMeetTime(CoordStruct* pSourceCrd, Coor
 {
 	const Point2D targetSpeedCrd { pTargetCrd->X - this->LastTargetCoord.X, pTargetCrd->Y - this->LastTargetCoord.Y };
 	const Point2D destinationCrd { pTargetCrd->X + pOffsetCrd->X - pSourceCrd->X, pTargetCrd->Y + pOffsetCrd->Y - pSourceCrd->Y };
-	const double targetSpeedSquared = targetSpeedCrd.MagnitudeSquared();
+	const double targetSpeed = targetSpeedCrd.Magnitude();
 	const double factor = 2 * (targetSpeedCrd * destinationCrd) - horizontalSpeed;
-	const double delta = factor * factor - 4 * targetSpeedSquared * destinationCrd.MagnitudeSquared();
+	const double delta = factor * factor - 4 * targetSpeed * destinationCrd.Magnitude();
 
 	if (delta >= 0)
 	{
-		const double timeP = 0.5 * (-factor + sqrt(delta)) / targetSpeedSquared;
-		const double timeM = 0.5 * (-factor - sqrt(delta)) / targetSpeedSquared;
+		const double timeP = 0.5 * (-factor + sqrt(delta)) / targetSpeed;
+		const double timeM = 0.5 * (-factor - sqrt(delta)) / targetSpeed;
 
 		if (timeM > 0)
 			return timeM;
