@@ -206,12 +206,19 @@ bool ParabolaTrajectory::OnAI(BulletClass* pBullet)
 	if (!pCell)
 		return true;
 
-	if (this->ShouldBounce && this->BounceTimes > 0 && (pCell->LandType != LandType::Water || this->BounceOnWater))
+	const double gravity = BulletTypeExt::GetAdjustedGravity(pBullet->Type);
+
+	if (this->ShouldBounce && this->BounceTimes > 0)
 	{
-		const BulletVelocity groundNormalVector = this->GetGroundNormalVector(pBullet, pCell);
-		pBullet->Velocity = (this->LastVelocity - groundNormalVector * (this->LastVelocity * groundNormalVector) * 2) * this->BounceCoefficient;
+		if (pCell->LandType == LandType::Water && !this->BounceOnWater)
+			return true;
+
 		--this->BounceTimes;
 		this->ShouldBounce = false;
+
+		const BulletVelocity groundNormalVector = this->GetGroundNormalVector(pBullet, pCell);
+		pBullet->Velocity = (this->LastVelocity - groundNormalVector * (this->LastVelocity * groundNormalVector) * 2) * this->BounceCoefficient;
+		pBullet->Velocity.Z -= gravity;
 
 		if (this->BounceDetonate)
 		{
@@ -233,19 +240,32 @@ bool ParabolaTrajectory::OnAI(BulletClass* pBullet)
 
 	do
 	{
-		pBullet->Velocity.Z -= BulletTypeExt::GetAdjustedGravity(pBullet->Type);
 		const int cellHeight = MapClass::Instance->GetCellFloorHeight(pBullet->Location);
 
-		if (cellHeight >= pBullet->Location.Z)
+		if (cellHeight >= pBullet->Location.Z + static_cast<int>(gravity) + 1)
+			return true;
+
+		pBullet->Velocity.Z -= gravity;
+
+		const CoordStruct futureCoords
+		{
+			pBullet->Location.X + static_cast<int>(pBullet->Velocity.X),
+			pBullet->Location.Y + static_cast<int>(pBullet->Velocity.Y),
+			pBullet->Location.Z + static_cast<int>(pBullet->Velocity.Z)
+		};
+
+		const int futureHeight = MapClass::Instance->GetCellFloorHeight(futureCoords);
+
+		if (futureHeight >= futureCoords.Z) // Make it fall on the ground without penetrating underground
 		{
 			this->LastVelocity = pBullet->Velocity;
-			pBullet->Velocity = BulletVelocity::Empty;
-			break;
-		}
-		else if (cellHeight >= (pBullet->Location.Z + static_cast<int>(pBullet->Velocity.Z))) // Make it fall on the ground without penetrating underground
-		{
-			this->LastVelocity = pBullet->Velocity;
-			pBullet->Velocity *= abs((pBullet->Location.Z - cellHeight) / pBullet->Velocity.Z);
+			const double mult = abs((pBullet->Location.Z - futureHeight) / pBullet->Velocity.Z);
+
+			if (mult < 1.0)
+				pBullet->Velocity *= mult;
+			else
+				pBullet->Velocity.Z += futureHeight - futureCoords.Z;
+
 			break;
 		}
 
@@ -329,11 +349,19 @@ void ParabolaTrajectory::PrepareForOpenFire(BulletClass* pBullet)
 	}
 
 	pBullet->TargetCoords = theTargetCoords;
+	const double gravity = BulletTypeExt::GetAdjustedGravity(pBullet->Type);
+
+	if (gravity <= 0.0)
+	{
+		pBullet->Velocity = BulletVelocity::Empty;
+		this->ShouldDetonate = true;
+		return;
+	}
 
 	if (leadTimeCalculate)
-		this->CalculateBulletVelocityLeadTime(pBullet, &theSourceCoords);
+		this->CalculateBulletVelocityLeadTime(pBullet, &theSourceCoords, gravity);
 	else
-		this->CalculateBulletVelocityRightNow(pBullet, &theSourceCoords);
+		this->CalculateBulletVelocityRightNow(pBullet, &theSourceCoords, gravity);
 
 	if (!this->UseDisperseBurst && this->RotateCoord != 0 && this->CountOfBurst > 1)
 	{
@@ -380,151 +408,71 @@ bool ParabolaTrajectory::BulletPrepareCheck(BulletClass* pBullet)
 	return false;
 }
 
-void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, CoordStruct* pSourceCoords)
+void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, CoordStruct* pSourceCoords, double gravity)
 {
-	const double gravity = BulletTypeExt::GetAdjustedGravity(pBullet->Type);
+	int leadTime = 0;
 
-	if (gravity <= 0.0)
-	{
-		pBullet->Velocity = BulletVelocity::Empty;
-		this->ShouldDetonate = true;
-		return;
-	}
-
-	CoordStruct targetCoords = pBullet->Target->GetCoords();
-	CoordStruct offsetCoords = pBullet->TargetCoords - targetCoords;
-
+	// Only simple guess, not exact solution
 	switch (this->OpenFireMode)
 	{
-	case 1: // Fixed max height and aim at the target
+	case 1:
+	case 4:
 	{
-		const double meetTime = this->SearchFixedHeightMeetTime(pSourceCoords, &targetCoords, &offsetCoords, gravity);
-		const CoordStruct distanceCoords = pBullet->TargetCoords + (targetCoords - this->LastTargetCoord) * meetTime - *pSourceCoords;
-
-		if (meetTime <= 0.0 || distanceCoords.Magnitude() <= 0.0)
-			break;
-
-		pBullet->Velocity.X = distanceCoords.X / meetTime;
-		pBullet->Velocity.Y = distanceCoords.Y / meetTime;
-
-		const int sourceHeight = pSourceCoords->Z, targetHeight = sourceHeight + distanceCoords.Z;
-		const int maxHeight = distanceCoords.Z > 0 ? this->ThrowHeight + targetHeight : this->ThrowHeight + sourceHeight;
-		pBullet->Velocity.Z = sqrt(2 * gravity * (maxHeight - sourceHeight)) + gravity / 2;
-		return;
+		leadTime = static_cast<int>(sqrt((this->ThrowHeight << 1) / gravity) * 2 + 1.5);
+		break;
 	}
-	case 2: // Fixed fire angle and aim at the target
+	case 2:
 	{
-		double radian = this->LaunchAngle * Math::Pi / 180.0;
-		radian = (radian >= Math::HalfPi || radian <= -Math::HalfPi) ? (Math::HalfPi / 3) : radian;
-		const double meetTime = this->SearchFixedAngleMeetTime(pSourceCoords, &targetCoords, &offsetCoords, radian, gravity);
-		const CoordStruct distanceCoords = pBullet->TargetCoords + (targetCoords - this->LastTargetCoord) * meetTime - *pSourceCoords;
-
-		if (meetTime <= 0.0 || distanceCoords.Magnitude() <= 0.0)
-			break;
-
-		pBullet->Velocity.X = distanceCoords.X / meetTime;
-		pBullet->Velocity.Y = distanceCoords.Y / meetTime;
-
+		const CoordStruct distanceCoords = pBullet->TargetCoords - *pSourceCoords;
 		const double horizontalDistance = Point2D{ distanceCoords.X, distanceCoords.Y }.Magnitude();
-		const double horizontalVelocity = horizontalDistance / meetTime;
-		pBullet->Velocity.Z = horizontalVelocity * tan(radian) + gravity / 2;
-		return;
-	}
-	case 3: // Fixed horizontal speed and fixed max height
-	{
-		double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
-		horizontalSpeed = horizontalSpeed > 256.0 ? 256.0 : horizontalSpeed;
-		const double meetTime = this->SolveFixedSpeedMeetTime(pSourceCoords, &targetCoords, &offsetCoords, horizontalSpeed);
-		const CoordStruct distanceCoords = pBullet->TargetCoords + (targetCoords - this->LastTargetCoord) * meetTime - *pSourceCoords;
 
-		if (meetTime <= 0.0 || distanceCoords.Magnitude() <= 0.0)
+		if (horizontalDistance <= 0.0)
 			break;
-
-		const double horizontalDistance = Point2D{ distanceCoords.X, distanceCoords.Y }.Magnitude();
-		const double mult = horizontalDistance > 0.0 ? horizontalSpeed / horizontalDistance : 1.0;
-
-		pBullet->Velocity.X = distanceCoords.X * mult;
-		pBullet->Velocity.Y = distanceCoords.Y * mult;
-
-		const int sourceHeight = pSourceCoords->Z, targetHeight = sourceHeight + distanceCoords.Z;
-		const int maxHeight = distanceCoords.Z > 0 ? this->ThrowHeight + targetHeight : this->ThrowHeight + sourceHeight;
-		pBullet->Velocity.Z = sqrt(2 * gravity * (maxHeight - sourceHeight)) + gravity / 2;
-		return;
-	}
-	case 4: // Fixed max height and fixed fire angle
-	{
-		const double meetTime = this->SearchFixedHeightMeetTime(pSourceCoords, &targetCoords, &offsetCoords, gravity);
-		const CoordStruct distanceCoords = pBullet->TargetCoords + (targetCoords - this->LastTargetCoord) * meetTime - *pSourceCoords;
-
-		if (meetTime <= 0.0 || distanceCoords.Magnitude() <= 0.0)
-			break;
-
-		const int sourceHeight = pSourceCoords->Z, targetHeight = sourceHeight + distanceCoords.Z;
-		const int maxHeight = distanceCoords.Z > 0 ? this->ThrowHeight + targetHeight : this->ThrowHeight + sourceHeight;
-		pBullet->Velocity.Z = sqrt(2 * gravity * (maxHeight - sourceHeight)) + gravity / 2;
-
-		double radian = this->LaunchAngle * Math::Pi / 180.0;
-		radian = (radian >= Math::HalfPi || radian <= 0.0) ? (Math::HalfPi / 3) : radian;
-		const double horizontalDistance = Point2D{ distanceCoords.X, distanceCoords.Y }.Magnitude();
-		const double mult = (pBullet->Velocity.Z / tan(radian)) / horizontalDistance;
-
-		pBullet->Velocity.X = distanceCoords.X * mult;
-		pBullet->Velocity.Y = distanceCoords.Y * mult;
-		return;
-	}
-	case 5: // Fixed horizontal speed and fixed fire angle
-	{
-		double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
-		horizontalSpeed = horizontalSpeed > 256.0 ? 256.0 : horizontalSpeed;
-		const double meetTime = this->SolveFixedSpeedMeetTime(pSourceCoords, &targetCoords, &offsetCoords, horizontalSpeed);
-		const CoordStruct distanceCoords = pBullet->TargetCoords + (targetCoords - this->LastTargetCoord) * meetTime - *pSourceCoords;
-
-		if (meetTime <= 0.0 || distanceCoords.Magnitude() <= 0.0)
-			break;
-
-		const double horizontalDistance = Point2D{ distanceCoords.X, distanceCoords.Y }.Magnitude();
-		const double mult = horizontalDistance > 0.0 ? horizontalSpeed / horizontalDistance : 1.0;
-
-		pBullet->Velocity.X = distanceCoords.X * mult;
-		pBullet->Velocity.Y = distanceCoords.Y * mult;
-		const double horizontalVelocity = horizontalDistance * mult;
 
 		double radian = this->LaunchAngle * Math::Pi / 180.0;
 		radian = (radian >= Math::HalfPi || radian <= -Math::HalfPi) ? (Math::HalfPi / 3) : radian;
-		pBullet->Velocity.Z = horizontalVelocity * tan(radian) + gravity / 2;
-		return;
-	}
-	default: // Fixed horizontal speed and aim at the target
-	{
-		double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
-		horizontalSpeed = horizontalSpeed > 256.0 ? 256.0 : horizontalSpeed;
-		const double meetTime = this->SolveFixedSpeedMeetTime(pSourceCoords, &targetCoords, &offsetCoords, horizontalSpeed);
-		const CoordStruct distanceCoords = pBullet->TargetCoords + (targetCoords - this->LastTargetCoord) * meetTime - *pSourceCoords;
+		const double factor = cos(radian);
 
-		if (meetTime <= 0.0 || distanceCoords.Magnitude() <= 0.0)
+		if (abs(factor) < 1e-10)
 			break;
 
+		const double mult = sin(2 * radian);
+		double velocity = abs(mult) > 1e-10 ? sqrt(horizontalDistance * gravity / mult) : 0.0;
+		velocity += distanceCoords.Z / gravity;
+
+		if (velocity < 1e-10)
+			break;
+
+		leadTime = static_cast<int>(horizontalDistance / (velocity * factor) + 1.5);
+		break;
+	}
+	default:
+	{
+		const CoordStruct distanceCoords = pBullet->TargetCoords - *pSourceCoords;
 		const double horizontalDistance = Point2D{ distanceCoords.X, distanceCoords.Y }.Magnitude();
-		const double mult = horizontalDistance > 0.0 ? horizontalSpeed / horizontalDistance : 1.0;
 
-		pBullet->Velocity.X = distanceCoords.X * mult;
-		pBullet->Velocity.Y = distanceCoords.Y * mult;
-		pBullet->Velocity.Z = distanceCoords.Z * mult + (gravity * horizontalDistance) / (2 * horizontalSpeed) + gravity / 2;
-		return;
+		if (horizontalDistance <= 0.0)
+			break;
+
+		double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
+		horizontalSpeed = horizontalSpeed > 256.0 ? 256.0 : horizontalSpeed;
+
+		leadTime = static_cast<int>(horizontalDistance / horizontalSpeed + 1.5);
+		break;
 	}
 	}
 
-	this->CalculateBulletVelocityRightNow(pBullet, pSourceCoords);
+	pBullet->TargetCoords += (pBullet->Target->GetCoords() - this->LastTargetCoord) * leadTime;
+	this->CalculateBulletVelocityRightNow(pBullet, pSourceCoords, gravity);
 }
 
-void ParabolaTrajectory::CalculateBulletVelocityRightNow(BulletClass* pBullet, CoordStruct* pSourceCoords)
+void ParabolaTrajectory::CalculateBulletVelocityRightNow(BulletClass* pBullet, CoordStruct* pSourceCoords, double gravity)
 {
 	const CoordStruct distanceCoords = pBullet->TargetCoords - *pSourceCoords;
 	const double distance = distanceCoords.Magnitude();
 	const double horizontalDistance = Point2D{ distanceCoords.X, distanceCoords.Y }.Magnitude();
-	const double gravity = BulletTypeExt::GetAdjustedGravity(pBullet->Type);
 
-	if (distance <= 0.0 || gravity <= 0.0)
+	if (distance <= 0.0)
 	{
 		pBullet->Velocity = BulletVelocity::Empty;
 		this->ShouldDetonate = true;
@@ -615,8 +563,11 @@ void ParabolaTrajectory::CalculateBulletVelocityRightNow(BulletClass* pBullet, C
 
 double ParabolaTrajectory::SearchVelocity(double horizontalDistance, int distanceCoordsZ, double radian, double gravity)
 {
+	const double mult = sin(2 * radian);
+	double velocity = abs(mult) > 1e-10 ? sqrt(horizontalDistance * gravity / mult) : 0.0;
+	velocity += distanceCoordsZ / gravity;
+	velocity = velocity > 10.0 ? velocity : 10.0;
 	const double delta = 1e-6;
-	double velocity = gravity * 16.0;
 
 	for (int i = 0; i < 10; ++i) // Newton iteration method
 	{
@@ -649,100 +600,6 @@ double ParabolaTrajectory::CheckVelocityEquation(double horizontalDistance, int 
 	const double wholeTime = horizontalDistance / horizontalVelocity;
 
 	return wholeTime - (upTime + downTime);
-}
-
-double ParabolaTrajectory::SolveFixedSpeedMeetTime(CoordStruct* pSourceCrd, CoordStruct* pTargetCrd, CoordStruct* pOffsetCrd, double horizontalSpeed)
-{
-	const Point2D targetSpeedCrd { pTargetCrd->X - this->LastTargetCoord.X, pTargetCrd->Y - this->LastTargetCoord.Y };
-	const Point2D destinationCrd { pTargetCrd->X + pOffsetCrd->X - pSourceCrd->X, pTargetCrd->Y + pOffsetCrd->Y - pSourceCrd->Y };
-	const double targetSpeedSquared = targetSpeedCrd.MagnitudeSquared();
-	const double factor = 2 * (targetSpeedCrd * destinationCrd) - horizontalSpeed;
-	const double delta = factor * factor - 4 * targetSpeedSquared * destinationCrd.MagnitudeSquared();
-
-	if (delta >= 0)
-	{
-		const double timeP = 0.5 * (-factor + sqrt(delta)) / targetSpeedSquared;
-		const double timeM = 0.5 * (-factor - sqrt(delta)) / targetSpeedSquared;
-
-		if (timeM > 0)
-			return timeM;
-
-		return timeP;
-	}
-
-	return -1.0;
-}
-
-double ParabolaTrajectory::SearchFixedHeightMeetTime(CoordStruct* pSourceCrd, CoordStruct* pTargetCrd, CoordStruct* pOffsetCrd, double gravity)
-{
-	const double delta = 1e-5;
-	double meetTime = (this->ThrowHeight << 2) / gravity;
-
-	for (int i = 0; i < 10; ++i)
-	{
-		const double differential = this->CheckFixedHeightEquation(pSourceCrd, pTargetCrd, pOffsetCrd, meetTime, gravity);
-		const double dDifferential = (this->CheckFixedHeightEquation(pSourceCrd, pTargetCrd, pOffsetCrd, (meetTime + delta), gravity) - differential) / delta;
-
-		if (abs(dDifferential) < 1e-10)
-			return meetTime;
-
-		const double difference = differential / dDifferential;
-		const double meetTimeNew = meetTime - difference;
-
-		if (abs(difference) < 1.0)
-			return meetTimeNew;
-
-		meetTime = meetTimeNew;
-	}
-
-	return -1.0;
-}
-
-double ParabolaTrajectory::CheckFixedHeightEquation(CoordStruct* pSourceCrd, CoordStruct* pTargetCrd, CoordStruct* pOffsetCrd, double meetTime, double gravity)
-{
-	const int meetHeight = static_cast<int>((pTargetCrd->Z - this->LastTargetCoord.Z) * meetTime) + pTargetCrd->Z + pOffsetCrd->Z;
-	const int maxHeight = meetHeight > pSourceCrd->Z ? this->ThrowHeight + meetHeight : this->ThrowHeight + pSourceCrd->Z;
-	return sqrt((maxHeight - pSourceCrd->Z) * 2 / gravity) + sqrt((maxHeight - meetHeight) * 2 / gravity) - meetTime;
-}
-
-double ParabolaTrajectory::SearchFixedAngleMeetTime(CoordStruct* pSourceCrd, CoordStruct* pTargetCrd, CoordStruct* pOffsetCrd, double radian, double gravity)
-{
-	const double delta = 1e-5;
-	double meetTime = 512 * sin(radian) / gravity;
-
-	for (int i = 0; i < 10; ++i)
-	{
-		const double differential = this->CheckFixedAngleEquation(pSourceCrd, pTargetCrd, pOffsetCrd, meetTime, radian, gravity);
-		const double dDifferential = (this->CheckFixedAngleEquation(pSourceCrd, pTargetCrd, pOffsetCrd, (meetTime + delta), radian, gravity) - differential) / delta;
-
-		if (abs(dDifferential) < 1e-10)
-			return meetTime;
-
-		const double difference = differential / dDifferential;
-		const double meetTimeNew = meetTime - difference;
-
-		if (abs(difference) < 1.0)
-			return meetTimeNew;
-
-		meetTime = meetTimeNew;
-	}
-
-	return -1.0;
-}
-
-double ParabolaTrajectory::CheckFixedAngleEquation(CoordStruct* pSourceCrd, CoordStruct* pTargetCrd, CoordStruct* pOffsetCrd, double meetTime, double radian, double gravity)
-{
-	const CoordStruct distanceCoords = (*pTargetCrd - this->LastTargetCoord) * meetTime + *pTargetCrd + *pOffsetCrd - *pSourceCrd;
-	const double horizontalDistance = Point2D{ distanceCoords.X, distanceCoords.Y }.Magnitude();
-
-	const double horizontalVelocity = horizontalDistance / meetTime;
-	const double verticalVelocity = horizontalVelocity * tan(radian);
-
-	const double upTime = verticalVelocity / gravity;
-	const double maxHeight = 0.5 * verticalVelocity * upTime;
-	const double downTime = sqrt(2 * (maxHeight - distanceCoords.Z) / gravity);
-
-	return upTime + downTime - meetTime;
 }
 
 BulletVelocity ParabolaTrajectory::GetGroundNormalVector(BulletClass* pBullet, CellClass* pCell)
@@ -855,7 +712,9 @@ BulletVelocity ParabolaTrajectory::GetGroundNormalVector(BulletClass* pBullet, C
 		return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
 	}
 
-	const int subX = pBullet->Location.X & 0xFF, subY = pBullet->Location.Y & 0xFF;
+	const int subX = pBullet->Location.X & 0xFF;
+	const int subY = pBullet->Location.Y & 0xFF;
+
 	CoordStruct checkPoint { subX, subY, pCell->GetFloorHeight(Point2D{ subX, subY }) };
 	CoordStruct surfaceX = checkPoint - CoordStruct{ subX + 13, subY, pCell->GetFloorHeight(Point2D{ subX + 13, subY }) };
 	CoordStruct surfaceY = checkPoint - CoordStruct{ subX, subY + 13, pCell->GetFloorHeight(Point2D{ subX, subY + 13 }) };
