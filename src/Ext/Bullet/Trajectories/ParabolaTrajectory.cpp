@@ -686,14 +686,14 @@ double ParabolaTrajectory::SolveFixedSpeedMeetTime(CoordStruct* pSourceCrd, Coor
 {
 	const Point2D targetSpeedCrd { pTargetCrd->X - this->LastTargetCoord.X, pTargetCrd->Y - this->LastTargetCoord.Y };
 	const Point2D destinationCrd { pTargetCrd->X + pOffsetCrd->X - pSourceCrd->X, pTargetCrd->Y + pOffsetCrd->Y - pSourceCrd->Y };
-	const double targetSpeed = targetSpeedCrd.Magnitude();
-	const double factor = 2 * (targetSpeedCrd * destinationCrd) - horizontalSpeed;
-	const double delta = factor * factor - 4 * targetSpeed * destinationCrd.Magnitude();
+	const double targetSpeedSquared = targetSpeedCrd.MagnitudeSquared() - horizontalSpeed * horizontalSpeed;
+	const double factor = 2 * (targetSpeedCrd * destinationCrd);
+	const double delta = factor * factor - 4 * targetSpeedSquared * destinationCrd.MagnitudeSquared();
 
 	if (delta >= 0)
 	{
-		const double timeP = 0.5 * (-factor + sqrt(delta)) / targetSpeed;
-		const double timeM = 0.5 * (-factor - sqrt(delta)) / targetSpeed;
+		const double timeP = 0.5 * (-factor + sqrt(delta)) / targetSpeedSquared;
+		const double timeM = 0.5 * (-factor - sqrt(delta)) / targetSpeedSquared;
 
 		if (timeM > 0)
 			return timeM;
