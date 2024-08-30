@@ -68,7 +68,7 @@ This page describes all the engine features that are either new and introduced b
   - `AttachEffect.(Required|Disallowed)MinCounts & (Required|Disallowed)MaxCounts` can be used to set the minimum and maximum number of instances required / disallowed to be on the Techno for `Cumulative=true` types (ignored for other types) respectively.
   - `AttachEffect.IgnoreFromSameSource` can be set to true to ignore effects that have been attached by the firer of the weapon and its Warhead.
   - `AttachEffect.CheckOnFirer` is set to true makes it so that the required / disallowed attached effects are checked from the firer of the weapon instead of the target.
-  
+
 In `rulesmd.ini`:
 ```ini
 [AttachEffectTypes]
@@ -1501,7 +1501,7 @@ Promote.EliteAnimation=           ; Animation
   - `[AudioVisual]->CombatAlert.SuppressIfInScreen` decides whether to disable the logic for the units in the current screen.
   - `[AudioVisual]->CombatAlert.Interval` decides the time interval (in frames) between alerts, to prevent the alert from being anonying. It is default to 150 frames.
   - `[AudioVisual]->CombatAlert.SuppressIfAllyDamage` decides whether to disable the logic for the damage from allys.
-  - Technos hitted by a warhead with `[SOMEWARHEAD]->CombatAlert.Suppress` setted to `true` will not raise a radar event or EVA. This flag is default to the inverse value of ares flag `[SOMEWARHEAD]->Malicious`.
+  - Technos hitted by a warhead with `[SOMEWARHEAD]->CombatAlert.Suppress` setted to `true` will not raise a radar event or EVA. This flag is default to the inverse value of ares flag `[SOMEWARHEAD]->Nonprovocative`.
 - And the following flags controlls the effect of a combat alert.
   - `[AudioVisual]->CombatAlert.MakeAVoice` decides whether to play some sound effect with the combat alert. Set it to `true` will enable the following flags, otherwise they will be ignored.
   - `[SOMETECHNO]->CombatAlert.UseFeedbackVoice` decides whether to use the sound defined by `VoiceFeedback`. Default to `[AudioVisual]->CombatAlert.UseFeedbackVoice`.

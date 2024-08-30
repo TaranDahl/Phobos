@@ -304,7 +304,6 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->AffectsEnemies.Read(exINI, pSection, "AffectsEnemies");
 	this->AffectsOwner.Read(exINI, pSection, "AffectsOwner");
 	this->EffectsRequireVerses.Read(exINI, pSection, "EffectsRequireVerses");
-	this->Malicious.Read(exINI, pSection, "Malicious");
 
 	// List all Warheads here that respect CellSpread
 	// Used in WarheadTypeExt::ExtData::Detonate
@@ -504,7 +503,6 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AffectsEnemies)
 		.Process(this->AffectsOwner)
 		.Process(this->EffectsRequireVerses)
-		.Process(this->Malicious)
 
 		.Process(this->WasDetonatedOnAllMapObjects)
 		.Process(this->RemainingAnimCreationInterval)

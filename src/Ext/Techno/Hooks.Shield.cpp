@@ -23,8 +23,9 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	LEA_STACK(args_ReceiveDamage*, args, 0x4);
 
 	auto const pRules = RulesExt::Global();
+	auto const pWHExt = WarheadTypeExt::ExtMap.Find(args->WH);
 
-	if (pRules->CombatAlert && *args->Damage > 1)
+	if (pRules->CombatAlert && *args->Damage > 1 && !pWHExt->CombatAlert_Suppress.Get(pWHExt->Nonprovocative))
 	{
 		do
 		{
@@ -41,11 +42,6 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 			const auto pHouseExt = HouseExt::ExtMap.Find(pHouse);
 
 			if (pHouseExt->CombatAlertTimer.HasTimeLeft())
-				break;
-
-			const auto pWHExt = WarheadTypeExt::ExtMap.Find(args->WH);
-
-			if (pWHExt->CombatAlert_Suppress.Get(!pWHExt->Malicious))
 				break;
 
 			const auto pType = pThis->GetTechnoType();
@@ -94,7 +90,7 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 		return 0;
 
 	//Calculate Damage Multiplier
-	if (const auto pWHExt = WarheadTypeExt::ExtMap.Find(args->WH))
+	if (pWHExt)
 	{
 		const auto pFirerHouse = pThis->Owner;
 		const auto pTargetHouse = args->SourceHouse;
