@@ -1227,7 +1227,7 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 				ParabolaTrajectory* const pTrajectory = static_cast<ParabolaTrajectory*>(pBulletExt->Trajectory);
 
 				//The parabola trajectory bullets has LeadTimeCalculate=true are not calculate its velocity yet.
-				if (pTrajectory->LeadTimeCalculate && (!pTarget || pTarget->WhatAmI() != AbstractType::Building))
+				if (pTrajectory->LeadTimeCalculate && (!pTarget || (pTarget->AbstractFlags & AbstractFlags::Foot) == AbstractFlags::None))
 				{
 					pTrajectory->CurrentBurst = curBurst;
 					pTrajectory->CountOfBurst = maxBurst;
