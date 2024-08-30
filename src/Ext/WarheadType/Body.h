@@ -51,11 +51,11 @@ public:
 		Valueable<double> Rocker_AmplitudeMultiplier;
 		Nullable<int> Rocker_AmplitudeOverride;
 
-
 		Valueable<double> Crit_Chance;
 		Valueable<bool> Crit_ApplyChancePerTarget;
 		Valueable<int> Crit_ExtraDamage;
 		Valueable<WarheadTypeClass*> Crit_Warhead;
+		Valueable<bool> Crit_Warhead_FullDetonation;
 		Valueable<AffectedTarget> Crit_Affects;
 		Valueable<AffectedHouse> Crit_AffectsHouses;
 		ValueableVector<AnimTypeClass*> Crit_AnimList;
@@ -121,6 +121,7 @@ public:
 		Valueable<bool> Debris_Conventional;
 
 		Valueable<bool> DetonateOnAllMapObjects;
+		Valueable<bool> DetonateOnAllMapObjects_Full;
 		Valueable<bool> DetonateOnAllMapObjects_RequireVerses;
 		Valueable<AffectedTarget> DetonateOnAllMapObjects_AffectTargets;
 		Valueable<AffectedHouse> DetonateOnAllMapObjects_AffectHouses;
@@ -140,6 +141,8 @@ public:
 		Valueable<bool> AffectsOnFloor;
 		Valueable<bool> AffectsInAir;
 		Valueable<bool> CellSpread_Cylinder;
+
+		Valueable<bool> Nonprovocative;
 
 		ValueableVector<AttachEffectTypeClass*> AttachEffect_AttachTypes;
 		ValueableVector<AttachEffectTypeClass*> AttachEffect_RemoveTypes;
@@ -163,11 +166,13 @@ public:
 		double Crit_RandomBuffer;
 		double Crit_CurrentChance;
 		bool Crit_Active;
+		bool InDamageArea;
 		bool WasDetonatedOnAllMapObjects;
 		bool Splashed;
 		bool Reflected;
 		int RemainingAnimCreationInterval;
 		bool PossibleCellSpreadDetonate;
+		TechnoClass* DamageAreaTarget;
 
 	private:
 		Valueable<double> Shield_Respawn_Rate_InMinutes;
@@ -209,6 +214,7 @@ public:
 			, Crit_ApplyChancePerTarget { false }
 			, Crit_ExtraDamage { 0 }
 			, Crit_Warhead {}
+			, Crit_Warhead_FullDetonation { true }
 			, Crit_Affects { AffectedTarget::All }
 			, Crit_AffectsHouses { AffectedHouse::All }
 			, Crit_AnimList {}
@@ -274,6 +280,7 @@ public:
 			, Debris_Conventional { false }
 
 			, DetonateOnAllMapObjects { false }
+			, DetonateOnAllMapObjects_Full { true }
 			, DetonateOnAllMapObjects_RequireVerses { false }
 			, DetonateOnAllMapObjects_AffectTargets { AffectedTarget::None }
 			, DetonateOnAllMapObjects_AffectHouses { AffectedHouse::None }
@@ -293,6 +300,8 @@ public:
 			, AffectsOnFloor { true }
 			, AffectsInAir { true }
 			, CellSpread_Cylinder { false }
+
+			, Nonprovocative { false }
 
 			, AttachEffect_AttachTypes {}
 			, AttachEffect_RemoveTypes {}
@@ -314,11 +323,13 @@ public:
 			, Crit_RandomBuffer { 0.0 }
 			, Crit_CurrentChance { 0.0 }
 			, Crit_Active { false }
+			, InDamageArea { true }
 			, WasDetonatedOnAllMapObjects { false }
 			, Splashed { false }
 			, Reflected { false }
 			, RemainingAnimCreationInterval { 0 }
 			, PossibleCellSpreadDetonate {false}
+			, DamageAreaTarget {}
 		{ }
 
 		void ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget);
@@ -344,6 +355,7 @@ public:
 		// Detonate.cpp
 		void Detonate(TechnoClass* pOwner, HouseClass* pHouse, BulletExt::ExtData* pBullet, CoordStruct coords);
 		void InterceptBullets(TechnoClass* pOwner, WeaponTypeClass* pWeapon, CoordStruct coords);
+		DamageAreaResult DamageAreaWithTarget(const CoordStruct& coords, int damage, TechnoClass* pSource, WarheadTypeClass* pWH, bool affectsTiberium, HouseClass* pSourceHouse, TechnoClass* pTarget);
 	private:
 		void DetonateOnOneUnit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner = nullptr, bool bulletWasIntercepted = false);
 		void ApplyRemoveDisguise(HouseClass* pHouse, TechnoClass* pTarget);

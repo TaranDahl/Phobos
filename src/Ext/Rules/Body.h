@@ -40,6 +40,8 @@ public:
 		Valueable<AffectedHouse> DisguiseBlinkingVisibility;
 		Valueable<int> ChronoSparkleDisplayDelay;
 		Valueable<ChronoSparkleDisplayPosition> ChronoSparkleBuildingDisplayPositions;
+		Valueable<int> ChronoSpherePreDelay;
+		Valueable<int> ChronoSphereDelay;
 		ValueableIdx<SuperWeaponTypeClass> AIChronoSphereSW;
 		ValueableIdx<SuperWeaponTypeClass> AIChronoWarpSW;
 		Valueable<int> SubterraneanHeight;
@@ -48,6 +50,7 @@ public:
 		Valueable<int> RadApplicationDelay_Building;
 		Valueable<int> RadBuildingDamageMaxCount;
 		Valueable<bool> RadSiteWarhead_Detonate;
+		Valueable<bool> RadSiteWarhead_Detonate_Full;
 		Valueable<bool> RadHasOwner;
 		Valueable<bool> RadHasInvoker;
 		Valueable<double> JumpjetCrash;
@@ -62,6 +65,7 @@ public:
 		Valueable<bool> PlacementPreview;
 		TranslucencyLevel PlacementPreview_Translucency;
 
+		Nullable<double> ConditionYellow_Terrain;
 		Nullable<double> Shield_ConditionYellow;
 		Nullable<double> Shield_ConditionRed;
 		Valueable<Vector3D<int>> Pips_Shield;
@@ -210,6 +214,8 @@ public:
 			, DisguiseBlinkingVisibility { AffectedHouse::Owner }
 			, ChronoSparkleDisplayDelay { 24 }
 			, ChronoSparkleBuildingDisplayPositions { ChronoSparkleDisplayPosition::OccupantSlots }
+			, ChronoSpherePreDelay { 60 }
+			, ChronoSphereDelay { 0 }
 			, AIChronoSphereSW {}
 			, AIChronoWarpSW {}
 			, SubterraneanHeight { -256 }
@@ -218,6 +224,7 @@ public:
 			, RadApplicationDelay_Building { 0 }
 			, RadBuildingDamageMaxCount { -1 }
 			, RadSiteWarhead_Detonate { false }
+			, RadSiteWarhead_Detonate_Full { true }
 			, RadHasOwner { false }
 			, RadHasInvoker { false }
 			, JumpjetCrash { 5.0 }

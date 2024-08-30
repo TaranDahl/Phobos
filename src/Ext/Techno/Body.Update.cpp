@@ -512,7 +512,7 @@ void TechnoExt::ExtData::UpdateTypeData(TechnoTypeClass* pCurrentType)
 		}
 
 		if (pOldType->Locomotor == LocomotionClass::CLSIDs::Teleport && pCurrentType->Locomotor != LocomotionClass::CLSIDs::Teleport && pThis->WarpingOut)
-			this->HasCarryoverWarpInDelay = true;
+			this->HasRemainingWarpInDelay = true;
 	}
 }
 
