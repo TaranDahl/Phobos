@@ -608,10 +608,10 @@ bool DisperseTrajectory::BulletRetargetTechno(BulletClass* pBullet, HouseClass* 
 	}
 	else
 	{
-		auto const airTracker = &AircraftTrackerClass::Instance.get();
+		AircraftTrackerClass* const airTracker = &AircraftTrackerClass::Instance.get();
 		airTracker->FillCurrentVector(MapClass::Instance->GetCellAt(retargetCoords), Game::F2I(this->RetargetRadius));
 
-		for (auto pTechno = airTracker->Get(); pTechno; pTechno = airTracker->Get())
+		for (TechnoClass* pTechno = airTracker->Get(); pTechno; pTechno = airTracker->Get())
 		{
 			if (pTechno->GetHeight() <= Unsorted::CellHeight || this->CheckTechnoIsInvalid(pTechno))
 				continue;
