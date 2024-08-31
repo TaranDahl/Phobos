@@ -329,28 +329,6 @@ DEFINE_HOOK(0x46A290, BulletClass_Logics_Extras, 0x5)
 	return 0;
 }
 
-DEFINE_HOOK(0x70023B, TechnoClass_MouseOverObject_AttackUnderGround, 0x5)
-{
-	enum { FireIsOK = 0x700246, FireIsNotOK = 0x70056C };
-
-	GET(ObjectClass*, pObject, EDI);
-	GET(TechnoClass*, pThis, ESI);
-	GET(int, wpIdx, EAX);
-
-	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
-	auto const pProjExt = pWeapon ? BulletTypeExt::ExtMap.Find(pWeapon->Projectile) : 0;
-	bool isSurfaced = pObject->IsSurfaced();
-
-	if (!isSurfaced && (!pProjExt || !pProjExt->AU))
-	{
-		return FireIsNotOK;
-	}
-	else
-	{
-		return FireIsOK;
-	}
-}
-
 // In vanilla, only ground is allowed, and Ares added air and top.
 // But it seems that underground and surface is also working fine?
 DEFINE_HOOK(0x469453, BulletClass_Logics_TemporalUnderGround, 0x6)
