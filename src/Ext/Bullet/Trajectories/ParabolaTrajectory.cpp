@@ -349,7 +349,8 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 {
 	CoordStruct targetCoords = pBullet->Target->GetCoords();
 	CoordStruct offsetCoords = pBullet->TargetCoords - targetCoords;
-	const double speedFixMult = 0.7; // A coefficient that should not exist here normally, but even so, there are still errors
+
+	const double speedFixMult = 0.75; // A coefficient that should not exist here normally, but even so, there are still errors
 
 	switch (this->OpenFireMode)
 	{
@@ -765,130 +766,104 @@ bool ParabolaTrajectory::CalculateBulletVelocityAfterBounce(BulletClass* pBullet
 
 BulletVelocity ParabolaTrajectory::GetGroundNormalVector(BulletClass* pBullet, CellClass* pCell)
 {
-	if (pCell->Tile_Is_Cliff() && (pBullet->Location.Z + 15) < pCell->GetCoords().Z)
+	const int bulletHeight = pBullet->Location.Z;
+
+	if (pCell->Tile_Is_Cliff() && bulletHeight < pCell->GetCoords().Z)
 	{
-		const short reverseSgnX = pBullet->Velocity.X != 0.0 ? (pBullet->Velocity.X > 0.0 ? -1 : 1) : 0;
-		const short reverseSgnY = pBullet->Velocity.Y != 0.0 ? (pBullet->Velocity.Y > 0.0 ? -1 : 1) : 0;
+		const short reverseSgnX = pBullet->Velocity.X >= 0.0 ? -1 : 1;
+		const short reverseSgnY = pBullet->Velocity.Y >= 0.0 ? -1 : 1;
+
 		CellStruct curCell = pCell->MapCoords;
+		curCell.X += reverseSgnX;
 
-		if (abs(pBullet->Velocity.X) > abs(pBullet->Velocity.Y))
+		if (this->CheckBulletHitCliff(curCell, bulletHeight))
 		{
-			curCell.X += reverseSgnX;
+			curCell.X -= reverseSgnX;
+			curCell.Y += reverseSgnY;
 
-			if (this->CheckCellIsCliff(curCell))
-			{
-				curCell.X -= reverseSgnX;
-				curCell.Y += reverseSgnY;
+			if (this->CheckBulletHitCliff(curCell, bulletHeight))
+				return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
 
-				if (this->CheckCellIsCliff(curCell))
-					return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
+			curCell.X -= reverseSgnX;
 
-				curCell.X -= reverseSgnX;
-
-				if (this->CheckCellIsCliff(curCell))
-					return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(2 * reverseSgnY), 0.0 }.Normalized();
-
-				return BulletVelocity{ 0.0, static_cast<double>(reverseSgnY), 0.0 };
-			}
-
-			curCell.Y -= reverseSgnY;
-
-			if (this->CheckCellIsCliff(curCell))
-			{
-				curCell.Y += 2 * reverseSgnY;
-				curCell.X -= reverseSgnX;
-
-				if (this->CheckCellIsCliff(curCell))
-					return BulletVelocity{ static_cast<double>(2 * reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
-
-				curCell.X -= reverseSgnX;
-
-				if (this->CheckCellIsCliff(curCell))
-					return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
-
+			if (this->CheckBulletHitCliff(curCell, bulletHeight))
 				return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(2 * reverseSgnY), 0.0 }.Normalized();
-			}
 
+			return BulletVelocity{ 0.0, static_cast<double>(reverseSgnY), 0.0 };
+		}
+
+		curCell.Y -= reverseSgnY;
+
+		if (this->CheckBulletHitCliff(curCell, bulletHeight))
+		{
 			curCell.Y += 2 * reverseSgnY;
 			curCell.X -= reverseSgnX;
 
-			if (this->CheckCellIsCliff(curCell))
-				return BulletVelocity{ static_cast<double>(reverseSgnX), 0.0, 0.0 };
+			if (this->CheckBulletHitCliff(curCell, bulletHeight))
+				return BulletVelocity{ static_cast<double>(2 * reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
 
 			curCell.X -= reverseSgnX;
 
-			if (this->CheckCellIsCliff(curCell))
-				return BulletVelocity{ static_cast<double>(2 * reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
+			if (this->CheckBulletHitCliff(curCell, bulletHeight))
+				return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
+
+			return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(2 * reverseSgnY), 0.0 }.Normalized();
 		}
-		else
-		{
-			curCell.Y += reverseSgnY;
 
-			if (this->CheckCellIsCliff(curCell))
-			{
-				curCell.Y -= reverseSgnY;
-				curCell.X += reverseSgnX;
+		curCell.Y += 2 * reverseSgnY;
+		curCell.X -= reverseSgnX;
 
-				if (this->CheckCellIsCliff(curCell))
-					return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
+		if (this->CheckBulletHitCliff(curCell, bulletHeight))
+			return BulletVelocity{ static_cast<double>(reverseSgnX), 0.0, 0.0 };
 
-				curCell.Y -= reverseSgnY;
+		curCell.X -= reverseSgnX;
 
-				if (this->CheckCellIsCliff(curCell))
-					return BulletVelocity{ static_cast<double>(2 * reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
-
-				return BulletVelocity{ static_cast<double>(reverseSgnX), 0.0, 0.0 };
-			}
-
-			curCell.X -= reverseSgnX;
-
-			if (this->CheckCellIsCliff(curCell))
-			{
-				curCell.X += 2 * reverseSgnX;
-				curCell.Y -= reverseSgnY;
-
-				if (this->CheckCellIsCliff(curCell))
-					return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(2 * reverseSgnY), 0.0 }.Normalized();
-
-				curCell.Y -= reverseSgnY;
-
-				if (this->CheckCellIsCliff(curCell))
-					return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
-
-				return BulletVelocity{ static_cast<double>(2 * reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
-			}
-
-			curCell.X += 2 * reverseSgnX;
-			curCell.Y -= reverseSgnY;
-
-			if (this->CheckCellIsCliff(curCell))
-				return BulletVelocity{ 0.0, static_cast<double>(reverseSgnY), 0.0 };
-
-			curCell.Y -= reverseSgnY;
-
-			if (this->CheckCellIsCliff(curCell))
-				return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(2 * reverseSgnY), 0.0 }.Normalized();
-		}
+		if (this->CheckBulletHitCliff(curCell, bulletHeight))
+			return BulletVelocity{ static_cast<double>(2 * reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
 
 		return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
 	}
 
-	const int subX = pBullet->Location.X & 0xFF;
-	const int subY = pBullet->Location.Y & 0xFF;
-
-	CoordStruct checkPoint { subX, subY, pCell->GetFloorHeight(Point2D{ subX, subY }) };
-	CoordStruct surfaceX = checkPoint - CoordStruct{ subX + 13, subY, pCell->GetFloorHeight(Point2D{ subX + 13, subY }) };
-	CoordStruct surfaceY = checkPoint - CoordStruct{ subX, subY + 13, pCell->GetFloorHeight(Point2D{ subX, subY + 13 }) };
-	CoordStruct normalVector = surfaceY.CrossProduct(surfaceX).Normalized();
-
-	return BulletVelocity{ static_cast<double>(normalVector.X), static_cast<double>(normalVector.Y), static_cast<double>(normalVector.Z) };
+	switch (pCell->SlopeIndex)
+	{
+	case 1:
+		return BulletVelocity{ -0.3763770469559380854890894443664, 0.0, 0.9264665771223091335116047861327 };
+	case 2:
+		return BulletVelocity{ 0.0, -0.3763770469559380854890894443664, 0.9264665771223091335116047861327 };
+	case 3:
+		return BulletVelocity{ 0.3763770469559380854890894443664, 0.0, 0.9264665771223091335116047861327 };
+	case 4:
+		return BulletVelocity{ 0.0, 0.3763770469559380854890894443664, 0.9264665771223091335116047861327 };
+	case 5:
+	case 9:
+		return BulletVelocity{ -0.3522530794922131411764879370407, -0.3522530794922131411764879370407, 0.8670845033654477321267395373309 };
+	case 6:
+	case 10:
+		return BulletVelocity{ 0.3522530794922131411764879370407, -0.3522530794922131411764879370407, 0.8670845033654477321267395373309 };
+	case 7:
+	case 11:
+		return BulletVelocity{ 0.3522530794922131411764879370407, 0.3522530794922131411764879370407, 0.8670845033654477321267395373309 };
+	case 8:
+	case 12:
+		return BulletVelocity{ -0.3522530794922131411764879370407, 0.3522530794922131411764879370407, 0.8670845033654477321267395373309 };
+	case 13:
+		return BulletVelocity{ -0.5333964609104418418483761938761, -0.5333964609104418418483761938761, 0.6564879518897745745826168540013 };
+	case 14:
+		return BulletVelocity{ 0.5333964609104418418483761938761, -0.5333964609104418418483761938761, 0.6564879518897745745826168540013 };
+	case 15:
+		return BulletVelocity{ 0.5333964609104418418483761938761, 0.5333964609104418418483761938761, 0.6564879518897745745826168540013 };
+	case 16:
+		return BulletVelocity{ -0.5333964609104418418483761938761, 0.5333964609104418418483761938761, 0.6564879518897745745826168540013 };
+	default:
+		return BulletVelocity{ 0.0, 0.0, 1.0 };
+	}
 }
 
-bool ParabolaTrajectory::CheckCellIsCliff(CellStruct cell)
+bool ParabolaTrajectory::CheckBulletHitCliff(CellStruct cell, int height)
 {
 	if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(cell))
 	{
-		if (pCell->Tile_Is_Cliff())
+		if (pCell->Tile_Is_Cliff() && height < pCell->GetCoords().Z)
 			return true;
 	}
 
@@ -898,85 +873,71 @@ bool ParabolaTrajectory::CheckCellIsCliff(CellStruct cell)
 bool ParabolaTrajectory::BulletDetonateLastCheck(BulletClass* pBullet, double gravity)
 {
 	pBullet->Velocity.Z -= gravity;
-	double mult = 1.0;
 
-	if (!this->NeedExtraCheck)
+	const CoordStruct futureCoords
 	{
-		const CoordStruct futureCoords
-		{
-			pBullet->Location.X + static_cast<int>(pBullet->Velocity.X),
-			pBullet->Location.Y + static_cast<int>(pBullet->Velocity.Y),
-			pBullet->Location.Z + static_cast<int>(pBullet->Velocity.Z)
-		};
+		pBullet->Location.X + static_cast<int>(pBullet->Velocity.X),
+		pBullet->Location.Y + static_cast<int>(pBullet->Velocity.Y),
+		pBullet->Location.Z + static_cast<int>(pBullet->Velocity.Z)
+	};
 
-		const int futureHeight = MapClass::Instance->GetCellFloorHeight(futureCoords);
-
-		if (futureHeight < futureCoords.Z)
-			return false;
-
-		mult = abs((pBullet->Location.Z - futureHeight) / pBullet->Velocity.Z);
-	}
-	else
+	if (this->NeedExtraCheck)
 	{
-		double locationDistance = pBullet->Velocity.Magnitude();
-		bool velocityCheck = false;
-
-		const CoordStruct theSourceCoords = pBullet->Location;
-		const CoordStruct theTargetCoords
-		{
-			pBullet->Location.X + static_cast<int>(pBullet->Velocity.X),
-			pBullet->Location.Y + static_cast<int>(pBullet->Velocity.Y),
-			pBullet->Location.Z + static_cast<int>(pBullet->Velocity.Z)
-		};
-
-		const CellStruct sourceCell = CellClass::Coord2Cell(theSourceCoords);
-		const CellStruct targetCell = CellClass::Coord2Cell(theTargetCoords);
+		const CellStruct sourceCell = CellClass::Coord2Cell(pBullet->Location);
+		const CellStruct targetCell = CellClass::Coord2Cell(futureCoords);
 		const CellStruct cellDist = sourceCell - targetCell;
 		const CellStruct cellPace = CellStruct { static_cast<short>(std::abs(cellDist.X)), static_cast<short>(std::abs(cellDist.Y)) };
 
-		size_t largePace = static_cast<size_t>(std::max(cellPace.X, cellPace.Y));
-		const CoordStruct stepCoord = !largePace ? CoordStruct::Empty : (theTargetCoords - theSourceCoords) * (1.0 / largePace);
-		CoordStruct curCoord = theSourceCoords;
+		const size_t largePace = static_cast<size_t>(std::max(cellPace.X, cellPace.Y));
+		const CoordStruct stepCoord = largePace ? (futureCoords - pBullet->Location) * (1.0 / largePace) : CoordStruct::Empty;
+		CoordStruct curCoord = pBullet->Location;
 		CellClass* pCurCell = MapClass::Instance->GetCellAt(sourceCell);
-		double distance = locationDistance;
 
 		for (size_t i = 0; i < largePace; ++i)
 		{
 			const int cellHeight = MapClass::Instance->GetCellFloorHeight(curCoord);
 
-			if ((curCoord.Z + 15) < cellHeight)
+			if (curCoord.Z < cellHeight)
 			{
-				velocityCheck = true;
-				distance = curCoord.DistanceFrom(theSourceCoords);
+				this->LastVelocity = pBullet->Velocity;
+				this->BulletDetonateEffectuate(pBullet, (pBullet->Location.Z - cellHeight) / pBullet->Velocity.Z);
 				break;
 			}
 
-			if (pBullet->Type->SubjectToWalls && pCurCell->OverlayTypeIndex != -1 && OverlayTypeClass::Array->GetItem(pCurCell->OverlayTypeIndex)->Wall && curCoord.Z < cellHeight + Unsorted::CellHeight)
+			if (pBullet->Type->SubjectToWalls && pCurCell->OverlayTypeIndex != -1 && OverlayTypeClass::Array->GetItem(pCurCell->OverlayTypeIndex)->Wall)
 			{
-				velocityCheck = true;
-				distance = curCoord.DistanceFrom(theSourceCoords);
-				break;
+				pBullet->Velocity *= curCoord.DistanceFrom(pBullet->Location) / pBullet->Velocity.Magnitude();
+				this->ShouldDetonate = true;
+				return false;
 			}
 
 			curCoord += stepCoord;
 			pCurCell = MapClass::Instance->GetCellAt(curCoord);
 		}
+	}
+	else
+	{
+		const int cellHeight = MapClass::Instance->GetCellFloorHeight(futureCoords);
 
-		if (velocityCheck)
-			mult = distance / locationDistance;
-		else
+		if (cellHeight < futureCoords.Z)
 			return false;
+
+		this->LastVelocity = pBullet->Velocity;
+		this->BulletDetonateEffectuate(pBullet, (pBullet->Location.Z - cellHeight) / pBullet->Velocity.Z);
 	}
 
-	this->LastVelocity = pBullet->Velocity;
+	return false;
+}
 
-	if (mult < 1.0) // Make it fall on the ground without penetrating underground
-		pBullet->Velocity *= mult;
+void ParabolaTrajectory::BulletDetonateEffectuate(BulletClass* pBullet, double velocityMult)
+{
+	velocityMult = abs(velocityMult);
+
+	if (velocityMult < 1.0)
+		pBullet->Velocity *= velocityMult;
 
 	if (this->BounceTimes > 0)
 		this->ShouldBounce = true;
 	else
 		this->ShouldDetonate = true;
-
-	return false;
 }
