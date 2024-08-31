@@ -329,24 +329,19 @@ DEFINE_HOOK(0x46A290, BulletClass_Logics_Extras, 0x5)
 	return 0;
 }
 
-// todo1 : fix this hook to replace the TEST one.
-// todo2 : flag AU on projectile.
-
-DEFINE_HOOK(0x70023E, TechnoClass_MouseOverObject_AttackUnderGround, 0x8)
+DEFINE_HOOK(0x70023B, TechnoClass_MouseOverObject_AttackUnderGround, 0x5)
 {
 	enum { FireIsOK = 0x700246, FireIsNotOK = 0x70056C };
 
-	Debug::LogAndMessage("Here\n");
+	GET(ObjectClass*, pObject, EDI);
+	GET(TechnoClass*, pThis, ESI);
+	GET(int, wpIdx, EAX);
 
-	//GET(ObjectClass*, pObject, EDI);
-	GET(bool, isSurfaced, EAX);
-	GET_STACK(WeaponStruct*, pWpStru, STACK_OFFSET(0x1C, -0x8));
+	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
+	auto const pProjExt = pWeapon ? BulletTypeExt::ExtMap.Find(pWeapon->Projectile) : 0;
+	bool isSurfaced = pObject->IsSurfaced();
 
-	Debug::LogAndMessage("%d\n", isSurfaced);
-
-	auto pProjExt = BulletTypeExt::ExtMap.Find(pWpStru->WeaponType->Projectile);
-
-	if (!isSurfaced && false)//!(pProjExt && pProjExt->AU))
+	if (!isSurfaced && (!pProjExt || !pProjExt->AU))
 	{
 		return FireIsNotOK;
 	}
@@ -355,19 +350,22 @@ DEFINE_HOOK(0x70023E, TechnoClass_MouseOverObject_AttackUnderGround, 0x8)
 		return FireIsOK;
 	}
 }
-/*
-DEFINE_HOOK(0x70023B, TEST, 0x5)
-{
-	return 0x700246;
-}
-*/
-// todo3 : ares changed the layer check of temporal wh, handle this.
-/*
-DEFINE_HOOK(, BulletClass_Logics_TemporalUnderGround, )
-{
 
+// In vanilla, only ground is allowed, and Ares added air and top.
+// But it seems that underground and surface is also working fine?
+DEFINE_HOOK(0x469453, BulletClass_Logics_TemporalUnderGround, 0x6)
+{
+	enum { NotOK = 0x469AA4, OK = 0x469475 };
+
+	GET(FootClass*, pTarget, EAX);
+
+	Layer lyr = pTarget->InWhichLayer();
+
+	if (lyr != Layer::None)
+		return OK;
+
+	return NotOK;
 }
-*/
 
 // todo4 : auto target related impl.
 // todo5 : overwrite bHitted in the vanilla function.
