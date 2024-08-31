@@ -280,7 +280,7 @@ namespace Helpers {
 				for (auto const& pTechno : *TechnoClass::Array)
 				{
 					if (pTechno->InWhichLayer() == Layer::Underground || // Layer is the mark for the underground units.
-						(includeInAir && pTechno->IsInAir() > 0) ||
+						(includeInAir && pTechno->IsInAir()) ||
 						(includeOnFloor && pTechno->IsOnFloor()))
 					{
 						double dist = 0.0;

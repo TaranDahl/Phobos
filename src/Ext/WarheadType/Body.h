@@ -145,6 +145,8 @@ public:
 		Valueable<bool> AffectsOnFloor;
 		Valueable<bool> AffectsInAir;
 		Valueable<bool> AffectsUnderground;
+		Valueable<bool> PlayAnimUnderground;
+		Valueable<bool> PlayAnimAboveSurface;
 		Valueable<bool> CellSpread_Cylinder;
 
 		// Ares tags
@@ -304,6 +306,8 @@ public:
 			, AffectsOnFloor { true }
 			, AffectsInAir { true }
 			, AffectsUnderground { false }
+			, PlayAnimUnderground { true }
+			, PlayAnimAboveSurface { false }
 			, CellSpread_Cylinder { false }
 		{ }
 

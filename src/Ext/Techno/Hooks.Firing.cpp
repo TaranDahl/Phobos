@@ -426,7 +426,7 @@ DEFINE_HOOK(0x6FC749, TechnoClass_GetFireError_AntiUnderground, 0x5)
 	enum { Illegal = 0x6FC86A, GoOtherChecks = 0x6FC762 };
 
 	GET(Layer, layer, EAX);
-	GET(TechnoClass*, pThis, EBX);
+	//GET(TechnoClass*, pThis, EBX);
 	GET(WeaponTypeClass*, pWeapon, EDI);
 
 	auto const pProj = pWeapon->Projectile;

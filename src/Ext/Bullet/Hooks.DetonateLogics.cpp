@@ -201,9 +201,14 @@ DEFINE_HOOK(0x469C46, BulletClass_Logics_DamageAnimSelected, 0x8)
 
 	bool createdAnim = false;
 
-	if (pAnimType)
+	auto const pWHExt = WarheadTypeExt::ExtMap.Find(pThis->WH);
+	int cellHeight = MapClass::Instance()->GetCellFloorHeight(*coords);
+	auto newCrds = pWHExt->PlayAnimAboveSurface ? CoordStruct { coords->X,coords->Y,Math::max(cellHeight,coords->Z) } : *coords;
+	bool isUnderground = cellHeight > newCrds.Z;
+	bool notSkip = !isUnderground || pWHExt->PlayAnimUnderground;
+
+	if (pAnimType && notSkip)
 	{
-		auto const pWHExt = WarheadTypeExt::ExtMap.Find(pThis->WH);
 		int creationInterval = pWHExt->Splashed ? pWHExt->SplashList_CreationInterval : pWHExt->AnimList_CreationInterval;
 		int* remainingInterval = &pWHExt->RemainingAnimCreationInterval;
 		int scatterMin = pWHExt->Splashed ? pWHExt->SplashList_ScatterMin.Get() : pWHExt->AnimList_ScatterMin.Get();
@@ -235,7 +240,7 @@ DEFINE_HOOK(0x469C46, BulletClass_Logics_DamageAnimSelected, 0x8)
 				if (!pType)
 					continue;
 
-				auto animCoords = *coords;
+				auto animCoords = newCrds;
 
 				if (allowScatter)
 				{
@@ -345,9 +350,7 @@ DEFINE_HOOK(0x469453, BulletClass_Logics_TemporalUnderGround, 0x6)
 	return NotOK;
 }
 
-// todo4 : auto target related impl.
-// todo5 : overwrite bHitted in the vanilla function.
-// todo6 : toggle wh anim when detonating underground, or play on surface.
+// todo : auto target related impl.
 DEFINE_HOOK(0x4899DA, MapClass_DamageArea_DamageUnderGround, 0x7)
 {
 	GET_STACK(bool, isNullified, STACK_OFFSET(0xE0, -0xC9));
@@ -356,16 +359,18 @@ DEFINE_HOOK(0x4899DA, MapClass_DamageArea_DamageUnderGround, 0x7)
 	GET_BASE(WarheadTypeClass*, pWH, 0xC);
 	GET_BASE(TechnoClass*, pSrcTechno, 0x8);
 	GET_BASE(HouseClass*, pSrcHouse, 0x14);
+	GET_STACK(bool, hitted, STACK_OFFSET(0xE0, -0xC1)); // bHitted = true
 
 	auto const pWHExt = WarheadTypeExt::ExtMap.Find(pWH);
 
-	if (isNullified || !pWHExt || false)//!pWHExt->AffectsUnderground)
+	if (isNullified || !pWHExt || !pWHExt->AffectsUnderground)
 	{
 		return 0;
 	}
 
 	bool cylinder = pWHExt->CellSpread_Cylinder;
 	float spread = pWH->CellSpread;
+
 	for (auto const& pTechno : *TechnoClass::Array)
 	{
 		if (pTechno->InWhichLayer() == Layer::Underground && // Layer.
@@ -387,12 +392,12 @@ DEFINE_HOOK(0x4899DA, MapClass_DamageArea_DamageUnderGround, 0x7)
 
 			if (dist <= spread * 256)
 			{
-				pTechno->ReceiveDamage(&damage, dist, pWH, pSrcTechno, false, false, pSrcHouse);
-				//hitted = true;
+				pTechno->ReceiveDamage(&damage, (int)dist, pWH, pSrcTechno, false, false, pSrcHouse);
+				hitted = true;
 			}
 		}
 	}
 
+	R->Stack8(STACK_OFFSET(0xE0, -0xC1), true);
 	return 0;
 }
-
