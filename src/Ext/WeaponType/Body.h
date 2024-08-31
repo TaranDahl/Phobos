@@ -92,7 +92,7 @@ public:
 			, AttachEffect_DisallowedMaxCounts {}
 			, AttachEffect_IgnoreFromSameSource { false }
 			, KickOutPassengers { true }
-			, AttackIronCurtain { true }
+			, AttackIronCurtain {}
 		{ }
 
 		int GetBurstDelay(int burstIndex) const;
