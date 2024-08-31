@@ -70,6 +70,7 @@ public:
 		, AxisOfRotation {}
 		, ShouldDetonate { false }
 		, ShouldBounce { false }
+		, NeedExtraCheck { false }
 		, LastTargetCoord {}
 		, CurrentBurst { 0 }
 		, CountOfBurst { 0 }
@@ -96,6 +97,7 @@ public:
 		, AxisOfRotation {}
 		, ShouldDetonate { false }
 		, ShouldBounce { false }
+		, NeedExtraCheck { false }
 		, LastTargetCoord {}
 		, CurrentBurst { 0 }
 		, CountOfBurst { 0 }
@@ -131,6 +133,7 @@ public:
 	CoordStruct AxisOfRotation;
 	bool ShouldDetonate;
 	bool ShouldBounce;
+	bool NeedExtraCheck;
 	CoordStruct LastTargetCoord;
 	int CurrentBurst;
 	int CountOfBurst;
@@ -142,6 +145,7 @@ private:
 	bool BulletPrepareCheck(BulletClass* pBullet);
 	void CalculateBulletVelocityRightNow(BulletClass* pBullet, CoordStruct* pSourceCoords, double gravity);
 	void CalculateBulletVelocityLeadTime(BulletClass* pBullet, CoordStruct* pSourceCoords, double gravity);
+	void CheckIfNeedExtraCheck(BulletClass* pBullet);
 	double SearchVelocity(double horizontalDistance, int distanceCoordsZ, double radian, double gravity);
 	double CheckVelocityEquation(double horizontalDistance, int distanceCoordsZ, double velocity, double radian, double gravity);
 	double SolveFixedSpeedMeetTime(CoordStruct* pSourceCrd, CoordStruct* pTargetCrd, CoordStruct* pOffsetCrd, double horizontalSpeed);
@@ -152,4 +156,5 @@ private:
 	bool CalculateBulletVelocityAfterBounce(BulletClass* pBullet, CellClass* pCell, double gravity);
 	BulletVelocity GetGroundNormalVector(BulletClass* pBullet, CellClass* pCell);
 	bool CheckCellIsCliff(CellStruct cell);
+	bool BulletDetonateLastCheck(BulletClass* pBullet, double gravity);
 };
