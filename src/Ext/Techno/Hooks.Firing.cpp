@@ -139,9 +139,11 @@ DEFINE_HOOK(0x6F36DB, TechnoClass_WhatWeaponShouldIUse, 0x8)
 			if (pShield->IsActive())
 			{
 				auto const secondary = pThis->GetWeapon(1)->WeaponType;
+				auto const pSecondProjExt = BulletTypeExt::ExtMap.Find(secondary->Projectile);
 				bool secondaryIsAA = pTargetTechno && pTargetTechno->IsInAir() && secondary && secondary->Projectile->AA;
+				bool secondaryIsAU = pTargetTechno && pTargetTechno->InWhichLayer() == Layer::Underground && pSecondProjExt && pSecondProjExt->AU;
 
-				if (secondary && (allowFallback || (allowAAFallback && secondaryIsAA) || TechnoExt::CanFireNoAmmoWeapon(pThis, 1)))
+				if (secondary && (allowFallback || (allowAAFallback && secondaryIsAA) || secondaryIsAU || TechnoExt::CanFireNoAmmoWeapon(pThis, 1)))
 				{
 					if (!pShield->CanBeTargeted(pThis->GetWeapon(0)->WeaponType))
 						return Secondary;
@@ -167,7 +169,16 @@ DEFINE_HOOK(0x6F37EB, TechnoClass_WhatWeaponShouldIUse_AntiAir, 0x6)
 
 	const auto pTargetTechno = abstract_cast<TechnoClass*>(pTarget);
 
-	if (!pWeapon->Projectile->AA && pSecWeapon->Projectile->AA && pTargetTechno && pTargetTechno->IsInAir())
+	auto const pPrimaryProj = pWeapon->Projectile;
+	auto const pSecondaryProj = pSecWeapon->Projectile;
+
+	if (!pPrimaryProj->AA && pSecondaryProj->AA && pTargetTechno && pTargetTechno->IsInAir())
+		return Secondary;
+
+	const auto pPrimaryProjExt = BulletTypeExt::ExtMap.Find(pPrimaryProj);
+	const auto pSecondaryProjExt = BulletTypeExt::ExtMap.Find(pSecondaryProj);
+
+	if (!pPrimaryProjExt->AU && pSecondaryProjExt->AU && pTargetTechno && (pTargetTechno->InWhichLayer()==Layer::Underground))
 		return Secondary;
 
 	return Primary;
@@ -215,7 +226,9 @@ DEFINE_HOOK(0x6F3432, TechnoClass_WhatWeaponShouldIUse_Gattling, 0xA)
 			else
 			{
 				auto const pCell = pTargetTechno->GetCell();
-				bool isOnWater = (pCell->LandType == LandType::Water || pCell->LandType == LandType::Beach) && !pTargetTechno->IsInAir();
+				bool isOnWater = (pCell->LandType == LandType::Water || pCell->LandType == LandType::Beach) && !pTargetTechno->IsInAir() && !(pTargetTechno->InWhichLayer() == Layer::Underground);
+				auto const pOddProjExt = BulletTypeExt::ExtMap.Find(pWeaponOdd->Projectile);
+				auto const pEvenProjExt = BulletTypeExt::ExtMap.Find(pWeaponEven->Projectile);
 
 				if (!pTargetTechno->OnBridge && isOnWater)
 				{
@@ -225,7 +238,8 @@ DEFINE_HOOK(0x6F3432, TechnoClass_WhatWeaponShouldIUse_Gattling, 0xA)
 						chosenWeaponIndex = evenWeaponIndex;
 				}
 				else if ((pTargetTechno->IsInAir() && !pWeaponOdd->Projectile->AA && pWeaponEven->Projectile->AA) ||
-					!pTargetTechno->IsInAir() && pThis->GetTechnoType()->LandTargeting == LandTargetingType::Land_Secondary)
+					!pTargetTechno->IsInAir() && pThis->GetTechnoType()->LandTargeting == LandTargetingType::Land_Secondary ||
+					pTargetTechno->InWhichLayer() == Layer::Underground && pOddProjExt && !pOddProjExt->AU && pEvenProjExt && pEvenProjExt->AU)
 				{
 					chosenWeaponIndex = evenWeaponIndex;
 				}
@@ -429,6 +443,26 @@ DEFINE_HOOK(0x6FCBE6, TechnoClass_CanFire_BridgeAAFix, 0x6)
 	return 0;
 }
 
+DEFINE_HOOK(0x6FC749, TechnoClass_GetFireError_AntiUnderground, 0x5)
+{
+	enum { Illegal = 0x6FC86A, GoOtherChecks = 0x6FC762 };
+
+	GET(Layer, layer, EAX);
+	//GET(TechnoClass*, pThis, EBX);
+	GET(WeaponTypeClass*, pWeapon, EDI);
+
+	auto const pProj = pWeapon->Projectile;
+	auto const pProjExt = BulletTypeExt::ExtMap.Find(pProj);
+
+	if (layer == Layer::Underground && !(pProjExt && pProjExt->AU))
+		return Illegal;
+
+	if ((layer == Layer::Air || layer == Layer::Top) && !pProj->AA)
+		return Illegal;
+
+	return GoOtherChecks;
+}
+
 #pragma endregion
 
 #pragma region TechnoClass_Fire
@@ -623,12 +657,14 @@ DEFINE_HOOK(0x6FE821, TechnoClass_Fire_BallisticScatterPhobos, 0x6)
 		int maxInMaxRange = pExt->BallisticScatter_Max_InMaxRange.Get(Leptons(max));
 		int minRange = pExt->BallisticScatter_UseMinimumRangeAsMin ? pWeapon->MinimumRange : 0;
 		int deltaRange = pWeapon->Range - minRange;
-		int deltaRangeReal = (pTarget->GetCoords() - pThis->GetCoords()).Magnitude() - minRange;
+		int deltaRangeReal = static_cast<int>((pTarget->GetCoords() - pThis->GetCoords()).Magnitude()) - minRange;
 		double rangePercent = deltaRange == 0 ? 0.5 : deltaRangeReal / (double)deltaRange;
+
 		if (rangePercent < 0)
 			rangePercent = 0;
-		min = minInMinRange + rangePercent * (minInMaxRange - minInMinRange);
-		max = maxInMinRange + rangePercent * (maxInMaxRange - maxInMinRange);
+
+		min = minInMinRange + static_cast<int>(rangePercent * (minInMaxRange - minInMinRange));
+		max = maxInMinRange + static_cast<int>(rangePercent * (maxInMaxRange - maxInMinRange));
 	}
 
 	int scatter = ScenarioClass::Instance->Random.RandomRanged(min, max);

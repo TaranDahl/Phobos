@@ -221,65 +221,73 @@ DEFINE_HOOK(0x469C46, BulletClass_Logics_DamageAnimSelected, 0x8)
 	if (pAnimType)
 	{
 		auto const pWHExt = WarheadTypeExt::ExtMap.Find(pThis->WH);
-		int creationInterval = pWHExt->Splashed ? pWHExt->SplashList_CreationInterval : pWHExt->AnimList_CreationInterval;
-		int* remainingInterval = &pWHExt->RemainingAnimCreationInterval;
-		int scatterMin = pWHExt->Splashed ? pWHExt->SplashList_ScatterMin.Get() : pWHExt->AnimList_ScatterMin.Get();
-		int scatterMax = pWHExt->Splashed ? pWHExt->SplashList_ScatterMax.Get() : pWHExt->AnimList_ScatterMax.Get();
-		bool allowScatter = scatterMax != 0 || scatterMin != 0;
+		int cellHeight = MapClass::Instance()->GetCellFloorHeight(*coords);
+		auto newCrds = pWHExt->PlayAnimAboveSurface ? CoordStruct { coords->X, coords->Y, Math::max(cellHeight, coords->Z) } : *coords;
+		bool isUnderground = cellHeight > newCrds.Z;
+		bool notSkip = !isUnderground || pWHExt->PlayAnimUnderground;
 
-		if (creationInterval > 0 && pThis->Owner)
-			remainingInterval = &TechnoExt::ExtMap.Find(pThis->Owner)->WHAnimRemainingCreationInterval;
-
-		if (creationInterval < 1 || *remainingInterval <= 0)
+		if (notSkip)
 		{
-			*remainingInterval = creationInterval;
+			int creationInterval = pWHExt->Splashed ? pWHExt->SplashList_CreationInterval : pWHExt->AnimList_CreationInterval;
+			int* remainingInterval = &pWHExt->RemainingAnimCreationInterval;
+			int scatterMin = pWHExt->Splashed ? pWHExt->SplashList_ScatterMin.Get() : pWHExt->AnimList_ScatterMin.Get();
+			int scatterMax = pWHExt->Splashed ? pWHExt->SplashList_ScatterMax.Get() : pWHExt->AnimList_ScatterMax.Get();
+			bool allowScatter = scatterMax != 0 || scatterMin != 0;
 
-			HouseClass* pInvoker = pThis->Owner ? pThis->Owner->Owner : BulletExt::ExtMap.Find(pThis)->FirerHouse;
-			HouseClass* pVictim = nullptr;
+			if (creationInterval > 0 && pThis->Owner)
+				remainingInterval = &TechnoExt::ExtMap.Find(pThis->Owner)->WHAnimRemainingCreationInterval;
 
-			if (TechnoClass* Target = generic_cast<TechnoClass*>(pThis->Target))
-				pVictim = Target->Owner;
-
-			auto types = make_iterator_single(pAnimType);
-
-			if (pWHExt->SplashList_CreateAll && pWHExt->Splashed)
-				types = pWHExt->SplashList.GetElements(RulesClass::Instance->SplashList);
-			else if (pWHExt->AnimList_CreateAll && !pWHExt->Splashed)
-				types = pWHExt->OwnerObject()->AnimList;
-
-			for (auto const& pType : types)
+			if (creationInterval < 1 || *remainingInterval <= 0)
 			{
-				if (!pType)
-					continue;
+				*remainingInterval = creationInterval;
 
-				auto animCoords = *coords;
+				HouseClass* pInvoker = pThis->Owner ? pThis->Owner->Owner : BulletExt::ExtMap.Find(pThis)->FirerHouse;
+				HouseClass* pVictim = nullptr;
 
-				if (allowScatter)
+				if (TechnoClass* Target = generic_cast<TechnoClass*>(pThis->Target))
+					pVictim = Target->Owner;
+
+				auto types = make_iterator_single(pAnimType);
+
+				if (pWHExt->SplashList_CreateAll && pWHExt->Splashed)
+					types = pWHExt->SplashList.GetElements(RulesClass::Instance->SplashList);
+				else if (pWHExt->AnimList_CreateAll && !pWHExt->Splashed)
+					types = pWHExt->OwnerObject()->AnimList;
+
+				for (auto const& pType : types)
 				{
-					int distance = ScenarioClass::Instance->Random.RandomRanged(scatterMin, scatterMax);
-					animCoords = MapClass::GetRandomCoordsNear(animCoords, distance, false);
-				}
+					if (!pType)
+						continue;
 
-				if (auto const pAnim = GameCreate<AnimClass>(pType, animCoords, 0, 1, 0x2600, -15, false))
-				{
-					createdAnim = true;
+					auto animCoords = newCrds;
 
-					AnimExt::SetAnimOwnerHouseKind(pAnim, pInvoker, pVictim, pInvoker);
-
-					if (!pAnim->Owner)
-						pAnim->Owner = pInvoker;
-
-					if (pThis->Owner)
+					if (allowScatter)
 					{
-						auto pExt = AnimExt::ExtMap.Find(pAnim);
-						pExt->SetInvoker(pThis->Owner);
+						int distance = ScenarioClass::Instance->Random.RandomRanged(scatterMin, scatterMax);
+						animCoords = MapClass::GetRandomCoordsNear(animCoords, distance, false);
+					}
+
+					if (auto const pAnim = GameCreate<AnimClass>(pType, animCoords, 0, 1, 0x2600, -15, false))
+					{
+						createdAnim = true;
+
+						AnimExt::SetAnimOwnerHouseKind(pAnim, pInvoker, pVictim, pInvoker);
+
+						if (!pAnim->Owner)
+							pAnim->Owner = pInvoker;
+
+						if (pThis->Owner)
+						{
+							auto pExt = AnimExt::ExtMap.Find(pAnim);
+							pExt->SetInvoker(pThis->Owner);
+						}
 					}
 				}
 			}
-		}
-		else
-		{
-			(*remainingInterval)--;
+			else
+			{
+				(*remainingInterval)--;
+			}
 		}
 	}
 
@@ -362,5 +370,67 @@ DEFINE_HOOK(0x469AA4, BulletClass_Logics_Extras, 0x5)
 
 	WarheadTypeExt::ExtMap.Find(pThis->WH)->InDamageArea = true;
 
+	return 0;
+}
+
+// In vanilla, only ground is allowed, and Ares added air and top.
+// But it seems that underground and surface is also working fine?
+DEFINE_HOOK(0x469453, BulletClass_Logics_TemporalUnderGround, 0x6)
+{
+	enum { NotOK = 0x469AA4, OK = 0x469475 };
+
+	GET(FootClass*, pTarget, EAX);
+
+	Layer lyr = pTarget->InWhichLayer();
+
+	if (lyr != Layer::None)
+		return OK;
+
+	return NotOK;
+}
+
+// TODO : auto target related impl.
+DEFINE_HOOK(0x4899DA, MapClass_DamageArea_DamageUnderGround, 0x7)
+{
+	GET_STACK(bool, isNullified, STACK_OFFSET(0xE0, -0xC9));
+	GET_STACK(int, damage, STACK_OFFSET(0xE0, -0xBC));
+	GET_STACK(CoordStruct*, pCrd, STACK_OFFSET(0xE0, -0xB8));
+	GET_BASE(WarheadTypeClass*, pWH, 0xC);
+	GET_BASE(TechnoClass*, pSrcTechno, 0x8);
+	GET_BASE(HouseClass*, pSrcHouse, 0x14);
+	GET_STACK(bool, hitted, STACK_OFFSET(0xE0, -0xC1)); // bHitted = true
+
+	auto const pWHExt = WarheadTypeExt::ExtMap.Find(pWH);
+
+	if (isNullified || !pWHExt || !pWHExt->AffectsUnderground)
+		return 0;
+
+	bool cylinder = pWHExt->CellSpread_Cylinder;
+	float spread = pWH->CellSpread;
+
+	for (auto const& pTechno : *TechnoClass::Array)
+	{
+		if (pTechno->InWhichLayer() == Layer::Underground && // Layer.
+			pTechno->IsAlive && !pTechno->IsIronCurtained() &&
+			!pTechno->IsOnMap && // Underground is not on map.
+			!pTechno->InLimbo)
+		{
+			double dist = 0.0;
+			auto technoCoords = pTechno->GetCoords();
+
+			if (cylinder)
+				dist = CoordStruct { technoCoords.X - pCrd->X, technoCoords.Y - pCrd->Y, 0 }.Magnitude();
+			else
+				dist = technoCoords.DistanceFrom(*pCrd);
+
+			if (dist <= spread * 256)
+			{
+				pTechno->ReceiveDamage(&damage, (int)dist, pWH, pSrcTechno, false, false, pSrcHouse);
+				hitted = true;
+			}
+		}
+	}
+
+	R->Stack8(STACK_OFFSET(0xE0, -0xC1), true);
 	return 0;
 }

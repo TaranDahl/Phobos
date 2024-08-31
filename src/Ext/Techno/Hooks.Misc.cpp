@@ -2,6 +2,7 @@
 
 #include <SpawnManagerClass.h>
 #include <Ext/WeaponType/Body.h>
+#include "Ext/BulletType/Body.h"
 
 DEFINE_HOOK(0x6B0B9C, SlaveManagerClass_Killed_DecideOwner, 0x6)
 {
@@ -197,19 +198,7 @@ DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 	return 0;
 }
 
-DEFINE_HOOK(0x481778, CellClass_ScatterContent_Fix1, 0x6)
-{
-	R->AL(false);
-	return 0;
-}
-
-DEFINE_HOOK(0x481780, CellClass_ScatterContent_Fix2, 0x6)
-{
-	R->AL(false);
-	return 0;
-}
-
-DEFINE_HOOK(0x481788, CellClass_ScatterContent_Fix3, 0x5)
+DEFINE_HOOK(0x481778, CellClass_ScatterContent_Fix, 0x6)
 {
 	enum { SkipGameCode = 0x481793 };
 	GET(ObjectClass*, pObject, ESI);
@@ -369,4 +358,22 @@ DEFINE_HOOK(0x709A43, TechnoClass_EnterIdleMode_TemporalLetGo, 0x7)
 	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
 
 	return (!pTypeExt || !pTypeExt->KeepWarping) ? LetGo : SkipLetGo;
+}
+
+DEFINE_HOOK(0x70023B, TechnoClass_MouseOverObject_AttackUnderGround, 0x5)
+{
+	enum { FireIsOK = 0x700246, FireIsNotOK = 0x70056C };
+
+	GET(ObjectClass*, pObject, EDI);
+	GET(TechnoClass*, pThis, ESI);
+	GET(int, wpIdx, EAX);
+
+	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
+	auto const pProjExt = pWeapon ? BulletTypeExt::ExtMap.Find(pWeapon->Projectile) : 0;
+	bool isSurfaced = pObject->IsSurfaced();
+
+	if (!isSurfaced && (!pProjExt || !pProjExt->AU))
+		return FireIsNotOK;
+
+	return FireIsOK;
 }

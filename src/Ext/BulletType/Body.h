@@ -48,6 +48,7 @@ public:
 
 		Valueable<bool> SubjectToGround;
 
+		Valueable<bool> AU;
 		Valueable<bool> BallisticScatter_IncreaseByRange;
 		Valueable<bool> BallisticScatter_UseMinimumRangeAsMin;
 		Nullable<Leptons> BallisticScatter_Min_InMinRange;
@@ -84,6 +85,7 @@ public:
 			, Arcing_AllowElevationInaccuracy { true }
 			, ReturnWeapon {}
 			, SubjectToGround { false }
+			, AU { false }
 			, BallisticScatter_IncreaseByRange { false }
 			, BallisticScatter_UseMinimumRangeAsMin { false }
 			, BallisticScatter_Min_InMinRange {}

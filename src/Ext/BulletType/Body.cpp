@@ -56,6 +56,7 @@ void BulletTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->SubjectToGround.Read(exINI, pSection, "SubjectToGround");
 
+	this->AU.Read(exINI, pSection, "AU");
 	this->BallisticScatter_IncreaseByRange.Read(exINI, pSection, "BallisticScatter.IncreaseByRange");
 	this->BallisticScatter_UseMinimumRangeAsMin.Read(exINI, pSection, "BallisticScatter.UseMinimumRangeAsMin");
 	this->BallisticScatter_Min_InMinRange.Read(exINI, pSection, "BallisticScatter.Min.InMinRange");
@@ -138,6 +139,7 @@ void BulletTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Arcing_AllowElevationInaccuracy)
 		.Process(this->ReturnWeapon)
 		.Process(this->SubjectToGround)
+		.Process(this->AU)
 		.Process(this->BallisticScatter_IncreaseByRange)
 		.Process(this->BallisticScatter_UseMinimumRangeAsMin)
 		.Process(this->BallisticScatter_Min_InMinRange)
