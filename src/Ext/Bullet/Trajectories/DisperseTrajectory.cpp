@@ -268,7 +268,7 @@ void DisperseTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bu
 	this->ROT = pType->ROT > 0.001 ? pType->ROT : 0.001;
 	this->LockDirection = pType->LockDirection;
 	this->CruiseEnable = pType->CruiseEnable;
-	this->CruiseUnableRange = pType->CruiseUnableRange > 0.25 ? pType->CruiseUnableRange * Unsorted::LeptonsPerCell : 64;
+	this->CruiseUnableRange = pType->CruiseUnableRange > 0.5 ? pType->CruiseUnableRange * Unsorted::LeptonsPerCell : Unsorted::LeptonsPerCell / 2;
 	this->LeadTimeCalculate = pType->LeadTimeCalculate;
 	this->TargetSnapDistance = pType->TargetSnapDistance;
 	this->RetargetRadius = pType->RetargetRadius;
@@ -546,7 +546,7 @@ bool DisperseTrajectory::BulletRetargetTechno(BulletClass* pBullet, HouseClass* 
 					TechnoClass* const pTechno = abstract_cast<TechnoClass*>(pObject);
 					pObject = pObject->NextObject;
 
-					if (!pTechno || pTechno->GetHeight() > Unsorted::CellHeight || this->CheckTechnoIsInvalid(pTechno))
+					if (!pTechno || this->CheckTechnoIsInvalid(pTechno))
 						continue;
 
 					TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
@@ -613,7 +613,7 @@ bool DisperseTrajectory::BulletRetargetTechno(BulletClass* pBullet, HouseClass* 
 
 		for (TechnoClass* pTechno = airTracker->Get(); pTechno; pTechno = airTracker->Get())
 		{
-			if (pTechno->GetHeight() <= Unsorted::CellHeight || this->CheckTechnoIsInvalid(pTechno))
+			if (this->CheckTechnoIsInvalid(pTechno))
 				continue;
 
 			TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
