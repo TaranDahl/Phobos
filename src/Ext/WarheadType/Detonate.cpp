@@ -132,7 +132,7 @@ void WarheadTypeExt::ExtData::Detonate(TechnoClass* pOwner, HouseClass* pHouse, 
 				auto targetCoords = pTarget->GetCoords();
 				if (cylinder)
 				{
-					dist = Math::sqrt(bulletCoords.X - targetCoords.X + bulletCoords.Y - targetCoords.Y);
+					dist = CoordStruct { bulletCoords.X - targetCoords.X , bulletCoords.Y - targetCoords.Y,0 }.Magnitude();
 				}
 				else
 				{

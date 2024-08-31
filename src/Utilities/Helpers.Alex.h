@@ -214,9 +214,10 @@ namespace Helpers {
 								{
 									auto const cellCenterCoords = pCell->GetCenterCoords();
 									double dist = 0.0;
+
 									if (cylinder)
 									{
-										dist = Math::sqrt(cellCenterCoords.X - coords.X + cellCenterCoords.Y - coords.Y);
+										dist = CoordStruct { cellCenterCoords.X - coords.X , cellCenterCoords.Y - coords.Y ,0 }.Magnitude();
 									}
 									else
 									{
@@ -257,7 +258,7 @@ namespace Helpers {
 							auto technoCoords = pTechno->Location;
 							if (cylinder)
 							{
-								dist = Math::sqrt(technoCoords.X - coords.X + technoCoords.Y - coords.Y);
+								dist = CoordStruct { technoCoords.X - coords.X, technoCoords.Y - coords.Y, 0 }.Magnitude();
 							}
 							else
 							{
@@ -284,7 +285,7 @@ namespace Helpers {
 						auto technoCoords = pTechno->Location;
 						if (cylinder)
 						{
-							dist = Math::sqrt(technoCoords.X - coords.X + technoCoords.Y - coords.Y);
+							dist = CoordStruct { technoCoords.X - coords.X, technoCoords.Y - coords.Y, 0 }.Magnitude();
 						}
 						else
 						{
@@ -321,7 +322,7 @@ namespace Helpers {
 				double dist = 0.0;
 				if (cylinder)
 				{
-					dist = Math::sqrt(target.X - coords.X + target.Y - coords.Y);
+					dist = CoordStruct { target.X - coords.X, target.Y - coords.Y, 0 }.Magnitude();
 				}
 				else
 				{
