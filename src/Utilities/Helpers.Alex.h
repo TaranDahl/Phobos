@@ -256,6 +256,7 @@ namespace Helpers {
 						{
 							double dist = 0.0;
 							auto technoCoords = pTechno->Location;
+
 							if (cylinder)
 							{
 								dist = CoordStruct { technoCoords.X - coords.X, technoCoords.Y - coords.Y, 0 }.Magnitude();
@@ -264,6 +265,7 @@ namespace Helpers {
 							{
 								dist = technoCoords.DistanceFrom(coords);
 							}
+
 							if (dist <= spreadMult)
 							{
 								set.insert(pTechno);
@@ -283,6 +285,7 @@ namespace Helpers {
 					{
 						double dist = 0.0;
 						auto technoCoords = pTechno->Location;
+
 						if (cylinder)
 						{
 							dist = CoordStruct { technoCoords.X - coords.X, technoCoords.Y - coords.Y, 0 }.Magnitude();
@@ -291,6 +294,7 @@ namespace Helpers {
 						{
 							dist = technoCoords.DistanceFrom(coords);
 						}
+
 						if (dist <= spread * 256)
 						{
 							set.insert(pTechno);
@@ -320,6 +324,7 @@ namespace Helpers {
 				// get distance from impact site
 				auto const target = pTechno->GetCoords();
 				double dist = 0.0;
+
 				if (cylinder)
 				{
 					dist = CoordStruct { target.X - coords.X, target.Y - coords.Y, 0 }.Magnitude();
