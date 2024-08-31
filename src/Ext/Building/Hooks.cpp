@@ -537,3 +537,33 @@ DEFINE_HOOK(0x449149, BuildingClass_Captured_FactoryPlant2, 0x6)
 }
 
 #pragma endregion
+
+DEFINE_HOOK(0x450630, BuildingClass_UpdateRepair_PlayerAutoRepair, 0x9)
+{
+	GET(BuildingClass*, pThis, ECX);
+
+	auto const pOwner = pThis->Owner;
+	auto const mission = pThis->CurrentMission;
+
+	if (pThis->Health < pThis->GetTechnoType()->Strength
+		&& pThis->Type->ClickRepairable
+		&& mission != Mission::Construction && mission != Mission::Selling
+		&& (pOwner->IsHumanPlayer || pOwner->IsControlledByHuman()) && RulesExt::Global()->PlayerAutoRepair)
+	{
+		pThis->IsBeingRepaired = true;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x448480, BuildingClass_SetOwningHouse_CapturedEVA, 0x5)
+{
+	GET(HouseClass*, pToHouse, EBX);
+
+	if (pToHouse->IsControlledByCurrentPlayer()) // Not necessary to per techno customize this, I guess?
+		VoxClass::PlayIndex(RulesExt::Global()->EVA_WeCaptureABuilding.Get(VoxClass::FindIndex((const char*)"EVA_BuildingCaptured")));
+	else
+		VoxClass::PlayIndex(RulesExt::Global()->EVA_OurBuildingIsCaptured.Get(VoxClass::FindIndex((const char*)"EVA_BuildingCaptured")));
+
+	return 0x44848F;
+}

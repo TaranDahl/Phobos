@@ -196,3 +196,177 @@ DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 
 	return 0;
 }
+
+DEFINE_HOOK(0x481778, CellClass_ScatterContent_Fix1, 0x6)
+{
+	R->AL(false);
+	return 0;
+}
+
+DEFINE_HOOK(0x481780, CellClass_ScatterContent_Fix2, 0x6)
+{
+	R->AL(false);
+	return 0;
+}
+
+DEFINE_HOOK(0x481788, CellClass_ScatterContent_Fix3, 0x5)
+{
+	enum { SkipGameCode = 0x481793 };
+	GET(ObjectClass*, pObject, ESI);
+
+	auto pTechno = abstract_cast<TechnoClass*>(pObject);
+
+	R->CL(pTechno && pTechno->Owner->IsHumanPlayer && RulesClass::Instance()->PlayerScatter);
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x63745D, UnknownClass_PlanWaypoint_ContinuePlanningOnEnter1, 0x6)
+{
+	enum { SkipDeselect = 0x637468, DoNotSkip = 0 };
+	GET(int, planResult, ESI);
+	return (planResult == 0 && !RulesExt::Global()->StopPlanningOnEnter) ? SkipDeselect : DoNotSkip;
+}
+
+DEFINE_HOOK(0x637479, UnknownClass_PlanWaypoint_DisableMessage1, 0x5)
+{
+	enum { SkipMessage = 0x63748A, DoNotSkip = 0 };
+	return (!RulesExt::Global()->StopPlanningOnEnter) ? SkipMessage : DoNotSkip;
+}
+
+DEFINE_HOOK(0x637491, UnknownClass_PlanWaypoint_DisableMessage2, 0x5)
+{
+	enum { SkipMessage = 0x637524, DoNotSkip = 0 };
+	return (!RulesExt::Global()->StopPlanningOnEnter) ? SkipMessage : DoNotSkip;
+}
+
+DEFINE_HOOK(0x638D73, UnknownClass_CheckLastWaypoint_ContinuePlanningWaypoint2, 0x5)
+{
+	enum { SkipDeselect = 0x638D8D, DoNotSkip = 0 };
+	return (!RulesExt::Global()->StopPlanningOnEnter) ? SkipDeselect : DoNotSkip;
+}
+
+DEFINE_HOOK(0x6FA697, TechnoClass_Update_DontScanIfUnarmed, 0x6)
+{
+	enum { SkipTargeting = 0x6FA6F5, DoTargeting = 0 };
+	GET(TechnoClass*, pThis, ESI);
+	return pThis->IsArmed() ? DoTargeting : SkipTargeting;
+}
+
+DEFINE_HOOK(0x709866, TechnoClass_TargetAndEstimateDamage_ScanDelayGuardArea, 0x6)
+{
+	GET(TechnoClass*, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	auto const pOwner = pThis->Owner;
+	auto const pRulesExt = RulesExt::Global();
+	auto const pRules = RulesClass::Instance();
+	int delay = 1;
+
+	if (pOwner->IsHumanPlayer || pOwner->IsControlledByHuman())
+		delay = pTypeExt->PlayerGuardAreaTargetingDelay.Get(pRulesExt->PlayerGuardAreaTargetingDelay.Get(pRules->GuardAreaTargetingDelay));
+	else
+		delay = pTypeExt->AIGuardAreaTargetingDelay.Get(pRulesExt->AIGuardAreaTargetingDelay.Get(pRules->GuardAreaTargetingDelay));
+
+	R->ECX(delay);
+	return 0;
+}
+
+DEFINE_HOOK(0x70989C, TechnoClass_TargetAndEstimateDamage_ScanDelayNormal, 0x6)
+{
+	GET(TechnoClass*, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	auto const pOwner = pThis->Owner;
+	auto const pRulesExt = RulesExt::Global();
+	auto const pRules = RulesClass::Instance();
+	int delay = (pThis->Location.X + pThis->Location.Y + Unsorted::CurrentFrame) % 3;
+
+	if (pOwner->IsHumanPlayer || pOwner->IsControlledByHuman())
+		delay += pTypeExt->PlayerNormalTargetingDelay.Get(pRulesExt->PlayerNormalTargetingDelay.Get(pRules->NormalTargetingDelay));
+	else
+		delay += pTypeExt->AINormalTargetingDelay.Get(pRulesExt->AINormalTargetingDelay.Get(pRules->NormalTargetingDelay));
+
+	R->ECX(delay);
+	return 0;
+}
+
+DEFINE_HOOK(0x702B31, TechnoClass_ReceiveDamage_ReturnFireCheck, 0x7)
+{
+	enum { SkipReturnFire = 0x702B47, NotSkip = 0 };
+
+	GET(TechnoClass*, pThis, ESI);
+
+	auto pOwner = pThis->Owner;
+
+	if (!(pOwner->IsHumanPlayer || pOwner->IsInPlayerControl) || !RulesExt::Global()->PlayerReturnFire_Smarter)
+		return NotSkip;
+
+	auto pTarget = pThis->Target;
+
+	if (pTarget)
+		return SkipReturnFire;
+
+	auto mission = pThis->CurrentMission;
+	auto pThisFoot = abstract_cast<FootClass*>(pThis);
+
+	if (!pThisFoot)
+		return NotSkip;
+
+	bool isJJMoving = pThisFoot->GetHeight() > Unsorted::CellHeight && mission == Mission::Move && pThisFoot->Locomotor->Is_Moving_Now();
+	bool isMoving = isJJMoving || (mission == Mission::Move && pThisFoot->GetHeight() <= 0);
+
+	return isMoving ? SkipReturnFire : NotSkip;
+}
+
+DEFINE_HOOK(0x6FC22A, TechnoClass_GetFireError_TargetingIronCurtain, 0x6)
+{
+	enum { CantFire = 0x6FC86A, GoOtherChecks = 0x6FC24D };
+
+	GET(TechnoClass*, pThis, ESI);
+	GET(ObjectClass*, pTarget, EBP);
+	GET_STACK(int, wpIdx, STACK_OFFSET(0x20, 0x8));
+
+	if (!pTarget->IsIronCurtained())
+		return GoOtherChecks;
+
+	auto pOwner = pThis->Owner;
+	auto const pRules = RulesExt::Global();
+
+	if ((pOwner->IsHumanPlayer || pOwner->IsInPlayerControl) ? pRules->PlayerAttackIronCurtain : pRules->AIAttackIronCurtain)
+		return GoOtherChecks;
+
+	auto pWpExt = WeaponTypeExt::ExtMap.Find(pThis->GetWeapon(wpIdx)->WeaponType);
+	bool isHealing = pThis->CombatDamage(wpIdx) < 0;
+
+	return (pWpExt && pWpExt->AttackIronCurtain.Get(isHealing)) ? GoOtherChecks : CantFire;
+}
+
+DEFINE_HOOK(0x6F50A9, TechnoClass_UpdatePosition_TemporalLetGo, 0x7)
+{
+	enum { LetGo = 0x6F50B4, SkipLetGo = 0x6F50B9 };
+
+	GET(TechnoClass* const, pThis, ESI);
+	GET(TemporalClass* const, pTemporal, ECX);
+
+	if (!pTemporal || !pTemporal->Target)
+		return SkipLetGo;
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	return (!pTypeExt || !pTypeExt->KeepWarping) ? LetGo : SkipLetGo;
+}
+
+DEFINE_HOOK(0x709A43, TechnoClass_EnterIdleMode_TemporalLetGo, 0x7)
+{
+	enum { LetGo = 0x709A54, SkipLetGo = 0x709A59 };
+
+	GET(TechnoClass* const, pThis, ESI);
+	GET(TemporalClass* const, pTemporal, ECX);
+
+	if (!pTemporal || !pTemporal->Target)
+		return SkipLetGo;
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	return (!pTypeExt || !pTypeExt->KeepWarping) ? LetGo : SkipLetGo;
+}

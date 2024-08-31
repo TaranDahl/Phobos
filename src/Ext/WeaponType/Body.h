@@ -60,6 +60,7 @@ public:
 		Valueable<bool> KeepRange_AllowAI;
 		Valueable<bool> KeepRange_AllowPlayer;
 		Nullable<bool> CylinderRangefinding;
+		Nullable<bool> AttackIronCurtain;
 		Valueable<bool> KickOutPassengers;
 
 		ExtData(WeaponTypeClass* OwnerObject) : Extension<WeaponTypeClass>(OwnerObject)
@@ -102,6 +103,7 @@ public:
 			, KeepRange_AllowAI { false }
 			, KeepRange_AllowPlayer { false }
 			, CylinderRangefinding {}
+			, AttackIronCurtain {}
 			, KickOutPassengers { true }
 		{ }
 

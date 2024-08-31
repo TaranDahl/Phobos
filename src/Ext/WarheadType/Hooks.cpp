@@ -44,9 +44,11 @@ DEFINE_HOOK(0x489286, MapClass_DamageArea, 0x6)
 
 	return 0;
 }
+
 #pragma endregion
 
-// Cylinder CellSpread
+#pragma region CylinderCellSpread
+
 DEFINE_HOOK(0x489430, MapClass_DamageArea_Cylinder_1, 0x7)
 {
 	//GET(int, nDetoCrdZ, EDX);
@@ -105,7 +107,10 @@ DEFINE_HOOK(0x4898BF, MapClass_DamageArea_Cylinder_4, 0x5)
 	return 0;
 }
 
-// AffectsInAir and AffectsOnFloor
+#pragma endregion
+
+#pragma region AffectsInAirAndAffectsOnFloor
+
 DEFINE_HOOK(0x489416, MapClass_DamageArea_CheckHeight_1, 0x6)
 {
 	enum { SkipThisObject = 0x489547 };
@@ -129,6 +134,8 @@ DEFINE_HOOK(0x489710, MapClass_DamageArea_CheckHeight_2, 0x7)
 
 	return (!pWHExt || !pObject || ((pWHExt->AffectsInAir && pObject->IsInAir()) || (pWHExt->AffectsOnFloor && !pObject->IsInAir()))) ? 0 : SkipThisObject;
 }
+
+#pragma endregion
 
 DEFINE_HOOK(0x48A551, WarheadTypeClass_AnimList_SplashList, 0x6)
 {

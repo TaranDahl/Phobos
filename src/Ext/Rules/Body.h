@@ -193,15 +193,27 @@ public:
 		Valueable<bool> CombatAlert_UseFeedbackVoice;
 		Valueable<bool> CombatAlert_UseAttackVoice;
 		Valueable<bool> CombatAlert_UseEVA;
-		Valueable<bool> BuildingWaypoint;
-		Valueable<bool> AircraftWaypoint;
-		Valueable<bool> CylinderRangefinding;
 		Valueable<bool> GatherWhenMCVDeploy;
 		Valueable<bool> AIFireSale;
 		Valueable<int> AIFireSaleDelay;
 		Valueable<bool> AIAllToHunt;
 		ValueableVector<bool> RepairBaseNodes;
 		Valueable<bool> MCVRedeploysInCampaign;
+		Valueable<bool> CylinderRangefinding;
+		Valueable<bool> BuildingWaypoint;
+		Valueable<bool> AircraftWaypoint;
+		Valueable<bool> StopPlanningOnEnter;
+		Valueable<bool> StrafingTargetScatter;
+		Nullable<int> AINormalTargetingDelay;
+		Nullable<int> PlayerNormalTargetingDelay;
+		Nullable<int> AIGuardAreaTargetingDelay;
+		Nullable<int> PlayerGuardAreaTargetingDelay;
+		Valueable<bool> PlayerAttackIronCurtain;
+		Valueable<bool> AIAttackIronCurtain;
+		Valueable<bool> PlayerAutoRepair;
+		Valueable<bool> PlayerReturnFire_Smarter;
+		NullableIdx<VoxClass> EVA_WeCaptureABuilding;
+		NullableIdx<VoxClass> EVA_OurBuildingIsCaptured;
 
 		Nullable<Vector3D<float>> VoxelLightSource;
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
@@ -358,15 +370,27 @@ public:
 			, CombatAlert_UseFeedbackVoice { true }
 			, CombatAlert_UseAttackVoice { true }
 			, CombatAlert_UseEVA { true }
-			, BuildingWaypoint { false }
-			, AircraftWaypoint { false }
-			, CylinderRangefinding { false }
 			, GatherWhenMCVDeploy { true }
 			, AIFireSale { true }
 			, AIFireSaleDelay { 0 }
 			, AIAllToHunt { true }
 			, RepairBaseNodes {}
 			, MCVRedeploysInCampaign { false }
+			, CylinderRangefinding { false }
+			, BuildingWaypoint { false }
+			, AircraftWaypoint { false }
+			, StopPlanningOnEnter { true }
+			, StrafingTargetScatter { true }
+			, AINormalTargetingDelay {}
+			, PlayerNormalTargetingDelay {}
+			, AIGuardAreaTargetingDelay {}
+			, PlayerGuardAreaTargetingDelay {}
+			, PlayerAttackIronCurtain { true }
+			, AIAttackIronCurtain { false }
+			, PlayerAutoRepair { false }
+			, PlayerReturnFire_Smarter { false }
+			, EVA_WeCaptureABuilding {}
+			, EVA_OurBuildingIsCaptured {}
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 			, UseFixedVoxelLighting { false }

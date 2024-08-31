@@ -231,15 +231,25 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->CombatAlert_UseFeedbackVoice.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseFeedbackVoice");
 	this->CombatAlert_UseAttackVoice.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseAttackVoice");
 	this->CombatAlert_UseEVA.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseEVA");
-	this->BuildingWaypoint.Read(exINI, GameStrings::General, "BuildingWaypoint");
-	this->AircraftWaypoint.Read(exINI, GameStrings::General, "AircraftWaypoint");
-	this->CylinderRangefinding.Read(exINI, GameStrings::General, "CylinderRangefinding");
 	this->GatherWhenMCVDeploy.Read(exINI, GameStrings::General, "GatherWhenMCVDeploy");
 	this->AIFireSale.Read(exINI, GameStrings::General, "AIFireSale");
 	this->AIFireSaleDelay.Read(exINI, GameStrings::General, "AIFireSaleDelay");
 	this->AIAllToHunt.Read(exINI, GameStrings::General, "AIAllToHunt");
 	this->RepairBaseNodes.Read(exINI, GameStrings::General, "RepairBaseNodes");
 	this->MCVRedeploysInCampaign.Read(exINI, GameStrings::General, "MCVRedeploysInCampaign");
+	this->CylinderRangefinding.Read(exINI, GameStrings::General, "CylinderRangefinding");
+	this->StopPlanningOnEnter.Read(exINI, GameStrings::General, "StopPlanningOnEnter");
+	this->StrafingTargetScatter.Read(exINI, GameStrings::General, "StrafingTargetScatter");
+	this->AINormalTargetingDelay.Read(exINI, GameStrings::General, "AINormalTargetingDelay");
+	this->PlayerNormalTargetingDelay.Read(exINI, GameStrings::General, "PlayerNormalTargetingDelay");
+	this->AIGuardAreaTargetingDelay.Read(exINI, GameStrings::General, "AIGuardAreaTargetingDelay");
+	this->PlayerGuardAreaTargetingDelay.Read(exINI, GameStrings::General, "PlayerGuardAreaTargetingDelay");
+	this->PlayerAttackIronCurtain.Read(exINI, GameStrings::General, "PlayerAttackIronCurtain");
+	this->AIAttackIronCurtain.Read(exINI, GameStrings::General, "AIAttackIronCurtain");
+	this->PlayerAutoRepair.Read(exINI, GameStrings::General, "PlayerAutoRepair");
+	this->PlayerReturnFire_Smarter.Read(exINI, GameStrings::CombatDamage, "PlayerReturnFire.Smarter");
+	this->EVA_WeCaptureABuilding.Read(exINI, GameStrings::AudioVisual, "EVA.WeCaptureABuilding");
+	this->EVA_OurBuildingIsCaptured.Read(exINI, GameStrings::AudioVisual, "EVA.OurBuildingIsCaptured");
 
 	this->VoxelLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelLightSource");
 	// this->VoxelShadowLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelShadowLightSource");
@@ -461,15 +471,27 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->CombatAlert_UseFeedbackVoice)
 		.Process(this->CombatAlert_UseAttackVoice)
 		.Process(this->CombatAlert_UseEVA)
-		.Process(this->AircraftWaypoint)
-		.Process(this->BuildingWaypoint)
-		.Process(this->CylinderRangefinding)
 		.Process(this->GatherWhenMCVDeploy)
 		.Process(this->AIFireSale)
 		.Process(this->AIFireSaleDelay)
 		.Process(this->AIAllToHunt)
 		.Process(this->RepairBaseNodes)
 		.Process(this->MCVRedeploysInCampaign)
+		.Process(this->CylinderRangefinding)
+		.Process(this->AircraftWaypoint)
+		.Process(this->BuildingWaypoint)
+		.Process(this->StopPlanningOnEnter)
+		.Process(this->StrafingTargetScatter)
+		.Process(this->AINormalTargetingDelay)
+		.Process(this->PlayerNormalTargetingDelay)
+		.Process(this->AIGuardAreaTargetingDelay)
+		.Process(this->PlayerGuardAreaTargetingDelay)
+		.Process(this->PlayerAttackIronCurtain)
+		.Process(this->AIAttackIronCurtain)
+		.Process(this->PlayerAutoRepair)
+		.Process(this->PlayerReturnFire_Smarter)
+		.Process(this->EVA_WeCaptureABuilding)
+		.Process(this->EVA_OurBuildingIsCaptured)
 		.Process(this->VoxelLightSource)
 		// .Process(this->VoxelShadowLightSource)
 		.Process(this->UseFixedVoxelLighting)

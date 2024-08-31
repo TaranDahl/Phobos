@@ -333,11 +333,17 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->CombatAlert_UseAttackVoice.Read(exINI, pSection, "CombatAlert.UseAttackVoice");
 	this->CombatAlert_UseEVA.Read(exINI, pSection, "CombatAlert.UseEVA");
 	this->CombatAlert_EVA.Read(exINI, pSection, "CombatAlert.EVA");
-	this->FiringByPassMovingCheck.Read(exINI, pSection, "FiringByPassMovingCheck");
 	this->Spawner_RecycleRange.Read(exINI, pSection, "Spawner.RecycleRange");
-	this->Spawner_RecycleFLH.Read(exINI, pSection, "Spawner.FLH");
-	this->Spawner_RecycleOnTurret.Read(exINI, pSection, "Spawner.RecycleOnTurret");
 	this->Spawner_RecycleAnim.Read(exINI, pSection, "Spawner.RecycleAnim");
+	//this->Spawner_RecycleFLH.Read(exINI, pSection, "Spawner.FLH");
+	//this->Spawner_RecycleOnTurret.Read(exINI, pSection, "Spawner.RecycleOnTurret");
+	this->AINormalTargetingDelay.Read(exINI, pSection, "AINormalTargetingDelay");
+	this->PlayerNormalTargetingDelay.Read(exINI, pSection, "PlayerNormalTargetingDelay");
+	this->AIGuardAreaTargetingDelay.Read(exINI, pSection, "AIGuardAreaTargetingDelay");
+	this->PlayerGuardAreaTargetingDelay.Read(exINI, pSection, "PlayerGuardAreaTargetingDelay");
+	this->KeepWarping.Read(exINI, pSection, "KeepWarping");
+	this->FiringByPassMovingCheck.Read(exINI, pSection, "FiringByPassMovingCheck");
+	this->SkipCrushSlowdown.Read(exINI, pSection, "SkipCrushSlowdown");
 
 	this->Wake.Read(exINI, pSection, "Wake");
 	this->Wake_Grapple.Read(exINI, pSection, "Wake.Grapple");
@@ -726,11 +732,17 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->CombatAlert_UseAttackVoice)
 		.Process(this->CombatAlert_UseEVA)
 		.Process(this->CombatAlert_EVA)
-		.Process(this->FiringByPassMovingCheck)
 		.Process(this->Spawner_RecycleRange)
-		.Process(this->Spawner_RecycleFLH)
-		.Process(this->Spawner_RecycleOnTurret)
 		.Process(this->Spawner_RecycleAnim)
+		//.Process(this->Spawner_RecycleFLH)
+		//.Process(this->Spawner_RecycleOnTurret)
+		.Process(this->AINormalTargetingDelay)
+		.Process(this->PlayerNormalTargetingDelay)
+		.Process(this->AIGuardAreaTargetingDelay)
+		.Process(this->PlayerGuardAreaTargetingDelay)
+		.Process(this->KeepWarping)
+		.Process(this->FiringByPassMovingCheck)
+		.Process(this->SkipCrushSlowdown)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)

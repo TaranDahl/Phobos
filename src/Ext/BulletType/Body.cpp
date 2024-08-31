@@ -53,7 +53,16 @@ void BulletTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->AAOnly.Read(exINI, pSection, "AAOnly");
 	this->Arcing_AllowElevationInaccuracy.Read(exINI, pSection, "Arcing.AllowElevationInaccuracy");
 	this->ReturnWeapon.Read<true>(exINI, pSection, "ReturnWeapon");
+
 	this->SubjectToGround.Read(exINI, pSection, "SubjectToGround");
+
+	this->BallisticScatter_IncreaseByRange.Read(exINI, pSection, "BallisticScatter.IncreaseByRange");
+	this->BallisticScatter_UseMinimumRangeAsMin.Read(exINI, pSection, "BallisticScatter.UseMinimumRangeAsMin");
+	this->BallisticScatter_Min_InMinRange.Read(exINI, pSection, "BallisticScatter.Min.InMinRange");
+	this->BallisticScatter_Min_InMaxRange.Read(exINI, pSection, "BallisticScatter.Min.InMaxRange");
+	this->BallisticScatter_Max_InMinRange.Read(exINI, pSection, "BallisticScatter.Max.InMinRange");
+	this->BallisticScatter_Max_InMaxRange.Read(exINI, pSection, "BallisticScatter.Max.InMaxRange");
+	this->BallisticScatter_Chance.Read(exINI, pSection, "BallisticScatter.Chance");
 
 	// Ares 0.7
 	this->BallisticScatter_Min.Read(exINI, pSection, "BallisticScatter.Min");
@@ -129,6 +138,13 @@ void BulletTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Arcing_AllowElevationInaccuracy)
 		.Process(this->ReturnWeapon)
 		.Process(this->SubjectToGround)
+		.Process(this->BallisticScatter_IncreaseByRange)
+		.Process(this->BallisticScatter_UseMinimumRangeAsMin)
+		.Process(this->BallisticScatter_Min_InMinRange)
+		.Process(this->BallisticScatter_Min_InMaxRange)
+		.Process(this->BallisticScatter_Max_InMinRange)
+		.Process(this->BallisticScatter_Max_InMaxRange)
+		.Process(this->BallisticScatter_Chance)
 		;
 
 	this->TrajectoryType = PhobosTrajectoryType::ProcessFromStream(Stm, this->TrajectoryType);
