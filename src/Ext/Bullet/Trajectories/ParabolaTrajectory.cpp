@@ -837,7 +837,8 @@ BulletVelocity ParabolaTrajectory::GetGroundNormalVector(BulletClass* pBullet, C
 {
 	const int bulletHeight = pBullet->Location.Z;
 
-	if (pCell->Tile_Is_Cliff() && bulletHeight < pCell->GetCoords().Z)
+	if (((pCell->Tile_Is_Cliff() || pCell->Tile_Is_DestroyableCliff()) && bulletHeight < pCell->GetCoords().Z)
+		|| (pCell->Tile_Is_Tunnel() && bulletHeight < (pCell->GetCoords().Z + (Unsorted::LevelHeight << 2))))
 	{
 		const short reverseSgnX = pBullet->Velocity.X >= 0.0 ? -1 : 1;
 		const short reverseSgnY = pBullet->Velocity.Y >= 0.0 ? -1 : 1;
@@ -889,9 +890,6 @@ BulletVelocity ParabolaTrajectory::GetGroundNormalVector(BulletClass* pBullet, C
 
 			if (this->CheckBulletHitCliff(curCell, bulletHeight))
 				return BulletVelocity{ static_cast<double>(reverseSgnX), 0.0, 0.0 };
-
-
-
 
 			curCell.X -= reverseSgnX;
 
@@ -990,8 +988,11 @@ bool ParabolaTrajectory::CheckBulletHitCliff(CellStruct cell, int height)
 {
 	if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(cell))
 	{
-		if (pCell->Tile_Is_Cliff() && height < pCell->GetCoords().Z)
+		if (((pCell->Tile_Is_Cliff() || pCell->Tile_Is_DestroyableCliff()) && height < pCell->GetCoords().Z)
+			|| (pCell->Tile_Is_Tunnel() && height < (pCell->GetCoords().Z + (Unsorted::LevelHeight << 2))))
+		{
 			return true;
+		}
 	}
 
 	return false;
