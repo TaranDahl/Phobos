@@ -160,18 +160,18 @@ bool TracingTrajectory::OnAI(BulletClass* pBullet)
 		pBullet->Target = pTechno->Target;
 
 	if (auto const pTarget = pBullet->Target)
-	{
-		const double trajectorySpeed = this->GetTrajectorySpeed(pBullet);
-		const CoordStruct distanceCoords = pTarget->GetCoords() - pBullet->Location; // TODO Need to calculate 1 frame ahead
-		const double distance = distanceCoords.Magnitude();
+		pBullet->TargetCoords = pTarget->GetCoords();
 
-		pBullet->Velocity.X = static_cast<double>(distanceCoords.X);
-		pBullet->Velocity.Y = static_cast<double>(distanceCoords.Y);
-		pBullet->Velocity.Z = static_cast<double>(distanceCoords.Z);
+	const double trajectorySpeed = this->GetTrajectorySpeed(pBullet);
+	const CoordStruct distanceCoords = pBullet->TargetCoords - pBullet->Location; // TODO Need to calculate 1 frame ahead
+	const double distance = distanceCoords.Magnitude();
 
-		if (distance > trajectorySpeed)
-			pBullet->Velocity *= trajectorySpeed / distance;
-	}
+	pBullet->Velocity.X = static_cast<double>(distanceCoords.X);
+	pBullet->Velocity.Y = static_cast<double>(distanceCoords.Y);
+	pBullet->Velocity.Z = static_cast<double>(distanceCoords.Z);
+
+	if (distance > trajectorySpeed)
+		pBullet->Velocity *= trajectorySpeed / distance;
 
 	if (!this->ExistTimer.Completed())
 		return false;
