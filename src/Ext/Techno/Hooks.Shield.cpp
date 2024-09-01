@@ -25,7 +25,7 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	auto const pRules = RulesExt::Global();
 	auto const pWHExt = WarheadTypeExt::ExtMap.Find(args->WH);
 
-	if (pRules->CombatAlert && *args->Damage > 1 && !pWHExt->CombatAlert_Suppress.Get(pWHExt->Nonprovocative))
+	if (pRules->CombatAlert && *args->Damage > 1 && !pWHExt->CombatAlert_Suppress.Get(!pWHExt->Malicious || pWHExt->Nonprovocative))
 	{
 		do
 		{
