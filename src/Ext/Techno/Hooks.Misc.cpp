@@ -212,7 +212,9 @@ DEFINE_HOOK(0x481778, CellClass_ScatterContent_Fix, 0x6)
 DEFINE_HOOK(0x63745D, UnknownClass_PlanWaypoint_ContinuePlanningOnEnter1, 0x6)
 {
 	enum { SkipDeselect = 0x637468, DoNotSkip = 0 };
+
 	GET(int, planResult, ESI);
+
 	return (planResult == 0 && !RulesExt::Global()->StopPlanningOnEnter) ? SkipDeselect : DoNotSkip;
 }
 
@@ -237,7 +239,9 @@ DEFINE_HOOK(0x638D73, UnknownClass_CheckLastWaypoint_ContinuePlanningWaypoint2, 
 DEFINE_HOOK(0x6FA697, TechnoClass_Update_DontScanIfUnarmed, 0x6)
 {
 	enum { SkipTargeting = 0x6FA6F5, DoTargeting = 0 };
+
 	GET(TechnoClass*, pThis, ESI);
+
 	return pThis->IsArmed() ? DoTargeting : SkipTargeting;
 }
 

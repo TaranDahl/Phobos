@@ -108,10 +108,7 @@ DEFINE_HOOK(0x4B1146, DriveLocomotionClass_WhileMoving_SkipCrushSlowDown, 0x6)
 
 	auto pTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType());
 
-	if (pTypeExt && pTypeExt->SkipCrushSlowdown)
-		return Skip;
-	else
-		return NotSkip;
+	return (pTypeExt && pTypeExt->SkipCrushSlowdown) ? Skip : NotSkip;
 }
 
 DEFINE_HOOK(0x6A0809, ShipLocomotionClass_WhileMoving_SkipCrushSlowDown, 0x6)
@@ -122,8 +119,5 @@ DEFINE_HOOK(0x6A0809, ShipLocomotionClass_WhileMoving_SkipCrushSlowDown, 0x6)
 
 	auto pTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType());
 
-	if (pTypeExt && pTypeExt->SkipCrushSlowdown)
-		return Skip;
-	else
-		return NotSkip;
+	return (pTypeExt && pTypeExt->SkipCrushSlowdown) ? Skip : NotSkip;
 }
