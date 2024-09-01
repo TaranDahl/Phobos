@@ -880,3 +880,22 @@ DEFINE_JUMP(CALL6, 0x6F8DD2, GET_OFFSET(TechnoClass_EvaluateCellGetWeaponRangeWr
 
 #pragma endregion
 
+DEFINE_HOOK(0x707E84, TechnoClass_GetGuardRange_Engineer, 0x6)
+{
+	GET(TechnoClass* const, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	R->AL(pThis->IsEngineer() && !(pTypeExt && pTypeExt->Engineer_CanAutoFire));
+	return 0;
+}
+
+DEFINE_HOOK(0x6F8EF1, TechnoClass_SelectAutoTarget_Engineer, 0x6)
+{
+	enum { ret = 0x06F8EF7 };
+
+	GET(InfantryTypeClass* const, pType, EAX);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+	R->CL(pType->Engineer && !(pTypeExt && pTypeExt->Engineer_CanAutoFire));
+	return ret;
+}
