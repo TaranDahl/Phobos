@@ -437,11 +437,11 @@ DEFINE_HOOK(0x418CD1, AircraftClass_Mission_Attack_ContinueFlyToDestination, 0x6
 // Idle: clear the target if no ammo
 DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 {
-	enum { SkipGameCode = 0x414D3F };
+	enum { ClearTarget = 0x414D3F };
 
 	GET(AircraftClass* const, pThis, ESI);
 
-	return !pThis->Ammo ? SkipGameCode : 0;
+	return !pThis->Ammo ? ClearTarget : 0;
 }
 
 // Stop: clear the mega mission and return to airbase immediately
