@@ -414,17 +414,8 @@ DEFINE_HOOK(0x4899DA, MapClass_DamageArea_DamageUnderGround, 0x7)
 			!pTechno->IsOnMap && // Underground is not on map.
 			!pTechno->InLimbo)
 		{
-			double dist = 0.0;
 			auto technoCoords = pTechno->GetCoords();
-
-			if (cylinder)
-			{
-				dist = CoordStruct { technoCoords.X - pCrd->X, technoCoords.Y - pCrd->Y, 0 }.Magnitude();
-			}
-			else
-			{
-				dist = technoCoords.DistanceFrom(*pCrd);
-			}
+			double dist = CoordStruct { technoCoords.X - pCrd->X, technoCoords.Y - pCrd->Y, (cylinder ? 0 : (technoCoords.Z - pCrd->Z)) }.Magnitude();
 
 			if (dist <= spread * 256)
 			{

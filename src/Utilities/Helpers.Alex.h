@@ -213,16 +213,7 @@ namespace Helpers {
 								if (pTechno->WhatAmI() == AbstractType::Building)
 								{
 									auto const cellCenterCoords = pCell->GetCenterCoords();
-									double dist = 0.0;
-
-									if (cylinder)
-									{
-										dist = CoordStruct { cellCenterCoords.X - coords.X , cellCenterCoords.Y - coords.Y ,0 }.Magnitude();
-									}
-									else
-									{
-										dist = cellCenterCoords.DistanceFrom(coords);
-									}
+									double dist = CoordStruct { cellCenterCoords.X - coords.X , cellCenterCoords.Y - coords.Y , (cylinder ? 0 : (cellCenterCoords.Z - coords.Z)) }.Magnitude();
 
 									// If this is the center cell, there's some different behaviour.
 									if (isCenter)
@@ -254,17 +245,8 @@ namespace Helpers {
 					{
 						if (pTechno->IsAlive && pTechno->IsOnMap && pTechno->Health > 0)
 						{
-							double dist = 0.0;
 							auto technoCoords = pTechno->Location;
-
-							if (cylinder)
-							{
-								dist = CoordStruct { technoCoords.X - coords.X, technoCoords.Y - coords.Y, 0 }.Magnitude();
-							}
-							else
-							{
-								dist = technoCoords.DistanceFrom(coords);
-							}
+							double dist = CoordStruct { technoCoords.X - coords.X, technoCoords.Y - coords.Y, (cylinder ? 0 : (technoCoords.Z - coords.Z)) }.Magnitude();
 
 							if (dist <= spreadMult)
 							{
@@ -283,17 +265,8 @@ namespace Helpers {
 						(includeInAir && pTechno->IsInAir()) ||
 						(includeOnFloor && pTechno->IsOnFloor()))
 					{
-						double dist = 0.0;
 						auto technoCoords = pTechno->Location;
-
-						if (cylinder)
-						{
-							dist = CoordStruct { technoCoords.X - coords.X, technoCoords.Y - coords.Y, 0 }.Magnitude();
-						}
-						else
-						{
-							dist = technoCoords.DistanceFrom(coords);
-						}
+						double dist = CoordStruct { technoCoords.X - coords.X, technoCoords.Y - coords.Y, (cylinder ? 0 : (technoCoords.Z - coords.Z)) }.Magnitude();
 
 						if (dist <= spread * 256)
 						{
@@ -323,16 +296,7 @@ namespace Helpers {
 
 				// get distance from impact site
 				auto const target = pTechno->GetCoords();
-				double dist = 0.0;
-
-				if (cylinder)
-				{
-					dist = CoordStruct { target.X - coords.X, target.Y - coords.Y, 0 }.Magnitude();
-				}
-				else
-				{
-					dist = target.DistanceFrom(coords);
-				}
+				double dist = CoordStruct { target.X - coords.X, target.Y - coords.Y, (cylinder ? 0 : (target.Z - coords.Z)) }.Magnitude();
 
 				// reduce the distance for flying aircraft
 				if (abs == AbstractType::Aircraft && pTechno->IsInAir()) {

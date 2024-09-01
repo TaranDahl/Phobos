@@ -133,17 +133,10 @@ void WarheadTypeExt::ExtData::Detonate(TechnoClass* pOwner, HouseClass* pHouse, 
 		{
 			if (auto pTarget = abstract_cast<TechnoClass*>(pBullet->Target))
 			{
-				double dist = 0.0;
 				auto bulletCoords = pBullet->GetCoords();
 				auto targetCoords = pTarget->GetCoords();
-				if (cylinder)
-				{
-					dist = CoordStruct { bulletCoords.X - targetCoords.X , bulletCoords.Y - targetCoords.Y,0 }.Magnitude();
-				}
-				else
-				{
-					dist = bulletCoords.DistanceFrom(targetCoords);
-				}
+				double dist = CoordStruct { bulletCoords.X - targetCoords.X, bulletCoords.Y - targetCoords.Y, (cylinder ? 0 : (bulletCoords.Z - targetCoords.Z)) }.Magnitude();
+
 				// Starkku: We should only detonate on the target if the bullet, at the moment of detonation is within acceptable distance of the target.
 				// Ares uses 64 leptons / quarter of a cell as a tolerance, so for sake of consistency we're gonna do the same here.
 				if (dist < Unsorted::LeptonsPerCell / 4 &&
