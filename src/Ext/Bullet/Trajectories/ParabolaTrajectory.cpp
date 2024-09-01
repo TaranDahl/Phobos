@@ -405,8 +405,7 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 			if (horizontalDistance <= 0.0)
 				break;
 
-			double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
-			horizontalSpeed = horizontalSpeed > 256.0 ? 256.0 : horizontalSpeed;
+			const double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
 			leadTime = static_cast<int>(horizontalDistance / horizontalSpeed);
 			break;
 		}
