@@ -389,16 +389,13 @@ bool __fastcall AircraftTypeClass_CanAttackMove(AircraftTypeClass* pThis)
 }
 DEFINE_JUMP(VTABLE, 0x7E290C, GET_OFFSET(AircraftTypeClass_CanAttackMove))
 
-DEFINE_HOOK(0x6FA68B, TechnoClass_Update_ShouldReturnToAirbase, 0xA)
+DEFINE_HOOK(0x6FA68B, TechnoClass_Update_AttackMovePaused, 0xA)
 {
 	enum { SkipGameCode = 0x6FA6F5 };
 
 	GET(TechnoClass* const, pThis, ESI);
 
-	if (pThis->WhatAmI() == AbstractType::Aircraft && !pThis->Ammo)
-		return SkipGameCode;
-
-	return 0;
+	return (pThis->WhatAmI() == AbstractType::Aircraft && (!pThis->Ammo || pThis->GetCurrentMission() == Mission::Sleep)) ? SkipGameCode : 0;
 }
 
 DEFINE_HOOK(0x4DF3BA, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget, 0x6)
@@ -441,7 +438,9 @@ DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 
 	GET(AircraftClass* const, pThis, ESI);
 
-	return !pThis->Ammo ? ClearTarget : 0;
+	const Mission mission = pThis->CurrentMission;
+
+	return (!pThis->Ammo || mission == Mission::Sleep || mission == Mission::Enter) ? ClearTarget : 0;
 }
 
 // Stop: clear the mega mission and return to airbase immediately
