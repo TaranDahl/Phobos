@@ -582,8 +582,9 @@ DEFINE_HOOK(0x6FE821, TechnoClass_Fire_BallisticScatterPhobos, 0x6)
 		int minInMaxRange = pExt->BallisticScatter_Min_InMaxRange.Get(Leptons(min));
 		int maxInMinRange = pExt->BallisticScatter_Max_InMinRange.Get(Leptons(max));
 		int maxInMaxRange = pExt->BallisticScatter_Max_InMaxRange.Get(Leptons(max));
-		int minRange = pExt->BallisticScatter_UseMinimumRangeAsMin ? pWeapon->MinimumRange : 0;
-		int deltaRange = pWeapon->Range - minRange;
+		int minRange = pExt->BallisticScatter_MinRange.Get(Leptons(pWeapon->MinimumRange));
+		int maxRange = pExt->BallisticScatter_MaxRange.Get(Leptons(pWeapon->Range));
+		int deltaRange = maxRange - minRange;
 		int deltaRangeReal = (pTarget->GetCoords() - pThis->GetCoords()).Magnitude() - minRange;
 		double rangePercent = deltaRange == 0 ? 0.5 : deltaRangeReal / (double)deltaRange;
 		if (rangePercent < 0)

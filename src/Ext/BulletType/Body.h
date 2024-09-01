@@ -47,7 +47,8 @@ public:
 		Valueable<WeaponTypeClass*> ReturnWeapon;
 
 		Valueable<bool> BallisticScatter_IncreaseByRange;
-		Valueable<bool> BallisticScatter_UseMinimumRangeAsMin;
+		Nullable<Leptons> BallisticScatter_MinRange;
+		Nullable<Leptons> BallisticScatter_MaxRange;
 		Nullable<Leptons> BallisticScatter_Min_InMinRange;
 		Nullable<Leptons> BallisticScatter_Min_InMaxRange;
 		Nullable<Leptons> BallisticScatter_Max_InMinRange;
@@ -82,7 +83,8 @@ public:
 			, Arcing_AllowElevationInaccuracy { true }
 			, ReturnWeapon {}
 			, BallisticScatter_IncreaseByRange { false }
-			, BallisticScatter_UseMinimumRangeAsMin { false }
+			, BallisticScatter_MinRange {}
+			, BallisticScatter_MaxRange {}
 			, BallisticScatter_Min_InMinRange {}
 			, BallisticScatter_Min_InMaxRange {}
 			, BallisticScatter_Max_InMinRange {}
