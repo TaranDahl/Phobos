@@ -162,7 +162,7 @@ bool TracingTrajectory::OnAI(BulletClass* pBullet)
 	if (auto const pTarget = pBullet->Target)
 	{
 		const double trajectorySpeed = this->GetTrajectorySpeed(pBullet);
-		const CoordStruct distanceCoords = pTarget->GetCoords() - pBullet->Location;
+		const CoordStruct distanceCoords = pTarget->GetCoords() - pBullet->Location; // TODO Need to calculate 1 frame ahead
 		const double distance = distanceCoords.Magnitude();
 
 		pBullet->Velocity.X = static_cast<double>(distanceCoords.X);

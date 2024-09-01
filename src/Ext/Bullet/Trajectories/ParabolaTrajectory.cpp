@@ -16,6 +16,8 @@ bool ParabolaTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChang
 		.Process(this->ThrowHeight, false)
 		.Process(this->LaunchAngle, false)
 		.Process(this->LeadTimeCalculate, false)
+		.Process(this->LeadTimeSimplify, false)
+		.Process(this->LeadTimeMultiplier, false)
 		.Process(this->BounceTimes, false)
 		.Process(this->BounceOnWater, false)
 		.Process(this->BounceDetonate, false)
@@ -42,6 +44,8 @@ bool ParabolaTrajectoryType::Save(PhobosStreamWriter& Stm) const
 		.Process(this->ThrowHeight)
 		.Process(this->LaunchAngle)
 		.Process(this->LeadTimeCalculate)
+		.Process(this->LeadTimeSimplify)
+		.Process(this->LeadTimeMultiplier)
 		.Process(this->BounceTimes)
 		.Process(this->BounceOnWater)
 		.Process(this->BounceDetonate)
@@ -71,6 +75,8 @@ void ParabolaTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 	this->ThrowHeight.Read(exINI, pSection, "Trajectory.Parabola.ThrowHeight");
 	this->LaunchAngle.Read(exINI, pSection, "Trajectory.Parabola.LaunchAngle");
 	this->LeadTimeCalculate.Read(exINI, pSection, "Trajectory.Parabola.LeadTimeCalculate");
+	this->LeadTimeSimplify.Read(exINI, pSection, "Trajectory.Parabola.LeadTimeSimplify");
+	this->LeadTimeMultiplier.Read(exINI, pSection, "Trajectory.Parabola.LeadTimeMultiplier");
 	this->BounceTimes.Read(exINI, pSection, "Trajectory.Parabola.BounceTimes");
 	this->BounceOnWater.Read(exINI, pSection, "Trajectory.Parabola.BounceOnWater");
 	this->BounceDetonate.Read(exINI, pSection, "Trajectory.Parabola.BounceDetonate");
@@ -94,6 +100,8 @@ bool ParabolaTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 		.Process(this->ThrowHeight)
 		.Process(this->LaunchAngle)
 		.Process(this->LeadTimeCalculate)
+		.Process(this->LeadTimeSimplify)
+		.Process(this->LeadTimeMultiplier)
 		.Process(this->BounceTimes)
 		.Process(this->BounceOnWater)
 		.Process(this->BounceDetonate)
@@ -128,6 +136,8 @@ bool ParabolaTrajectory::Save(PhobosStreamWriter& Stm) const
 		.Process(this->ThrowHeight)
 		.Process(this->LaunchAngle)
 		.Process(this->LeadTimeCalculate)
+		.Process(this->LeadTimeSimplify)
+		.Process(this->LeadTimeMultiplier)
 		.Process(this->BounceTimes)
 		.Process(this->BounceOnWater)
 		.Process(this->BounceDetonate)
@@ -161,6 +171,8 @@ void ParabolaTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bu
 	this->ThrowHeight = pType->ThrowHeight > 0 ? pType->ThrowHeight : 600;
 	this->LaunchAngle = pType->LaunchAngle;
 	this->LeadTimeCalculate = pType->LeadTimeCalculate;
+	this->LeadTimeSimplify = pType->LeadTimeSimplify;
+	this->LeadTimeMultiplier = pType->LeadTimeMultiplier;
 	this->BounceTimes = pType->BounceTimes;
 	this->BounceOnWater = pType->BounceOnWater;
 	this->BounceDetonate = pType->BounceDetonate;
@@ -347,10 +359,67 @@ bool ParabolaTrajectory::BulletPrepareCheck(BulletClass* pBullet)
 
 void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, CoordStruct* pSourceCoords, double gravity)
 {
+	if (this->LeadTimeSimplify)
+	{
+		int leadTime = 0;
+
+		// Only simple guess, not exact solution
+		switch (this->OpenFireMode)
+		{
+		case 1:
+		case 4:
+		{
+			leadTime = static_cast<int>(sqrt((this->ThrowHeight << 1) / gravity) * 2);
+			break;
+		}
+		case 2:
+		{
+			const CoordStruct distanceCoords = pBullet->TargetCoords - *pSourceCoords;
+			const double horizontalDistance = Point2D{ distanceCoords.X, distanceCoords.Y }.Magnitude();
+
+			if (horizontalDistance <= 0.0)
+				break;
+
+			double radian = this->LaunchAngle * Math::Pi / 180.0;
+			radian = (radian >= Math::HalfPi || radian <= -Math::HalfPi) ? (Math::HalfPi / 3) : radian;
+			const double factor = cos(radian);
+
+			if (abs(factor) < 1e-10)
+				break;
+
+			const double mult = sin(2 * radian);
+			double velocity = abs(mult) > 1e-10 ? sqrt(horizontalDistance * gravity / mult) : 0.0;
+			velocity += 2 * distanceCoords.Z / gravity;
+
+			if (velocity < 1e-10)
+				break;
+
+			leadTime = static_cast<int>(horizontalDistance / (velocity * factor));
+			break;
+		}
+		default:
+		{
+			const CoordStruct distanceCoords = pBullet->TargetCoords - *pSourceCoords;
+			const double horizontalDistance = Point2D{ distanceCoords.X, distanceCoords.Y }.Magnitude();
+
+			if (horizontalDistance <= 0.0)
+				break;
+
+			double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
+			horizontalSpeed = horizontalSpeed > 256.0 ? 256.0 : horizontalSpeed;
+			leadTime = static_cast<int>(horizontalDistance / horizontalSpeed);
+			break;
+		}
+		}
+
+		pBullet->TargetCoords += (pBullet->Target->GetCoords() - this->LastTargetCoord) * (this->LeadTimeMultiplier * leadTime);
+		this->CalculateBulletVelocityRightNow(pBullet, pSourceCoords, gravity);
+		return;
+	}
+
 	CoordStruct targetCoords = pBullet->Target->GetCoords();
 	CoordStruct offsetCoords = pBullet->TargetCoords - targetCoords;
-
-	const double speedFixMult = 0.75; // A coefficient that should not exist here normally, but even so, there are still errors
+	const double speedFixMult = this->LeadTimeMultiplier * 0.75; // A coefficient that should not exist here normally, but even so, there are still errors
 
 	switch (this->OpenFireMode)
 	{
@@ -774,52 +843,110 @@ BulletVelocity ParabolaTrajectory::GetGroundNormalVector(BulletClass* pBullet, C
 		const short reverseSgnY = pBullet->Velocity.Y >= 0.0 ? -1 : 1;
 
 		CellStruct curCell = pCell->MapCoords;
-		curCell.X += reverseSgnX;
 
-		if (this->CheckBulletHitCliff(curCell, bulletHeight))
+		if (abs(pBullet->Velocity.X) > abs(pBullet->Velocity.Y))
 		{
-			curCell.X -= reverseSgnX;
-			curCell.Y += reverseSgnY;
+			curCell.X += reverseSgnX;
 
 			if (this->CheckBulletHitCliff(curCell, bulletHeight))
-				return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
+			{
+				curCell.X -= reverseSgnX;
+				curCell.Y += reverseSgnY;
 
-			curCell.X -= reverseSgnX;
+				if (this->CheckBulletHitCliff(curCell, bulletHeight))
+					return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
+
+				curCell.X -= reverseSgnX;
+
+				if (this->CheckBulletHitCliff(curCell, bulletHeight))
+					return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(2 * reverseSgnY), 0.0 }.Normalized();
+
+				return BulletVelocity{ 0.0, static_cast<double>(reverseSgnY), 0.0 };
+			}
+
+			curCell.Y -= reverseSgnY;
 
 			if (this->CheckBulletHitCliff(curCell, bulletHeight))
+			{
+				curCell.Y += 2 * reverseSgnY;
+				curCell.X -= reverseSgnX;
+
+				if (this->CheckBulletHitCliff(curCell, bulletHeight))
+					return BulletVelocity{ static_cast<double>(2 * reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
+
+				curCell.X -= reverseSgnX;
+
+
+				if (this->CheckBulletHitCliff(curCell, bulletHeight))
+					return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
+
+
 				return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(2 * reverseSgnY), 0.0 }.Normalized();
+			}
 
-			return BulletVelocity{ 0.0, static_cast<double>(reverseSgnY), 0.0 };
-		}
-
-		curCell.Y -= reverseSgnY;
-
-		if (this->CheckBulletHitCliff(curCell, bulletHeight))
-		{
 			curCell.Y += 2 * reverseSgnY;
 			curCell.X -= reverseSgnX;
 
 			if (this->CheckBulletHitCliff(curCell, bulletHeight))
-				return BulletVelocity{ static_cast<double>(2 * reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
+				return BulletVelocity{ static_cast<double>(reverseSgnX), 0.0, 0.0 };
+
+
+
 
 			curCell.X -= reverseSgnX;
 
 			if (this->CheckBulletHitCliff(curCell, bulletHeight))
-				return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
-
-			return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(2 * reverseSgnY), 0.0 }.Normalized();
+				return BulletVelocity{ static_cast<double>(2 * reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
 		}
+		else
+		{
+			curCell.Y += reverseSgnY;
 
-		curCell.Y += 2 * reverseSgnY;
-		curCell.X -= reverseSgnX;
+			if (this->CheckBulletHitCliff(curCell, bulletHeight))
+			{
+				curCell.Y -= reverseSgnY;
+				curCell.X += reverseSgnX;
 
-		if (this->CheckBulletHitCliff(curCell, bulletHeight))
-			return BulletVelocity{ static_cast<double>(reverseSgnX), 0.0, 0.0 };
+				if (this->CheckBulletHitCliff(curCell, bulletHeight))
+					return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
 
-		curCell.X -= reverseSgnX;
+				curCell.Y -= reverseSgnY;
 
-		if (this->CheckBulletHitCliff(curCell, bulletHeight))
-			return BulletVelocity{ static_cast<double>(2 * reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
+				if (this->CheckBulletHitCliff(curCell, bulletHeight))
+					return BulletVelocity{ static_cast<double>(2 * reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
+
+				return BulletVelocity{ static_cast<double>(reverseSgnX), 0.0, 0.0 };
+			}
+
+			curCell.X -= reverseSgnX;
+
+			if (this->CheckBulletHitCliff(curCell, bulletHeight))
+			{
+				curCell.X += 2 * reverseSgnX;
+				curCell.Y -= reverseSgnY;
+
+				if (this->CheckBulletHitCliff(curCell, bulletHeight))
+					return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(2 * reverseSgnY), 0.0 }.Normalized();
+
+				curCell.Y -= reverseSgnY;
+
+				if (this->CheckBulletHitCliff(curCell, bulletHeight))
+					return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
+
+				return BulletVelocity{ static_cast<double>(2 * reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
+			}
+
+			curCell.X += 2 * reverseSgnX;
+			curCell.Y -= reverseSgnY;
+
+			if (this->CheckBulletHitCliff(curCell, bulletHeight))
+				return BulletVelocity{ 0.0, static_cast<double>(reverseSgnY), 0.0 };
+
+			curCell.Y -= reverseSgnY;
+
+			if (this->CheckBulletHitCliff(curCell, bulletHeight))
+				return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(2 * reverseSgnY), 0.0 }.Normalized();
+		}
 
 		return BulletVelocity{ static_cast<double>(reverseSgnX), static_cast<double>(reverseSgnY), 0.0 }.Normalized();
 	}
@@ -900,7 +1027,9 @@ bool ParabolaTrajectory::BulletDetonateLastCheck(BulletClass* pBullet, double gr
 			if (curCoord.Z < cellHeight)
 			{
 				this->LastVelocity = pBullet->Velocity;
-				this->BulletDetonateEffectuate(pBullet, (pBullet->Location.Z - cellHeight) / pBullet->Velocity.Z);
+				const double heightMult = abs((pBullet->Location.Z - cellHeight) / pBullet->Velocity.Z);
+				const double speedMult = curCoord.DistanceFrom(pBullet->Location) / pBullet->Velocity.Magnitude();
+				this->BulletDetonateEffectuate(pBullet, heightMult < speedMult ? heightMult : speedMult);
 				break;
 			}
 
@@ -923,7 +1052,7 @@ bool ParabolaTrajectory::BulletDetonateLastCheck(BulletClass* pBullet, double gr
 			return false;
 
 		this->LastVelocity = pBullet->Velocity;
-		this->BulletDetonateEffectuate(pBullet, (pBullet->Location.Z - cellHeight) / pBullet->Velocity.Z);
+		this->BulletDetonateEffectuate(pBullet, abs((pBullet->Location.Z - cellHeight) / pBullet->Velocity.Z));
 	}
 
 	return false;
@@ -931,8 +1060,6 @@ bool ParabolaTrajectory::BulletDetonateLastCheck(BulletClass* pBullet, double gr
 
 void ParabolaTrajectory::BulletDetonateEffectuate(BulletClass* pBullet, double velocityMult)
 {
-	velocityMult = abs(velocityMult);
-
 	if (velocityMult < 1.0)
 		pBullet->Velocity *= velocityMult;
 

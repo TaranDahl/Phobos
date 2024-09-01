@@ -12,6 +12,8 @@ public:
 		, ThrowHeight { 600 }
 		, LaunchAngle { 30.0 }
 		, LeadTimeCalculate { false }
+		, LeadTimeSimplify { false }
+		, LeadTimeMultiplier { 1.0 }
 		, BounceTimes { 0 }
 		, BounceOnWater { false }
 		, BounceDetonate { false }
@@ -35,6 +37,8 @@ public:
 	Valueable<int> ThrowHeight;
 	Valueable<double> LaunchAngle;
 	Valueable<bool> LeadTimeCalculate;
+	Valueable<bool> LeadTimeSimplify;
+	Valueable<double> LeadTimeMultiplier;
 	Valueable<int> BounceTimes;
 	Valueable<bool> BounceOnWater;
 	Valueable<bool> BounceDetonate;
@@ -58,6 +62,8 @@ public:
 		, ThrowHeight { 600 }
 		, LaunchAngle { 30.0 }
 		, LeadTimeCalculate { false }
+		, LeadTimeSimplify { false }
+		, LeadTimeMultiplier { 1.0 }
 		, BounceTimes { 0 }
 		, BounceOnWater { false }
 		, BounceDetonate { false }
@@ -85,6 +91,8 @@ public:
 		, ThrowHeight { 600 }
 		, LaunchAngle { 30.0 }
 		, LeadTimeCalculate { false }
+		, LeadTimeSimplify { false }
+		, LeadTimeMultiplier { 1.0 }
 		, BounceTimes { 0 }
 		, BounceOnWater { false }
 		, BounceDetonate { false }
@@ -121,6 +129,8 @@ public:
 	int ThrowHeight;
 	double LaunchAngle;
 	bool LeadTimeCalculate;
+	bool LeadTimeSimplify;
+	double LeadTimeMultiplier;
 	int BounceTimes;
 	bool BounceOnWater;
 	bool BounceDetonate;
