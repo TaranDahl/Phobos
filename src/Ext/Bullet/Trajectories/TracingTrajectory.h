@@ -43,7 +43,6 @@ class TracingTrajectory final : public PhobosTrajectory
 {
 public:
 	TracingTrajectory() : PhobosTrajectory(TrajectoryFlag::Tracing)
-		, TheDuration { 0 }
 		, RelockDelay { 20 }
 		, RelockRange { 5.0 }
 		, AddedRange { 5.0 }
@@ -58,10 +57,10 @@ public:
 		, RelockTimer {}
 		, BlazeTimer {}
 		, DamageTimer {}
+		, ExistTimer {}
 	{}
 
 	TracingTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Tracing)
-		, TheDuration { 0 }
 		, RelockDelay { 20 }
 		, RelockRange { 5.0 }
 		, AddedRange { 5.0 }
@@ -76,6 +75,7 @@ public:
 		, RelockTimer {}
 		, BlazeTimer {}
 		, DamageTimer {}
+		, ExistTimer {}
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -88,7 +88,6 @@ public:
 	virtual TrajectoryCheckReturnType OnAITargetCoordCheck(BulletClass* pBullet) override;
 	virtual TrajectoryCheckReturnType OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno) override;
 
-	int TheDuration;
 	int RelockDelay;
 	double RelockRange;
 	double AddedRange;
@@ -103,6 +102,7 @@ public:
 	CDTimerClass RelockTimer;
 	CDTimerClass BlazeTimer;
 	CDTimerClass DamageTimer;
+	CDTimerClass ExistTimer;
 
 private:
 

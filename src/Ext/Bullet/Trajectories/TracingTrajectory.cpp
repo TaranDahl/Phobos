@@ -72,7 +72,6 @@ bool TracingTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 	this->PhobosTrajectory::Load(Stm, false);
 
 	Stm
-		.Process(this->TheDuration)
 		.Process(this->RelockDelay)
 		.Process(this->RelockRange)
 		.Process(this->NoRelockROF)
@@ -87,6 +86,7 @@ bool TracingTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 		.Process(this->RelockTimer)
 		.Process(this->BlazeTimer)
 		.Process(this->DamageTimer)
+		.Process(this->ExistTimer)
 		;
 
 	return true;
@@ -97,7 +97,6 @@ bool TracingTrajectory::Save(PhobosStreamWriter& Stm) const
 	this->PhobosTrajectory::Save(Stm);
 
 	Stm
-		.Process(this->TheDuration)
 		.Process(this->RelockDelay)
 		.Process(this->RelockRange)
 		.Process(this->NoRelockROF)
@@ -112,6 +111,7 @@ bool TracingTrajectory::Save(PhobosStreamWriter& Stm) const
 		.Process(this->RelockTimer)
 		.Process(this->BlazeTimer)
 		.Process(this->DamageTimer)
+		.Process(this->ExistTimer)
 		;
 
 	return true;
@@ -121,7 +121,7 @@ void TracingTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 {
 	auto const pType = this->GetTrajectoryType<TracingTrajectoryType>(pBullet);
 
-	this->TheDuration = pType->TheDuration;
+	int theDuration = pType->TheDuration;
 	this->RelockDelay = pType->RelockDelay;
 	this->RelockRange = pType->RelockRange;
 	this->NoRelockROF = pType->NoRelockROF;
@@ -133,16 +133,55 @@ void TracingTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 	this->LaserColor = pType->LaserColor;
 	this->BlazeDelay = pType->BlazeDelay;
 	this->DamageDelay = pType->DamageDelay;
+
+	if (theDuration <= 0)
+	{
+		if (auto const pWeapon = pBullet->WeaponType)
+		{
+			const int weaponROF = pBullet->WeaponType->ROF;
+
+			if (weaponROF > 10)
+				theDuration = weaponROF - 10;
+			else
+				theDuration = 1;
+		}
+		else
+		{
+			theDuration = 120;
+		}
+	}
+
+	this->ExistTimer.Start(theDuration);
 }
 
 bool TracingTrajectory::OnAI(BulletClass* pBullet)
 {
+	if (auto const pTechno = pBullet->Owner)
+		pBullet->Target = pTechno->Target;
+
+	if (auto const pTarget = pBullet->Target)
+	{
+		const double trajectorySpeed = this->GetTrajectorySpeed(pBullet);
+		const CoordStruct distanceCoords = pTarget->GetCoords() - pBullet->Location;
+		const double distance = distanceCoords.Magnitude();
+
+		pBullet->Velocity.X = static_cast<double>(distanceCoords.X);
+		pBullet->Velocity.Y = static_cast<double>(distanceCoords.Y);
+		pBullet->Velocity.Z = static_cast<double>(distanceCoords.Z);
+
+		if (distance > trajectorySpeed)
+			pBullet->Velocity *= trajectorySpeed / distance;
+	}
+
+	if (!this->ExistTimer.Completed())
+		return false;
+
 	return true;
 }
 
 void TracingTrajectory::OnAIPreDetonate(BulletClass* pBullet)
 {
-	pBullet->UnInit(); //Prevent damage again.
+//	pBullet->UnInit(); //Prevent damage again.
 }
 
 void TracingTrajectory::OnAIVelocity(BulletClass* pBullet, BulletVelocity* pSpeed, BulletVelocity* pPosition)
