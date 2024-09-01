@@ -658,7 +658,7 @@ DEFINE_HOOK(0x6FE821, TechnoClass_Fire_BallisticScatterPhobos, 0x6)
 		const int maxRange = pExt->BallisticScatter_MaxRange.Get(Leptons(pWeapon->Range));
 		const int deltaRange = maxRange - minRange;
 		const int deltaRangeReal = static_cast<int>((pTarget->GetCoords() - pThis->GetCoords()).Magnitude()) - minRange;
-		const double rangePercent = Math::clamp((deltaRange == 0 ? 0.5 : deltaRangeReal / (double)deltaRange), 0, 1);
+		const double rangePercent = Math::clamp((deltaRange == 0 ? 0.5 : deltaRangeReal / static_cast<double>(deltaRange)), 0, 1);
 		min = minInMinRange + static_cast<int>(rangePercent * (minInMaxRange - minInMinRange));
 		max = maxInMinRange + static_cast<int>(rangePercent * (maxInMaxRange - maxInMinRange));
 	}
