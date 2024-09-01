@@ -238,6 +238,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->RepairBaseNodes.Read(exINI, GameStrings::General, "RepairBaseNodes");
 	this->MCVRedeploysInCampaign.Read(exINI, GameStrings::General, "MCVRedeploysInCampaign");
 	this->CylinderRangefinding.Read(exINI, GameStrings::General, "CylinderRangefinding");
+	this->AircraftWaypoint.Read(exINI, GameStrings::General, "AircraftWaypoint");
+	this->BuildingWaypoint.Read(exINI, GameStrings::General, "BuildingWaypoint");
 	this->StopPlanningOnEnter.Read(exINI, GameStrings::General, "StopPlanningOnEnter");
 	this->StrafingTargetScatter.Read(exINI, GameStrings::General, "StrafingTargetScatter");
 	this->AINormalTargetingDelay.Read(exINI, GameStrings::General, "AINormalTargetingDelay");
