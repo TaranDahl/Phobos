@@ -369,17 +369,11 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 		case 1:
 		case 4:
 		{
-			leadTime = static_cast<int>(sqrt((this->ThrowHeight << 1) / gravity) * 2);
+			leadTime = static_cast<int>(sqrt((this->ThrowHeight << 1) / gravity) * 1.25);
 			break;
 		}
 		case 2:
 		{
-			const CoordStruct distanceCoords = pBullet->TargetCoords - *pSourceCoords;
-			const double horizontalDistance = Point2D{ distanceCoords.X, distanceCoords.Y }.Magnitude();
-
-			if (horizontalDistance <= 0.0)
-				break;
-
 			double radian = this->LaunchAngle * Math::Pi / 180.0;
 			radian = (radian >= Math::HalfPi || radian <= -Math::HalfPi) ? (Math::HalfPi / 3) : radian;
 			const double factor = cos(radian);
@@ -388,25 +382,17 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 				break;
 
 			const double mult = sin(2 * radian);
-			double velocity = abs(mult) > 1e-10 ? sqrt(horizontalDistance * gravity / mult) : 0.0;
-			velocity += 2 * distanceCoords.Z / gravity;
+			const double velocity = abs(mult) > 1e-10 ? sqrt((Unsorted::LeptonsPerCell << 2) * gravity / mult) : 0.0;
 
 			if (velocity < 1e-10)
 				break;
 
-			leadTime = static_cast<int>(horizontalDistance / (velocity * factor));
+			leadTime = static_cast<int>((Unsorted::LeptonsPerCell << 2) / (velocity * factor));
 			break;
 		}
 		default:
 		{
-			const CoordStruct distanceCoords = pBullet->TargetCoords - *pSourceCoords;
-			const double horizontalDistance = Point2D{ distanceCoords.X, distanceCoords.Y }.Magnitude();
-
-			if (horizontalDistance <= 0.0)
-				break;
-
-			const double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
-			leadTime = static_cast<int>(horizontalDistance / horizontalSpeed);
+			leadTime = static_cast<int>((Unsorted::LeptonsPerCell << 2) / this->GetTrajectorySpeed(pBullet));
 			break;
 		}
 		}

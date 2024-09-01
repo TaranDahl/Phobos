@@ -644,25 +644,21 @@ DEFINE_HOOK(0x6FE821, TechnoClass_Fire_BallisticScatterPhobos, 0x6)
 	}
 
 	// defaults for !FlakScatter || Inviso
-	int globalScatter = RulesClass::Instance->BallisticScatter;
+	const int globalScatter = RulesClass::Instance->BallisticScatter;
 	int min = pExt->BallisticScatter_Min.Get(Leptons(globalScatter / 2));
 	int max = pExt->BallisticScatter_Max.Get(Leptons(globalScatter));
 
 	if (pExt->BallisticScatter_IncreaseByRange)
 	{
-		int minInMinRange = pExt->BallisticScatter_Min_InMinRange.Get(Leptons(min));
-		int minInMaxRange = pExt->BallisticScatter_Min_InMaxRange.Get(Leptons(min));
-		int maxInMinRange = pExt->BallisticScatter_Max_InMinRange.Get(Leptons(max));
-		int maxInMaxRange = pExt->BallisticScatter_Max_InMaxRange.Get(Leptons(max));
-		int minRange = pExt->BallisticScatter_MinRange.Get(Leptons(pWeapon->MinimumRange));
-		int maxRange = pExt->BallisticScatter_MaxRange.Get(Leptons(pWeapon->Range));
-		int deltaRange = maxRange - minRange;
-		int deltaRangeReal = static_cast<int>((pTarget->GetCoords() - pThis->GetCoords()).Magnitude()) - minRange;
-		double rangePercent = deltaRange == 0 ? 0.5 : deltaRangeReal / (double)deltaRange;
-
-		if (rangePercent < 0)
-			rangePercent = 0;
-
+		const int minInMinRange = pExt->BallisticScatter_Min_InMinRange.Get(Leptons(min));
+		const int minInMaxRange = pExt->BallisticScatter_Min_InMaxRange.Get(Leptons(min));
+		const int maxInMinRange = pExt->BallisticScatter_Max_InMinRange.Get(Leptons(max));
+		const int maxInMaxRange = pExt->BallisticScatter_Max_InMaxRange.Get(Leptons(max));
+		const int minRange = pExt->BallisticScatter_MinRange.Get(Leptons(pWeapon->MinimumRange));
+		const int maxRange = pExt->BallisticScatter_MaxRange.Get(Leptons(pWeapon->Range));
+		const int deltaRange = maxRange - minRange;
+		const int deltaRangeReal = static_cast<int>((pTarget->GetCoords() - pThis->GetCoords()).Magnitude()) - minRange;
+		const double rangePercent = Math::clamp((deltaRange == 0 ? 0.5 : deltaRangeReal / (double)deltaRange), 0, 1);
 		min = minInMinRange + static_cast<int>(rangePercent * (minInMaxRange - minInMinRange));
 		max = maxInMinRange + static_cast<int>(rangePercent * (maxInMaxRange - maxInMinRange));
 	}

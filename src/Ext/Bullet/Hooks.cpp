@@ -439,27 +439,23 @@ DEFINE_HOOK(0x4687F8, BulletClass_Unlimbo_FlakScatter, 0x6)
 				return 0;
 			}
 
-			int defaultValue = RulesClass::Instance->BallisticScatter;
+			const int defaultValue = RulesClass::Instance->BallisticScatter;
 			int min = pTypeExt->BallisticScatter_Min.Get(Leptons(0));
 			int max = pTypeExt->BallisticScatter_Max.Get(Leptons(defaultValue));
 			int result;
 
 			if (pTypeExt->BallisticScatter_IncreaseByRange)
 			{
-				auto pWeapon = pThis->WeaponType;
-				int minInMinRange = pTypeExt->BallisticScatter_Min_InMinRange.Get(Leptons(min));
-				int minInMaxRange = pTypeExt->BallisticScatter_Min_InMaxRange.Get(Leptons(min));
-				int maxInMinRange = pTypeExt->BallisticScatter_Max_InMinRange.Get(Leptons(max));
-				int maxInMaxRange = pTypeExt->BallisticScatter_Max_InMaxRange.Get(Leptons(max));
-				int minRange = pTypeExt->BallisticScatter_MinRange.Get(Leptons(pWeapon->MinimumRange));
-				int maxRange = pTypeExt->BallisticScatter_MaxRange.Get(Leptons(pWeapon->Range));
-				int deltaRange = maxRange - minRange;
-				int deltaRangeReal = static_cast<int>(mult) - minRange;
-				double rangePercent = deltaRange == 0 ? 0.5 : deltaRangeReal / (double)deltaRange;
-
-				if (rangePercent < 0)
-					rangePercent = 0;
-
+				auto const pWeapon = pThis->WeaponType;
+				const int minInMinRange = pTypeExt->BallisticScatter_Min_InMinRange.Get(Leptons(min));
+				const int minInMaxRange = pTypeExt->BallisticScatter_Min_InMaxRange.Get(Leptons(min));
+				const int maxInMinRange = pTypeExt->BallisticScatter_Max_InMinRange.Get(Leptons(max));
+				const int maxInMaxRange = pTypeExt->BallisticScatter_Max_InMaxRange.Get(Leptons(max));
+				const int minRange = pTypeExt->BallisticScatter_MinRange.Get(Leptons(pWeapon->MinimumRange));
+				const int maxRange = pTypeExt->BallisticScatter_MaxRange.Get(Leptons(pWeapon->Range));
+				const int deltaRange = maxRange - minRange;
+				const int deltaRangeReal = static_cast<int>(mult) - minRange;
+				const double rangePercent = Math::clamp((deltaRange == 0 ? 0.5 : deltaRangeReal / (double)deltaRange), 0, 1);
 				min = minInMinRange + static_cast<int>(rangePercent * (minInMaxRange - minInMinRange));
 				max = maxInMinRange + static_cast<int>(rangePercent * (maxInMaxRange - maxInMinRange));
 				result = ScenarioClass::Instance->Random.RandomRanged(min, max);
