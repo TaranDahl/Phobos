@@ -837,7 +837,7 @@ BulletVelocity ParabolaTrajectory::GetGroundNormalVector(BulletClass* pBullet, C
 {
 	const int bulletHeight = pBullet->Location.Z;
 
-	if ((pCell->Tile_Is_Cliff() || pCell->Tile_Is_DestroyableCliff()) && bulletHeight < pCell->GetCoords().Z)
+	if (pCell->Tile_Is_Cliff() && bulletHeight < pCell->GetCoords().Z)
 	{
 		const short reverseSgnX = pBullet->Velocity.X >= 0.0 ? -1 : 1;
 		const short reverseSgnY = pBullet->Velocity.Y >= 0.0 ? -1 : 1;
@@ -987,7 +987,7 @@ bool ParabolaTrajectory::CheckBulletHitCliff(CellStruct cell, int height)
 {
 	if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(cell))
 	{
-		if ((pCell->Tile_Is_Cliff() || pCell->Tile_Is_DestroyableCliff()) && height < pCell->GetCoords().Z)
+		if (pCell->Tile_Is_Cliff() && height < pCell->GetCoords().Z)
 			return true;
 	}
 
