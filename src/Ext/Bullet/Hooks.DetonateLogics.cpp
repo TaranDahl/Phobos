@@ -381,9 +381,9 @@ DEFINE_HOOK(0x469453, BulletClass_Logics_TemporalUnderGround, 0x6)
 
 	GET(FootClass*, pTarget, EAX);
 
-	Layer lyr = pTarget->InWhichLayer();
+	Layer layer = pTarget->InWhichLayer();
 
-	if (lyr != Layer::None)
+	if (layer != Layer::None)
 		return OK;
 
 	return NotOK;

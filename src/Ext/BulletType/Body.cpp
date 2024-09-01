@@ -58,7 +58,8 @@ void BulletTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->AU.Read(exINI, pSection, "AU");
 	this->BallisticScatter_IncreaseByRange.Read(exINI, pSection, "BallisticScatter.IncreaseByRange");
-	this->BallisticScatter_UseMinimumRangeAsMin.Read(exINI, pSection, "BallisticScatter.UseMinimumRangeAsMin");
+	this->BallisticScatter_MinRange.Read(exINI, pSection, "BallisticScatter.MinRange");
+	this->BallisticScatter_MaxRange.Read(exINI, pSection, "BallisticScatter.MaxRange");
 	this->BallisticScatter_Min_InMinRange.Read(exINI, pSection, "BallisticScatter.Min.InMinRange");
 	this->BallisticScatter_Min_InMaxRange.Read(exINI, pSection, "BallisticScatter.Min.InMaxRange");
 	this->BallisticScatter_Max_InMinRange.Read(exINI, pSection, "BallisticScatter.Max.InMinRange");
@@ -141,7 +142,8 @@ void BulletTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SubjectToGround)
 		.Process(this->AU)
 		.Process(this->BallisticScatter_IncreaseByRange)
-		.Process(this->BallisticScatter_UseMinimumRangeAsMin)
+		.Process(this->BallisticScatter_MinRange)
+		.Process(this->BallisticScatter_MaxRange)
 		.Process(this->BallisticScatter_Min_InMinRange)
 		.Process(this->BallisticScatter_Min_InMaxRange)
 		.Process(this->BallisticScatter_Max_InMinRange)

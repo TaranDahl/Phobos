@@ -451,8 +451,9 @@ DEFINE_HOOK(0x4687F8, BulletClass_Unlimbo_FlakScatter, 0x6)
 				int minInMaxRange = pTypeExt->BallisticScatter_Min_InMaxRange.Get(Leptons(min));
 				int maxInMinRange = pTypeExt->BallisticScatter_Max_InMinRange.Get(Leptons(max));
 				int maxInMaxRange = pTypeExt->BallisticScatter_Max_InMaxRange.Get(Leptons(max));
-				int minRange = pTypeExt->BallisticScatter_UseMinimumRangeAsMin ? pWeapon->MinimumRange : 0;
-				int deltaRange = pWeapon->Range - minRange;
+				int minRange = pTypeExt->BallisticScatter_MinRange.Get(Leptons(pWeapon->MinimumRange));
+				int maxRange = pTypeExt->BallisticScatter_MaxRange.Get(Leptons(pWeapon->Range));
+				int deltaRange = maxRange - minRange;
 				int deltaRangeReal = static_cast<int>(mult) - minRange;
 				double rangePercent = deltaRange == 0 ? 0.5 : deltaRangeReal / (double)deltaRange;
 
