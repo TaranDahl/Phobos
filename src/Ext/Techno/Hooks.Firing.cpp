@@ -168,9 +168,8 @@ DEFINE_HOOK(0x6F37EB, TechnoClass_WhatWeaponShouldIUse_AntiAir, 0x6)
 	GET(WeaponTypeClass*, pSecWeapon, EAX);
 
 	const auto pTargetTechno = abstract_cast<TechnoClass*>(pTarget);
-
-	auto const pPrimaryProj = pWeapon->Projectile;
-	auto const pSecondaryProj = pSecWeapon->Projectile;
+	const auto pPrimaryProj = pWeapon->Projectile;
+	const auto pSecondaryProj = pSecWeapon->Projectile;
 
 	if (!pPrimaryProj->AA && pSecondaryProj->AA && pTargetTechno && pTargetTechno->IsInAir())
 		return Secondary;
