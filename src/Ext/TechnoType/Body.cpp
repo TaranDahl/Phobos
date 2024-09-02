@@ -342,6 +342,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->AIGuardAreaTargetingDelay.Read(exINI, pSection, "AIGuardAreaTargetingDelay");
 	this->PlayerGuardAreaTargetingDelay.Read(exINI, pSection, "PlayerGuardAreaTargetingDelay");
 	this->KeepWarping.Read(exINI, pSection, "KeepWarping");
+	this->KeepWarping_Distance.Read(exINI, pSection, "KeepWarping.Distance");
 	this->FiringByPassMovingCheck.Read(exINI, pSection, "FiringByPassMovingCheck");
 	this->SkipCrushSlowdown.Read(exINI, pSection, "SkipCrushSlowdown");
 
@@ -741,6 +742,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AIGuardAreaTargetingDelay)
 		.Process(this->PlayerGuardAreaTargetingDelay)
 		.Process(this->KeepWarping)
+		.Process(this->KeepWarping_Distance)
 		.Process(this->FiringByPassMovingCheck)
 		.Process(this->SkipCrushSlowdown)
 

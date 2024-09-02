@@ -255,6 +255,7 @@ public:
 		Nullable<int> AIGuardAreaTargetingDelay;
 		Nullable<int> PlayerGuardAreaTargetingDelay;
 		Valueable<bool> KeepWarping;
+		Nullable<int> KeepWarping_Distance;
 		Valueable<bool> FiringByPassMovingCheck;
 		Valueable<bool> SkipCrushSlowdown;
 
@@ -513,6 +514,7 @@ public:
 			, AIGuardAreaTargetingDelay {}
 			, PlayerGuardAreaTargetingDelay {}
 			, KeepWarping { false }
+			, KeepWarping_Distance {}
 			, FiringByPassMovingCheck { false }
 			, SkipCrushSlowdown { false }
 
