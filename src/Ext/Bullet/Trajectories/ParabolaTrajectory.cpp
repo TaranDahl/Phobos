@@ -879,77 +879,53 @@ BulletVelocity ParabolaTrajectory::GetGroundNormalVector(BulletClass* pBullet, C
 
 	if (bulletHeight < cellHeight && (cellHeight - lastCellHeight) > 384)
 	{
+		CellStruct cell = pCell->MapCoords;
+		const short reverseSgnX = pBullet->Velocity.X >= 0.0 ? -1 : 1;
+		const short reverseSgnY = pBullet->Velocity.Y >= 0.0 ? -1 : 1;
 		int index = 0;
 
-		const CellStruct reverseSgn { static_cast<short>(pBullet->Velocity.X >= 0.0 ? -1 : 1), static_cast<short>(pBullet->Velocity.Y >= 0.0 ? -1 : 1) };
-		CellStruct curCell = pCell->MapCoords + reverseSgn;
-		curCell.X += reverseSgn.X;
-
-		if (this->CheckBulletHitCliff(curCell, bulletHeight, lastCellHeight))
+		if (this->CheckBulletHitCliff(cell.X + reverseSgnX, cell.Y, bulletHeight, lastCellHeight))
 		{
-			curCell.X -= reverseSgn.X;
-			curCell.Y += reverseSgn.Y;
-
-			if (!this->CheckBulletHitCliff(curCell, bulletHeight, lastCellHeight))
+			if (!this->CheckBulletHitCliff(cell.X, cell.Y + reverseSgnY, bulletHeight, lastCellHeight))
 			{
-				curCell.X -= reverseSgn.X;
-
-				if (!this->CheckBulletHitCliff(curCell, bulletHeight, lastCellHeight))
-					return BulletVelocity{ 0.0, static_cast<double>(reverseSgn.Y), 0.0 };
+				if (!this->CheckBulletHitCliff(cell.X - reverseSgnX, cell.Y, bulletHeight, lastCellHeight))
+					return BulletVelocity{ 0.0, static_cast<double>(reverseSgnY), 0.0 };
 
 				index = 2;
 			}
 		}
 		else
 		{
-			curCell.Y -= reverseSgn.Y;
-
-			if (this->CheckBulletHitCliff(curCell, bulletHeight, lastCellHeight))
+			if (this->CheckBulletHitCliff(cell.X + reverseSgnX, cell.Y - reverseSgnY, bulletHeight, lastCellHeight))
 			{
-				curCell.Y += reverseSgn.Y << 1;
-				curCell.X -= reverseSgn.X;
-
-				if (!this->CheckBulletHitCliff(curCell, bulletHeight, lastCellHeight))
-				{
-					curCell.X -= reverseSgn.X;
-
-					if (!this->CheckBulletHitCliff(curCell, bulletHeight, lastCellHeight))
-						index = 2;
-				}
-				else
-				{
+				if (this->CheckBulletHitCliff(cell.X, cell.Y + reverseSgnY, bulletHeight, lastCellHeight))
 					index = 1;
-				}
+				else if (!this->CheckBulletHitCliff(cell.X - reverseSgnX, cell.Y + reverseSgnY, bulletHeight, lastCellHeight))
+					index = 2;
 			}
 			else
 			{
-				curCell.Y += reverseSgn.Y << 1;
-				curCell.X -= reverseSgn.X;
-
-				if (this->CheckBulletHitCliff(curCell, bulletHeight, lastCellHeight))
-					return BulletVelocity{ static_cast<double>(reverseSgn.X), 0.0, 0.0 };
-
-				curCell.X -= reverseSgn.X;
-
-				if (this->CheckBulletHitCliff(curCell, bulletHeight, lastCellHeight))
+				if (this->CheckBulletHitCliff(cell.X, cell.Y + reverseSgnY, bulletHeight, lastCellHeight))
+					return BulletVelocity{ static_cast<double>(reverseSgnX), 0.0, 0.0 };
+				else if (this->CheckBulletHitCliff(cell.X - reverseSgnX, cell.Y + reverseSgnY, bulletHeight, lastCellHeight))
 					index = 1;
 			}
 		}
 
 		if (index == 1)
-			return BulletVelocity{ 0.8944271909999158785636694674925 * reverseSgn.X, 0.4472135954999579392818347337463 * reverseSgn.Y, 0.0 };
+			return BulletVelocity{ 0.8944271909999158785636694674925 * reverseSgnX, 0.4472135954999579392818347337463 * reverseSgnY, 0.0 };
 		else if (index == 2)
-			return BulletVelocity{ 0.4472135954999579392818347337463 * reverseSgn.X, 0.8944271909999158785636694674925 * reverseSgn.Y, 0.0 };
+			return BulletVelocity{ 0.4472135954999579392818347337463 * reverseSgnX, 0.8944271909999158785636694674925 * reverseSgnY, 0.0 };
 
-		return BulletVelocity{ 0.7071067811865475244008443621049 * reverseSgn.X, 0.7071067811865475244008443621049 * reverseSgn.Y, 0.0 };
+		return BulletVelocity{ 0.7071067811865475244008443621049 * reverseSgnX, 0.7071067811865475244008443621049 * reverseSgnY, 0.0 };
 	}
 
 	return BulletVelocity{ 0.0, 0.0, 1.0 };
 }
 
-bool ParabolaTrajectory::CheckBulletHitCliff(CellStruct cell, int bulletHeight, int lastCellHeight)
+bool ParabolaTrajectory::CheckBulletHitCliff(short X, short Y, int bulletHeight, int lastCellHeight)
 {
-	if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(cell))
+	if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(CellStruct{X, Y}))
 	{
 		const int cellHeight = pCell->GetCoords().Z;
 
