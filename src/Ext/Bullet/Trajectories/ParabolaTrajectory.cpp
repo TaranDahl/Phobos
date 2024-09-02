@@ -822,51 +822,41 @@ BulletVelocity ParabolaTrajectory::GetGroundNormalVector(BulletClass* pBullet, C
 {
 	if (const unsigned char index = pCell->SlopeIndex)
 	{
-		double horizontal = 0.0;
-		double vertical = 0.0;
+		Vector2D<double> factor { 0.0, 0.0 };
 
 		if (index <= 4)
-		{
-			horizontal = 0.3763770469559380854890894443664;
-			vertical = 0.9264665771223091335116047861327;
-		}
+			factor = Vector2D<double>{ 0.3763770469559380854890894443664, 0.9264665771223091335116047861327 };
 		else if (index <= 12)
-		{
-			horizontal = 0.3522530794922131411764879370407;
-			vertical = 0.8670845033654477321267395373309;
-		}
+			factor = Vector2D<double>{ 0.3522530794922131411764879370407, 0.8670845033654477321267395373309 };
 		else
-		{
-			horizontal = 0.5333964609104418418483761938761;
-			vertical = 0.6564879518897745745826168540013;
-		}
+			factor = Vector2D<double>{ 0.5333964609104418418483761938761, 0.6564879518897745745826168540013 };
 
 		switch (index)
 		{
 		case 1:
-			return BulletVelocity{ -horizontal, 0.0, vertical };
+			return BulletVelocity{ -factor.X, 0.0, factor.Y };
 		case 2:
-			return BulletVelocity{ 0.0, -horizontal, vertical };
+			return BulletVelocity{ 0.0, -factor.X, factor.Y };
 		case 3:
-			return BulletVelocity{ horizontal, 0.0, vertical };
+			return BulletVelocity{ factor.X, 0.0, factor.Y };
 		case 4:
-			return BulletVelocity{ 0.0, horizontal, vertical };
+			return BulletVelocity{ 0.0, factor.X, factor.Y };
 		case 5:
 		case 9:
 		case 13:
-			return BulletVelocity{ -horizontal, -horizontal, vertical };
+			return BulletVelocity{ -factor.X, -factor.X, factor.Y };
 		case 6:
 		case 10:
 		case 14:
-			return BulletVelocity{ horizontal, -horizontal, vertical };
+			return BulletVelocity{ factor.X, -factor.X, factor.Y };
 		case 7:
 		case 11:
 		case 15:
-			return BulletVelocity{ horizontal, horizontal, vertical };
+			return BulletVelocity{ factor.X, factor.X, factor.Y };
 		case 8:
 		case 12:
 		case 16:
-			return BulletVelocity{ -horizontal, horizontal, vertical };
+			return BulletVelocity{ -factor.X, factor.X, factor.Y };
 		default:
 			return BulletVelocity{ 0.0, 0.0, 1.0 };
 		}
@@ -925,7 +915,7 @@ BulletVelocity ParabolaTrajectory::GetGroundNormalVector(BulletClass* pBullet, C
 
 bool ParabolaTrajectory::CheckBulletHitCliff(short X, short Y, int bulletHeight, int lastCellHeight)
 {
-	if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(CellStruct{X, Y}))
+	if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(CellStruct{ X, Y }))
 	{
 		const int cellHeight = pCell->GetCoords().Z;
 
