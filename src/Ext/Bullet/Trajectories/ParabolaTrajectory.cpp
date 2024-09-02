@@ -862,7 +862,10 @@ BulletVelocity ParabolaTrajectory::GetGroundNormalVector(BulletClass* pBullet, C
 		}
 	}
 
-	const CoordStruct velocityCoords { static_cast<int>(pBullet->Velocity.X), static_cast<int>(pBullet->Velocity.Y), static_cast<int>(pBullet->Velocity.Z) };
+	const double horizontalVelocity = Vector2D<double>{ pBullet->Velocity.X, pBullet->Velocity.Y }.Magnitude();
+	const BulletVelocity velocity = horizontalVelocity > 362.1 ? pBullet->Velocity * (362.1 / horizontalVelocity) : pBullet->Velocity;
+	const CoordStruct velocityCoords { static_cast<int>(velocity.X), static_cast<int>(velocity.Y), static_cast<int>(velocity.Z) };
+
 	const int cellHeight = pCell->GetCoords().Z;
 	const int bulletHeight = pBullet->Location.Z;
 	const int lastCellHeight = MapClass::Instance->GetCellFloorHeight(pBullet->Location - velocityCoords);
