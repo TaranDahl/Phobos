@@ -140,3 +140,17 @@ DEFINE_HOOK(0x709A43, TechnoClass_EnterIdleMode_TemporalLetGo, 0x7)
 	else
 		return SkipLetGo;
 }
+
+DEFINE_HOOK(0x71A7A8, TemporalClass_Update_CheckRange, 0x6)
+{
+	enum { DontCheckRange = 0x71A84E, CheckRange = 0x71A7B4 };
+
+	GET(TechnoClass*, pTechno, EAX);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType());
+
+	if (pTechno->InOpenToppedTransport || (pTypeExt && pTypeExt->KeepWarping))
+		return CheckRange;
+
+	return DontCheckRange;
+}

@@ -230,6 +230,7 @@ public:
 		Nullable<AnimTypeClass*> Wake_Sinking;
 
 		Valueable<bool> KeepWarping;
+		Nullable<int> KeepWarping_Distance;
 
 		struct LaserTrailDataEntry
 		{
@@ -457,6 +458,7 @@ public:
 			, Wake_Sinking { }
 
 			, KeepWarping { false }
+			, KeepWarping_Distance {}
 		{ }
 
 		virtual ~ExtData() = default;
