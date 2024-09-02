@@ -141,6 +141,20 @@ DEFINE_HOOK(0x709A43, TechnoClass_EnterIdleMode_TemporalLetGo, 0x7)
 		return SkipLetGo;
 }
 
+// This is a fix to KeepWarping.
+// But I think it has no difference with vanilla behavior, so no check for KeepWarping.
+DEFINE_HOOK(0x4C7643, EventClass_RespondToEvent_StopTemporal, 0x6)
+{
+	GET(TechnoClass*, pTechno, ESI);
+
+	auto const pTemporal = pTechno->TemporalImUsing;
+
+	if (pTemporal && pTemporal->Target)
+		pTemporal->LetGo();
+
+	return 0;
+}
+
 DEFINE_HOOK(0x71A7A8, TemporalClass_Update_CheckRange, 0x6)
 {
 	enum { DontCheckRange = 0x71A84E, CheckRange = 0x71A7B4 };
