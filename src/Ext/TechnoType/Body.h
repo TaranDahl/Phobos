@@ -233,6 +233,12 @@ public:
 		Nullable<AnimTypeClass*> Wake_Grapple;
 		Nullable<AnimTypeClass*> Wake_Sinking;
 
+		Nullable<bool> GuardModePursuit;
+		Nullable<Leptons> GuardModeStray;
+		Nullable<double> GuardModeGuardRangeMultiplier;
+		Nullable<Leptons> GuardModeGuardRangeAddend;
+		Nullable<Leptons> GuardStationaryStray;
+
 		struct LaserTrailDataEntry
 		{
 			ValueableIdx<LaserTrailTypeClass> idxType;
@@ -461,6 +467,12 @@ public:
 			, Wake { }
 			, Wake_Grapple { }
 			, Wake_Sinking { }
+
+			, GuardModePursuit {}
+			, GuardModeStray {}
+			, GuardModeGuardRangeMultiplier {}
+			, GuardModeGuardRangeAddend {}
+			, GuardStationaryStray {}
 		{ }
 
 		virtual ~ExtData() = default;

@@ -319,6 +319,12 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Wake_Grapple.Read(exINI, pSection, "Wake.Grapple");
 	this->Wake_Sinking.Read(exINI, pSection, "Wake.Sinking");
 
+	this->GuardModePursuit.Read(exINI, pSection, "GuardModePursuit");
+	this->GuardModeStray.Read(exINI, pSection, "GuardModeStray");
+	this->GuardModeGuardRangeMultiplier.Read(exINI, pSection, "GuardModeGuardRangeMultiplier");
+	this->GuardModeGuardRangeAddend.Read(exINI, pSection, "GuardModeGuardRangeAddend");
+	this->GuardStationaryStray.Read(exINI, pSection, "GuardStationaryStray");
+
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
 
@@ -688,6 +694,12 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)
 		.Process(this->Wake_Sinking)
+
+		.Process(this->GuardModePursuit)
+		.Process(this->GuardModeStray)
+		.Process(this->GuardModeGuardRangeMultiplier)
+		.Process(this->GuardModeGuardRangeAddend)
+		.Process(this->GuardStationaryStray)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

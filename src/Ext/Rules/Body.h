@@ -151,6 +151,12 @@ public:
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
 		Valueable<bool> UseFixedVoxelLighting;
 
+		Valueable<bool> GuardModePursuit;
+		Valueable<double> GuardModeGuardRangeMultiplier;
+		Valueable<Leptons> GuardModeGuardRangeAddend;
+		Valueable<Leptons> GuardModeGuardRangeMax;
+		Valueable<Leptons> GuardStationaryStray;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -259,6 +265,11 @@ public:
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 			, UseFixedVoxelLighting { false }
+			, GuardModePursuit { true }
+			, GuardModeGuardRangeMultiplier { 2.0 }
+			, GuardModeGuardRangeAddend { Leptons(0) }
+			, GuardModeGuardRangeMax { Leptons(4096) }
+			, GuardStationaryStray { Leptons(-256) }
 		{ }
 
 		virtual ~ExtData() = default;

@@ -192,6 +192,12 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->UseFixedVoxelLighting.Read(exINI, GameStrings::AudioVisual, "UseFixedVoxelLighting");
 
+	this->GuardModePursuit.Read(exINI, GameStrings::General, "GuardModePursuit");
+	this->GuardModeGuardRangeMultiplier.Read(exINI, GameStrings::General, "GuardModeGuardRangeMultiplier");
+	this->GuardModeGuardRangeAddend.Read(exINI, GameStrings::General, "GuardModeGuardRangeAddend");
+	this->GuardModeGuardRangeMax.Read(exINI, GameStrings::General, "GuardModeGuardRangeMax");
+	this->GuardStationaryStray.Read(exINI, GameStrings::General, "GuardStationaryStray");
+
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
 	for (int i = 0; i < itemsCount; ++i)
@@ -363,6 +369,11 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->VoxelLightSource)
 		// .Process(this->VoxelShadowLightSource)
 		.Process(this->UseFixedVoxelLighting)
+		.Process(this->GuardModePursuit)
+		.Process(this->GuardModeGuardRangeMultiplier)
+		.Process(this->GuardModeGuardRangeAddend)
+		.Process(this->GuardModeGuardRangeMax)
+		.Process(this->GuardStationaryStray)
 		;
 }
 
