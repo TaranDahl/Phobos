@@ -417,7 +417,7 @@ New:
 - Enhance bombard trajectory with vertical and meteor trajectory (by NaotoYuuki & Ollerus)
 - Allow different technos to share build limit in a group (by ststl & Ollerus)
 - Technos will maintain a suitable distance after firing (by CrimRecya)
-- Several new Infotypes and a new single frame display method (by CrimRecya)
+- Several new Infotypes, no display in specific status and a new single frame display method (by CrimRecya)
 - Projectile subject to ground check before firing (by CrimRecya)
 - Technos recount current burst index when change the firing weapon (by CrimRecya)
 - Enhanced Straight trajectory (by CrimRecya)

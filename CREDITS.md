@@ -358,7 +358,7 @@ This page lists all the individual contributions to the project by their author.
   - Vertical & meteor trajectory projectile prototypes
 - **CrimRecya**
   - Technos will maintain a suitable distance after firing
-  - Several new Infotypes and a new single frame display method
+  - Several new Infotypes, no display in specific status and a new single frame display method
   - Projectile subject to ground check before firing
   - Technos recount current burst index when change the firing weapon
   - Enhanced Straight trajectory

@@ -684,6 +684,9 @@ void TechnoExt::ProcessDigitalDisplays(TechnoClass* pThis)
 		if (!HouseClass::IsCurrentPlayerObserver() && !EnumFunctions::CanTargetHouse(pDisplayType->VisibleToHouses, pThis->Owner, HouseClass::CurrentPlayer))
 			continue;
 
+		if (!pDisplayType->VisibleInSpecialState && (pThis->TemporalTargetingMe || pThis->IsIronCurtained()))
+			continue;
+
 		int value = -1;
 		int maxValue = 0;
 
@@ -941,6 +944,28 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 
 		value = pSuper->RechargeTimer.GetTimeLeft();
 		maxValue = pSuper->RechargeTimer.TimeLeft;
+		break;
+	}
+	case DisplayInfoType::IronCurtain:
+	{
+		if (!pThis->IsIronCurtained())
+			return;
+
+		const CDTimerClass* const timer = &pThis->IronCurtainTimer;
+
+		value = (timer->GetTimeLeft() + 14) / 15;
+		maxValue = timer->TimeLeft / 15;
+		break;
+	}
+	case DisplayInfoType::TemporalLife:
+	{
+		const TemporalClass* const pTemporal = pThis->TemporalTargetingMe;
+
+		if (!pTemporal)
+			return;
+
+		value = (pTemporal->WarpRemaining + 14) / 15;
+		maxValue = (pType->Strength * 10) / 15;
 		break;
 	}
 	default:
