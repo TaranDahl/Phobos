@@ -485,11 +485,11 @@ void TechnoExt::DrawVanillaStyleFootBar(DrawFrameStruct* pDraw)
 	{
 		pLocation->X += 17;
 		DSurface::Temp->DrawSHP(FileSystem::PALETTE_PAL, FileSystem::PIPBRD_SHP, pDraw->BrdFrame, pLocation, pBounds, BlitterFlags(0xE00), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
-		pLocation->X -= 14;
+		pLocation->X -= 16;
 	}
 	else
 	{
-		pLocation->X += 3;
+		pLocation->X += 1;
 	}
 
 	if (!pipSHP)
