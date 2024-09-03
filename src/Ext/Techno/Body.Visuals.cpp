@@ -728,7 +728,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 	}
 	case DisplayInfoType::Shield:
 	{
-		if (pExt->Shield == nullptr || pExt->Shield->IsBrokenAndNonRespawning())
+		if (!pExt->Shield || pExt->Shield->IsBrokenAndNonRespawning())
 			return;
 
 		value = pExt->Shield->GetHP();
@@ -746,7 +746,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 	}
 	case DisplayInfoType::MindControl:
 	{
-		if (pThis->CaptureManager == nullptr)
+		if (!pThis->CaptureManager)
 			return;
 
 		value = pThis->CaptureManager->ControlNodes.Count;
@@ -755,7 +755,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 	}
 	case DisplayInfoType::Spawns:
 	{
-		if (pThis->SpawnManager == nullptr || pType->Spawns == nullptr || pType->SpawnsNumber <= 0)
+		if (!pThis->SpawnManager || !pType->Spawns || pType->SpawnsNumber <= 0)
 			return;
 
 		value = pThis->SpawnManager->CountAliveSpawns();
