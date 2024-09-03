@@ -942,8 +942,8 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 		if (!pSuper)
 			return;
 
-		value = pSuper->RechargeTimer.GetTimeLeft();
-		maxValue = pSuper->RechargeTimer.TimeLeft;
+		value = (pSuper->RechargeTimer.GetTimeLeft() + 14) / 15;
+		maxValue = pSuper->RechargeTimer.TimeLeft / 15;
 		break;
 	}
 	case DisplayInfoType::IronCurtain:
