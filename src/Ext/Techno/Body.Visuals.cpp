@@ -456,7 +456,7 @@ void TechnoExt::DrawTemporalProgress(TechnoClass* pThis, RectangleStruct* pBound
 	{
 		const int maxLength = isInfantry ? 8 : 17;
 		const TechnoTypeClass* const pType = pThis->GetTechnoType();
-		Point2D position = basePosition + Point2D{ (isInfantry ? 1 : 0), (pType->PixelSelectionBracketDelta + 2) } + pRulesExt->TemporalLifeDisplay_Others_Offset.Get();
+		Point2D position = basePosition + Point2D{ 0, (pType->PixelSelectionBracketDelta + 2) } + pRulesExt->TemporalLifeDisplay_Others_Offset.Get();
 
 		DrawFrameStruct pDraw
 		{
