@@ -244,6 +244,11 @@ void ParabolaTrajectory::OnAIPreDetonate(BulletClass* pBullet)
 		pExt->SnappedToTarget = true;
 		pBullet->SetLocation(coords);
 	}
+	else if (const int cellHeight = MapClass::Instance->GetCellFloorHeight(pBullet->Location))
+	{
+		if (pBullet->Location.Z < cellHeight)
+			pBullet->SetLocation(CoordStruct{ pBullet->Location.X, pBullet->Location.Y, cellHeight });
+	}
 }
 
 void ParabolaTrajectory::OnAIVelocity(BulletClass* pBullet, BulletVelocity* pSpeed, BulletVelocity* pPosition)
@@ -956,8 +961,8 @@ bool ParabolaTrajectory::BulletDetonateLastCheck(BulletClass* pBullet, double gr
 			{
 				this->LastVelocity = pBullet->Velocity;
 				const double heightMult = abs((pBullet->Location.Z - cellHeight) / pBullet->Velocity.Z);
-				const double speedMult = curCoord.DistanceFrom(pBullet->Location) / pBullet->Velocity.Magnitude();
-				this->BulletDetonateEffectuate(pBullet, heightMult < speedMult ? heightMult : speedMult);
+				const double speedMult = i ? (static_cast<double>(i) - 0.5) / largePace : 0;
+				this->BulletDetonateEffectuate(pBullet, (heightMult < speedMult ? heightMult : speedMult));
 				break;
 			}
 

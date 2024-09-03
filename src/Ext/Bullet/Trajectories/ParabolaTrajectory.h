@@ -23,7 +23,7 @@ public:
 		, RotateCoord { 0 }
 		, MirrorCoord { true }
 		, UseDisperseBurst { false }
-		, AxisOfRotation { { 0, 0, 0 } }
+		, AxisOfRotation { { 0, 0, 1 } }
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
