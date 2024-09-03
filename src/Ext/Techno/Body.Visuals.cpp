@@ -943,7 +943,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 			return;
 
 		value = (pSuper->RechargeTimer.GetTimeLeft() + 14) / 15;
-		maxValue = pSuper->RechargeTimer.TimeLeft / 15;
+		maxValue = (pSuper->RechargeTimer.TimeLeft + 14) / 15;
 		break;
 	}
 	case DisplayInfoType::IronCurtain:
@@ -954,7 +954,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 		const CDTimerClass* const timer = &pThis->IronCurtainTimer;
 
 		value = (timer->GetTimeLeft() + 14) / 15;
-		maxValue = timer->TimeLeft / 15;
+		maxValue = (timer->TimeLeft + 14) / 15;
 		break;
 	}
 	case DisplayInfoType::TemporalLife:
@@ -965,7 +965,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 			return;
 
 		value = (pTemporal->WarpRemaining + 14) / 15;
-		maxValue = (pType->Strength * 10) / 15;
+		maxValue = (pType->Strength * 10 + 14) / 15;
 		break;
 	}
 	default:
