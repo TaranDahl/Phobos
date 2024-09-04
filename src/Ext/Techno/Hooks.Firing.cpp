@@ -891,11 +891,47 @@ DEFINE_HOOK(0x707E84, TechnoClass_GetGuardRange_Engineer, 0x6)
 
 DEFINE_HOOK(0x6F8EF1, TechnoClass_SelectAutoTarget_Engineer, 0x6)
 {
-	enum { ret = 0x06F8EF7 };
+	enum { ret = 0x6F8EF7 };
 
 	GET(InfantryTypeClass* const, pType, EAX);
 
 	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
 	R->CL(pType->Engineer && !(pTypeExt && pTypeExt->Engineer_CanAutoFire));
+	return ret;
+}
+
+DEFINE_HOOK(0x709249, TechnoClass_CanPassiveAcquireNow_Engineer1, 0xA)
+{
+	enum { ret = 0x709253 };
+
+	GET(TechnoClass* const, pThis, ESI);
+
+	auto const pType = pThis->GetTechnoType();
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+	R->AL(pThis->IsEngineer() && !(pTypeExt&& pTypeExt->Engineer_CanAutoFire));
+	return ret;
+}
+
+DEFINE_HOOK(0x6F8AEC, TechnoClass_TryAutoTargetObject_Engineer1, 0x6)
+{
+	enum { ret = 0x6F8AF2 };
+
+	GET(TechnoClass* const, pThis, ESI);
+
+	auto const pType = pThis->GetTechnoType();
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+	R->AL(pThis->IsEngineer() && !(pTypeExt && pTypeExt->Engineer_CanAutoFire));
+	return ret;
+}
+
+DEFINE_HOOK(0x6F8BB2, TechnoClass_TryAutoTargetObject_Engineer2, 0x6)
+{
+	enum { ret = 0x6F8BB8 };
+
+	GET(TechnoClass* const, pThis, ESI);
+
+	auto const pType = pThis->GetTechnoType();
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+	R->AL(pThis->IsEngineer() && !(pTypeExt && pTypeExt->Engineer_CanAutoFire));
 	return ret;
 }
