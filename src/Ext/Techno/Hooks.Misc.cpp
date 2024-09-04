@@ -168,33 +168,28 @@ DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 	auto const deltaCrd = spawnedCrd - spawnerCrd;
 	const int recycleRange = pSpawnerExt->Spawner_RecycleRange;
 
-	do
+	if (recycleRange < 0)
 	{
-		if (recycleRange < 0)
+		if (pSpawner->WhatAmI() == AbstractType::Building)
 		{
-			if (pSpawner->WhatAmI() == AbstractType::Building)
-			{
-				if (deltaCrd.X > 182 || deltaCrd.Y > 182 || deltaCrd.Z >= 20)
-					break;
-			}
-			else if (spawnedMapCrd != *pSpawnerMapCrd || deltaCrd.Z >= 20)
-			{
-				break;
-			}
+			if (deltaCrd.X > 182 || deltaCrd.Y > 182 || deltaCrd.Z >= 20)
+				return 0;
 		}
-		else if (deltaCrd.Magnitude() > recycleRange)
+		else if (spawnedMapCrd != *pSpawnerMapCrd || deltaCrd.Z >= 20)
 		{
-			break;
+			return 0;
 		}
-
-		if (pSpawnerExt->Spawner_RecycleAnim)
-			GameCreate<AnimClass>(pSpawnerExt->Spawner_RecycleAnim, spawnedCrd);
-
-		pSpawned->SetLocation(spawnerCrd);
-		R->EAX(pSpawnerMapCrd);
 	}
-	while (false);
+	else if (deltaCrd.Magnitude() > recycleRange)
+	{
+		return 0;
+	}
 
+	if (pSpawnerExt->Spawner_RecycleAnim)
+		GameCreate<AnimClass>(pSpawnerExt->Spawner_RecycleAnim, spawnedCrd);
+
+	pSpawned->SetLocation(spawnerCrd);
+	R->EAX(pSpawnerMapCrd);
 	return 0;
 }
 
