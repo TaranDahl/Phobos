@@ -961,14 +961,14 @@ bool ParabolaTrajectory::BulletDetonateLastCheck(BulletClass* pBullet, double gr
 			{
 				this->LastVelocity = pBullet->Velocity;
 				const double heightMult = abs((pBullet->Location.Z - cellHeight) / pBullet->Velocity.Z);
-				const double speedMult = i ? (static_cast<double>(i) - 0.5) / largePace : 0;
+				const double speedMult = static_cast<double>(i) / largePace;
 				this->BulletDetonateEffectuate(pBullet, (heightMult < speedMult ? heightMult : speedMult));
 				break;
 			}
 
 			if (pBullet->Type->SubjectToWalls && pCurCell->OverlayTypeIndex != -1 && OverlayTypeClass::Array->GetItem(pCurCell->OverlayTypeIndex)->Wall)
 			{
-				pBullet->Velocity *= curCoord.DistanceFrom(pBullet->Location) / pBullet->Velocity.Magnitude();
+				pBullet->Velocity *= static_cast<double>(i) / largePace;
 				this->ShouldDetonate = true;
 				return false;
 			}
