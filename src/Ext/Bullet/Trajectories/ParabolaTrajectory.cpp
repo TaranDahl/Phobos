@@ -384,14 +384,14 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 		// Directly assume that the distance between the position where the projectile hits the target and the starting point is 4 grids
 		switch (this->OpenFireMode)
 		{
-		case 1:
-		case 4:
+		case ParabolaFireMode::Height:
+		case ParabolaFireMode::HeightAndAngle:
 		{
 			// Assuming equal height
 			leadTime = static_cast<int>(sqrt((this->ThrowHeight << 1) / gravity) * 1.25);
 			break;
 		}
-		case 2:
+		case ParabolaFireMode::Angle:
 		{
 			double radian = this->LaunchAngle * Math::Pi / 180.0;
 			radian = (radian >= Math::HalfPi || radian <= -Math::HalfPi) ? (Math::HalfPi / 3) : radian;
@@ -437,7 +437,7 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 
 	switch (this->OpenFireMode)
 	{
-	case 1: // Fixed max height and aim at the target
+	case ParabolaFireMode::Height: // Fixed max height and aim at the target
 	{
 		// Step 1: Using Newton Iteration Method to determine the time of encounter between the projectile and the target
 		const double meetTime = this->SearchFixedHeightMeetTime(pSourceCoords, &targetCoords, &offsetCoords, gravity);
@@ -465,7 +465,7 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 		this->CheckIfNeedExtraCheck(pBullet);
 		return;
 	}
-	case 2: // Fixed fire angle and aim at the target
+	case ParabolaFireMode::Angle: // Fixed fire angle and aim at the target
 	{
 		// Step 1: Read the appropriate fire angle
 		double radian = this->LaunchAngle * Math::Pi / 180.0;
@@ -497,7 +497,7 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 		this->CheckIfNeedExtraCheck(pBullet);
 		return;
 	}
-	case 3: // Fixed horizontal speed and fixed max height
+	case ParabolaFireMode::SpeedAndHeight: // Fixed horizontal speed and fixed max height
 	{
 		// Step 1: Read the appropriate horizontal speed
 		const double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
@@ -532,7 +532,7 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 		this->CheckIfNeedExtraCheck(pBullet);
 		return;
 	}
-	case 4: // Fixed max height and fixed fire angle
+	case ParabolaFireMode::HeightAndAngle: // Fixed max height and fixed fire angle
 	{
 		// Step 1: Using Newton Iteration Method to determine the time of encounter between the projectile and the target
 		const double meetTime = this->SearchFixedHeightMeetTime(pSourceCoords, &targetCoords, &offsetCoords, gravity);
@@ -568,7 +568,7 @@ void ParabolaTrajectory::CalculateBulletVelocityLeadTime(BulletClass* pBullet, C
 		this->CheckIfNeedExtraCheck(pBullet);
 		return;
 	}
-	case 5: // Fixed horizontal speed and fixed fire angle
+	case ParabolaFireMode::SpeedAndAngle: // Fixed horizontal speed and fixed fire angle
 	{
 		// Step 1: Read the appropriate horizontal speed
 		const double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
@@ -660,7 +660,7 @@ void ParabolaTrajectory::CalculateBulletVelocityRightNow(BulletClass* pBullet, C
 
 	switch (this->OpenFireMode)
 	{
-	case 1: // Fixed max height and aim at the target
+	case ParabolaFireMode::Height: // Fixed max height and aim at the target
 	{
 		// Step 1: Determine the maximum height that the projectile should reach
 		const int sourceHeight = pSourceCoords->Z, targetHeight = pBullet->TargetCoords.Z;
@@ -677,7 +677,7 @@ void ParabolaTrajectory::CalculateBulletVelocityRightNow(BulletClass* pBullet, C
 		pBullet->Velocity.Y = distanceCoords.Y / meetTime;
 		break;
 	}
-	case 2: // Fixed fire angle and aim at the target
+	case ParabolaFireMode::Angle: // Fixed fire angle and aim at the target
 	{
 		// Step 1: Read the appropriate fire angle
 		double radian = this->LaunchAngle * Math::Pi / 180.0;
@@ -696,7 +696,7 @@ void ParabolaTrajectory::CalculateBulletVelocityRightNow(BulletClass* pBullet, C
 		pBullet->Velocity.Y = distanceCoords.Y * mult;
 		break;
 	}
-	case 3: // Fixed horizontal speed and fixed max height
+	case ParabolaFireMode::SpeedAndHeight: // Fixed horizontal speed and fixed max height
 	{
 		// Step 1: Determine the maximum height that the projectile should reach
 		const int sourceHeight = pSourceCoords->Z, targetHeight = pBullet->TargetCoords.Z;
@@ -716,7 +716,7 @@ void ParabolaTrajectory::CalculateBulletVelocityRightNow(BulletClass* pBullet, C
 		pBullet->Velocity.Y = distanceCoords.Y * mult;
 		break;
 	}
-	case 4: // Fixed max height and fixed fire angle
+	case ParabolaFireMode::HeightAndAngle: // Fixed max height and fixed fire angle
 	{
 		// Step 1: Determine the maximum height that the projectile should reach
 		const int sourceHeight = pSourceCoords->Z, targetHeight = pBullet->TargetCoords.Z;
@@ -737,7 +737,7 @@ void ParabolaTrajectory::CalculateBulletVelocityRightNow(BulletClass* pBullet, C
 		pBullet->Velocity.Y = distanceCoords.Y * mult;
 		break;
 	}
-	case 5: // Fixed horizontal speed and fixed fire angle
+	case ParabolaFireMode::SpeedAndAngle: // Fixed horizontal speed and fixed fire angle
 	{
 		// Step 1: Read the appropriate horizontal speed
 		const double horizontalSpeed = this->GetTrajectorySpeed(pBullet);
@@ -784,9 +784,9 @@ void ParabolaTrajectory::CheckIfNeedExtraCheck(BulletClass* pBullet)
 {
 	switch (this->OpenFireMode)
 	{
-	case 1: // Fixed max height and aim at the target
-	case 2: // Fixed fire angle and aim at the target
-	case 4: // Fixed max height and fixed fire angle
+	case ParabolaFireMode::Height: // Fixed max height and aim at the target
+	case ParabolaFireMode::Angle: // Fixed fire angle and aim at the target
+	case ParabolaFireMode::HeightAndAngle: // Fixed max height and fixed fire angle
 	{
 		this->NeedExtraCheck = Vector2D<double>{ pBullet->Velocity.X, pBullet->Velocity.Y }.MagnitudeSquared() > 65536.0;
 		break;
