@@ -258,6 +258,12 @@ public:
 		std::vector<std::vector<CoordStruct>> DeployedWeaponBurstFLHs;
 		std::vector<std::vector<CoordStruct>> EliteDeployedWeaponBurstFLHs;
 
+		Valueable<int> DigStartROT;
+		Valueable<int> DigInSpeed;
+		Valueable<int> DiggingSpeed;
+		Valueable<int> DigOutSpeed;
+		Valueable<int> DigEndROT;
+
 		ExtData(TechnoTypeClass* OwnerObject) : Extension<TechnoTypeClass>(OwnerObject)
 			, HealthBar_Hide { false }
 			, UIDescription {}
@@ -461,6 +467,12 @@ public:
 			, Wake { }
 			, Wake_Grapple { }
 			, Wake_Sinking { }
+				
+			, DigStartROT { -1 }
+			, DigInSpeed { -1 }
+			, DiggingSpeed { 19 }
+			, DigOutSpeed { -1 }
+			, DigEndROT { -1 }
 		{ }
 
 		virtual ~ExtData() = default;
