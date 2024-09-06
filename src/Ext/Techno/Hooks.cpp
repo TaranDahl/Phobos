@@ -599,7 +599,7 @@ DEFINE_HOOK(0x6F9FA9, TechnoClass_AI_PromoteAnim, 0x6)
 // TunnelLocomotionClass_IsToHaveShadow, skip shadow on all but idle.
 // TODO: Investigate if it is possible to fix the shadows not tilting on the burrowing etc. states.
 DEFINE_JUMP(LJMP, 0x72A070, 0x72A07F);
-/*
+
 DEFINE_HOOK(0x4CDF84, FlyLocomotionClass_UpdateLoaction_CrashSpeed, 0x5)
 {
 	GET(int, deltaZ, ECX);
@@ -649,4 +649,4 @@ DEFINE_HOOK(0x4CDE96, FlyLocomotionClass_UpdateLoaction_ClimbSpeed, 0x6)
 
 	return 0;
 }
-*/
+
