@@ -600,7 +600,7 @@ DEFINE_HOOK(0x6F9FA9, TechnoClass_AI_PromoteAnim, 0x6)
 // TODO: Investigate if it is possible to fix the shadows not tilting on the burrowing etc. states.
 DEFINE_JUMP(LJMP, 0x72A070, 0x72A07F);
 
-DEFINE_HOOK(0x4CDF84, FlyLocomotionClass_UpdateLoaction_CrashSpeed, 0x5)
+DEFINE_HOOK(0x4CDF84, FlyLocomotionClass_UpdateLoaction_FlightCrash1, 0x5)
 {
 	GET(int, deltaZ, ECX);
 	GET(FootClass* const, pLinkedTo, EAX);
@@ -610,7 +610,7 @@ DEFINE_HOOK(0x4CDF84, FlyLocomotionClass_UpdateLoaction_CrashSpeed, 0x5)
 
 	if (pTypeExt)
 	{
-		int crashSpeed = pTypeExt->FlightCrashSpeed;
+		int crashSpeed = pTypeExt->FlightCrash;
 
 		if (crashSpeed >= 0)
 			newDeltaZ = crashSpeed;
@@ -620,8 +620,26 @@ DEFINE_HOOK(0x4CDF84, FlyLocomotionClass_UpdateLoaction_CrashSpeed, 0x5)
 
 	return 0;
 }
+/*
+// Need FlyLocomotionClass.h to check pThis->IsLanding and so on.
+DEFINE_HOOK(0x4CDFB1, FlyLocomotionClass_UpdateLoaction_FlightCrash2, 0x5)
+{
+	GET(int, bridgeHeight, EBX);
+	GET(int, flightLevelNow, EDI);
+	GET(FootClass* const, pLinkedTo, ECX);
 
-DEFINE_HOOK(0x4CDE96, FlyLocomotionClass_UpdateLoaction_ClimbSpeed, 0x6)
+	auto const pType = pLinkedTo->GetTechnoType();
+	int extraHeight = bridgeHeight + flightLevelNow - pType->GetFlightLevel();
+
+	if (extraHeight < 0 && !pThis->IsLanding && pLinkeTo->Health != 0)
+		flightLevelNow -= extraHeight;
+
+	R->EDI(flightLevelNow);
+
+	return 0;
+}
+*/
+DEFINE_HOOK(0x4CDE96, FlyLocomotionClass_UpdateLoaction_FlightClimb, 0x6)
 {
 	GET(int, deltaZ, EAX);
 	GET(int, bridgeHeight, EBX);
@@ -634,7 +652,7 @@ DEFINE_HOOK(0x4CDE96, FlyLocomotionClass_UpdateLoaction_ClimbSpeed, 0x6)
 
 	if (pTypeExt)
 	{
-		int climbSpeed = pTypeExt->FlightClimbSpeed;
+		int climbSpeed = pTypeExt->FlightClimb;
 
 		if (climbSpeed >= 0)
 			newDeltaZ = climbSpeed;
@@ -642,7 +660,7 @@ DEFINE_HOOK(0x4CDE96, FlyLocomotionClass_UpdateLoaction_ClimbSpeed, 0x6)
 
 	int extraHeight = bridgeHeight + technoHeight + newDeltaZ - pType->GetFlightLevel();
 
-	if (extraHeight >= 0)
+	if (extraHeight > 0)
 		newDeltaZ -= extraHeight;
 
 	R->EAX(newDeltaZ);
