@@ -233,6 +233,9 @@ public:
 		Nullable<AnimTypeClass*> Wake_Grapple;
 		Nullable<AnimTypeClass*> Wake_Sinking;
 
+		Valueable<int> FlightClimbSpeed;
+		Valueable<int> FlightCrashSpeed;
+
 		struct LaserTrailDataEntry
 		{
 			ValueableIdx<LaserTrailTypeClass> idxType;
@@ -461,6 +464,9 @@ public:
 			, Wake { }
 			, Wake_Grapple { }
 			, Wake_Sinking { }
+
+			, FlightClimbSpeed { -1 }
+			, FlightCrashSpeed { -1 }
 		{ }
 
 		virtual ~ExtData() = default;

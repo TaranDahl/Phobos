@@ -599,3 +599,54 @@ DEFINE_HOOK(0x6F9FA9, TechnoClass_AI_PromoteAnim, 0x6)
 // TunnelLocomotionClass_IsToHaveShadow, skip shadow on all but idle.
 // TODO: Investigate if it is possible to fix the shadows not tilting on the burrowing etc. states.
 DEFINE_JUMP(LJMP, 0x72A070, 0x72A07F);
+/*
+DEFINE_HOOK(0x4CDF84, FlyLocomotionClass_UpdateLoaction_CrashSpeed, 0x5)
+{
+	GET(int, deltaZ, ECX);
+	GET(FootClass* const, pLinkedTo, EAX);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pLinkedTo->GetTechnoType());
+	int newDeltaZ = deltaZ;
+
+	if (pTypeExt)
+	{
+		int crashSpeed = pTypeExt->FlightCrashSpeed;
+
+		if (crashSpeed >= 0)
+			newDeltaZ = crashSpeed;
+	}
+
+	R->ECX(newDeltaZ);
+
+	return 0;
+}
+
+DEFINE_HOOK(0x4CDE96, FlyLocomotionClass_UpdateLoaction_ClimbSpeed, 0x6)
+{
+	GET(int, deltaZ, EAX);
+	GET(int, bridgeHeight, EBX);
+	GET(int, technoHeight, EDI);
+	GET(FootClass* const, pLinkedTo, ECX);
+
+	auto const pType = pLinkedTo->GetTechnoType();
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+	int newDeltaZ = deltaZ;
+
+	if (pTypeExt)
+	{
+		int climbSpeed = pTypeExt->FlightClimbSpeed;
+
+		if (climbSpeed >= 0)
+			newDeltaZ = climbSpeed;
+	}
+
+	int extraHeight = bridgeHeight + technoHeight + newDeltaZ - pType->GetFlightLevel();
+
+	if (extraHeight >= 0)
+		newDeltaZ -= extraHeight;
+
+	R->EAX(newDeltaZ);
+
+	return 0;
+}
+*/
