@@ -667,4 +667,9 @@ DEFINE_HOOK(0x4CDE96, FlyLocomotionClass_UpdateLoaction_FlightClimb, 0x6)
 
 	return 0;
 }
-
+/*
+// todo : set speed to 0 if close to destination. Need FlyLocomotionClass.h.
+DEFINE_HOOK(0x4CE2D1, FlyLocomotionClass_UpdateLoaction_Stop, 0xA)
+{
+}
+*/
