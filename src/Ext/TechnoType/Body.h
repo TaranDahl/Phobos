@@ -233,6 +233,9 @@ public:
 		Nullable<AnimTypeClass*> Wake_Grapple;
 		Nullable<AnimTypeClass*> Wake_Sinking;
 
+		PhobosFixedString<32u> GunnerGroupAs;
+		Valueable<bool> UseGunnerGroupAs;
+
 		struct LaserTrailDataEntry
 		{
 			ValueableIdx<LaserTrailTypeClass> idxType;
@@ -461,6 +464,9 @@ public:
 			, Wake { }
 			, Wake_Grapple { }
 			, Wake_Sinking { }
+
+			, GunnerGroupAs { }
+			, UseGunnerGroupAs { false }
 		{ }
 
 		virtual ~ExtData() = default;
@@ -476,6 +482,8 @@ public:
 
 		// Ares 0.A
 		const char* GetSelectionGroupID() const;
+
+		const char* GetGunnerGroupID() const;
 
 	private:
 		template <typename T>
@@ -500,4 +508,7 @@ public:
 	// Ares 0.A
 	static const char* GetSelectionGroupID(ObjectTypeClass* pType);
 	static bool HasSelectionGroupID(ObjectTypeClass* pType, const char* pID);
+
+	static const char* GetGunnerGroupID(ObjectTypeClass* pType);
+	static bool HasGunnerGroupID(ObjectTypeClass* pType, const char* pID);
 };

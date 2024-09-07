@@ -54,6 +54,41 @@ bool TechnoTypeExt::HasSelectionGroupID(ObjectTypeClass* pType, const char* pID)
 	return (_strcmpi(id, pID) == 0);
 }
 
+const char* TechnoTypeExt::ExtData::GetGunnerGroupID() const
+{
+	if (GeneralUtils::IsValidString(this->GunnerGroupAs))
+		return this->GunnerGroupAs;
+
+	auto const pInfType = abstract_cast<InfantryTypeClass*>(this->OwnerObject());
+
+	if (pInfType && pInfType->Engineer)
+		return (const char*)("Healer");
+
+	return (const char*)("Warrior");
+}
+
+const char* TechnoTypeExt::GetGunnerGroupID(ObjectTypeClass* pType)
+{
+	auto const pTechnoType = static_cast<TechnoTypeClass*>(pType);
+
+	if (auto pExt = TechnoTypeExt::ExtMap.Find(pTechnoType))
+		return pExt->GetGunnerGroupID();
+
+	auto const pInfType = abstract_cast<InfantryTypeClass*>(pTechnoType);
+
+	if (pInfType && pInfType->Engineer)
+		return (const char*)("Healer");
+
+	return (const char*)("Warrior");
+}
+
+bool TechnoTypeExt::HasGunnerGroupID(ObjectTypeClass* pType, const char* pID)
+{
+	auto id = TechnoTypeExt::GetGunnerGroupID(pType);
+
+	return (_strcmpi(id, pID) == 0);
+}
+
 void TechnoTypeExt::ExtData::ParseBurstFLHs(INI_EX& exArtINI, const char* pArtSection,
 	std::vector<std::vector<CoordStruct>>& nFLH, std::vector<std::vector<CoordStruct>>& nEFlh, const char* pPrefixTag)
 {
@@ -318,6 +353,9 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Wake.Read(exINI, pSection, "Wake");
 	this->Wake_Grapple.Read(exINI, pSection, "Wake.Grapple");
 	this->Wake_Sinking.Read(exINI, pSection, "Wake.Sinking");
+
+	this->GunnerGroupAs.Read(pINI, pSection, "GunnerGroupAs");
+	this->UseGunnerGroupAs.Read(exINI, pSection, "UseGunnerGroupAs");
 
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
@@ -688,6 +726,9 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)
 		.Process(this->Wake_Sinking)
+
+		.Process(this->GunnerGroupAs)
+		.Process(this->UseGunnerGroupAs)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

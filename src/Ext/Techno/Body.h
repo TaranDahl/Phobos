@@ -55,6 +55,8 @@ public:
 		int LastWarpInDelay;                   // Last-warp in delay for this unit, used by HasCarryoverWarpInDelay.
 		bool IsBeingChronoSphered;             // Set to true on units currently being ChronoSphered, does not apply to Ares-ChronoSphere'd buildings or Chrono reinforcements.
 
+		FootClass* Gunner;
+
 		ExtData(TechnoClass* OwnerObject) : Extension<TechnoClass>(OwnerObject)
 			, TypeExtData { nullptr }
 			, Shield {}
@@ -83,7 +85,8 @@ public:
 			, OriginalPassengerOwner {}
 			, HasRemainingWarpInDelay { false }
 			, LastWarpInDelay { 0 }
-			, IsBeingChronoSphered { false}
+			, IsBeingChronoSphered { false }
+			, Gunner { 0 }
 		{ }
 
 		void OnEarlyUpdate();
