@@ -634,6 +634,15 @@ DEFINE_HOOK(0x469EC0, BulletClass_Logics_AirburstWeapon, 0x6)
 				if (auto const pBullet = pTypeSplits->CreateBullet(pTarget, pSource, damage, pWeapon->Warhead, pWeapon->Speed, pWeapon->Bright))
 				{
 					pBullet->WeaponType = pWeapon;
+					auto const pBulletExt = BulletExt::ExtMap.Find(pBullet);
+					pBulletExt->FirerHouse = BulletExt::ExtMap.Find(pBullet)->FirerHouse;
+
+					if (pBulletExt->Trajectory)
+					{
+						pBullet->MoveTo(pThis->Location, BulletVelocity::Empty);
+						continue;
+					}
+
 					pBullet->Range = projectileRange;
 
 					DirStruct dir;
@@ -645,12 +654,7 @@ DEFINE_HOOK(0x469EC0, BulletClass_Logics_AirburstWeapon, 0x6)
 					auto const cos_factor = -2.44921270764e-16; // cos(1.5 * Math::Pi * 1.00001)
 					auto const flatSpeed = cos_factor * pBullet->Speed;
 
-					BulletVelocity velocity;
-					velocity.X = cos_rad * flatSpeed;
-					velocity.Y = sin_rad * flatSpeed;
-					velocity.Z = -pBullet->Speed;
-
-					pBullet->MoveTo(pThis->Location, velocity);
+					pBullet->MoveTo(pThis->Location, BulletVelocity{ cos_rad * flatSpeed, sin_rad * flatSpeed, static_cast<double>(-pBullet->Speed) });
 				}
 			}
 		}
