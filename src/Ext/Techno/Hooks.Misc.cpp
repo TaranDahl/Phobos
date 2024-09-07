@@ -196,9 +196,9 @@ DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 DEFINE_HOOK(0x481778, CellClass_ScatterContent_Fix, 0x6)
 {
 	enum { SkipGameCode = 0x481793 };
-	GET(ObjectClass*, pObject, ESI);
+	GET(ObjectClass* const, pObject, ESI);
 
-	auto pTechno = abstract_cast<TechnoClass*>(pObject);
+	auto const pTechno = abstract_cast<TechnoClass*>(pObject);
 
 	R->CL(pTechno && pTechno->Owner->IsHumanPlayer && RulesClass::Instance()->PlayerScatter);
 	return SkipGameCode;
@@ -208,7 +208,7 @@ DEFINE_HOOK(0x63745D, UnknownClass_PlanWaypoint_ContinuePlanningOnEnter, 0x6)
 {
 	enum { SkipDeselect = 0x637468 };
 
-	GET(int, planResult, ESI);
+	GET(const int, planResult, ESI);
 
 	return (!planResult && !RulesExt::Global()->StopPlanningOnEnter) ? SkipDeselect : 0;
 }
@@ -223,7 +223,7 @@ DEFINE_HOOK(0x638D73, UnknownClass_CheckLastWaypoint_ContinuePlanningWaypoint, 0
 {
 	enum { SkipDeselect = 0x638D8D, Deselect = 0x638D82 };
 
-	GET(Action, action, EAX);
+	GET(const Action, action, EAX);
 
 	if (!RulesExt::Global()->StopPlanningOnEnter)
 		return SkipDeselect;
@@ -237,14 +237,14 @@ DEFINE_HOOK(0x6FA697, TechnoClass_Update_DontScanIfUnarmed, 0x6)
 {
 	enum { SkipTargeting = 0x6FA6F5 };
 
-	GET(TechnoClass*, pThis, ESI);
+	GET(TechnoClass* const, pThis, ESI);
 
 	return pThis->IsArmed() ? 0 : SkipTargeting;
 }
 
 DEFINE_HOOK(0x709866, TechnoClass_TargetAndEstimateDamage_ScanDelayGuardArea, 0x6)
 {
-	GET(TechnoClass*, pThis, ESI);
+	GET(TechnoClass* const, pThis, ESI);
 
 	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
 	auto const pOwner = pThis->Owner;
@@ -263,7 +263,7 @@ DEFINE_HOOK(0x709866, TechnoClass_TargetAndEstimateDamage_ScanDelayGuardArea, 0x
 
 DEFINE_HOOK(0x70989C, TechnoClass_TargetAndEstimateDamage_ScanDelayNormal, 0x6)
 {
-	GET(TechnoClass*, pThis, ESI);
+	GET(TechnoClass* const, pThis, ESI);
 
 	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
 	auto const pOwner = pThis->Owner;
@@ -284,28 +284,24 @@ DEFINE_HOOK(0x702B31, TechnoClass_ReceiveDamage_ReturnFireCheck, 0x7)
 {
 	enum { SkipReturnFire = 0x702B47, NotSkip = 0 };
 
-	GET(TechnoClass*, pThis, ESI);
+	GET(TechnoClass* const, pThis, ESI);
 
-	auto pOwner = pThis->Owner;
+	auto const pOwner = pThis->Owner;
 
 	if (!(pOwner->IsHumanPlayer || pOwner->IsInPlayerControl) || !RulesExt::Global()->PlayerReturnFire_Smarter)
 		return NotSkip;
-
-	auto pTarget = pThis->Target;
-
-	if (pTarget)
+	else if (pThis->Target)
 		return SkipReturnFire;
 
-	auto pThisFoot = abstract_cast<FootClass*>(pThis);
+	auto const pThisFoot = abstract_cast<FootClass*>(pThis);
 
 	if (!pThisFoot)
 		return NotSkip;
 
-	auto mission = pThis->CurrentMission;
-	bool isJJMoving = pThisFoot->GetHeight() > Unsorted::CellHeight && mission == Mission::Move && pThisFoot->Locomotor->Is_Moving_Now();
-	bool isMoving = isJJMoving || (mission == Mission::Move && pThisFoot->GetHeight() <= 0);
+	auto const mission = pThis->CurrentMission;
+	const bool isJJMoving = pThisFoot->GetHeight() > Unsorted::CellHeight && mission == Mission::Move && pThisFoot->Locomotor->Is_Moving_Now();
 
-	return isMoving ? SkipReturnFire : NotSkip;
+	return (isJJMoving || (mission == Mission::Move && pThisFoot->GetHeight() <= 0)) ? SkipReturnFire : NotSkip;
 }
 
 DEFINE_HOOK(0x6FC22A, TechnoClass_GetFireError_TargetingIronCurtain, 0x6)
@@ -369,10 +365,8 @@ DEFINE_HOOK(0x70023B, TechnoClass_MouseOverObject_AttackUnderGround, 0x5)
 	GET(TechnoClass*, pThis, ESI);
 	GET(int, wpIdx, EAX);
 
-	bool isSurfaced = pObject->IsSurfaced();
-
-	if (!isSurfaced)
-		return FireIsNotOK;
+	if (pObject->IsSurfaced())
+		return FireIsOK;
 
 	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
 	auto const pProjExt = pWeapon ? BulletTypeExt::ExtMap.Find(pWeapon->Projectile) : nullptr;
@@ -457,7 +451,7 @@ DEFINE_HOOK(0x707F08, TechnoClass_GetGuardRange_AreaGuardRange, 0x5)
 	enum { SkipGameCode = 0x707E70 };
 
 	GET(Leptons, guardRange, EAX);
-	GET(int, code, EDI);
+	GET(int, mode, EDI);
 	GET(TechnoClass* const, pThis, ESI);
 
 	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
@@ -465,8 +459,11 @@ DEFINE_HOOK(0x707F08, TechnoClass_GetGuardRange_AreaGuardRange, 0x5)
 
 	const double multiplier = pTypeExt ? pTypeExt->GuardModeGuardRangeMultiplier.Get(pRulesExt->GuardModeGuardRangeMultiplier) : pRulesExt->GuardModeGuardRangeMultiplier;
 	const Leptons addend = pTypeExt ? pTypeExt->GuardModeGuardRangeAddend.Get(pRulesExt->GuardModeGuardRangeAddend) : pRulesExt->GuardModeGuardRangeAddend;
+	const Leptons areaGuardRange = Leptons(static_cast<int>((int)guardRange * multiplier) + (int)addend);
+	const Leptons minGuardRange = Leptons((mode == 2) ? 1792 : 0);
+	const Leptons maxGuardRange = RulesExt::Global()->GuardModeGuardRangeMax;
 
-	R->EAX(Math::clamp(Leptons((int)guardRange * multiplier + (int)addend), Leptons((code == 2) ? 1792 : 0), RulesExt::Global()->GuardModeGuardRangeMax));
+	R->EAX(Math::clamp(areaGuardRange, minGuardRange, maxGuardRange));
 	return SkipGameCode;
 }
 
