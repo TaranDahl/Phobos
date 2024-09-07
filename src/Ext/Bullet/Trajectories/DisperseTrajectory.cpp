@@ -969,8 +969,13 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 
 			if (!this->WeaponRetarget)
 			{
-				for (int burstNum = 0; burstNum < burstCount; burstNum++)
-					this->CreateDisperseBullets(pBullet, pWeapon, pTarget, pOwner, burstNum, burstCount);
+				if (pTarget)
+				{
+					for (int burstNum = 0; burstNum < burstCount; burstNum++)
+					{
+						this->CreateDisperseBullets(pBullet, pWeapon, pTarget, pOwner, burstNum, burstCount);
+					}
+				}
 
 				continue;
 			}
