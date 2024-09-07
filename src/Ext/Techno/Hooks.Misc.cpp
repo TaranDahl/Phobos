@@ -431,7 +431,7 @@ DEFINE_HOOK(0x4D6E97, FootClass_MissionAreaGuard_Pursuit, 0x6)
 	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
 	const bool pursuit = pTypeExt ? pTypeExt->GuardModePursuit.Get(RulesExt::Global()->GuardModePursuit) : true;
 
-	if ((pFocus->AbstractFlags & AbstractFlags::Foot) != AbstractFlags::None && pTypeExt)
+	if ((pFocus->AbstractFlags & AbstractFlags::Foot) == AbstractFlags::None && pTypeExt)
 	{
 		const Leptons stationaryStray = pTypeExt->GuardStationaryStray.Get(RulesExt::Global()->GuardStationaryStray);
 
