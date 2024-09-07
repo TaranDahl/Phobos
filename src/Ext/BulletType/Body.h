@@ -58,6 +58,19 @@ public:
 		Nullable<Leptons> BallisticScatter_Max_InMaxRange;
 		Valueable<double> BallisticScatter_Chance;
 
+		Valueable<bool> Splits;
+		Valueable<double> AirburstSpread;
+		Valueable<double> RetargetAccuracy;
+		Valueable<bool> RetargetSelf;
+		Valueable<double> RetargetSelf_Probability;
+		Nullable<bool> AroundTarget;
+		Valueable<bool> Airburst_UseCluster;
+		Valueable<bool> Airburst_RandomClusters;
+		Valueable<Leptons> Splits_TargetingDistance;
+		Valueable<int> Splits_TargetCellRange;
+		Valueable<bool> Splits_UseWeaponTargeting;
+		Valueable<bool> AirburstWeapon_ApplyFirepowerMult;
+
 		// Ares 0.7
 		Nullable<Leptons> BallisticScatter_Min;
 		Nullable<Leptons> BallisticScatter_Max;
@@ -95,6 +108,18 @@ public:
 			, BallisticScatter_Max_InMinRange {}
 			, BallisticScatter_Max_InMaxRange {}
 			, BallisticScatter_Chance { 1.0 }
+			, Splits { false }
+			, AirburstSpread { 1.5 }
+			, RetargetAccuracy { 0.0 }
+			, RetargetSelf { true }
+			, RetargetSelf_Probability { 0.5 }
+			, AroundTarget {}
+			, Airburst_UseCluster { false }
+			, Airburst_RandomClusters { false }
+			, Splits_TargetingDistance{ Leptons(1280) }
+			, Splits_TargetCellRange { 3 }
+			, Splits_UseWeaponTargeting { false }
+			, AirburstWeapon_ApplyFirepowerMult { false }
 		{ }
 
 		virtual ~ExtData() = default;

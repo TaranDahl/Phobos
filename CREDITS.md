@@ -241,6 +241,8 @@ This page lists all the individual contributions to the project by their author.
   - Customizable ChronoSphere teleport delays for units
   - Allowed and disallowed types for `FactoryPlant`
   - Forbidding parallel AI queues for specific TechnoTypes
+  - Vehicles keeping target on move command
+  - Reimplemented `Airburst` & `Splits` logic with more customization options
   - Nonprovocative Warheads
 - **Morton (MortonPL)**:
   - `XDrawOffset` for animations

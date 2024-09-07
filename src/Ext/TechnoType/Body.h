@@ -274,6 +274,12 @@ public:
 		Valueable<int> FlightClimb;
 		Valueable<int> FlightCrash;
 
+		ValueableVector<TechnoTypeClass*> InitialPayload_Types;
+		ValueableVector<int> InitialPayload_Nums;
+
+		Valueable<bool> KeepTargetOnMove;
+		Valueable<Leptons> KeepTargetOnMove_ExtraDistance;
+
 		Nullable<AnimTypeClass*> Wake;
 		Nullable<AnimTypeClass*> Wake_Grapple;
 		Nullable<AnimTypeClass*> Wake_Sinking;
@@ -547,6 +553,12 @@ public:
 			, DigEndROT { -1 }
 			, FlightClimb { -1 }
 			, FlightCrash { -1 }
+
+			, InitialPayload_Types {}
+			, InitialPayload_Nums {}
+
+			, KeepTargetOnMove { false }
+			, KeepTargetOnMove_ExtraDistance { Leptons(0) }
 
 			, Wake { }
 			, Wake_Grapple { }

@@ -361,6 +361,12 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->FlightClimb.Read(exINI, pSection, "FlightClimb");
 	this->FlightCrash.Read(exINI, pSection, "FlightCrash");
 
+	this->InitialPayload_Types.Read(exINI, pSection, "InitialPayload.Types");
+	this->InitialPayload_Nums.Read(exINI, pSection, "InitialPayload.Nums");
+
+	this->KeepTargetOnMove.Read(exINI, pSection, "KeepTargetOnMove");
+	this->KeepTargetOnMove_ExtraDistance.Read(exINI, pSection, "KeepTargetOnMove.ExtraDistance");
+
 	this->Wake.Read(exINI, pSection, "Wake");
 	this->Wake_Grapple.Read(exINI, pSection, "Wake.Grapple");
 	this->Wake_Sinking.Read(exINI, pSection, "Wake.Sinking");
@@ -775,6 +781,12 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->DigEndROT)
 		.Process(this->FlightClimb)
 		.Process(this->FlightCrash)
+
+		.Process(this->InitialPayload_Types)
+		.Process(this->InitialPayload_Nums)
+
+		.Process(this->KeepTargetOnMove)
+		.Process(this->KeepTargetOnMove_ExtraDistance)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)
