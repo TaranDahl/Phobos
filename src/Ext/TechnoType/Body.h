@@ -258,6 +258,21 @@ public:
 		Nullable<int> KeepWarping_Distance;
 		Valueable<bool> FiringByPassMovingCheck;
 		Valueable<bool> SkipCrushSlowdown;
+		Nullable<bool> GuardModePursuit;
+		Nullable<Leptons> GuardModeStray;
+		Nullable<double> GuardModeGuardRangeMultiplier;
+		Nullable<Leptons> GuardModeGuardRangeAddend;
+		Nullable<Leptons> GuardStationaryStray;
+		Valueable<bool> Engineer_CanAutoFire;
+		Valueable<bool> BunkerableAnyWay;
+		Valueable<bool> Harvester_CanGuardArea;
+		Valueable<int> DigStartROT;
+		Valueable<int> DigInSpeed;
+		Valueable<int> DiggingSpeed;
+		Valueable<int> DigOutSpeed;
+		Valueable<int> DigEndROT;
+		Valueable<int> FlightClimb;
+		Valueable<int> FlightCrash;
 
 		Nullable<AnimTypeClass*> Wake;
 		Nullable<AnimTypeClass*> Wake_Grapple;
@@ -517,6 +532,21 @@ public:
 			, KeepWarping_Distance {}
 			, FiringByPassMovingCheck { false }
 			, SkipCrushSlowdown { false }
+			, GuardModePursuit {}
+			, GuardModeStray {}
+			, GuardModeGuardRangeMultiplier {}
+			, GuardModeGuardRangeAddend {}
+			, GuardStationaryStray {}
+			, Engineer_CanAutoFire { false }
+			, BunkerableAnyWay { false }
+			, Harvester_CanGuardArea { false }
+			, DigStartROT { -1 }
+			, DigInSpeed { -1 }
+			, DiggingSpeed { 19 }
+			, DigOutSpeed { -1 }
+			, DigEndROT { -1 }
+			, FlightClimb { -1 }
+			, FlightCrash { -1 }
 
 			, Wake { }
 			, Wake_Grapple { }

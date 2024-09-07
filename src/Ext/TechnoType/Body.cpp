@@ -345,6 +345,21 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->KeepWarping_Distance.Read(exINI, pSection, "KeepWarping.Distance");
 	this->FiringByPassMovingCheck.Read(exINI, pSection, "FiringByPassMovingCheck");
 	this->SkipCrushSlowdown.Read(exINI, pSection, "SkipCrushSlowdown");
+	this->GuardModePursuit.Read(exINI, pSection, "GuardModePursuit");
+	this->GuardModeStray.Read(exINI, pSection, "GuardModeStray");
+	this->GuardModeGuardRangeMultiplier.Read(exINI, pSection, "GuardModeGuardRangeMultiplier");
+	this->GuardModeGuardRangeAddend.Read(exINI, pSection, "GuardModeGuardRangeAddend");
+	this->GuardStationaryStray.Read(exINI, pSection, "GuardStationaryStray");
+	this->Engineer_CanAutoFire.Read(exINI, pSection, "Engineer.CanAutoFire");
+	this->BunkerableAnyWay.Read(exINI, pSection, "BunkerableAnyWay");
+	this->Harvester_CanGuardArea.Read(exINI, pSection, "Harvester.CanGuardArea");
+	this->DigStartROT.Read(exINI, pSection, "DigStartROT");
+	this->DigInSpeed.Read(exINI, pSection, "DigInSpeed");
+	this->DiggingSpeed.Read(exINI, pSection, "DiggingSpeed");
+	this->DigOutSpeed.Read(exINI, pSection, "DigOutSpeed");
+	this->DigEndROT.Read(exINI, pSection, "DigEndROT");
+	this->FlightClimb.Read(exINI, pSection, "FlightClimb");
+	this->FlightCrash.Read(exINI, pSection, "FlightCrash");
 
 	this->Wake.Read(exINI, pSection, "Wake");
 	this->Wake_Grapple.Read(exINI, pSection, "Wake.Grapple");
@@ -745,6 +760,21 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->KeepWarping_Distance)
 		.Process(this->FiringByPassMovingCheck)
 		.Process(this->SkipCrushSlowdown)
+		.Process(this->GuardModePursuit)
+		.Process(this->GuardModeStray)
+		.Process(this->GuardModeGuardRangeMultiplier)
+		.Process(this->GuardModeGuardRangeAddend)
+		.Process(this->GuardStationaryStray)
+		.Process(this->Engineer_CanAutoFire)
+		.Process(this->BunkerableAnyWay)
+		.Process(this->Harvester_CanGuardArea)
+		.Process(this->DigStartROT)
+		.Process(this->DigInSpeed)
+		.Process(this->DiggingSpeed)
+		.Process(this->DigOutSpeed)
+		.Process(this->DigEndROT)
+		.Process(this->FlightClimb)
+		.Process(this->FlightCrash)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)

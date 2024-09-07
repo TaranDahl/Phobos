@@ -296,12 +296,12 @@ DEFINE_HOOK(0x702B31, TechnoClass_ReceiveDamage_ReturnFireCheck, 0x7)
 	if (pTarget)
 		return SkipReturnFire;
 
-	auto mission = pThis->CurrentMission;
 	auto pThisFoot = abstract_cast<FootClass*>(pThis);
 
 	if (!pThisFoot)
 		return NotSkip;
 
+	auto mission = pThis->CurrentMission;
 	bool isJJMoving = pThisFoot->GetHeight() > Unsorted::CellHeight && mission == Mission::Move && pThisFoot->Locomotor->Is_Moving_Now();
 	bool isMoving = isJJMoving || (mission == Mission::Move && pThisFoot->GetHeight() <= 0);
 
@@ -369,14 +369,15 @@ DEFINE_HOOK(0x70023B, TechnoClass_MouseOverObject_AttackUnderGround, 0x5)
 	GET(TechnoClass*, pThis, ESI);
 	GET(int, wpIdx, EAX);
 
-	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
-	auto const pProjExt = pWeapon ? BulletTypeExt::ExtMap.Find(pWeapon->Projectile) : 0;
 	bool isSurfaced = pObject->IsSurfaced();
 
-	if (!isSurfaced && (!pProjExt || !pProjExt->AU))
+	if (!isSurfaced)
 		return FireIsNotOK;
 
-	return FireIsOK;
+	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
+	auto const pProjExt = pWeapon ? BulletTypeExt::ExtMap.Find(pWeapon->Projectile) : nullptr;
+
+	return (!pProjExt || !pProjExt->AU) ? FireIsNotOK : FireIsOK;
 }
 
 // This is a fix to KeepWarping.
@@ -399,10 +400,94 @@ DEFINE_HOOK(0x71A7A8, TemporalClass_Update_CheckRange, 0x6)
 
 	GET(TechnoClass*, pTechno, EAX);
 
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType());
-
-	if (pTechno->InOpenToppedTransport || (pTypeExt && pTypeExt->KeepWarping))
+	if (pTechno->InOpenToppedTransport)
 		return CheckRange;
 
-	return DontCheckRange;
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType());
+
+	return (pTypeExt && pTypeExt->KeepWarping) ? CheckRange : DontCheckRange;
+}
+
+DEFINE_HOOK(0x4D6E83, FootClass_MissionAreaGuard_FollowStray, 0x6)
+{
+	enum { SkipGameCode = 0x4D6E8F };
+
+	GET(FootClass* const, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	R->EDI(pTypeExt ? pTypeExt->GuardModeStray.Get(Leptons(RulesClass::Instance()->GuardModeStray)) : RulesClass::Instance()->GuardModeStray);
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x4D6E97, FootClass_MissionAreaGuard_Pursuit, 0x6)
+{
+	enum { KeepTarget = 0x4D6ED1, RemoveTarget = 0x4D6EB3 };
+
+	GET(FootClass* const, pThis, ESI);
+	GET(int, range, EDI);
+	GET(AbstractClass* const, pFocus, EAX);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	const bool pursuit = pTypeExt ? pTypeExt->GuardModePursuit.Get(RulesExt::Global()->GuardModePursuit) : true;
+
+	if ((pFocus->AbstractFlags & AbstractFlags::Foot) != AbstractFlags::None && pTypeExt)
+	{
+		const Leptons stationaryStray = pTypeExt->GuardStationaryStray.Get(RulesExt::Global()->GuardStationaryStray);
+
+		if (stationaryStray != Leptons(-256))
+			range = stationaryStray;
+	}
+
+	if (pursuit)
+	{
+		if (!pThis->IsFiring && !pThis->Destination && pThis->DistanceFrom(pFocus) > range)
+			return RemoveTarget;
+	}
+	else if (pThis->DistanceFrom(pFocus) > range)
+	{
+		return RemoveTarget;
+	}
+
+	return KeepTarget;
+}
+
+DEFINE_HOOK(0x707F08, TechnoClass_GetGuardRange_AreaGuardRange, 0x5)
+{
+	enum { SkipGameCode = 0x707E70 };
+
+	GET(Leptons, guardRange, EAX);
+	GET(int, code, EDI);
+	GET(TechnoClass* const, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	auto const pRulesExt = RulesExt::Global();
+
+	const double multiplier = pTypeExt ? pTypeExt->GuardModeGuardRangeMultiplier.Get(pRulesExt->GuardModeGuardRangeMultiplier) : pRulesExt->GuardModeGuardRangeMultiplier;
+	const Leptons addend = pTypeExt ? pTypeExt->GuardModeGuardRangeAddend.Get(pRulesExt->GuardModeGuardRangeAddend) : pRulesExt->GuardModeGuardRangeAddend;
+
+	R->EAX(Math::clamp(Leptons((int)guardRange * multiplier + (int)addend), Leptons((code == 2) ? 1792 : 0), RulesExt::Global()->GuardModeGuardRangeMax));
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x70FB73, FootClass_IsBunkerableNow_Dehardcode, 0x6)
+{
+	enum { SkipVanillaChecks = 0x70FBAF };
+
+	GET(TechnoTypeClass*, pType, EAX);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+
+	return (pTypeExt && pTypeExt->BunkerableAnyWay) ? SkipVanillaChecks : 0;
+}
+
+DEFINE_HOOK(0x4D6D34, FootClass_MissionAreaGuard_Miner, 0x5)
+{
+	enum { GuardArea = 0x4D6D69 };
+
+	GET(FootClass*, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	return (pTypeExt && pTypeExt->Harvester_CanGuardArea) ? GuardArea : 0;
 }

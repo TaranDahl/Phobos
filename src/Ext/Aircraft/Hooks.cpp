@@ -514,3 +514,46 @@ DEFINE_HOOK(0x418B46, AircraftClass_MissionAttack_ScatterCell6, 0x6)
 	enum { SkipScatter = 0x418B8A, Scatter = 0 };
 	return RulesExt::Global()->StrafingTargetScatter ? Scatter : SkipScatter;
 }
+
+DEFINE_HOOK(0x4CDF84, FlyLocomotionClass_UpdateLoaction_FlightCrash, 0x5)
+{
+	GET(int, deltaZ, ECX);
+	GET(FootClass* const, pLinkedTo, EAX);
+
+	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pLinkedTo->GetTechnoType()))
+	{
+		const int crashSpeed = pTypeExt->FlightCrash;
+
+		if (crashSpeed >= 0)
+			deltaZ = crashSpeed;
+	}
+
+	R->ECX(deltaZ);
+	return 0;
+}
+
+DEFINE_HOOK(0x4CDE96, FlyLocomotionClass_UpdateLoaction_FlightClimb, 0x6)
+{
+	GET(int, deltaZ, EAX);
+	GET(const int, bridgeHeight, EBX);
+	GET(const int, technoHeight, EDI);
+	GET(FootClass* const, pLinkedTo, ECX);
+
+	auto const pType = pLinkedTo->GetTechnoType();
+
+	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType))
+	{
+		const int climbSpeed = pTypeExt->FlightClimb;
+
+		if (climbSpeed >= 0)
+			deltaZ = climbSpeed;
+	}
+
+	const int extraHeight = bridgeHeight + technoHeight + deltaZ - pType->GetFlightLevel();
+
+	if (extraHeight > 0)
+		deltaZ -= extraHeight;
+
+	R->EAX(deltaZ);
+	return 0;
+}

@@ -252,6 +252,11 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->PlayerReturnFire_Smarter.Read(exINI, GameStrings::CombatDamage, "PlayerReturnFire.Smarter");
 	this->EVA_WeCaptureABuilding.Read(exINI, GameStrings::AudioVisual, "EVA.WeCaptureABuilding");
 	this->EVA_OurBuildingIsCaptured.Read(exINI, GameStrings::AudioVisual, "EVA.OurBuildingIsCaptured");
+	this->GuardModePursuit.Read(exINI, GameStrings::General, "GuardModePursuit");
+	this->GuardModeGuardRangeMultiplier.Read(exINI, GameStrings::General, "GuardModeGuardRangeMultiplier");
+	this->GuardModeGuardRangeAddend.Read(exINI, GameStrings::General, "GuardModeGuardRangeAddend");
+	this->GuardModeGuardRangeMax.Read(exINI, GameStrings::General, "GuardModeGuardRangeMax");
+	this->GuardStationaryStray.Read(exINI, GameStrings::General, "GuardStationaryStray");
 
 	this->VoxelLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelLightSource");
 	// this->VoxelShadowLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelShadowLightSource");
@@ -494,6 +499,11 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->PlayerReturnFire_Smarter)
 		.Process(this->EVA_WeCaptureABuilding)
 		.Process(this->EVA_OurBuildingIsCaptured)
+		.Process(this->GuardModePursuit)
+		.Process(this->GuardModeGuardRangeMultiplier)
+		.Process(this->GuardModeGuardRangeAddend)
+		.Process(this->GuardModeGuardRangeMax)
+		.Process(this->GuardStationaryStray)
 		.Process(this->VoxelLightSource)
 		// .Process(this->VoxelShadowLightSource)
 		.Process(this->UseFixedVoxelLighting)
