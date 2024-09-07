@@ -635,7 +635,7 @@ DEFINE_HOOK(0x469EC0, BulletClass_Logics_AirburstWeapon, 0x6)
 				{
 					pBullet->WeaponType = pWeapon;
 					auto const pBulletExt = BulletExt::ExtMap.Find(pBullet);
-					pBulletExt->FirerHouse = BulletExt::ExtMap.Find(pBullet)->FirerHouse;
+					pBulletExt->FirerHouse = pOwner;
 
 					if (pBulletExt->Trajectory)
 					{
