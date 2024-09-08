@@ -372,7 +372,9 @@ This page lists all the individual contributions to the project by their author.
   - Damage multiplier for different houses
   - Units Rotate Turret When in Idle Action
   - Jumpjet climbing logic enhancement
-  - Building placing and deploying logic enhancement, unit base normal, new placing grids and grey cameo preview
+  - Building placing and deploying logic enhancement
+  - Unit base normal and new placing grids
+  - Grey cameo preview and cameo overlays
   - Units will not always stuck in the factory
   - Optimize aircrafts stop action and allow they using area guard and attack moving
 - **TaranDahl**
