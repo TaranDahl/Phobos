@@ -46,6 +46,8 @@ public:
 		CellStruct CurrentBuildingTopLeft;
 		CDTimerClass CurrentBuildingTimer;
 		int CurrentBuildingTimes;
+		int SuperWeaponButtonData[6];
+		int SuperWeaponButtonCount;
 
 		//Read from INI
 		bool RepairBaseNodes[3];
@@ -82,6 +84,8 @@ public:
 			, CurrentBuildingTopLeft {}
 			, CurrentBuildingTimer {}
 			, CurrentBuildingTimes { 0 }
+			, SuperWeaponButtonData { -1, -1, -1, -1, -1, -1 }
+			, SuperWeaponButtonCount { 0 }
 			, CombatAlertTimer {}
 			, AIFireSaleDelayTimer {}
 			, AISuperWeaponDelayTimer {}

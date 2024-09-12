@@ -23,7 +23,16 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SW_AuxBuildings)
 		.Process(this->SW_NegBuildings)
 		.Process(this->SW_InitialReady)
+		.Process(this->SW_AutoFire)
+		.Process(this->SW_ManualFire)
+		.Process(this->SW_Unstoppable)
 		.Process(this->SW_PostDependent)
+		.Process(this->EVA_Impatient)
+		.Process(this->EVA_InsufficientFunds)
+		.Process(this->EVA_SelectTarget)
+		.Process(this->Message_InsufficientFunds)
+		.Process(this->Message_ColorScheme)
+		.Process(this->Message_FirerColor)
 		.Process(this->UIDescription)
 		.Process(this->CameoPriority)
 		.Process(this->LimboDelivery_Types)
@@ -47,6 +56,9 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ShowTimer_Priority)
 		.Process(this->Convert_Pairs)
 		.Process(this->ShowDesignatorRange)
+		.Process(this->SW_ShowInButtons)
+		.Process(this->SW_ButtonsPriorityHouses)
+		.Process(this->SW_ButtonsRequiredHouses)
 		.Process(this->UseWeeds)
 		.Process(this->UseWeeds_Amount)
 		.Process(this->UseWeeds_StorageTimer)
@@ -85,7 +97,16 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SW_AuxBuildings.Read(exINI, pSection, "SW.AuxBuildings");
 	this->SW_NegBuildings.Read(exINI, pSection, "SW.NegBuildings");
 	this->SW_InitialReady.Read(exINI, pSection, "SW.InitialReady");
+	this->SW_AutoFire.Read(exINI, pSection, "SW.AutoFire");
+	this->SW_ManualFire.Read(exINI, pSection, "SW.ManualFire");
+	this->SW_Unstoppable.Read(exINI, pSection, "SW.Unstoppable");
 	this->SW_PostDependent.Read(exINI, pSection, "SW.PostDependent");
+	this->EVA_Impatient.Read(exINI, pSection, "EVA.Impatient");
+	this->EVA_InsufficientFunds.Read(exINI, pSection, "EVA.InsufficientFunds");
+	this->EVA_SelectTarget.Read(exINI, pSection, "EVA.SelectTarget");
+	this->Message_InsufficientFunds.Read(exINI, pSection, "Message.InsufficientFunds");
+	this->Message_ColorScheme.Read(exINI, pSection, "Message.ColorScheme");
+	this->Message_FirerColor.Read(exINI, pSection, "Message.FirerColor");
 
 	this->UIDescription.Read(exINI, pSection, "UIDescription");
 	this->CameoPriority.Read(exINI, pSection, "CameoPriority");
@@ -166,6 +187,10 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->ShowDesignatorRange.Read(exINI, pSection, "ShowDesignatorRange");
 
+	this->SW_ShowInButtons.Read(exINI, pSection, "SW.ShowInButtons");
+	this->SW_ButtonsPriorityHouses = pINI->ReadHouseTypesList(pSection, "SW.ButtonsPriorityHouses", this->SW_ButtonsPriorityHouses);
+	this->SW_ButtonsRequiredHouses = pINI->ReadHouseTypesList(pSection, "SW.ButtonsRequiredHouses", this->SW_ButtonsRequiredHouses);
+
 	this->UseWeeds.Read(exINI, pSection, "UseWeeds");
 	this->UseWeeds_Amount.Read(exINI, pSection, "UseWeeds.Amount");
 	this->UseWeeds_StorageTimer.Read(exINI, pSection, "UseWeeds.StorageTimer");
@@ -192,6 +217,7 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 		else
 			this->SW_GrantOneTime_RandomWeightsData.push_back(std::move(weights3));
 	}
+
 	ValueableVector<int> weights3;
 	weights3.Read(exINI, pSection, "SW.GrantOneTime.RandomWeights");
 	if (weights3.size())

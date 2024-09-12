@@ -35,7 +35,16 @@ public:
 		ValueableVector<BuildingTypeClass*> SW_AuxBuildings;
 		ValueableVector<BuildingTypeClass*> SW_NegBuildings;
 		Valueable<bool> SW_InitialReady;
+		Valueable<bool> SW_AutoFire;
+		Valueable<bool> SW_ManualFire;
+		Valueable<bool> SW_Unstoppable;
 		ValueableIdx<SuperWeaponTypeClass> SW_PostDependent;
+		ValueableIdx<VoxClass> EVA_Impatient;
+		ValueableIdx<VoxClass> EVA_InsufficientFunds;
+		ValueableIdx<VoxClass> EVA_SelectTarget;
+		Valueable<CSFText> Message_InsufficientFunds;
+		Valueable<int> Message_ColorScheme;
+		Valueable<bool> Message_FirerColor;
 
 		Valueable<CSFText> UIDescription;
 		Valueable<int> CameoPriority;
@@ -59,6 +68,10 @@ public:
 		Valueable<bool> Detonate_Warhead_Full;
 		Valueable<bool> Detonate_AtFirer;
 		Valueable<bool> ShowDesignatorRange;
+
+		Valueable<bool> SW_ShowInButtons;
+		DWORD SW_ButtonsPriorityHouses;
+		DWORD SW_ButtonsRequiredHouses;
 
 		std::vector<ValueableVector<int>> LimboDelivery_RandomWeightsData;
 		std::vector<ValueableVector<int>> SW_Next_RandomWeightsData;
@@ -90,7 +103,17 @@ public:
 			, SW_AuxBuildings {}
 			, SW_NegBuildings {}
 			, SW_InitialReady { false }
+			, SW_AutoFire { false }
+			, SW_ManualFire { true }
+			, SW_Unstoppable { false }
 			, SW_PostDependent {}
+			, EVA_Impatient { -1 }
+			, EVA_InsufficientFunds { -1 }
+			, EVA_SelectTarget { -1 }
+			, Message_InsufficientFunds {}
+			, Message_ColorScheme { -1 }
+			, Message_FirerColor { false }
+
 			, UIDescription {}
 			, CameoPriority { 0 }
 			, LimboDelivery_Types {}
@@ -112,8 +135,11 @@ public:
 			, SW_Next_RollChances {}
 			, SW_Next_RandomWeightsData {}
 			, ShowTimer_Priority { 0 }
+			, SW_ButtonsPriorityHouses { 0xFFFFFFFFu }
+			, SW_ButtonsRequiredHouses { 0xFFFFFFFFu }
 			, Convert_Pairs {}
 			, ShowDesignatorRange { true }
+			, SW_ShowInButtons { false }
 			, UseWeeds { false }
 			, UseWeeds_Amount { RulesClass::Instance->WeedCapacity }
 			, UseWeeds_StorageTimer { false }
