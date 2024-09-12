@@ -176,6 +176,10 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->CheckExpandPlaceGrid.Read(exINI, GameStrings::AudioVisual, "CheckExpandPlaceGrid");
 	this->ExpandLandGridFrames.Read(exINI, GameStrings::AudioVisual, "ExpandLandGridFrames");
 	this->ExpandWaterGridFrames.Read(exINI, GameStrings::AudioVisual, "ExpandWaterGridFrames");
+	this->SWSidebarBackground_TopPCX.Read(pINI, GameStrings::AudioVisual, "SWSidebarBackground.TopPCX");
+	this->SWSidebarBackground_CenterPCX.Read(pINI, GameStrings::AudioVisual, "SWSidebarBackground.CenterPCX");
+	this->SWSidebarBackground_BottomPCX.Read(pINI, GameStrings::AudioVisual, "SWSidebarBackground.BottomPCX");
+	this->SWSidebarBackground.Read(exINI, GameStrings::AudioVisual, "SWSidebarBackground");
 
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
 	this->ForbidParallelAIQueues_Aircraft.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Aircraft");
@@ -433,6 +437,10 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->CheckExpandPlaceGrid)
 		.Process(this->ExpandLandGridFrames)
 		.Process(this->ExpandWaterGridFrames)
+		.Process(this->SWSidebarBackground_TopPCX)
+		.Process(this->SWSidebarBackground_CenterPCX)
+		.Process(this->SWSidebarBackground_BottomPCX)
+		.Process(this->SWSidebarBackground)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
 		.Process(this->ForbidParallelAIQueues_Building)

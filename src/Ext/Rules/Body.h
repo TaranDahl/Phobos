@@ -133,6 +133,10 @@ public:
 		Valueable<bool> CheckExpandPlaceGrid;
 		Valueable<Vector3D<int>> ExpandLandGridFrames;
 		Valueable<Vector3D<int>> ExpandWaterGridFrames;
+		PhobosPCXFile SWSidebarBackground_TopPCX;
+		PhobosPCXFile SWSidebarBackground_CenterPCX;
+		PhobosPCXFile SWSidebarBackground_BottomPCX;
+		Valueable<bool> SWSidebarBackground;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -327,6 +331,7 @@ public:
 			, CheckExpandPlaceGrid { false }
 			, ExpandLandGridFrames { { 1, 0, 0 } }
 			, ExpandWaterGridFrames { { 1, 0, 0 } }
+			, SWSidebarBackground { true }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
