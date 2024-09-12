@@ -224,7 +224,7 @@ void MousePressHelper::DrawButtonForSuperWeapon()
 		if (CAN_USE_ARES && AresHelper::CanUseAres && CameoPCX)
 		{
 			RectangleStruct drawRect { position.X, position.Y, 60, 48 };
-			PCX::Instance->BlitToSurface(&drawRect, DSurface::Sidebar, CameoPCX);
+			PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
 		}
 		else if (SHPStruct* const pSHP = pSWType->SidebarImage)
 		{
@@ -233,7 +233,10 @@ void MousePressHelper::DrawButtonForSuperWeapon()
 		}
 
 		// Flash
-		if (pSuper->ShouldFlashTab())
+		const int delay = pSWType->FlashSidebarTabFrames;
+
+		if (delay > 0 && !pSuper->IsSuspended && (pSuper->IsReady || (pSWType->UseChargeDrain && pSuper->ChargeDrainState != ChargeDrainState::Charging))
+			&& ((Unsorted::CurrentFrame - pSuper->ReadyFrame) % delay) > (delay / 2))
 		{
 			DSurface::Composite->DrawSHP(FileSystem::SIDEBAR_PAL, Make_Global<SHPStruct*>(0xB07BC0), 0, &position, &rect,
 				BlitterFlags(0x404), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
@@ -243,6 +246,7 @@ void MousePressHelper::DrawButtonForSuperWeapon()
 		if (pSuper->ShouldDrawProgress())
 		{
 			const int frame = pSuper->AnimStage() + 1;
+
 			DSurface::Composite->DrawSHP(FileSystem::SIDEBAR_PAL, Make_Global<SHPStruct*>(0xB0B484), frame, &position, &rect,
 				BlitterFlags(0x404), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 		}
