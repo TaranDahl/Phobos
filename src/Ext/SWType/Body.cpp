@@ -33,6 +33,7 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Message_InsufficientFunds)
 		.Process(this->Message_ColorScheme)
 		.Process(this->Message_FirerColor)
+		.Process(this->SidebarPCX)
 		.Process(this->UIDescription)
 		.Process(this->CameoPriority)
 		.Process(this->LimboDelivery_Types)
@@ -107,6 +108,7 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Message_InsufficientFunds.Read(exINI, pSection, "Message.InsufficientFunds");
 	this->Message_ColorScheme.Read(exINI, pSection, "Message.ColorScheme");
 	this->Message_FirerColor.Read(exINI, pSection, "Message.FirerColor");
+	this->SidebarPCX.Read(pINI, pSection, "SidebarPCX");
 
 	this->UIDescription.Read(exINI, pSection, "UIDescription");
 	this->CameoPriority.Read(exINI, pSection, "CameoPriority");

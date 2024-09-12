@@ -45,6 +45,7 @@ public:
 		Valueable<CSFText> Message_InsufficientFunds;
 		Valueable<int> Message_ColorScheme;
 		Valueable<bool> Message_FirerColor;
+		PhobosPCXFile SidebarPCX;
 
 		Valueable<CSFText> UIDescription;
 		Valueable<int> CameoPriority;
