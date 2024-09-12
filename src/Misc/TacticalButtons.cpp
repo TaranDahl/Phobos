@@ -236,10 +236,10 @@ void MousePressHelper::DrawButtonForSuperWeapon()
 		const int delay = pSWType->FlashSidebarTabFrames;
 
 		if (delay > 0 && !pSuper->IsSuspended && (pSuper->IsReady || (pSWType->UseChargeDrain && pSuper->ChargeDrainState != ChargeDrainState::Charging))
-			&& ((Unsorted::CurrentFrame - pSuper->ReadyFrame) % delay) > (delay / 2))
+			&& ((Unsorted::CurrentFrame - pSuper->ReadyFrame) % (delay << 1)) > delay)
 		{
 			DSurface::Composite->DrawSHP(FileSystem::SIDEBAR_PAL, Make_Global<SHPStruct*>(0xB07BC0), 0, &position, &rect,
-				BlitterFlags(0x404), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
+				BlitterFlags(0x406), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 		}
 
 		// Progress
