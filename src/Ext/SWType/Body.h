@@ -143,7 +143,7 @@ public:
 			, Convert_Pairs {}
 			, ShowDesignatorRange { true }
 			, SW_InScreen_Show { false }
-			, SW_InScreen_PriorityHouses { 0xFFFFFFFFu }
+			, SW_InScreen_PriorityHouses { 0u }
 			, SW_InScreen_RequiredHouses { 0xFFFFFFFFu }
 			, SW_InScreen_QuickFire { false }
 			, UseWeeds { false }
