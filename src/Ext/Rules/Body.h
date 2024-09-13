@@ -133,9 +133,6 @@ public:
 		Valueable<bool> CheckExpandPlaceGrid;
 		Valueable<Vector3D<int>> ExpandLandGridFrames;
 		Valueable<Vector3D<int>> ExpandWaterGridFrames;
-		PhobosPCXFile SWSidebarBackground_TopPCX;
-		PhobosPCXFile SWSidebarBackground_CenterPCX;
-		PhobosPCXFile SWSidebarBackground_BottomPCX;
 		Valueable<bool> SWSidebarBackground;
 
 		Valueable<bool> AllowParallelAIQueues;

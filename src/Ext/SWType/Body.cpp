@@ -34,6 +34,7 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Message_ColorScheme)
 		.Process(this->Message_FirerColor)
 		.Process(this->SidebarPCX)
+		.Process(this->SW_UseAITargeting)
 		.Process(this->UIDescription)
 		.Process(this->CameoPriority)
 		.Process(this->LimboDelivery_Types)
@@ -60,6 +61,7 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SW_ShowInButtons)
 		.Process(this->SW_ButtonsPriorityHouses)
 		.Process(this->SW_ButtonsRequiredHouses)
+		.Process(this->SW_QuickFireInScreen)
 		.Process(this->UseWeeds)
 		.Process(this->UseWeeds_Amount)
 		.Process(this->UseWeeds_StorageTimer)
@@ -109,6 +111,7 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Message_ColorScheme.Read(exINI, pSection, "Message.ColorScheme");
 	this->Message_FirerColor.Read(exINI, pSection, "Message.FirerColor");
 	this->SidebarPCX.Read(pINI, pSection, "SidebarPCX");
+	this->SW_UseAITargeting.Read(exINI, pSection, "SW.UseAITargeting");
 
 	this->UIDescription.Read(exINI, pSection, "UIDescription");
 	this->CameoPriority.Read(exINI, pSection, "CameoPriority");
@@ -192,6 +195,7 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SW_ShowInButtons.Read(exINI, pSection, "SW.ShowInButtons");
 	this->SW_ButtonsPriorityHouses = pINI->ReadHouseTypesList(pSection, "SW.ButtonsPriorityHouses", this->SW_ButtonsPriorityHouses);
 	this->SW_ButtonsRequiredHouses = pINI->ReadHouseTypesList(pSection, "SW.ButtonsRequiredHouses", this->SW_ButtonsRequiredHouses);
+	this->SW_QuickFireInScreen.Read(exINI, pSection, "SW.QuickFireInScreen");
 
 	this->UseWeeds.Read(exINI, pSection, "UseWeeds");
 	this->UseWeeds_Amount.Read(exINI, pSection, "UseWeeds.Amount");

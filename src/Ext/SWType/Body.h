@@ -47,6 +47,8 @@ public:
 		Valueable<bool> Message_FirerColor;
 		PhobosPCXFile SidebarPCX;
 
+		Valueable<bool> SW_UseAITargeting;
+
 		Valueable<CSFText> UIDescription;
 		Valueable<int> CameoPriority;
 		ValueableVector<BuildingTypeClass*> LimboDelivery_Types;
@@ -73,6 +75,7 @@ public:
 		Valueable<bool> SW_ShowInButtons;
 		DWORD SW_ButtonsPriorityHouses;
 		DWORD SW_ButtonsRequiredHouses;
+		Valueable<bool> SW_QuickFireInScreen;
 
 		std::vector<ValueableVector<int>> LimboDelivery_RandomWeightsData;
 		std::vector<ValueableVector<int>> SW_Next_RandomWeightsData;
@@ -114,6 +117,7 @@ public:
 			, Message_InsufficientFunds {}
 			, Message_ColorScheme { -1 }
 			, Message_FirerColor { false }
+			, SW_UseAITargeting { false }
 
 			, UIDescription {}
 			, CameoPriority { 0 }
@@ -136,11 +140,12 @@ public:
 			, SW_Next_RollChances {}
 			, SW_Next_RandomWeightsData {}
 			, ShowTimer_Priority { 0 }
-			, SW_ButtonsPriorityHouses { 0xFFFFFFFFu }
-			, SW_ButtonsRequiredHouses { 0xFFFFFFFFu }
 			, Convert_Pairs {}
 			, ShowDesignatorRange { true }
 			, SW_ShowInButtons { false }
+			, SW_ButtonsPriorityHouses { 0xFFFFFFFFu }
+			, SW_ButtonsRequiredHouses { 0xFFFFFFFFu }
+			, SW_QuickFireInScreen { false }
 			, UseWeeds { false }
 			, UseWeeds_Amount { RulesClass::Instance->WeedCapacity }
 			, UseWeeds_StorageTimer { false }
