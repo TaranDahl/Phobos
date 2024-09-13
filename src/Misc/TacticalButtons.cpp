@@ -297,7 +297,7 @@ bool TacticalButtonClass::InsertButtonForSW(int& superIndex)
 	const unsigned int ownerBits = 1u << pHouse->Type->ArrayIndex;
 	bool overflow = true;
 
-	if (pTypeExt->SW_ShowInButtons && !pTypeExt->SW_UseAITargeting && (pTypeExt->SW_ButtonsRequiredHouses & ownerBits))
+	if (pTypeExt->SW_InScreen_Show && !pTypeExt->SW_UseAITargeting && (pTypeExt->SW_InScreen_RequiredHouses & ownerBits))
 	{
 		auto& data = pHouseExt->SuperWeaponButtonData;
 		bool move = false;
@@ -347,9 +347,9 @@ bool TacticalButtonClass::MoveButtonForSW(SuperWeaponTypeClass* pDataType, Super
 {
 	SWTypeExt::ExtData* const pDataTypeExt = SWTypeExt::ExtMap.Find(pDataType);
 
-	if ((pDataTypeExt->SW_ButtonsPriorityHouses & ownerBits) && !(pAddTypeExt->SW_ButtonsPriorityHouses & ownerBits))
+	if ((pDataTypeExt->SW_InScreen_PriorityHouses & ownerBits) && !(pAddTypeExt->SW_InScreen_PriorityHouses & ownerBits))
 		return false;
-	else if (!(pDataTypeExt->SW_ButtonsPriorityHouses & ownerBits) && (pAddTypeExt->SW_ButtonsPriorityHouses & ownerBits))
+	else if (!(pDataTypeExt->SW_InScreen_PriorityHouses & ownerBits) && (pAddTypeExt->SW_InScreen_PriorityHouses & ownerBits))
 		return true;
 	else if (pDataTypeExt->CameoPriority > pAddTypeExt->CameoPriority)
 		return false;
@@ -431,7 +431,7 @@ void TacticalButtonClass::TriggerButtonForSW(int buttonIndex)
 		return;
 	}
 
-	// Use SW.QuickFireInScreen here, to some extent to replace SW.UseAITargeting
+	// Use SW.InScreen.QuickFire here, to some extent to replace SW.UseAITargeting
 	// Inevitably ignore various conditions such as range, sight, indicators .etc
 	// No check for SW.UseAITargeting, too complicated for me. - CrimRecya
 	if (pType->Action == Action::None)
@@ -445,7 +445,7 @@ void TacticalButtonClass::TriggerButtonForSW(int buttonIndex)
 		);
 		EventClass::AddEvent(event);
 	}
-	else if (pTypeExt->SW_QuickFireInScreen)
+	else if (pTypeExt->SW_InScreen_QuickFire)
 	{
 		EventClass event
 		(

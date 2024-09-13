@@ -58,10 +58,10 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ShowTimer_Priority)
 		.Process(this->Convert_Pairs)
 		.Process(this->ShowDesignatorRange)
-		.Process(this->SW_ShowInButtons)
-		.Process(this->SW_ButtonsPriorityHouses)
-		.Process(this->SW_ButtonsRequiredHouses)
-		.Process(this->SW_QuickFireInScreen)
+		.Process(this->SW_InScreen_Show)
+		.Process(this->SW_InScreen_PriorityHouses)
+		.Process(this->SW_InScreen_RequiredHouses)
+		.Process(this->SW_InScreen_QuickFire)
 		.Process(this->UseWeeds)
 		.Process(this->UseWeeds_Amount)
 		.Process(this->UseWeeds_StorageTimer)
@@ -192,10 +192,10 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->ShowDesignatorRange.Read(exINI, pSection, "ShowDesignatorRange");
 
-	this->SW_ShowInButtons.Read(exINI, pSection, "SW.ShowInButtons");
-	this->SW_ButtonsPriorityHouses = pINI->ReadHouseTypesList(pSection, "SW.ButtonsPriorityHouses", this->SW_ButtonsPriorityHouses);
-	this->SW_ButtonsRequiredHouses = pINI->ReadHouseTypesList(pSection, "SW.ButtonsRequiredHouses", this->SW_ButtonsRequiredHouses);
-	this->SW_QuickFireInScreen.Read(exINI, pSection, "SW.QuickFireInScreen");
+	this->SW_InScreen_Show.Read(exINI, pSection, "SW.InScreen.Show");
+	this->SW_InScreen_PriorityHouses = pINI->ReadHouseTypesList(pSection, "SW.InScreen.PriorityHouses", this->SW_InScreen_PriorityHouses);
+	this->SW_InScreen_RequiredHouses = pINI->ReadHouseTypesList(pSection, "SW.InScreen.RequiredHouses", this->SW_InScreen_RequiredHouses);
+	this->SW_InScreen_QuickFire.Read(exINI, pSection, "SW.InScreen.QuickFire");
 
 	this->UseWeeds.Read(exINI, pSection, "UseWeeds");
 	this->UseWeeds_Amount.Read(exINI, pSection, "UseWeeds.Amount");
