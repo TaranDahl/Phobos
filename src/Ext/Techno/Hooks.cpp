@@ -617,3 +617,9 @@ DEFINE_HOOK(0x452734, TEST3, 0xA)
 	Debug::LogAndMessage("Here3\n");
 	return 0x4527B4;
 }
+
+DEFINE_HOOK(0x449762, TEST4, 0x6)
+{
+	Debug::LogAndMessage("Here4\n");
+	return 0x449780;
+}
