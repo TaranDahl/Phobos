@@ -599,3 +599,28 @@ DEFINE_HOOK(0x6F9FA9, TechnoClass_AI_PromoteAnim, 0x6)
 // TunnelLocomotionClass_IsToHaveShadow, skip shadow on all but idle.
 // TODO: Investigate if it is possible to fix the shadows not tilting on the burrowing etc. states.
 DEFINE_JUMP(LJMP, 0x72A070, 0x72A07F);
+
+DEFINE_HOOK(0x443621, TEST, 0x6)
+{
+	return 0x44363C;
+}
+
+DEFINE_HOOK(0x44499C, TEST2, 0x5)
+{
+	GET(BuildingClass*, pThis, ESI);
+	GET(FootClass*, pProduct, EDI);
+
+	if (pThis->Focus && (pThis->Focus->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None)
+	{
+		auto const pFocus = abstract_cast<ObjectClass*>(pThis->Focus);
+		pProduct->ClickedMission(Mission::Area_Guard, pFocus, nullptr, nullptr);
+	}
+
+	return 0;
+}
+/*
+DEFINE_HOOK(0x444CA3, TEST3, 0x6)
+{
+	return 0x444D11;
+}
+*/
