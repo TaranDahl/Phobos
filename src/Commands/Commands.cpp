@@ -30,6 +30,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<SWShortcutsCommandClass<6>>();
 	MakeCommand<SWShortcutsCommandClass<7>>();
 	MakeCommand<SWShortcutsCommandClass<8>>();
+	MakeCommand<SWShortcutsCommandClass<9>>();
 
 	if (Phobos::Config::DevelopmentCommands)
 	{

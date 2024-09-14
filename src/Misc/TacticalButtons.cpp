@@ -13,13 +13,14 @@
 #include "PhobosToolTip.h"
 #include "TacticalButtons.h"
 
-// Functions
-
 TacticalButtonClass TacticalButtonClass::Instance;
 
+// Functions
+
+// Private functions
 int TacticalButtonClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 {
-	if (pMousePosition->X < 65 && pMousePosition->X >= 5) // Button index 1-8 : Super weapons buttons
+	if (pMousePosition->X < 65 && pMousePosition->X >= 5) // Button index 1-9 : Super weapons buttons
 	{
 		const int currentCounts = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->SuperWeaponButtonCount;
 		const int height = DSurface::Composite->GetHeight();
@@ -39,7 +40,7 @@ int TacticalButtonClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 		}
 	}
 
-	// TODO New buttons (Start from index = 9)
+	// TODO New buttons (Start from index = 10)
 
 	if (CheckMouseOverBackground(pMousePosition))
 		return 0; // Button index 0 : Background
@@ -64,6 +65,7 @@ bool TacticalButtonClass::CheckMouseOverBackground(const Point2D* pMousePosition
 	return false;
 }
 
+// Inline functions
 inline bool TacticalButtonClass::MouseOverButtons()
 {
 	return this->ButtonIndex > 0;
@@ -74,11 +76,13 @@ inline bool TacticalButtonClass::MouseOverTactical()
 	return this->ButtonIndex < 0;
 }
 
+// Cite functions
 int TacticalButtonClass::GetButtonIndex()
 {
 	return this->ButtonIndex;
 }
 
+// General functions
 void TacticalButtonClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 {
 	if (this->LastPosition == *pMousePosition)
@@ -113,19 +117,20 @@ void TacticalButtonClass::PressDesignatedButton(int triggerIndex)
 	if (!buttonIndex) // In buttons background
 		return;
 
-	if (buttonIndex <= 8) // Button index 1-8 : Super weapons buttons
+	if (buttonIndex <= 9) // Button index 1-9 : Super weapons buttons
 	{
 		if (!triggerIndex)
 			TriggerButtonForSW(buttonIndex);
 		else if (triggerIndex == 2)
 			DisplayClass::Instance->CurrentSWTypeIndex = -1;
 	}
-/*	else if (?) // TODO New buttons (Start from index = 9)
+/*	else if (?) // TODO New buttons (Start from index = 10)
 	{
 		;
 	}*/
 }
 
+// SW buttons functions
 void TacticalButtonClass::DrawButtonForSW()
 {
 	HouseClass* const pHouse = HouseClass::CurrentPlayer;
@@ -163,7 +168,7 @@ void TacticalButtonClass::DrawButtonForSW()
 	}
 
 	// Draw each buttons
-	for (int i = 0; i < currentCounts; position.Y += 50, rect.Height += 50) // Button index 1-8
+	for (int i = 0; i < currentCounts; position.Y += 50, rect.Height += 50) // Button index 1-9
 	{
 		// Draw center background (80 * 50)
 		if (drawSWSidebarBackground)
@@ -183,7 +188,7 @@ void TacticalButtonClass::DrawButtonForSW()
 		}
 
 		// Get SW data
-		SuperClass* const pSuper = HouseClass::CurrentPlayer->Supers.Items[data[i]];
+		SuperClass* const pSuper = pHouse->Supers.Items[data[i]];
 		SuperWeaponTypeClass* const pSWType = pSuper->Type;
 		SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pSWType);
 
@@ -291,26 +296,46 @@ bool TacticalButtonClass::InsertButtonForSW(int& superIndex)
 {
 	SuperWeaponTypeClass* const pType = SuperWeaponTypeClass::Array->Items[superIndex];
 	SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pType);
-
-	HouseClass* const pHouse = HouseClass::CurrentPlayer;
-	HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pHouse);
-	const unsigned int ownerBits = 1u << pHouse->Type->ArrayIndex;
 	bool overflow = true;
 
-	if (pTypeExt->SW_InScreen_Show && !pTypeExt->SW_UseAITargeting && (pTypeExt->SW_InScreen_RequiredHouses & ownerBits))
+	if (pTypeExt->SW_InScreen_Show && !pTypeExt->SW_UseAITargeting)
 	{
-		auto& data = pHouseExt->SuperWeaponButtonData;
-		bool move = false;
+		HouseClass* const pHouse = HouseClass::CurrentPlayer;
+		HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pHouse);
+		const unsigned int ownerBits = 1u << pHouse->Type->ArrayIndex;
 
-		for (int i = 0; i < 8; ++i) // 8 buttons at max
+		if (pTypeExt->SW_InScreen_RequiredHouses & ownerBits)
 		{
-			if (move)
+			auto& data = pHouseExt->SuperWeaponButtonData;
+			bool move = false;
+
+			for (int i = 0; i < 9; ++i) // 9 buttons at max
 			{
-				if (data[i] != -1)
+				if (move)
 				{
-					int buffer = data[i];
-					data[i] = superIndex;
-					superIndex = buffer;
+					if (data[i] != -1)
+					{
+						int buffer = data[i];
+						data[i] = superIndex;
+						superIndex = buffer;
+					}
+					else
+					{
+						data[i] = superIndex;
+						overflow = false;
+						++pHouseExt->SuperWeaponButtonCount;
+						break;
+					}
+				}
+				else if (data[i] != -1)
+				{
+					if (MoveButtonForSW(SuperWeaponTypeClass::Array->Items[data[i]], pType, pTypeExt, ownerBits))
+					{
+						move = true;
+						int buffer = data[i];
+						data[i] = superIndex;
+						superIndex = buffer;
+					}
 				}
 				else
 				{
@@ -320,27 +345,10 @@ bool TacticalButtonClass::InsertButtonForSW(int& superIndex)
 					break;
 				}
 			}
-			else if (data[i] != -1)
-			{
-				if (MoveButtonForSW(SuperWeaponTypeClass::Array->Items[data[i]], pType, pTypeExt, ownerBits))
-				{
-					move = true;
-					int buffer = data[i];
-					data[i] = superIndex;
-					superIndex = buffer;
-				}
-			}
-			else
-			{
-				data[i] = superIndex;
-				overflow = false;
-				++pHouseExt->SuperWeaponButtonCount;
-				break;
-			}
 		}
 	}
 
-	return !overflow;
+	return overflow;
 }
 
 bool TacticalButtonClass::MoveButtonForSW(SuperWeaponTypeClass* pDataType, SuperWeaponTypeClass* pAddType, SWTypeExt::ExtData* pAddTypeExt, unsigned int ownerBits)
@@ -478,7 +486,9 @@ void TacticalButtonClass::TriggerButtonForSW(int buttonIndex)
 	}
 }
 
-// Hooks for trigger
+// Hooks
+
+// Mouse trigger hooks
 DEFINE_HOOK(0x6931A5, ScrollClass_WindowsProcedure_PressLeftMouseButton, 0x6)
 {
 	enum { SkipGameCode = 0x6931B4 };
@@ -551,7 +561,7 @@ DEFINE_HOOK(0x693397, ScrollClass_WindowsProcedure_ReleaseRightMouseButton, 0x6)
 	return 0;
 }
 
-// Hooks for suspend
+// Mouse suspend hooks
 DEFINE_HOOK(0x692F85, ScrollClass_MouseUpdate_SkipMouseLongPress, 0x7)
 {
 	enum { CheckMousePress = 0x692F8E, CheckMouseNoPress = 0x692FDC, SkipGameCode = 0x692FAE };
@@ -580,7 +590,7 @@ DEFINE_HOOK(0x69300B, ScrollClass_MouseUpdate_SkipMouseActionUpdate, 0x6)
 	return SkipGameCode;
 }
 
-// Hooks for display
+// Buttons display hooks
 DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 {
 	// TODO New buttons (The later draw, the higher layer)
@@ -589,25 +599,19 @@ DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 	return 0;
 }
 
-// Hooks for function
+// SW buttons hooks
 DEFINE_HOOK(0x4F9283, HouseClass_Update_RecheckTechTree, 0x5)
 {
 	TacticalButtonClass::RecheckButtonForSW();
 	return 0;
 }
 
-DEFINE_HOOK(0x6A6314, SidebarClass_AddCameo_SupportNewButtons, 0x8)
+DEFINE_HOOK(0x6A6314, SidebarClass_AddCameo_SupportSWButtons, 0x8)
 {
 	enum { SkipGameCode = 0x6A65F5 };
 
 	GET_STACK(const AbstractType, absType, STACK_OFFSET(0x14, 0x4));
 	REF_STACK(int, index, STACK_OFFSET(0x14, 0x8));
 
-	if (absType != AbstractType::Special || SuperWeaponTypeClass::Array->Count <= index)
-		return 0;
-
-	if (TacticalButtonClass::InsertButtonForSW(index))
-		return SkipGameCode;
-
-	return 0;
+	return (absType != AbstractType::Special || SuperWeaponTypeClass::Array->Count <= index || TacticalButtonClass::InsertButtonForSW(index)) ? 0 : SkipGameCode;
 }

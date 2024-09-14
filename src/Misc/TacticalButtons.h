@@ -29,7 +29,7 @@ public:
 	void SetMouseButtonIndex(const Point2D* pMousePosition);
 	void PressDesignatedButton(int triggerIndex);
 
-	// Button index 1-8 : Super weapons buttons
+	// Button index 1-9 : Super weapons buttons
 	static void DrawButtonForSW();
 	static void RecheckButtonForSW();
 	static bool InsertButtonForSW(int& superIndex);
@@ -43,6 +43,6 @@ private:
 	int ButtonIndex { -1 }; // -1 -> above no buttons, 0 -> above buttons background, POSITIVE -> above button who have this index
 	Point2D LastPosition { Point2D::Empty }; // Check moving
 
-	// Button index 1-8 : Super weapons buttons
+	// Button index 1-9 : Super weapons buttons
 	SuperClass* pRecordSuper = nullptr; // Cannot be used, only for comparison purposes
 };
