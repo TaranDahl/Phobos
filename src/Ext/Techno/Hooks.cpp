@@ -811,3 +811,126 @@ DEFINE_HOOK(0x51B20E, InfantryClass_AssignTarget_FireOnce, 0x6)
 
 	return 0;
 }
+
+namespace PlayDestroyAnimGeneralize
+{
+	TechnoTypeClass* pType;
+}
+
+DEFINE_HOOK(0x738687, UnitClass_PlayDestroyAnim_SetContext, 0x6)
+{
+	enum { SkipGameCode = 0x73868D };
+
+	GET(TechnoClass*, pThis, ESI);
+
+	PlayDestroyAnimGeneralize::pType = pThis->GetTechnoType();
+	R->EAX(PlayDestroyAnimGeneralize::pType);
+
+	return SkipGameCode;
+}
+
+DEFINE_HOOK_AGAIN(0x738822, UnitClass_PlayDestroyAnim_Generalize1, 0x6);
+DEFINE_HOOK_AGAIN(0x7387C4, UnitClass_PlayDestroyAnim_Generalize1, 0x6);
+DEFINE_HOOK(0x7386AC, UnitClass_PlayDestroyAnim_Generalize1, 0x6)
+{
+	R->ECX(PlayDestroyAnimGeneralize::pType);
+	return R->Origin() + 6;
+}
+
+DEFINE_HOOK_AGAIN(0x738801, UnitClass_PlayDestroyAnim_Generalize2, 0x6);
+DEFINE_HOOK(0x7386DA, UnitClass_PlayDestroyAnim_Generalize2, 0x6)
+{
+	R->EAX(PlayDestroyAnimGeneralize::pType);
+	return R->Origin() + 6;
+}
+
+DEFINE_HOOK(0x746D61, UnitClass_Destroy_ToggleAnim, 0x7)
+{
+	enum { SkipGameCode = 0x746D68 };
+
+	GET(TechnoClass*, pThis, ECX);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	if (pTypeExt->ExplodeOnDestroy.Get(pThis->WhatAmI() == AbstractType::Unit || RulesExt::Global()->NonVehExplodeOnDestroy))
+		static_cast<UnitClass*>(pThis)->Explode();
+
+	R->ESI(pThis);
+	return SkipGameCode;
+}
+
+DEFINE_JUMP(VTABLE, 0x7EB1C8, 0x746D60); // Redirect InfantryClass::Explode(TechnoClass::Explode) to UnitClass::Explode
+DEFINE_JUMP(VTABLE, 0x7E402C, 0x746D60); // Redirect BuildingClass::Explode(TechnoClass::Explode) to UnitClass::Explode
+DEFINE_JUMP(VTABLE, 0x7E2414, 0x746D60); // Redirect AircraftClass::Explode(TechnoClass::Explode) to UnitClass::Explode
+
+DEFINE_HOOK(0x7418D4, UnitClass_CrushCell_FireDeathWeapon, 0x6)
+{
+	GET(ObjectClass*, pThis, ESI);
+
+	if ((pThis->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None)
+	{
+		auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+		if (pTypeExt && pTypeExt->FireDeathWeaponOnCrushed.Get(RulesExt::Global()->FireDeathWeaponOnCrushed))
+		{
+			auto const pTechno = static_cast<TechnoClass*>(pThis);
+			pTechno->FireDeathWeapon(0);
+		}
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x70D703, TechnoClass_FireDeathWeapon_UseGlobalDeathWeaponDamage, 0xA)
+{
+	enum { ReplaceDamage = 0x70D724, DontReplace = 0 };
+
+	if (RulesExt::Global()->UseGlobalDeathWeaponDamage)
+	{
+		auto const pDeathWeapon = RulesClass::Instance()->DeathWeapon;
+		R->EDI(pDeathWeapon);
+		R->EAX(pDeathWeapon ? pDeathWeapon->Damage : 0);
+		return ReplaceDamage;
+	}
+
+	return DontReplace;
+}
+
+namespace CrushBuildingOnAnyCell
+{
+	CellClass* pCell;
+}
+
+DEFINE_HOOK(0x741733, UnitClass_CrushCell_SetContext, 0x6)
+{
+	GET(CellClass*, pCell, ESI);
+
+	CrushBuildingOnAnyCell::pCell = pCell;
+
+	return 0;
+}
+
+DEFINE_HOOK(0x741925, UnitClass_CrushCell_CrushBuilding, 0x5)
+{
+	GET(UnitClass*, pThis, EDI);
+
+	if (RulesExt::Global()->CrushBuildingOnAnyCell)
+	{
+		if (auto const pBuilding = CrushBuildingOnAnyCell::pCell->GetBuilding())
+		{
+			if (reinterpret_cast<bool(__thiscall*)(BuildingClass*, TechnoClass*)>(0x5F6CD0)(pBuilding, pThis)) // IsCrushable
+			{
+				VocClass::PlayAt(pBuilding->GetTechnoType()->CrushSound, pThis->Location, 0);
+				pBuilding->Destroy();
+				pBuilding->RegisterDestruction(pThis);
+				pBuilding->Mark(MarkType::Up);
+				// pBuilding->Limbo(); // Vanilla do this. May be not necessary?
+				pBuilding->UnInit();
+
+				R->AL(true);
+			}
+		}
+	}
+
+	return 0;
+}

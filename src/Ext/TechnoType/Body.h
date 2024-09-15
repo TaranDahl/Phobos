@@ -273,6 +273,8 @@ public:
 		Valueable<int> DigEndROT;
 		Valueable<int> FlightClimb;
 		Valueable<int> FlightCrash;
+		Nullable<bool> ExplodeOnDestroy;
+		Nullable<bool> FireDeathWeaponOnCrushed;
 
 		ValueableVector<TechnoTypeClass*> InitialPayload_Types;
 		ValueableVector<int> InitialPayload_Nums;
@@ -553,6 +555,8 @@ public:
 			, DigEndROT { -1 }
 			, FlightClimb { -1 }
 			, FlightCrash { -1 }
+			, ExplodeOnDestroy { }
+			, FireDeathWeaponOnCrushed { }
 
 			, InitialPayload_Types {}
 			, InitialPayload_Nums {}

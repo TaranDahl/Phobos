@@ -263,6 +263,10 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->GuardModeGuardRangeAddend.Read(exINI, GameStrings::General, "GuardModeGuardRangeAddend");
 	this->GuardModeGuardRangeMax.Read(exINI, GameStrings::General, "GuardModeGuardRangeMax");
 	this->GuardStationaryStray.Read(exINI, GameStrings::General, "GuardStationaryStray");
+	this->UseGlobalDeathWeaponDamage.Read(exINI, GameStrings::CombatDamage, "UseGlobalDeathWeaponDamage");
+	this->NonVehExplodeOnDestroy.Read(exINI, GameStrings::AudioVisual, "NonVehExplodeOnDestroy");
+	this->FireDeathWeaponOnCrushed.Read(exINI, GameStrings::CombatDamage, "FireDeathWeaponOnCrushed");
+	this->CrushBuildingOnAnyCell.Read(exINI, GameStrings::General, "CrushBuildingOnAnyCell");
 
 	this->VoxelLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelLightSource");
 	// this->VoxelShadowLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelShadowLightSource");
@@ -516,6 +520,10 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->GuardModeGuardRangeAddend)
 		.Process(this->GuardModeGuardRangeMax)
 		.Process(this->GuardStationaryStray)
+		.Process(this->UseGlobalDeathWeaponDamage)
+		.Process(this->NonVehExplodeOnDestroy)
+		.Process(this->FireDeathWeaponOnCrushed)
+		.Process(this->CrushBuildingOnAnyCell)
 		.Process(this->VoxelLightSource)
 		// .Process(this->VoxelShadowLightSource)
 		.Process(this->UseFixedVoxelLighting)

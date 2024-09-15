@@ -58,6 +58,7 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ShowTimer_Priority)
 		.Process(this->Convert_Pairs)
 		.Process(this->ShowDesignatorRange)
+		.Process(this->CameoTabIdx)
 		.Process(this->SW_InScreen_Show)
 		.Process(this->SW_InScreen_PriorityHouses)
 		.Process(this->SW_InScreen_RequiredHouses)
@@ -191,6 +192,8 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	TypeConvertGroup::Parse(this->Convert_Pairs, exINI, pSection, AffectedHouse::Owner);
 
 	this->ShowDesignatorRange.Read(exINI, pSection, "ShowDesignatorRange");
+
+	this->CameoTabIdx.Read(exINI, pSection, "CameoTabIdx");
 
 	this->SW_InScreen_Show.Read(exINI, pSection, "SW.InScreen.Show");
 	this->SW_InScreen_PriorityHouses = pINI->ReadHouseTypesList(pSection, "SW.InScreen.PriorityHouses", this->SW_InScreen_PriorityHouses);

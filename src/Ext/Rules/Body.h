@@ -225,6 +225,10 @@ public:
 		Valueable<Leptons> GuardModeGuardRangeAddend;
 		Valueable<Leptons> GuardModeGuardRangeMax;
 		Valueable<Leptons> GuardStationaryStray;
+		Valueable<bool> UseGlobalDeathWeaponDamage;
+		Valueable<bool> NonVehExplodeOnDestroy;
+		Valueable<bool> FireDeathWeaponOnCrushed;
+		Valueable<bool> CrushBuildingOnAnyCell;
 
 		Nullable<Vector3D<float>> VoxelLightSource;
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
@@ -413,6 +417,10 @@ public:
 			, GuardModeGuardRangeAddend { Leptons(0) }
 			, GuardModeGuardRangeMax { Leptons(4096) }
 			, GuardStationaryStray { Leptons(-256) }
+			, UseGlobalDeathWeaponDamage { false }
+			, NonVehExplodeOnDestroy { false }
+			, FireDeathWeaponOnCrushed { false }
+			, CrushBuildingOnAnyCell { false }
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 			, UseFixedVoxelLighting { false }

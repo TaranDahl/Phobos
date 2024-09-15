@@ -263,6 +263,11 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->PlayAnimUnderground.Read(exINI, pSection, "PlayAnimUnderground");
 	this->PlayAnimAboveSurface.Read(exINI, pSection, "PlayAnimAboveSurface");
 	this->CellSpread_Cylinder.Read(exINI, pSection, "CellSpread.Cylinder");
+	this->LightChanging.Read(exINI, pSection, "LightChanging");
+	this->SetAmbientLight.Read(exINI, pSection, "SetAmbientLight");
+	this->SetAmbientRed.Read(exINI, pSection, "SetAmbientRed");
+	this->SetAmbientGreen.Read(exINI, pSection, "SetAmbientGreen");
+	this->SetAmbientBlue.Read(exINI, pSection, "SetAmbientBlue");
 
 	this->Nonprovocative.Read(exINI, pSection, "Nonprovocative");
 
@@ -492,6 +497,11 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->PlayAnimUnderground)
 		.Process(this->PlayAnimAboveSurface)
 		.Process(this->CellSpread_Cylinder)
+		.Process(this->LightChanging)
+		.Process(this->SetAmbientLight)
+		.Process(this->SetAmbientRed)
+		.Process(this->SetAmbientGreen)
+		.Process(this->SetAmbientBlue)
 
 		.Process(this->AttachEffect_AttachTypes)
 		.Process(this->AttachEffect_RemoveTypes)

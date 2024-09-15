@@ -72,6 +72,8 @@ public:
 		Valueable<bool> Detonate_AtFirer;
 		Valueable<bool> ShowDesignatorRange;
 
+		Valueable<int> CameoTabIdx;
+
 		Valueable<bool> SW_InScreen_Show;
 		DWORD SW_InScreen_PriorityHouses;
 		DWORD SW_InScreen_RequiredHouses;
@@ -142,6 +144,7 @@ public:
 			, ShowTimer_Priority { 0 }
 			, Convert_Pairs {}
 			, ShowDesignatorRange { true }
+			, CameoTabIdx { 1 }
 			, SW_InScreen_Show { false }
 			, SW_InScreen_PriorityHouses { 0u }
 			, SW_InScreen_RequiredHouses { 0xFFFFFFFFu }

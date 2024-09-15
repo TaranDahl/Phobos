@@ -360,6 +360,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->DigEndROT.Read(exINI, pSection, "DigEndROT");
 	this->FlightClimb.Read(exINI, pSection, "FlightClimb");
 	this->FlightCrash.Read(exINI, pSection, "FlightCrash");
+	this->ExplodeOnDestroy.Read(exINI, pSection, "ExplodeOnDestroy");
+	this->FireDeathWeaponOnCrushed.Read(exINI, pSection, "FireDeathWeaponOnCrushed");
 
 	this->InitialPayload_Types.Read(exINI, pSection, "InitialPayload.Types");
 	this->InitialPayload_Nums.Read(exINI, pSection, "InitialPayload.Nums");
@@ -781,6 +783,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->DigEndROT)
 		.Process(this->FlightClimb)
 		.Process(this->FlightCrash)
+		.Process(this->ExplodeOnDestroy)
+		.Process(this->FireDeathWeaponOnCrushed)
 
 		.Process(this->InitialPayload_Types)
 		.Process(this->InitialPayload_Nums)
