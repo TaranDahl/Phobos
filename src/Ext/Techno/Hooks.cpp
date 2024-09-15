@@ -909,7 +909,7 @@ DEFINE_HOOK(0x4473F4, BuildingClass_MouseOverObject_JustHasRallyPoint, 0x6)
 
 	GET(BuildingClass* const, pThis, ESI);
 
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
 
 	return (pTypeExt && pTypeExt->JustHasRallyPoint) ? JustRally : 0;
 }
@@ -930,7 +930,7 @@ DEFINE_HOOK(0x70000E, TechnoClass_MouseOverObject_RallyPointForceMove, 0x5)
 	if (pThis->WhatAmI() == AbstractType::Building && RulesExt::Global()->RallyPointForceMove)
 	{
 		auto const pType = static_cast<BuildingClass*>(pThis)->Type;
-		auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+		auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pType);
 		bool HasRallyPoint = (pTypeExt ? pTypeExt->JustHasRallyPoint : false) || pType->Factory == AbstractType::UnitType || pType->Factory == AbstractType::InfantryType || pType->Factory == AbstractType::AircraftType;
 		return HasRallyPoint ? AlwaysAlt : 0;
 	}
@@ -944,7 +944,7 @@ DEFINE_HOOK(0x44748E, BuildingClass_MouseOverObject_JustHasRallyPointAircraft, 0
 
 	GET(BuildingClass* const, pThis, ESI);
 
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
 
 	return (pTypeExt && pTypeExt->JustHasRallyPoint) ? JustRally : 0;
 }
@@ -955,7 +955,7 @@ DEFINE_HOOK(0x447674, BuildingClass_MouseOverCell_JustHasRallyPoint, 0x6)
 
 	GET(BuildingClass* const, pThis, ESI);
 
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
 
 	return (pTypeExt && pTypeExt->JustHasRallyPoint) ? JustRally : 0;
 }
@@ -976,7 +976,7 @@ DEFINE_HOOK(0x700B28, TechnoClass_MouseOverCell_RallyPointForceMove, 0x6)
 	if (pThis->WhatAmI() == AbstractType::Building && RulesExt::Global()->RallyPointForceMove)
 	{
 		auto const pType = static_cast<BuildingClass*>(pThis)->Type;
-		auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+		auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pType);
 		bool HasRallyPoint = (pTypeExt ? pTypeExt->JustHasRallyPoint : false) || pType->Factory == AbstractType::UnitType || pType->Factory == AbstractType::InfantryType || pType->Factory == AbstractType::AircraftType;
 		return HasRallyPoint ? AlwaysAlt : 0;
 	}
@@ -990,7 +990,7 @@ DEFINE_HOOK(0x455DA0, BuildingClass_IsUnitFactory_JustHasRallyPoint, 0x6)
 
 	GET(BuildingClass* const, pThis, ECX);
 
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
 
 	return (pTypeExt && pTypeExt->JustHasRallyPoint) ? SkipGameCode : 0;
 }
