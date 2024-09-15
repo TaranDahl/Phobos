@@ -792,3 +792,22 @@ DEFINE_HOOK(0x736480, UnitClass_AI_KeepTargetOnMove, 0x6)
 }
 
 #pragma endregion
+
+DEFINE_HOOK(0x51B20E, InfantryClass_AssignTarget_FireOnce, 0x6)
+{
+	enum { SkipGameCode = 0x51B255 };
+
+	GET(InfantryClass*, pThis, ESI);
+	GET(AbstractClass*, pTarget, EBX);
+
+	auto const pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (!pTarget && pExt->SkipTargetChangeResetSequence)
+	{
+		pThis->IsFiring = false;
+		pExt->SkipTargetChangeResetSequence = false;
+		return SkipGameCode;
+	}
+
+	return 0;
+}
