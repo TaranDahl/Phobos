@@ -267,6 +267,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->NonVehExplodeOnDestroy.Read(exINI, GameStrings::AudioVisual, "NonVehExplodeOnDestroy");
 	this->FireDeathWeaponOnCrushed.Read(exINI, GameStrings::CombatDamage, "FireDeathWeaponOnCrushed");
 	this->CrushBuildingOnAnyCell.Read(exINI, GameStrings::General, "CrushBuildingOnAnyCell");
+	this->RallyPointOnTechno.Read(exINI, GameStrings::General, "RallyPointOnTechno");
+	this->RallyPointForceMove.Read(exINI, GameStrings::General, "RallyPointForceMove");
 
 	this->VoxelLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelLightSource");
 	// this->VoxelShadowLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelShadowLightSource");
@@ -524,6 +526,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->NonVehExplodeOnDestroy)
 		.Process(this->FireDeathWeaponOnCrushed)
 		.Process(this->CrushBuildingOnAnyCell)
+		.Process(this->RallyPointOnTechno)
+		.Process(this->RallyPointForceMove)
 		.Process(this->VoxelLightSource)
 		// .Process(this->VoxelShadowLightSource)
 		.Process(this->UseFixedVoxelLighting)

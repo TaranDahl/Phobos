@@ -229,6 +229,8 @@ public:
 		Valueable<bool> NonVehExplodeOnDestroy;
 		Valueable<bool> FireDeathWeaponOnCrushed;
 		Valueable<bool> CrushBuildingOnAnyCell;
+		Valueable<bool> RallyPointOnTechno;
+		Valueable<bool> RallyPointForceMove;
 
 		Nullable<Vector3D<float>> VoxelLightSource;
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
@@ -421,6 +423,8 @@ public:
 			, NonVehExplodeOnDestroy { false }
 			, FireDeathWeaponOnCrushed { false }
 			, CrushBuildingOnAnyCell { false }
+			, RallyPointOnTechno { false }
+			, RallyPointForceMove { false }
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 			, UseFixedVoxelLighting { false }
