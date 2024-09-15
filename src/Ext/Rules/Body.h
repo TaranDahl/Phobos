@@ -151,6 +151,9 @@ public:
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
 		Valueable<bool> UseFixedVoxelLighting;
 
+		Valueable<bool> RallyPointOnTechno;
+		Valueable<bool> RallyPointForceMove;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -259,6 +262,8 @@ public:
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 			, UseFixedVoxelLighting { false }
+			, RallyPointOnTechno { false }
+			, RallyPointForceMove { false }
 		{ }
 
 		virtual ~ExtData() = default;

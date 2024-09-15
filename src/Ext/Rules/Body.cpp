@@ -192,6 +192,9 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->UseFixedVoxelLighting.Read(exINI, GameStrings::AudioVisual, "UseFixedVoxelLighting");
 
+	this->RallyPointOnTechno.Read(exINI, GameStrings::General, "RallyPointOnTechno");
+	this->RallyPointForceMove.Read(exINI, GameStrings::General, "RallyPointForceMove");
+
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
 	for (int i = 0; i < itemsCount; ++i)
@@ -363,6 +366,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->VoxelLightSource)
 		// .Process(this->VoxelShadowLightSource)
 		.Process(this->UseFixedVoxelLighting)
+		.Process(this->RallyPointOnTechno)
+		.Process(this->RallyPointForceMove)
 		;
 }
 
