@@ -433,6 +433,7 @@ New:
 - Unit base normal and new placing grids (by CrimRecya)
 - Grey cameo preview and cameo overlays (by CrimRecya)
 - Optimize aircrafts stop action and allow they using area guard and attack moving (by CrimRecya)
+- Exclusive Sidebar for Superweapons (by CrimRecya)
 - Raise alert when technos are taking damage (by TaranDahl)
 - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller. (by TaranDahl)
 - Recycle spawned in long-range (by TaranDahl)
@@ -602,6 +603,7 @@ Phobos fixes:
 - Fixed frame by frame hotkey description to read `TXT_FRAME_BY_FRAME_DESC` instead of `TXT_DISPLAY_DAMAGE_DESC` (by DeathFishAtEase)
 - Buildings considered vehicles (`ConsideredVehicle=true` or not set in conjunction with `UndeploysInto` & 1x1 foundation) are now considered units by affected target enum checks (by Starkku)
 - Fixed Phobos Warhead effects not reliably being applied on damage area as opposed to full weapon-based Warhead detonation (by Starkku)
+- Fix a mistake of `LimboKill` that it did not update the iterators correctly (by CrimRecya)
 
 Fixes / interactions with other extensions:
 - `IsSimpleDeployer` units with Hover locomotor and `DeployToLand` no longer get stuck after deploying or play their move sound indefinitely (by Starkku)
