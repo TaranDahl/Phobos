@@ -697,12 +697,13 @@ DEFINE_HOOK(0x741733, UnitClass_CrushCell_SetContext, 0x6)
 DEFINE_HOOK(0x741925, UnitClass_CrushCell_CrushBuilding, 0x5)
 {
 	GET(UnitClass*, pThis, EDI);
-	
+
 	if (RulesExt::Global()->CrushBuildingOnAnyCell)
 	{
 		if (auto const pBuilding = CrushBuildingOnAnyCell::pCell->GetBuilding())
 		{
-			if (pBuilding->IsCrushable(pThis))
+			//ObjectClass::IsCrushable(TechnoClass* pCrusher)
+			if (reinterpret_cast<bool(__thiscall*)(ObjectClass*, TechnoClass*)>(0x5F6CD0)(pBuilding, pThis))
 			{
 				R->AL(true);
 				VocClass::PlayAt(pBuilding->GetTechnoType()->CrushSound, pThis->Location, 0);
