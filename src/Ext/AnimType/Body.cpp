@@ -18,7 +18,7 @@ void AnimTypeExt::ProcessDestroyAnims(UnitClass* pThis, TechnoClass* pKiller)
 		return;
 
 	HouseClass* pInvoker = pKiller ? pKiller->Owner : nullptr;
-	auto const pType = pThis->Type;
+	auto const pType = pThis->GetTechnoType(); // Redirect I/A/BClass::Explode(TechnoClass::Explode) to UnitClass::Explode
 
 	if (pType->DestroyAnim.Count > 0)
 	{
