@@ -698,9 +698,9 @@ DEFINE_HOOK(0x455DA0, BuildingClass_IsUnitFactory_JustHasRallyPoint, 0x6)
 
 	return (pTypeExt && pTypeExt->JustHasRallyPoint) ? ret : VanillaCheck;
 }
-/*
-* TODO : make the product follow the focus
-DEFINE_HOOK(0x44499C, TEST2, 0x5)
+
+// TODO : make the product follow the focus
+DEFINE_HOOK(0x44498E, TEST, 0x6)
 {
 	GET(BuildingClass*, pThis, ESI);
 	GET(FootClass*, pProduct, EDI);
@@ -708,14 +708,23 @@ DEFINE_HOOK(0x44499C, TEST2, 0x5)
 	if (pThis->Focus && (pThis->Focus->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None)
 	{
 		auto const pFocus = abstract_cast<ObjectClass*>(pThis->Focus);
-		pProduct->ClickedMission(Mission::Area_Guard, pFocus, nullptr, nullptr);
+		//pProduct->ClickedMission(Mission::Area_Guard, pFocus, nullptr, nullptr);
+		pProduct->SetFocus(pFocus);
+		pProduct->QueueMission(Mission::Area_Guard, true);
 	}
 
-	return 0;
+	return 0x44499C;
 }
 
-DEFINE_HOOK(0x444CA3, TEST3, 0x6)
+DEFINE_HOOK(0x444CA3, TEST1, 0x6)
 {
+	Debug::LogAndMessage("Here1\n");
 	return 0x444D11;
+}
+/*
+DEFINE_HOOK(0x44DE76, TEST2, 0x6)
+{
+	Debug::LogAndMessage("Here2\n");
+	return 0x44DE84;
 }
 */
