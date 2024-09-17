@@ -22,7 +22,7 @@ int TacticalButtonClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 {
 	if (pMousePosition->X < 65 && pMousePosition->X >= 5) // Button index 1-9 : Super weapons buttons
 	{
-		const int currentCounts = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->SuperWeaponButtonCount;
+		const int currentCounts = Instance.SWButtonData.size();
 		const int height = DSurface::Composite->GetHeight();
 		int checkHight = (height - 32 - 48 * currentCounts - 2 * (currentCounts - 1)) / 2;
 
@@ -50,14 +50,19 @@ int TacticalButtonClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 
 bool TacticalButtonClass::CheckMouseOverBackground(const Point2D* pMousePosition)
 {
-	if (RulesExt::Global()->SWSidebarBackground && pMousePosition->X < 80 && pMousePosition->X >= 0)
+	if (RulesExt::Global()->SWSidebarBackground)
 	{
-		const int currentCounts = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->SuperWeaponButtonCount;
-		const int height = DSurface::Composite->GetHeight();
-		const int checkHight = (height - 32 - 48 * currentCounts - 2 * (currentCounts - 1)) / 2 - 21;
+		if (const int currentCounts = Instance.SWButtonData.size())
+		{
+			if (pMousePosition->X < 80 && pMousePosition->X >= 0)
+			{
+				const int height = DSurface::Composite->GetHeight();
+				const int checkHight = (height - 32 - 48 * currentCounts - 2 * (currentCounts - 1)) / 2 - 21;
 
-		if (pMousePosition->Y >= checkHight && pMousePosition->Y < (checkHight + currentCounts * 50 + 40))
-			return true;
+				if (pMousePosition->Y >= checkHight && pMousePosition->Y < (checkHight + currentCounts * 50 + 40))
+					return true;
+			}
+		}
 	}
 
 	// TODO New button backgrounds
@@ -95,18 +100,18 @@ void TacticalButtonClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 	if (this->ButtonIndex > 0)
 	{
 		HouseClass* const pHouse = HouseClass::CurrentPlayer;
-		const int index = HouseExt::ExtMap.Find(pHouse)->SuperWeaponButtonData[this->ButtonIndex - 1];
+		const int index = Instance.SWButtonData[this->ButtonIndex - 1];
 		SuperClass* const pSuper = pHouse->Supers.Items[index];
 
-		if (pSuper != this->pRecordSuper)
+		if (pSuper != this->RecordSuper)
 		{
 			PhobosToolTip::Instance.HelpText(pSuper);
-			this->pRecordSuper = pSuper;
+			this->RecordSuper = pSuper;
 		}
 	}
-	else if (this->pRecordSuper)
+	else if (this->RecordSuper)
 	{
-		this->pRecordSuper = nullptr;
+		this->RecordSuper = nullptr;
 	}
 }
 
@@ -133,16 +138,16 @@ void TacticalButtonClass::PressDesignatedButton(int triggerIndex)
 // SW buttons functions
 void TacticalButtonClass::DrawButtonForSW()
 {
-	HouseClass* const pHouse = HouseClass::CurrentPlayer;
-	HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pHouse);
-	SideExt::ExtData* const pSideExt = SideExt::ExtMap.Find(SideClass::Array->GetItem(pHouse->SideIndex));
-	const int currentCounts = pHouseExt->SuperWeaponButtonCount;
-	const bool drawSWSidebarBackground = RulesExt::Global()->SWSidebarBackground;
+	const int currentCounts = Instance.SWButtonData.size();
 
 	if (!currentCounts)
 		return;
 
-	auto& data = pHouseExt->SuperWeaponButtonData;
+	HouseClass* const pHouse = HouseClass::CurrentPlayer;
+	SideExt::ExtData* const pSideExt = SideExt::ExtMap.Find(SideClass::Array->GetItem(pHouse->SideIndex));
+	const bool drawSWSidebarBackground = RulesExt::Global()->SWSidebarBackground;
+
+	auto& data = Instance.SWButtonData;
 	const int height = DSurface::Composite->GetHeight();
 	const int color = Drawing::RGB_To_Int(Drawing::TooltipColor);
 
@@ -273,22 +278,16 @@ void TacticalButtonClass::RecheckButtonForSW()
 {
 	Instance.LastPosition = Point2D::Empty;
 	HouseClass* const pHouse = HouseClass::CurrentPlayer;
-	HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pHouse);
-	auto& data = pHouseExt->SuperWeaponButtonData;
+	auto& data = Instance.SWButtonData;
 
-	for (int i = 0; i < pHouseExt->SuperWeaponButtonCount; ++i)
+	for (auto it = data.begin(); it != data.end();)
 	{
-		if (data[i] >= pHouse->Supers.Count || !pHouse->Supers.Items[data[i]]->IsPresent)
-		{
-			const int counts = pHouseExt->SuperWeaponButtonCount - 1;
+		const int superIndex = *it;
 
-			for (int j = i; j < counts; ++j)
-			{
-				data[j] = data[j + 1];
-			}
-
-			data[--pHouseExt->SuperWeaponButtonCount] = -1;
-		}
+		if (superIndex >= pHouse->Supers.Count || !pHouse->Supers.Items[superIndex]->IsPresent)
+			it = data.erase(it);
+		else
+			++it;
 	}
 }
 
@@ -300,20 +299,19 @@ bool TacticalButtonClass::InsertButtonForSW(int& superIndex)
 
 	if (pTypeExt->SW_InScreen_Show && !pTypeExt->SW_UseAITargeting)
 	{
-		HouseClass* const pHouse = HouseClass::CurrentPlayer;
-		HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pHouse);
-		const unsigned int ownerBits = 1u << pHouse->Type->ArrayIndex;
+		const unsigned int ownerBits = 1u << HouseClass::CurrentPlayer->Type->ArrayIndex;
 
 		if (pTypeExt->SW_InScreen_RequiredHouses & ownerBits)
 		{
-			auto& data = pHouseExt->SuperWeaponButtonData;
+			const int currentCounts = Instance.SWButtonData.size();
+			auto& data = Instance.SWButtonData;
 			bool move = false;
 
 			for (int i = 0; i < 9; ++i) // 9 buttons at max
 			{
 				if (move)
 				{
-					if (data[i] != -1)
+					if (i < currentCounts)
 					{
 						int buffer = data[i];
 						data[i] = superIndex;
@@ -321,13 +319,12 @@ bool TacticalButtonClass::InsertButtonForSW(int& superIndex)
 					}
 					else
 					{
-						data[i] = superIndex;
+						data.push_back(superIndex);
 						overflow = false;
-						++pHouseExt->SuperWeaponButtonCount;
 						break;
 					}
 				}
-				else if (data[i] != -1)
+				else if (i < currentCounts)
 				{
 					if (MoveButtonForSW(SuperWeaponTypeClass::Array->Items[data[i]], pType, pTypeExt, ownerBits))
 					{
@@ -339,9 +336,8 @@ bool TacticalButtonClass::InsertButtonForSW(int& superIndex)
 				}
 				else
 				{
-					data[i] = superIndex;
+					data.push_back(superIndex);
 					overflow = false;
-					++pHouseExt->SuperWeaponButtonCount;
 					break;
 				}
 			}
@@ -376,12 +372,11 @@ void TacticalButtonClass::TriggerButtonForSW(int buttonIndex)
 	if (ScenarioClass::Instance->UserInputLocked)
 		return;
 
-	HouseClass* const pHouse = HouseClass::CurrentPlayer;
-	const int index = HouseExt::ExtMap.Find(pHouse)->SuperWeaponButtonData[buttonIndex - 1];
-
-	if (index < 0) // Keyboard shortcuts may be invalid
+	if (Instance.SWButtonData.size() < buttonIndex) // Keyboard shortcuts may be invalid
 		return;
 
+	const int index = Instance.SWButtonData[buttonIndex - 1];
+	HouseClass* const pHouse = HouseClass::CurrentPlayer;
 	SuperClass* const pSuper = pHouse->Supers.Items[index];
 	SuperWeaponTypeClass* const pType = pSuper->Type;
 	SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pType);

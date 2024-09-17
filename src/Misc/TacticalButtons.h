@@ -44,5 +44,6 @@ private:
 	Point2D LastPosition { Point2D::Empty }; // Check moving
 
 	// Button index 1-9 : Super weapons buttons
-	SuperClass* pRecordSuper = nullptr; // Cannot be used, only for comparison purposes
+	std::vector<int> SWButtonData;
+	SuperClass* RecordSuper = nullptr; // Cannot be used, only for comparison purposes
 };
