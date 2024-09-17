@@ -390,7 +390,7 @@ bool __fastcall AircraftTypeClass_CanAttackMove(AircraftTypeClass* pThis)
 }
 DEFINE_JUMP(VTABLE, 0x7E290C, GET_OFFSET(AircraftTypeClass_CanAttackMove))
 
-DEFINE_HOOK(0x6FA68B, TechnoClass_Update_AttackMovePaused, 0xA)
+DEFINE_HOOK(0x6FA68B, TechnoClass_Update_AttackMovePaused, 0xA) // To make aircrafts not search for targets while resting at the airport, this is designed to adapt to loop waypoint
 {
 	enum { SkipGameCode = 0x6FA6F5 };
 
