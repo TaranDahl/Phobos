@@ -153,6 +153,7 @@ public:
 
 		Valueable<bool> RallyPointOnTechno;
 		Valueable<bool> RallyPointForceMove;
+		Valueable<bool> RallyPointAreaGuard;
 
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
@@ -264,6 +265,7 @@ public:
 			, UseFixedVoxelLighting { false }
 			, RallyPointOnTechno { false }
 			, RallyPointForceMove { false }
+			, RallyPointAreaGuard { false }
 		{ }
 
 		virtual ~ExtData() = default;

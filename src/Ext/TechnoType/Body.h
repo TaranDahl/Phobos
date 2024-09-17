@@ -233,7 +233,7 @@ public:
 		Nullable<AnimTypeClass*> Wake_Grapple;
 		Nullable<AnimTypeClass*> Wake_Sinking;
 
-		Valueable<bool> JustHasRallyPoint;
+		Nullable<CoordStruct> ExitCoord;
 
 		struct LaserTrailDataEntry
 		{
@@ -464,7 +464,7 @@ public:
 			, Wake_Grapple { }
 			, Wake_Sinking { }
 
-			, JustHasRallyPoint { false }
+			, ExitCoord { }
 		{ }
 
 		virtual ~ExtData() = default;
