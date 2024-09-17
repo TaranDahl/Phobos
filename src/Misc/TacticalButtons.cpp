@@ -527,7 +527,7 @@ DEFINE_HOOK(0x6A6314, SidebarClass_AddCameo_SupportSWButtons, 0x8)
 	return (absType != AbstractType::Special || SuperWeaponTypeClass::Array->Count <= index || TacticalButtonClass::InsertButtonForSW(index)) ? 0 : SkipGameCode;
 }
 
-DEFINE_HOOK(0x6AAF46, SelectClass_Action_ButtonClick1, 0x7)
+DEFINE_HOOK(0x6AAF46, SelectClass_Action_ButtonClick1, 0x6)
 {
 	enum { SkipGameCode = 0x6AB95A };
 
@@ -546,6 +546,7 @@ DEFINE_HOOK(0x6AAF46, SelectClass_Action_ButtonClick1, 0x7)
 			CellClass::Coord2Cell(TacticalClass::Instance->ClientToCoords(Point2D{ (DSurface::Composite->Width >> 1), (DSurface::Composite->Height >> 1) }))
 		);
 		EventClass::AddEvent(event);
+
 		return SkipGameCode;
 	}
 
