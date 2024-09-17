@@ -748,6 +748,7 @@ DEFINE_HOOK(0x4448CE, BuildingClass_KickOutUnit_RallyPointAreaGuard2, 0x6)
 }
 
 // This makes the building has WeaponsFactory = no to kick out units in the cell same as WeaponsFactory = yes.
+// Alse enhanced the ExitCoord.
 DEFINE_HOOK(0x4448B0, BuildingClass_KickOutUnit_ExitCoords, 0x6)
 {
 	GET(FootClass*, pProduct, EDI);
