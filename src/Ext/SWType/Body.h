@@ -63,6 +63,7 @@ public:
 
 		Valueable<int> CameoTabIdx;
 
+		Valueable<bool> SW_QuickFireInScreen;
 		Valueable<bool> SW_InScreen_Show;
 		DWORD SW_InScreen_PriorityHouses;
 		DWORD SW_InScreen_RequiredHouses;
@@ -123,6 +124,7 @@ public:
 			, Convert_Pairs {}
 			, ShowDesignatorRange { true }
 			, CameoTabIdx { 1 }
+			, SW_QuickFireInScreen { false }
 			, SW_InScreen_Show { false }
 			, SW_InScreen_PriorityHouses { 0u }
 			, SW_InScreen_RequiredHouses { 0xFFFFFFFFu }

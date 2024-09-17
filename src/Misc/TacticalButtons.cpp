@@ -145,7 +145,7 @@ void TacticalButtonClass::DrawButtonForSW()
 
 	HouseClass* const pHouse = HouseClass::CurrentPlayer;
 	SideExt::ExtData* const pSideExt = SideExt::ExtMap.Find(SideClass::Array->GetItem(pHouse->SideIndex));
-	const bool drawSWSidebarBackground = RulesExt::Global()->SWSidebarBackground;
+	const bool drawSWSidebarBackground = RulesExt::Global()->SWSidebarBackground && pSideExt;
 
 	auto& data = Instance.SWButtonData;
 	const int height = DSurface::Composite->GetHeight();
@@ -195,20 +195,22 @@ void TacticalButtonClass::DrawButtonForSW()
 		// Get SW data
 		SuperClass* const pSuper = pHouse->Supers.Items[data[i]];
 		SuperWeaponTypeClass* const pSWType = pSuper->Type;
-		SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pSWType);
 
 		// Draw cameo
-		BSurface* const CameoPCX = pTypeExt->SidebarPCX.GetSurface();
+		if (SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pSWType))
+		{
+			BSurface* const CameoPCX = pTypeExt->SidebarPCX.GetSurface();
 
-		if (CAN_USE_ARES && AresHelper::CanUseAres && CameoPCX)
-		{
-			RectangleStruct drawRect { position.X, position.Y, 60, 48 };
-			PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
-		}
-		else if (SHPStruct* const pSHP = pSWType->SidebarImage)
-		{
-			DSurface::Composite->DrawSHP(FileSystem::CAMEO_PAL, pSHP, 0, &position, &rect,
-				BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
+			if (CAN_USE_ARES && AresHelper::CanUseAres && CameoPCX)
+			{
+				RectangleStruct drawRect { position.X, position.Y, 60, 48 };
+				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
+			}
+			else if (SHPStruct* const pSHP = pSWType->SidebarImage)
+			{
+				DSurface::Composite->DrawSHP(FileSystem::CAMEO_PAL, pSHP, 0, &position, &rect,
+					BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
+			}
 		}
 
 		// Flash cameo
@@ -297,7 +299,7 @@ bool TacticalButtonClass::InsertButtonForSW(int& superIndex)
 	SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pType);
 	bool overflow = true;
 
-	if (pTypeExt->SW_InScreen_Show)
+	if (pTypeExt && pTypeExt->SW_InScreen_Show)
 	{
 		const unsigned int ownerBits = 1u << HouseClass::CurrentPlayer->Type->ArrayIndex;
 
@@ -351,17 +353,25 @@ bool TacticalButtonClass::MoveButtonForSW(SuperWeaponTypeClass* pDataType, Super
 {
 	SWTypeExt::ExtData* const pDataTypeExt = SWTypeExt::ExtMap.Find(pDataType);
 
-	if ((pDataTypeExt->SW_InScreen_PriorityHouses & ownerBits) && !(pAddTypeExt->SW_InScreen_PriorityHouses & ownerBits))
+	if (pDataTypeExt && pAddTypeExt)
+	{
+		if ((pDataTypeExt->SW_InScreen_PriorityHouses & ownerBits) && !(pAddTypeExt->SW_InScreen_PriorityHouses & ownerBits))
+			return false;
+
+		if (!(pDataTypeExt->SW_InScreen_PriorityHouses & ownerBits) && (pAddTypeExt->SW_InScreen_PriorityHouses & ownerBits))
+			return true;
+
+		if (pDataTypeExt->CameoPriority > pAddTypeExt->CameoPriority)
+			return false;
+
+		if (pDataTypeExt->CameoPriority < pAddTypeExt->CameoPriority)
+			return true;
+	}
+
+	if (pDataType->RechargeTime < pAddType->RechargeTime)
 		return false;
-	else if (!(pDataTypeExt->SW_InScreen_PriorityHouses & ownerBits) && (pAddTypeExt->SW_InScreen_PriorityHouses & ownerBits))
-		return true;
-	else if (pDataTypeExt->CameoPriority > pAddTypeExt->CameoPriority)
-		return false;
-	else if (pDataTypeExt->CameoPriority < pAddTypeExt->CameoPriority)
-		return true;
-	else if (pDataType->RechargeTime < pAddType->RechargeTime)
-		return false;
-	else if (pDataType->RechargeTime > pAddType->RechargeTime)
+
+	if (pDataType->RechargeTime > pAddType->RechargeTime)
 		return true;
 
 	return wcscmp(pDataType->UIName, pAddType->UIName) > 0;
@@ -517,19 +527,44 @@ DEFINE_HOOK(0x6A6314, SidebarClass_AddCameo_SupportSWButtons, 0x8)
 	return (absType != AbstractType::Special || SuperWeaponTypeClass::Array->Count <= index || TacticalButtonClass::InsertButtonForSW(index)) ? 0 : SkipGameCode;
 }
 
-DEFINE_HOOK(0x6AB94F, SelectClass_Action_ButtonClick1, 0xB)
+DEFINE_HOOK(0x6AAF46, SelectClass_Action_ButtonClick1, 0x7)
+{
+	enum { SkipGameCode = 0x6AB95A };
+
+	GET(const int, index, ESI);
+
+	SuperWeaponTypeClass* const pType = SuperWeaponTypeClass::Array->Items[index];
+	SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pType);
+
+	if (pTypeExt && pTypeExt->SW_QuickFireInScreen)
+	{
+		EventClass event
+		(
+			HouseClass::CurrentPlayer->ArrayIndex,
+			EventType::SpecialPlace,
+			pType->ArrayIndex,
+			CellClass::Coord2Cell(TacticalClass::Instance->ClientToCoords(Point2D{ (DSurface::Composite->Width >> 1), (DSurface::Composite->Height >> 1) }))
+		);
+		EventClass::AddEvent(event);
+		return SkipGameCode;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x6AB94F, SelectClass_Action_ButtonClick2, 0xB)
 {
 	if (!TacticalButtonClass::Instance.DummyAction)
 		return 0;
 
 	enum { SkipGameCode = 0x6AAE7C };
-	GET(TacticalButtonClass::DummySelectClass*, pThis, EDI);
+	GET(TacticalButtonClass::DummySelectClass* const , pThis, EDI);
 
 	R->Stack(STACK_OFFSET(0xAC, -0x98), pThis->SWIndex);
 	return SkipGameCode;
 }
 
-DEFINE_HOOK(0x6AB961, SelectClass_Action_ButtonClick2, 0x7)
+DEFINE_HOOK(0x6AB961, SelectClass_Action_ButtonClick3, 0x7)
 {
 	if (!TacticalButtonClass::Instance.DummyAction)
 		return 0;
