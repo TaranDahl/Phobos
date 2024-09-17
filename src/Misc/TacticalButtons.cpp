@@ -119,7 +119,7 @@ void TacticalButtonClass::PressDesignatedButton(int triggerIndex)
 {
 	const int buttonIndex = this->ButtonIndex;
 
-	if (!buttonIndex) // In buttons background
+	if (buttonIndex <= 0) // In buttons background
 		return;
 
 	if (buttonIndex <= 9) // Button index 1-9 : Super weapons buttons
@@ -297,7 +297,7 @@ bool TacticalButtonClass::InsertButtonForSW(int& superIndex)
 	SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pType);
 	bool overflow = true;
 
-	if (pTypeExt->SW_InScreen_Show && !pTypeExt->SW_UseAITargeting)
+	if (pTypeExt->SW_InScreen_Show)
 	{
 		const unsigned int ownerBits = 1u << HouseClass::CurrentPlayer->Type->ArrayIndex;
 
@@ -369,116 +369,22 @@ bool TacticalButtonClass::MoveButtonForSW(SuperWeaponTypeClass* pDataType, Super
 
 void TacticalButtonClass::TriggerButtonForSW(int buttonIndex)
 {
-	if (ScenarioClass::Instance->UserInputLocked)
+	TacticalButtonClass* const pButtons = &Instance;
+	const int superIndex = pButtons->SWButtonData[buttonIndex - 1];
+
+	if (superIndex < 0)
 		return;
 
-	if (Instance.SWButtonData.size() < buttonIndex) // Keyboard shortcuts may be invalid
-		return;
+	SidebarClass* const pSidebar = SidebarClass::Instance;
+	pButtons->DummyAction = true;
 
-	const int index = Instance.SWButtonData[buttonIndex - 1];
-	HouseClass* const pHouse = HouseClass::CurrentPlayer;
-	SuperClass* const pSuper = pHouse->Supers.Items[index];
-	SuperWeaponTypeClass* const pType = pSuper->Type;
-	SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pType);
+	DummySelectClass pButton;
+	pButton.LinkTo = &pSidebar->Tabs[pSidebar->ActiveTabIndex];
+	pButton.unknown_int_30 = 0x7FFFFFFF;
+	pButton.SWIndex = superIndex;
 
-	if (CAN_USE_ARES && AresHelper::CanUseAres)
-	{
-		const bool autoFire = !pTypeExt->SW_ManualFire && pTypeExt->SW_AutoFire;
-
-		if (!pSuper->CanFire() && !autoFire)
-		{
-			VoxClass::PlayIndex(pTypeExt->EVA_Impatient);
-			return;
-		}
-
-		if (!pHouse->CanTransactMoney(pTypeExt->Money_Amount))
-		{
-			if (pTypeExt->EVA_InsufficientFunds != -1)
-				VoxClass::PlayIndex(pTypeExt->EVA_InsufficientFunds);
-			else
-				VoxClass::Play(&Make_Global<const char>(0x819044)); // 0x819044 -> EVA_InsufficientFunds
-
-			const CSFText csf = pTypeExt->Message_InsufficientFunds;
-
-			if (!csf.empty())
-			{
-				int color = ColorScheme::FindIndex("Gold");
-
-				if (pTypeExt->Message_FirerColor)
-				{
-					if (pHouse)
-						color = pHouse->ColorSchemeIndex;
-				}
-				else
-				{
-					if (pTypeExt->Message_ColorScheme > -1)
-						color = pTypeExt->Message_ColorScheme;
-					else if (pHouse)
-						color = pHouse->ColorSchemeIndex;
-				}
-
-				MessageListClass::Instance->PrintMessage(csf, RulesClass::Instance->MessageDelay, color);
-			}
-
-			return;
-		}
-
-		const bool unstoppable = pType->UseChargeDrain && pSuper->ChargeDrainState == ChargeDrainState::Draining
-			&& pTypeExt->SW_Unstoppable;
-
-		if (autoFire || unstoppable)
-			return;
-	}
-	else if (!pSuper->CanFire())
-	{
-		return;
-	}
-
-	// Use SW.InScreen.QuickFire here, to some extent to replace SW.UseAITargeting
-	// Inevitably ignore various conditions such as range, sight, indicators .etc
-	// No check for SW.UseAITargeting, too complicated for me. - CrimRecya
-	if (pType->Action == Action::None)
-	{
-		EventClass event
-		(
-			pHouse->ArrayIndex,
-			EventType::SpecialPlace,
-			pType->ArrayIndex,
-			CellStruct::Empty
-		);
-		EventClass::AddEvent(event);
-	}
-	else if (pTypeExt->SW_InScreen_QuickFire)
-	{
-		EventClass event
-		(
-			pHouse->ArrayIndex,
-			EventType::SpecialPlace,
-			pType->ArrayIndex,
-			CellClass::Coord2Cell(TacticalClass::Instance->ClientToCoords(Point2D{ (DSurface::Composite->Width >> 1), (DSurface::Composite->Height >> 1) }))
-		);
-		EventClass::AddEvent(event);
-	}
-	else
-	{
-		MouseClass* const pMouse = MouseClass::Instance;
-		pMouse->CurrentBuilding = nullptr;
-		pMouse->CurrentBuildingType = nullptr;
-		pMouse->unknown_11AC = 0xFFFFFFFF;
-		pMouse->SetActiveFoundation(nullptr);
-		pMouse->SetRepairMode(0);
-		pMouse->SetSellMode(0);
-		pMouse->PowerToggleMode = false;
-		pMouse->PlanningMode = false;
-		pMouse->PlaceBeaconMode = false;
-		pMouse->CurrentSWTypeIndex = index;
-		pMouse->UnselectAll();
-
-		if (CAN_USE_ARES && AresHelper::CanUseAres && pTypeExt->EVA_SelectTarget != -1)
-			VoxClass::PlayIndex(pTypeExt->EVA_SelectTarget);
-		else
-			VoxClass::Play(&Make_Global<const char>(0x83FB78)); // 0x83FB78 -> EVA_SelectTarget
-	}
+	DWORD KeyNum = 0;
+	reinterpret_cast<bool(__thiscall*)(DummySelectClass*, GadgetFlag, DWORD*, KeyModifier)>(0x6AAD00)(&pButton, GadgetFlag::LeftPress, &KeyNum, KeyModifier::None); // SelectClass_Action
 }
 
 // Hooks
@@ -609,4 +515,28 @@ DEFINE_HOOK(0x6A6314, SidebarClass_AddCameo_SupportSWButtons, 0x8)
 	REF_STACK(int, index, STACK_OFFSET(0x14, 0x8));
 
 	return (absType != AbstractType::Special || SuperWeaponTypeClass::Array->Count <= index || TacticalButtonClass::InsertButtonForSW(index)) ? 0 : SkipGameCode;
+}
+
+DEFINE_HOOK(0x6AB94F, SelectClass_Action_ButtonClick1, 0xB)
+{
+	if (!TacticalButtonClass::Instance.DummyAction)
+		return 0;
+
+	enum { SkipGameCode = 0x6AAE7C };
+	GET(TacticalButtonClass::DummySelectClass*, pThis, EDI);
+
+	R->Stack(STACK_OFFSET(0xAC, -0x98), pThis->SWIndex);
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x6AB961, SelectClass_Action_ButtonClick2, 0x7)
+{
+	if (!TacticalButtonClass::Instance.DummyAction)
+		return 0;
+
+	enum { SkipGameCode = 0x6AB975 };
+
+	TacticalButtonClass::Instance.DummyAction = false;
+
+	return SkipGameCode;
 }

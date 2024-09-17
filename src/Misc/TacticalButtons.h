@@ -1,5 +1,6 @@
 #include <Utilities/Macro.h>
 #include <Ext/SWType/Body.h>
+#include <ControlClass.h>
 
 // Test function for extra pressable buttons above tactical map
 
@@ -36,8 +37,20 @@ public:
 	static bool MoveButtonForSW(SuperWeaponTypeClass* pDataType, SuperWeaponTypeClass* pAddType, SWTypeExt::ExtData* pAddTypeExt, unsigned int ownerBits);
 	static void TriggerButtonForSW(int buttonIndex);
 
+	struct DummySelectClass
+	{
+		char _[0x2C] {};
+		StripClass *LinkTo { nullptr };
+		int unknown_int_30 { 0 };
+		bool MouseEntered { false };
+		int SWIndex { -1 }; // New
+	};
+
 public:
 	bool PressedInButtonsLayer { false }; // Check press
+
+	// Button index 1-9 : Super weapons buttons
+	bool DummyAction { false };
 
 private:
 	int ButtonIndex { -1 }; // -1 -> above no buttons, 0 -> above buttons background, POSITIVE -> above button who have this index
