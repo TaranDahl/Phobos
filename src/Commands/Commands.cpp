@@ -22,6 +22,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<ToggleDigitalDisplayCommandClass>();
 	MakeCommand<ToggleDesignatorRangeCommandClass>();
 	MakeCommand<SelectCapturedCommandClass>();
+	MakeCommand<SWShortcutsCommandClass<0>>();
 	MakeCommand<SWShortcutsCommandClass<1>>();
 	MakeCommand<SWShortcutsCommandClass<2>>();
 	MakeCommand<SWShortcutsCommandClass<3>>();
@@ -31,6 +32,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<SWShortcutsCommandClass<7>>();
 	MakeCommand<SWShortcutsCommandClass<8>>();
 	MakeCommand<SWShortcutsCommandClass<9>>();
+	MakeCommand<SWShortcutsCommandClass<10>>();
 
 	if (Phobos::Config::DevelopmentCommands)
 	{
