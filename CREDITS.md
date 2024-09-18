@@ -378,7 +378,7 @@ This page lists all the individual contributions to the project by their author.
   - Units will not always stuck in the factory
   - Optimize aircrafts stop action and allow they using area guard and attack moving
   - Exclusive Sidebar for Superweapons
-  - Fix a mistake of `LimboKill` that it did not update the iterators correctly
+  - Fix `LimboKill` not working reliably
 - **TaranDahl**
   - Raise alert when technos are taking damage
   - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller
