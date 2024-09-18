@@ -42,7 +42,7 @@ int TacticalButtonClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 
 	// TODO New buttons (Start from index = 11)
 
-	if (CheckMouseOverBackground(pMousePosition))
+	if (this->CheckMouseOverBackground(pMousePosition))
 		return 0; // Button index 0 : Background
 
 	return -1;
@@ -99,7 +99,7 @@ void TacticalButtonClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 		return;
 
 	this->LastPosition = *pMousePosition;
-	this->ButtonIndex = CheckMouseOverButtons(pMousePosition);
+	this->ButtonIndex = this->CheckMouseOverButtons(pMousePosition);
 
 	// SW ToolTip
 	if (this->ButtonIndex > 0)
@@ -130,7 +130,7 @@ void TacticalButtonClass::PressDesignatedButton(int triggerIndex)
 	if (buttonIndex <= 10) // Button index 1-10 : Super weapons buttons
 	{
 		if (!triggerIndex)
-			TriggerButtonForSW(buttonIndex);
+			this->SWSidebarTrigger(buttonIndex);
 		else if (triggerIndex == 2)
 			DisplayClass::Instance->CurrentSWTypeIndex = -1;
 	}
@@ -141,7 +141,7 @@ void TacticalButtonClass::PressDesignatedButton(int triggerIndex)
 }
 
 // SW buttons functions
-void TacticalButtonClass::DrawButtonForSW()
+void TacticalButtonClass::SWSidebarDraw()
 {
 	if (!this->SuperVisible)
 		return;
@@ -284,9 +284,9 @@ void TacticalButtonClass::DrawButtonForSW()
 	}
 }
 
-void TacticalButtonClass::RecheckButtonForSW()
+void TacticalButtonClass::SWSidebarRecheck()
 {
-	RecheckButtonIndex();
+	this->RecheckButtonIndex();
 	HouseClass* const pHouse = HouseClass::CurrentPlayer;
 	auto& data = this->SWButtonData;
 
@@ -301,7 +301,7 @@ void TacticalButtonClass::RecheckButtonForSW()
 	}
 }
 
-bool TacticalButtonClass::InsertButtonForSW(int& superIndex)
+bool TacticalButtonClass::SWSidebarAdd(int& superIndex)
 {
 	SuperWeaponTypeClass* const pType = SuperWeaponTypeClass::Array->Items[superIndex];
 	SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pType);
@@ -336,7 +336,7 @@ bool TacticalButtonClass::InsertButtonForSW(int& superIndex)
 				}
 				else if (i < currentCounts)
 				{
-					if (SortButtonForSW(SuperWeaponTypeClass::Array->Items[data[i]], pType, pTypeExt, ownerBits))
+					if (this->SWSidebarSort(SuperWeaponTypeClass::Array->Items[data[i]], pType, pTypeExt, ownerBits))
 					{
 						move = true;
 						int buffer = data[i];
@@ -357,7 +357,7 @@ bool TacticalButtonClass::InsertButtonForSW(int& superIndex)
 	return overflow;
 }
 
-bool TacticalButtonClass::SortButtonForSW(SuperWeaponTypeClass* pDataType, SuperWeaponTypeClass* pAddType, SWTypeExt::ExtData* pAddTypeExt, unsigned int ownerBits)
+bool TacticalButtonClass::SWSidebarSort(SuperWeaponTypeClass* pDataType, SuperWeaponTypeClass* pAddType, SWTypeExt::ExtData* pAddTypeExt, unsigned int ownerBits)
 {
 	SWTypeExt::ExtData* const pDataTypeExt = SWTypeExt::ExtMap.Find(pDataType);
 
@@ -385,7 +385,7 @@ bool TacticalButtonClass::SortButtonForSW(SuperWeaponTypeClass* pDataType, Super
 	return wcscmp(pDataType->UIName, pAddType->UIName) > 0;
 }
 
-void TacticalButtonClass::TriggerButtonForSW(int buttonIndex)
+void TacticalButtonClass::SWSidebarTrigger(int buttonIndex)
 {
 	if (ScenarioClass::Instance->UserInputLocked || !this->SuperVisible)
 		return;
@@ -405,6 +405,58 @@ void TacticalButtonClass::TriggerButtonForSW(int buttonIndex)
 
 	DWORD KeyNum = 0;
 	reinterpret_cast<bool(__thiscall*)(DummySelectClass*, GadgetFlag, DWORD*, KeyModifier)>(0x6AAD00)(&pButton, GadgetFlag::LeftPress, &KeyNum, KeyModifier::None); // SelectClass_Action
+}
+
+bool TacticalButtonClass::SWQuickLaunch(int superIndex)
+{
+	bool keyboardCall = false;
+
+	if (this->KeyboardCall)
+	{
+		this->KeyboardCall = false;
+		keyboardCall = true;
+	}
+
+	SuperWeaponTypeClass* const pType = SuperWeaponTypeClass::Array->Items[superIndex];
+
+	if (SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pType))
+	{
+		if (pTypeExt->SW_QuickFireAtMouse && keyboardCall)
+		{
+			const CoordStruct mouseCoords = TacticalClass::Instance->ClientToCoords(WWMouseClass::Instance->XY1);
+
+			if (mouseCoords != CoordStruct::Empty)
+			{
+				EventClass event
+				(
+					HouseClass::CurrentPlayer->ArrayIndex,
+					EventType::SpecialPlace,
+					pType->ArrayIndex,
+					CellClass::Coord2Cell(mouseCoords)
+				);
+				EventClass::AddEvent(event);
+
+				return true;
+			}
+		}
+		else if (!pTypeExt->SW_QuickFireInScreen)
+		{
+			return false;
+		}
+
+		EventClass event
+		(
+			HouseClass::CurrentPlayer->ArrayIndex,
+			EventType::SpecialPlace,
+			pType->ArrayIndex,
+			CellClass::Coord2Cell(TacticalClass::Instance->ClientToCoords(Point2D{ (DSurface::Composite->Width >> 1), (DSurface::Composite->Height >> 1) }))
+		);
+		EventClass::AddEvent(event);
+
+		return true;
+	}
+
+	return false;
 }
 
 // Hooks
@@ -516,88 +568,42 @@ DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 {
 	// TODO New buttons (The later draw, the higher layer)
 
-	TacticalButtonClass::Instance.DrawButtonForSW();
+	TacticalButtonClass::Instance.SWSidebarDraw();
+
 	return 0;
 }
 
 // SW buttons hooks
 DEFINE_HOOK(0x4F9283, HouseClass_Update_RecheckTechTree, 0x5)
 {
-	TacticalButtonClass::Instance.RecheckButtonForSW();
+	TacticalButtonClass::Instance.SWSidebarRecheck();
+
 	return 0;
 }
 
 DEFINE_HOOK(0x6A6314, SidebarClass_AddCameo_SupportSWButtons, 0x8)
 {
-	enum { SkipGameCode = 0x6A65F5 };
+	enum { SkipThisCameo = 0x6A65F5 };
 
 	GET_STACK(const AbstractType, absType, STACK_OFFSET(0x14, 0x4));
 	REF_STACK(int, index, STACK_OFFSET(0x14, 0x8));
 
-	return (absType != AbstractType::Special || SuperWeaponTypeClass::Array->Count <= index || TacticalButtonClass::Instance.InsertButtonForSW(index)) ? 0 : SkipGameCode;
+	return (absType != AbstractType::Special || SuperWeaponTypeClass::Array->Count <= index || TacticalButtonClass::Instance.SWSidebarAdd(index)) ? 0 : SkipThisCameo;
 }
 
 DEFINE_HOOK(0x6AAF46, SelectClass_Action_ButtonClick1, 0x6)
 {
-	enum { SkipGameCode = 0x6AB95A };
+	enum { SkipClearMouse = 0x6AB95A };
 
 	GET(const int, index, ESI);
 
-	SuperWeaponTypeClass* const pType = SuperWeaponTypeClass::Array->Items[index];
-	SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pType);
-	TacticalButtonClass* const pButtons = &TacticalButtonClass::Instance;
-	bool keyboardCall = false;
-
-	if (pButtons->KeyboardCall)
-	{
-		pButtons->KeyboardCall = false;
-		keyboardCall = true;
-	}
-
-	if (pTypeExt)
-	{
-		if (pTypeExt->SW_QuickFireAtMouse && keyboardCall)
-		{
-			const CoordStruct mouseCoords = TacticalClass::Instance->ClientToCoords(WWMouseClass::Instance->XY1);
-
-			if (mouseCoords != CoordStruct::Empty)
-			{
-				EventClass event
-				(
-					HouseClass::CurrentPlayer->ArrayIndex,
-					EventType::SpecialPlace,
-					pType->ArrayIndex,
-					CellClass::Coord2Cell(mouseCoords)
-				);
-				EventClass::AddEvent(event);
-
-				return SkipGameCode;
-			}
-		}
-		else if (!pTypeExt->SW_QuickFireInScreen)
-		{
-			return 0;
-		}
-
-		EventClass event
-		(
-			HouseClass::CurrentPlayer->ArrayIndex,
-			EventType::SpecialPlace,
-			pType->ArrayIndex,
-			CellClass::Coord2Cell(TacticalClass::Instance->ClientToCoords(Point2D{ (DSurface::Composite->Width >> 1), (DSurface::Composite->Height >> 1) }))
-		);
-		EventClass::AddEvent(event);
-
-		return SkipGameCode;
-	}
-
-	return 0;
+	return TacticalButtonClass::Instance.SWQuickLaunch(index) ? SkipClearMouse : 0;
 }
 
 DEFINE_HOOK_AGAIN(0x6AAD2F, SelectClass_Action_ButtonClick2, 0x7)
 DEFINE_HOOK(0x6AB94F, SelectClass_Action_ButtonClick2, 0xB)
 {
-	enum { SkipGameCode = 0x6AAE7C };
+	enum { ForceEffective = 0x6AAE7C };
 
 	if (!TacticalButtonClass::Instance.DummyAction)
 		return 0;
@@ -605,12 +611,12 @@ DEFINE_HOOK(0x6AB94F, SelectClass_Action_ButtonClick2, 0xB)
 	GET(TacticalButtonClass::DummySelectClass* const , pThis, EDI);
 
 	R->Stack(STACK_OFFSET(0xAC, -0x98), pThis->SWIndex);
-	return SkipGameCode;
+	return ForceEffective;
 }
 
 DEFINE_HOOK(0x6AB961, SelectClass_Action_ButtonClick3, 0x7)
 {
-	enum { SkipGameCode = 0x6AB975 };
+	enum { SkipControlAction = 0x6AB975 };
 
 	TacticalButtonClass* const pButtons = &TacticalButtonClass::Instance;
 
@@ -619,5 +625,5 @@ DEFINE_HOOK(0x6AB961, SelectClass_Action_ButtonClick3, 0x7)
 
 	pButtons->DummyAction = false;
 
-	return SkipGameCode;
+	return SkipControlAction;
 }

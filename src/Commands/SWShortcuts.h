@@ -108,7 +108,7 @@ inline void SWShortcutsCommandClass<KeyIndex>::Execute(WWKey eInput) const
 	if (KeyIndex > 0)
 	{
 		TacticalButtonClass::Instance.KeyboardCall = true;
-		TacticalButtonClass::Instance.TriggerButtonForSW(KeyIndex);
+		TacticalButtonClass::Instance.SWSidebarTrigger(KeyIndex);
 		return;
 	}
 

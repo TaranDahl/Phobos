@@ -21,11 +21,12 @@ public:
 	void PressDesignatedButton(int triggerIndex);
 
 	// Button index 1-10 : Super weapons buttons
-	void DrawButtonForSW();
-	void RecheckButtonForSW();
-	bool InsertButtonForSW(int& superIndex);
-	bool SortButtonForSW(SuperWeaponTypeClass* pDataType, SuperWeaponTypeClass* pAddType, SWTypeExt::ExtData* pAddTypeExt, unsigned int ownerBits);
-	void TriggerButtonForSW(int buttonIndex);
+	void SWSidebarDraw();
+	void SWSidebarRecheck();
+	bool SWSidebarAdd(int& superIndex);
+	bool SWSidebarSort(SuperWeaponTypeClass* pDataType, SuperWeaponTypeClass* pAddType, SWTypeExt::ExtData* pAddTypeExt, unsigned int ownerBits);
+	void SWSidebarTrigger(int buttonIndex);
+	bool SWQuickLaunch(int superIndex);
 
 	struct DummySelectClass
 	{
