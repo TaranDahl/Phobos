@@ -594,6 +594,7 @@ DEFINE_HOOK(0x6AAF46, SelectClass_Action_ButtonClick1, 0x6)
 	return 0;
 }
 
+DEFINE_HOOK_AGAIN(0x6AAD2F, SelectClass_Action_ButtonClick2, 0x7)
 DEFINE_HOOK(0x6AB94F, SelectClass_Action_ButtonClick2, 0xB)
 {
 	enum { SkipGameCode = 0x6AAE7C };

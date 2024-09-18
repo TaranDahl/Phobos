@@ -29,7 +29,7 @@ public:
 
 	struct DummySelectClass
 	{
-		char _[0x2C] {};
+		char _[0x2C] {}; // : ControlClass
 		StripClass *LinkTo { nullptr };
 		int unknown_int_30 { 0 };
 		bool MouseEntered { false };
