@@ -2,10 +2,10 @@
 #include <Ext/SWType/Body.h>
 #include <ControlClass.h>
 
-class TacticalButtonClass
+class TacticalButtonsClass
 {
 public:
-	static TacticalButtonClass Instance;
+	static TacticalButtonsClass Instance;
 
 private:
 	int CheckMouseOverButtons(const Point2D* pMousePosition);

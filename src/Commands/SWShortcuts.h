@@ -107,17 +107,17 @@ inline void SWShortcutsCommandClass<KeyIndex>::Execute(WWKey eInput) const
 {
 	if (KeyIndex > 0)
 	{
-		TacticalButtonClass::Instance.KeyboardCall = true;
-		TacticalButtonClass::Instance.SWSidebarTrigger(KeyIndex);
+		TacticalButtonsClass::Instance.KeyboardCall = true;
+		TacticalButtonsClass::Instance.SWSidebarTrigger(KeyIndex);
 		return;
 	}
 
-	TacticalButtonClass::Instance.SuperVisible = !TacticalButtonClass::Instance.SuperVisible;
-	TacticalButtonClass::Instance.RecheckButtonIndex();
+	TacticalButtonsClass::Instance.SuperVisible = !TacticalButtonsClass::Instance.SuperVisible;
+	TacticalButtonsClass::Instance.RecheckButtonIndex();
 
 	MessageListClass::Instance->PrintMessage
 	(
-		(TacticalButtonClass::Instance.SuperVisible ?
+		(TacticalButtonsClass::Instance.SuperVisible ?
 			GeneralUtils::LoadStringUnlessMissing("MSG:SWSidebarVisible", L"Set exclusive SW sidebar visible.") :
 			GeneralUtils::LoadStringUnlessMissing("MSG:SWSidebarInvisible", L"Set exclusive SW sidebar invisible.")),
 		RulesClass::Instance->MessageDelay,
