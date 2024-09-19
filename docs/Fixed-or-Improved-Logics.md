@@ -171,6 +171,7 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - The otherwise unused setting `[AI]` -> `PowerSurplus` (defaults to 50) which determines how much surplus power AI players will strive to have can be restored by setting `[AI]` -> `EnablePowerSurplus` to true.
 - Projectiles created from `AirburstWeapon` now remember the WeaponType and can apply radiation etc.
 - Planning paths are now shown for all units under player control or when `[GlobalControls]->DebugPlanningPaths=yes` in singleplayer game modes.
+- Enable the observer data panel, which could only be displayed in multiplayer games, to also be displayed in skirmish games.
 - Fixed `Temporal=true` Warheads potentially crashing game if used to attack `Slaved=true` infantry.
 
 ## Fixes / interactions with other extensions
