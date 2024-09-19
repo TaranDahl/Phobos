@@ -441,14 +441,18 @@ void TacticalButtonsClass::SWSidebarDraw()
 			}
 		}
 
-		// Flash cameo
-		const int delay = pSWType->FlashSidebarTabFrames;
+		const bool ready = !pSuper->IsSuspended && (pSuper->IsReady || (pSWType->UseChargeDrain && pSuper->ChargeDrainState != ChargeDrainState::Charging));
 
-		if (delay > 0 && !pSuper->IsSuspended && (pSuper->IsReady || (pSWType->UseChargeDrain && pSuper->ChargeDrainState != ChargeDrainState::Charging))
-			&& ((Unsorted::CurrentFrame - pSuper->ReadyFrame) % (delay << 1)) > delay)
+		// Flash cameo
+		if (ready)
 		{
-			DSurface::Composite->DrawSHP(FileSystem::SIDEBAR_PAL, Make_Global<SHPStruct*>(0xB07BC0), 0, &position, &rect,
-				BlitterFlags(0x406), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
+			const int delay = pSWType->FlashSidebarTabFrames;
+
+			if (delay > 0 && ((Unsorted::CurrentFrame - pSuper->ReadyFrame) % (delay << 1)) > delay)
+			{
+				DSurface::Composite->DrawSHP(FileSystem::SIDEBAR_PAL, Make_Global<SHPStruct*>(0xB07BC0), 0, &position, &rect,
+					BlitterFlags(0x406), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
+			}
 		}
 
 		// SW charge progress
@@ -460,8 +464,20 @@ void TacticalButtonsClass::SWSidebarDraw()
 				BlitterFlags(0x404), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 		}
 
+		const wchar_t* pKey = this->keyCodeText[i];
+
 		// SW status
-		if (const wchar_t* pName = pSuper->NameReadiness())
+		if (ready && pKey)
+		{
+			Point2D textLocation { 35, position.Y + 1 };
+			const TextPrintType printType = TextPrintType::Center | TextPrintType::FullShadow | TextPrintType::Point8;
+			RectangleStruct textRect = Drawing::GetTextDimensions(pKey, textLocation, static_cast<WORD>(printType), 2, 1);
+
+			// Text black background
+			reinterpret_cast<void(__fastcall*)(RectangleStruct*, DSurface*, unsigned short, unsigned char)>(0x621B80)(&textRect, DSurface::Composite, 0, 0xAFu);
+			DSurface::Composite->DrawTextA(pKey, &rect, &textLocation, static_cast<COLORREF>(color), COLOR_BLACK, printType);
+		}
+		else if (const wchar_t* pName = pSuper->NameReadiness())
 		{
 			Point2D textLocation { 35, position.Y + 1 };
 			const TextPrintType printType = TextPrintType::Center | TextPrintType::FullShadow | TextPrintType::Point8;
@@ -470,18 +486,6 @@ void TacticalButtonsClass::SWSidebarDraw()
 			// Text black background
 			reinterpret_cast<void(__fastcall*)(RectangleStruct*, DSurface*, unsigned short, unsigned char)>(0x621B80)(&textRect, DSurface::Composite, 0, 0xAFu);
 			DSurface::Composite->DrawTextA(pName, &rect, &textLocation, static_cast<COLORREF>(color), COLOR_BLACK, printType);
-		}
-
-		// SW shortcut
-		if (const wchar_t* pKey = this->keyCodeText[i])
-		{
-			Point2D textLocation { 35, position.Y + 34 };
-			const TextPrintType printType = TextPrintType::Center | TextPrintType::FullShadow | TextPrintType::Point8;
-			RectangleStruct textRect = Drawing::GetTextDimensions(pKey, textLocation, static_cast<WORD>(printType), 2, 1);
-
-			// Text black background
-			reinterpret_cast<void(__fastcall*)(RectangleStruct*, DSurface*, unsigned short, unsigned char)>(0x621B80)(&textRect, DSurface::Composite, 0, 0xAFu);
-			DSurface::Composite->DrawTextA(pKey, &rect, &textLocation, static_cast<COLORREF>(color), COLOR_BLACK, printType);
 		}
 
 		if (++i == this->ButtonIndex)
