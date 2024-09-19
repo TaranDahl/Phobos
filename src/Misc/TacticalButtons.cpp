@@ -441,7 +441,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 			}
 		}
 
-		const bool ready = !pSuper->IsSuspended && (pSuper->IsReady || (pSWType->UseChargeDrain && pSuper->ChargeDrainState != ChargeDrainState::Charging));
+		const bool ready = !pSuper->IsSuspended && (pSWType->UseChargeDrain ? pSuper->ChargeDrainState == ChargeDrainState::Ready : pSuper->IsReady);
 
 		// Flash cameo
 		if (ready)
