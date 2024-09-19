@@ -112,16 +112,5 @@ inline void SWShortcutsCommandClass<KeyIndex>::Execute(WWKey eInput) const
 		return;
 	}
 
-	TacticalButtonsClass::Instance.SuperVisible = !TacticalButtonsClass::Instance.SuperVisible;
-	TacticalButtonsClass::Instance.RecheckButtonIndex();
-
-	MessageListClass::Instance->PrintMessage
-	(
-		(TacticalButtonsClass::Instance.SuperVisible ?
-			GeneralUtils::LoadStringUnlessMissing("MSG:SWSidebarVisible", L"Set exclusive SW sidebar visible.") :
-			GeneralUtils::LoadStringUnlessMissing("MSG:SWSidebarInvisible", L"Set exclusive SW sidebar invisible.")),
-		RulesClass::Instance->MessageDelay,
-		HouseClass::CurrentPlayer->ColorSchemeIndex,
-		true
-	);
+	TacticalButtonsClass::Instance.SWSidebarSwitch();
 }

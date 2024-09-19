@@ -9,6 +9,7 @@
 #include <Utilities/AresHelper.h>
 #include <TacticalClass.h>
 #include <WWMouseClass.h>
+#include <CCToolTip.h>
 
 #include "PhobosToolTip.h"
 #include "TacticalButtons.h"
@@ -20,27 +21,41 @@ TacticalButtonsClass TacticalButtonsClass::Instance;
 // Private functions
 int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 {
-	if (this->SuperVisible && pMousePosition->X < 65 && pMousePosition->X >= 5) // Button index 1-10 : Super weapons buttons
+	if (const int currentCounts = this->SWButtonData.size())
 	{
-		const int currentCounts = this->SWButtonData.size();
-		const int height = DSurface::Composite->GetHeight();
-		int checkHight = (height - 32 - 48 * currentCounts - 2 * (currentCounts - 1)) / 2;
+		const int height = DSurface::Composite->GetHeight() - 32;
 
-		for (int i = 0; i < currentCounts; ++i)
+		if (this->SuperVisible && pMousePosition->X < 65 && pMousePosition->X >= 5) // Button index 1-10 : Super weapons buttons
 		{
-			if (pMousePosition->Y < checkHight)
-				break;
+			int checkHight = (height - 48 * currentCounts - 2 * (currentCounts - 1)) / 2;
 
-			checkHight += 48;
+			for (int i = 0; i < currentCounts; ++i)
+			{
+				if (pMousePosition->Y < checkHight)
+					break;
 
-			if (pMousePosition->Y < checkHight)
-				return i + 1;
+				checkHight += 48;
 
-			checkHight += 2;
+				if (pMousePosition->Y < checkHight)
+					return i + 1;
+
+				checkHight += 2;
+			}
+		}
+
+		if (RulesExt::Global()->SWSidebarBackground) // Button index 11 : SW sidebar switch
+		{
+			if (this->SuperVisible ? (pMousePosition->X < 90 && pMousePosition->X >= 80) : (pMousePosition->X < 10 && pMousePosition->X >= 0))
+			{
+				const int checkHight = height / 2;
+
+				if (pMousePosition->Y < checkHight + 25 && pMousePosition->Y >= checkHight - 25)
+					return 11;
+			}
 		}
 	}
 
-	// TODO New buttons (Start from index = 11)
+	// TODO New buttons (Start from index = 12)
 
 	if (this->CheckMouseOverBackground(pMousePosition))
 		return 0; // Button index 0 : Background
@@ -56,8 +71,8 @@ bool TacticalButtonsClass::CheckMouseOverBackground(const Point2D* pMousePositio
 		{
 			if (pMousePosition->X < 80 && pMousePosition->X >= 0)
 			{
-				const int height = DSurface::Composite->GetHeight();
-				const int checkHight = (height - 32 - 48 * currentCounts - 2 * (currentCounts - 1)) / 2 - 21;
+				const int height = DSurface::Composite->GetHeight() - 32;
+				const int checkHight = (height - 48 * currentCounts - 2 * (currentCounts - 1)) / 2 - 21;
 
 				if (pMousePosition->Y >= checkHight && pMousePosition->Y < (checkHight + currentCounts * 50 + 40))
 					return true;
@@ -90,6 +105,7 @@ int TacticalButtonsClass::GetButtonIndex()
 void TacticalButtonsClass::RecheckButtonIndex()
 {
 	this->LastPosition = Point2D { -1, -1 };
+	this->ButtonIndex = -1;
 }
 
 // General functions
@@ -102,50 +118,65 @@ void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 	this->ButtonIndex = this->CheckMouseOverButtons(pMousePosition);
 
 	// SW ToolTip
-	if (this->ButtonIndex > 0)
-	{
-		HouseClass* const pHouse = HouseClass::CurrentPlayer;
-		const int index = Instance.SWButtonData[this->ButtonIndex - 1];
-		SuperClass* const pSuper = pHouse->Supers.Items[index];
+	CCToolTip* const toolTips = CCToolTip::Instance;
 
-		if (pSuper != this->RecordSuper)
+	if (this->MouseIsOverButtons() && this->IndexInSWButtons()) // Button index 1-10 : Super weapons buttons
+	{
+		SuperClass* const pSuper = HouseClass::CurrentPlayer->Supers.Items[Instance.SWButtonData[this->ButtonIndex - 1]];
+
+		if (pSuper && pSuper != this->RecordSuper)
 		{
 			PhobosToolTip::Instance.HelpText(pSuper);
 			this->RecordSuper = pSuper;
+
+			if (toolTips->ToolTipDelay)
+				toolTips->LastToolTipDelay = toolTips->ToolTipDelay;
+
+			toolTips->ToolTipDelay = 0;
 		}
 	}
 	else if (this->RecordSuper)
 	{
 		this->RecordSuper = nullptr;
+		toolTips->ToolTipDelay = toolTips->LastToolTipDelay;
 	}
 }
 
 void TacticalButtonsClass::PressDesignatedButton(int triggerIndex)
 {
-	const int buttonIndex = this->ButtonIndex;
-
-	if (buttonIndex <= 0) // In buttons background
+	if (!this->MouseIsOverButtons()) // In buttons background
 		return;
 
-	if (buttonIndex <= 10) // Button index 1-10 : Super weapons buttons
+	if (this->IndexInSWButtons()) // Button index 1-10 : Super weapons buttons
 	{
 		if (!triggerIndex)
-			this->SWSidebarTrigger(buttonIndex);
+			this->SWSidebarTrigger(this->ButtonIndex);
 		else if (triggerIndex == 2)
 			DisplayClass::Instance->CurrentSWTypeIndex = -1;
+
+		CCToolTip* const toolTips = CCToolTip::Instance;
+		this->RecordSuper = nullptr;
+		toolTips->ToolTipDelay = toolTips->LastToolTipDelay;
 	}
-/*	else if (?) // TODO New buttons (Start from index = 11)
+	else if (this->IndexIsSWSwitch())
+	{
+		if (!triggerIndex)
+			this->SWSidebarSwitch();
+	}
+/*	else if (?) // TODO New buttons (Start from index = 12)
 	{
 		;
 	}*/
 }
 
 // SW buttons functions
+inline bool TacticalButtonsClass::IndexInSWButtons()
+{
+	return this->ButtonIndex <= 10;
+}
+
 void TacticalButtonsClass::SWSidebarDraw()
 {
-	if (!this->SuperVisible)
-		return;
-
 	const int currentCounts = this->SWButtonData.size();
 
 	if (!currentCounts)
@@ -154,12 +185,51 @@ void TacticalButtonsClass::SWSidebarDraw()
 	HouseClass* const pHouse = HouseClass::CurrentPlayer;
 	SideExt::ExtData* const pSideExt = SideExt::ExtMap.Find(SideClass::Array->GetItem(pHouse->SideIndex));
 	const bool drawSWSidebarBackground = RulesExt::Global()->SWSidebarBackground && pSideExt;
-
-	auto& data = this->SWButtonData;
-	const int height = DSurface::Composite->GetHeight();
+	const int height = DSurface::Composite->GetHeight() - 32;
 	const int color = Drawing::RGB_To_Int(Drawing::TooltipColor);
 
-	Point2D position { 5, (height - 32 - 48 * currentCounts - 2 * (currentCounts - 1)) / 2 };
+	// Draw switch
+	if (this->SuperVisible)
+	{
+		if (drawSWSidebarBackground)
+		{
+			RectangleStruct drawRect { 80, (height / 2 - 25), 10, 50 };
+
+			if (BSurface* const CameoPCX = pSideExt->SWSidebarBackground_OnPCX.GetSurface())
+				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
+			else
+				DSurface::Composite->FillRect(&drawRect, COLOR_BLUE);
+
+			if (this->IndexIsSWSwitch())
+			{
+				RectangleStruct rect { 0, 0, 90, drawRect.Y + 50 };
+				DSurface::Composite->DrawRectEx(&rect, &drawRect, color);
+			}
+		}
+	}
+	else
+	{
+		if (drawSWSidebarBackground)
+		{
+			RectangleStruct drawRect { 0, (height / 2 - 25), 10, 50 };
+
+			if (BSurface* const CameoPCX = pSideExt->SWSidebarBackground_OffPCX.GetSurface())
+				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
+			else
+				DSurface::Composite->FillRect(&drawRect, COLOR_BLUE);
+
+			if (this->IndexIsSWSwitch())
+			{
+				RectangleStruct rect { 0, 0, 10, drawRect.Y + 50 };
+				DSurface::Composite->DrawRectEx(&rect, &drawRect, color);
+			}
+		}
+
+		return;
+	}
+
+	auto& data = this->SWButtonData;
+	Point2D position { 5, (height - 48 * currentCounts - 2 * (currentCounts - 1)) / 2 };
 	RectangleStruct rect { 0, 0, 65, position.Y + 48 };
 	int recordHeight = -1;
 
@@ -286,7 +356,6 @@ void TacticalButtonsClass::SWSidebarDraw()
 
 void TacticalButtonsClass::SWSidebarRecheck()
 {
-	this->RecheckButtonIndex();
 	HouseClass* const pHouse = HouseClass::CurrentPlayer;
 	auto& data = this->SWButtonData;
 
@@ -295,9 +364,14 @@ void TacticalButtonsClass::SWSidebarRecheck()
 		const int superIndex = *it;
 
 		if (superIndex >= pHouse->Supers.Count || !pHouse->Supers.Items[superIndex]->IsPresent)
+		{
 			it = data.erase(it);
+			this->RecheckButtonIndex();
+		}
 		else
+		{
 			++it;
+		}
 	}
 }
 
@@ -387,12 +461,7 @@ bool TacticalButtonsClass::SWSidebarSort(SuperWeaponTypeClass* pDataType, SuperW
 
 void TacticalButtonsClass::SWSidebarTrigger(int buttonIndex)
 {
-	if (ScenarioClass::Instance->UserInputLocked || !this->SuperVisible)
-		return;
-
-	const int superIndex = this->SWButtonData[buttonIndex - 1];
-
-	if (superIndex < 0)
+	if (ScenarioClass::Instance->UserInputLocked || !this->SuperVisible || static_cast<size_t>(buttonIndex) > this->SWButtonData.size())
 		return;
 
 	SidebarClass* const pSidebar = SidebarClass::Instance;
@@ -401,10 +470,31 @@ void TacticalButtonsClass::SWSidebarTrigger(int buttonIndex)
 	DummySelectClass pButton;
 	pButton.LinkTo = &pSidebar->Tabs[pSidebar->ActiveTabIndex];
 	pButton.unknown_int_30 = 0x7FFFFFFF;
-	pButton.SWIndex = superIndex;
+	pButton.SWIndex = this->SWButtonData[buttonIndex - 1];
 
 	DWORD KeyNum = 0;
 	reinterpret_cast<bool(__thiscall*)(DummySelectClass*, GadgetFlag, DWORD*, KeyModifier)>(0x6AAD00)(&pButton, GadgetFlag::LeftPress, &KeyNum, KeyModifier::None); // SelectClass_Action
+}
+
+inline bool TacticalButtonsClass::IndexIsSWSwitch()
+{
+	return this->ButtonIndex == 11;
+}
+
+void TacticalButtonsClass::SWSidebarSwitch()
+{
+	this->SuperVisible = !this->SuperVisible;
+	this->RecheckButtonIndex();
+
+	MessageListClass::Instance->PrintMessage
+	(
+		(this->SuperVisible ?
+			GeneralUtils::LoadStringUnlessMissing("TXT_EX_SW_BAR_VISIBLE", L"Set exclusive SW sidebar visible.") :
+			GeneralUtils::LoadStringUnlessMissing("TXT_EX_SW_BAR_INVISIBLE", L"Set exclusive SW sidebar invisible.")),
+		RulesClass::Instance->MessageDelay,
+		HouseClass::CurrentPlayer->ColorSchemeIndex,
+		true
+	);
 }
 
 bool TacticalButtonsClass::SWQuickLaunch(int superIndex)
@@ -537,14 +627,12 @@ DEFINE_HOOK(0x693397, ScrollClass_WindowsProcedure_ReleaseRightMouseButton, 0x6)
 // Mouse suspend hooks
 DEFINE_HOOK(0x692F85, ScrollClass_MouseUpdate_SkipMouseLongPress, 0x7)
 {
-	enum { CheckMousePress = 0x692F8E, CheckMouseNoPress = 0x692FDC, SkipGameCode = 0x692FAE };
+	enum { CheckMousePress = 0x692F8E, CheckMouseNoPress = 0x692FDC };
 
 	GET(ScrollClass*, pThis, EBX);
 
-	if (pThis->unknown_byte_554A) // 555A: AnyMouseButtonDown
-		return !TacticalButtonsClass::Instance.PressedInButtonsLayer ? CheckMousePress : SkipGameCode;
-
-	return CheckMouseNoPress;
+	// 555A: AnyMouseButtonDown
+	return (pThis->unknown_byte_554A && !TacticalButtonsClass::Instance.PressedInButtonsLayer) ? CheckMousePress : CheckMouseNoPress;
 }
 
 DEFINE_HOOK(0x69300B, ScrollClass_MouseUpdate_SkipMouseActionUpdate, 0x6)
