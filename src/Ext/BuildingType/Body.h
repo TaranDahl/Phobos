@@ -64,6 +64,7 @@ public:
 		Valueable<int> SellBuildupLength;
 
 		Valueable<bool> JustHasRallyPoint;
+		Nullable<CoordStruct> JumpjetExitCoord;
 
 		std::vector<OptionalStruct<DirType, true>> AircraftDockingDirs;
 
@@ -108,6 +109,7 @@ public:
 			, ZShapePointMove_OnBuildup { false }
 			, SellBuildupLength { 23 }
 			, JustHasRallyPoint { false }
+			, JumpjetExitCoord { }
 			, AircraftDockingDirs {}
 			, FactoryPlant_AllowTypes {}
 			, FactoryPlant_DisallowTypes {}

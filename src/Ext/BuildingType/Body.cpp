@@ -683,6 +683,7 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SellBuildupLength.Read(exINI, pSection, "SellBuildupLength");
 
 	this->JustHasRallyPoint.Read(exINI, pSection, "JustHasRallyPoint");
+	this->JumpjetExitCoord.Read(exINI, pSection, "JumpjetExitCoord");
 
 	this->FactoryPlant_AllowTypes.Read(exINI, pSection, "FactoryPlant.AllowTypes");
 	this->FactoryPlant_DisallowTypes.Read(exINI, pSection, "FactoryPlant.DisallowTypes");
@@ -799,6 +800,7 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ZShapePointMove_OnBuildup)
 		.Process(this->SellBuildupLength)
 		.Process(this->JustHasRallyPoint)
+		.Process(this->JumpjetExitCoord)
 		.Process(this->AircraftDockingDirs)
 		.Process(this->FactoryPlant_AllowTypes)
 		.Process(this->FactoryPlant_DisallowTypes)

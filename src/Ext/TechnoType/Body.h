@@ -275,6 +275,7 @@ public:
 		Valueable<int> FlightCrash;
 		Nullable<bool> ExplodeOnDestroy;
 		Nullable<bool> FireDeathWeaponOnCrushed;
+		Nullable<CoordStruct> ExitCoord;
 
 		ValueableVector<TechnoTypeClass*> InitialPayload_Types;
 		ValueableVector<int> InitialPayload_Nums;
@@ -557,6 +558,7 @@ public:
 			, FlightCrash { -1 }
 			, ExplodeOnDestroy { }
 			, FireDeathWeaponOnCrushed { }
+			, ExitCoord { }
 
 			, InitialPayload_Types {}
 			, InitialPayload_Nums {}

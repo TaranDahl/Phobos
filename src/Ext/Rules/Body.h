@@ -231,6 +231,7 @@ public:
 		Valueable<bool> CrushBuildingOnAnyCell;
 		Valueable<bool> RallyPointOnTechno;
 		Valueable<bool> RallyPointForceMove;
+		Valueable<bool> RallyPointAreaGuard;
 
 		Nullable<Vector3D<float>> VoxelLightSource;
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
@@ -425,6 +426,7 @@ public:
 			, CrushBuildingOnAnyCell { false }
 			, RallyPointOnTechno { false }
 			, RallyPointForceMove { false }
+			, RallyPointAreaGuard { false }
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 			, UseFixedVoxelLighting { false }
