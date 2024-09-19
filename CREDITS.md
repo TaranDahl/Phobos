@@ -379,6 +379,7 @@ This page lists all the individual contributions to the project by their author.
   - Optimize aircrafts stop action and allow they using area guard and attack moving
   - Exclusive Sidebar for Superweapons
   - Fix `LimboKill` not working reliably
+  - Observer sidebar in skirmish game mode
 - **TaranDahl**
   - Raise alert when technos are taking damage
   - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller

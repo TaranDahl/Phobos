@@ -556,6 +556,7 @@ Vanilla fixes:
 - Buildings with foundation bigger than 1x1 can now recycle spawned correctly (by TaranDahl)
 - Infantry firing while moving (by TaranDahl)
 - Fix the bug that parasite will vanish if it missed its target when its previous cell is occupied (by TaranDahl)
+- Observer sidebar in skirmish game mode (by CrimRecya)
 - Units are now unable to kick out from a factory that is in construction process, and will not always stuck in the factory (by CrimRecya & TaranDahl)
 - Fixed disguised units not using the correct palette if target has custom palette (by NetsuNegi)
 - Building upgrades now consistently use building's `PowerUpN` animation settings corresponding to the upgrade's `PowersUpToLevel` where possible (by Starkku)
