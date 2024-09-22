@@ -270,6 +270,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->RallyPointOnTechno.Read(exINI, GameStrings::General, "RallyPointOnTechno");
 	this->RallyPointForceMove.Read(exINI, GameStrings::General, "RallyPointForceMove");
 	this->RallyPointAreaGuard.Read(exINI, GameStrings::General, "RallyPointAreaGuard");
+	this->EnableEnhancedExitCoords.Read(exINI, GameStrings::General, "EnableEnhancedExitCoords");
 
 	this->VoxelLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelLightSource");
 	// this->VoxelShadowLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelShadowLightSource");
@@ -530,6 +531,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->RallyPointOnTechno)
 		.Process(this->RallyPointForceMove)
 		.Process(this->RallyPointAreaGuard)
+		.Process(this->EnableEnhancedExitCoords)
 		.Process(this->VoxelLightSource)
 		// .Process(this->VoxelShadowLightSource)
 		.Process(this->UseFixedVoxelLighting)

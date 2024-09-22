@@ -232,6 +232,7 @@ public:
 		Valueable<bool> RallyPointOnTechno;
 		Valueable<bool> RallyPointForceMove;
 		Valueable<bool> RallyPointAreaGuard;
+		Valueable<bool> EnableEnhancedExitCoords;
 
 		Nullable<Vector3D<float>> VoxelLightSource;
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
@@ -427,6 +428,7 @@ public:
 			, RallyPointOnTechno { false }
 			, RallyPointForceMove { false }
 			, RallyPointAreaGuard { false }
+			, EnableEnhancedExitCoords { false }
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 			, UseFixedVoxelLighting { false }

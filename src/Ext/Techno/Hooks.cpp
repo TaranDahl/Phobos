@@ -1054,6 +1054,9 @@ DEFINE_HOOK(0x4448CE, BuildingClass_KickOutUnit_RallyPointAreaGuard2, 0x6)
 // Also enhanced the ExitCoord.
 DEFINE_HOOK(0x4448B0, BuildingClass_KickOutUnit_ExitCoords, 0x6)
 {
+	if (!RulesExt::Global()->EnableEnhancedExitCoords)
+		return 0;
+
 	GET(FootClass*, pProduct, EDI);
 	GET(BuildingClass*, pThis, ESI);
 	GET(CoordStruct*, pCrd, ECX);
