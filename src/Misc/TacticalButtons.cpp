@@ -987,10 +987,13 @@ void TacticalButtonsClass::SelectedDraw()
 
 					textPosition.X -= 30;
 					DSurface::Composite->DrawTextA(text, &surfaceRect, &textPosition, color, 0, printType);
-					DSurface::Composite->DrawRect(&drawRect, color);
-
-					return;
 				}
+			}
+
+			if (i == this->RecordIndex)
+			{
+				DSurface::Composite->DrawRect(&drawRect, color);
+				return;
 			}
 		}
 	}
