@@ -326,6 +326,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->PrerequisiteForCameo.Read(exINI, pSection, "PrerequisiteForCameo");
 	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
 	this->UIExtraDescription.Read(exINI, pSection, "UIExtraDescription");
+	this->FakeOf.Read(exINI, pSection, "FakeOf");
 
 	this->CombatAlert.Read(exINI, pSection, "CombatAlert");
 	this->CombatAlert_NotBuilding.Read(exINI, pSection, "CombatAlert.NotBuilding");
@@ -423,6 +424,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->CameoPCX.Read(&CCINIClass::INI_Art, pArtSection, "CameoPCX");
 	this->GreyCameoPCX.Read(&CCINIClass::INI_Art, pArtSection, "GreyCameoPCX");
+	this->CameoPal.LoadFromINI(&CCINIClass::INI_Art, pArtSection, "CameoPalette");
 
 	this->TurretOffset.Read(exArtINI, pArtSection, "TurretOffset");
 	this->TurretShadow.Read(exArtINI, pArtSection, "TurretShadow");
@@ -755,6 +757,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->UIExtraDescription)
 		.Process(this->CameoPCX)
 		.Process(this->GreyCameoPCX)
+		.Process(this->FakeOf)
+		.Process(this->CameoPal)
 
 		.Process(this->CombatAlert)
 		.Process(this->CombatAlert_NotBuilding)

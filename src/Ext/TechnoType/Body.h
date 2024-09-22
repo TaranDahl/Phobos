@@ -241,6 +241,8 @@ public:
 		Valueable<CSFText> UIExtraDescription;
 		PhobosPCXFile CameoPCX;
 		PhobosPCXFile GreyCameoPCX;
+		Valueable<TechnoTypeClass*> FakeOf;
+		CustomPalette CameoPal;
 
 		Nullable<bool> CombatAlert;
 		Nullable<bool> CombatAlert_NotBuilding;
@@ -524,6 +526,8 @@ public:
 			, AlwaysExistTheCameo {}
 			, PrerequisiteForCameo {}
 			, UIExtraDescription {}
+			, FakeOf {}
+			, CameoPal {}
 
 			, CombatAlert {}
 			, CombatAlert_NotBuilding {}
