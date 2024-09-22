@@ -49,7 +49,7 @@ public:
 	// Button index 71-100 : Select buttons
 	inline bool IndexInSelectButtons();
 	inline void AddToCurrentSelect(TechnoTypeExt::ExtData* pTypeExt, int count, int checkIndex);
-	void SelectedTrigger(int buttonIndex);
+	void SelectedTrigger(int buttonIndex, bool select);
 	void SelectedUpdate();
 	void SelectedDraw();
 	void SelectedSwitch();

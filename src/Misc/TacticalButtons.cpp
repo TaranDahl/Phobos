@@ -201,24 +201,47 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 	{
 		if (const int currentCounts = Math::min(30, static_cast<int>(this->CurrentSelectCameo.size())))
 		{
-			const int height = DSurface::Composite->GetHeight() - 32;
+			const int height = DSurface::Composite->GetHeight() - 80;
 
-			if (pMousePosition->Y >= (height - 48) && pMousePosition->Y < height)
+			if (pMousePosition->Y >= (this->IndexInSelectButtons() ? (height - 10) : height) && pMousePosition->Y < (height + 48))
 			{
-				const int width = DSurface::Composite->GetWidth() / 3 + 60;
+				const int gap = Math::min(60, ((DSurface::Composite->GetWidth() << 1) / (5 * currentCounts)));
 
-				if (pMousePosition->X < width)
+				if (pMousePosition->X < (gap * (currentCounts - 1) + 60))
 				{
-					const int gap = Math::min(60, (width / currentCounts));
 					const int index = currentCounts + 71;
 					int checkWidth = 0;
 
 					for (int i = 71; i < index; ++i)
 					{
-						checkWidth += (this->RecordIndex == i) ? 60 : gap;
+						if (this->RecordIndex == i)
+						{
+							checkWidth += 60;
 
-						if (pMousePosition->X < checkWidth)
-							return i;
+							if (this->ButtonIndex == this->RecordIndex)
+							{
+								if (pMousePosition->X < checkWidth)
+									return i;
+
+								break;
+							}
+							else if (pMousePosition->X < checkWidth && pMousePosition->Y >= height)
+							{
+								return i;
+							}
+						}
+						else
+						{
+							checkWidth += gap;
+
+							if (pMousePosition->X < checkWidth)
+							{
+								if (pMousePosition->Y >= height)
+									return i;
+								else
+									break;
+							}
+						}
 					}
 				}
 			}
@@ -336,9 +359,12 @@ void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 			this->HoveredSelected = nullptr;
 		}
 	}
-	else if (this->HoveredSelected)
+	else
 	{
-		this->HoveredSelected = nullptr;
+		if (this->HoveredSelected)
+			this->HoveredSelected = nullptr;
+
+		this->RecordIndex = 71;
 	}
 }
 
@@ -370,7 +396,9 @@ void TacticalButtonsClass::PressDesignatedButton(int triggerIndex)
 	else if (this->IndexInSelectButtons())
 	{
 		if (!triggerIndex)
-			this->SelectedTrigger(this->ButtonIndex);
+			this->SelectedTrigger(this->ButtonIndex, true);
+		else if (triggerIndex == 2)
+			this->SelectedTrigger(this->ButtonIndex, false);
 	}
 }
 
@@ -828,7 +856,7 @@ inline void TacticalButtonsClass::AddToCurrentSelect(TechnoTypeExt::ExtData* pTy
 	this->CurrentSelectCameo.push_back(select);
 }
 
-void TacticalButtonsClass::SelectedTrigger(int buttonIndex)
+void TacticalButtonsClass::SelectedTrigger(int buttonIndex, bool select)
 {
 	if (ScenarioClass::Instance->UserInputLocked || !this->SelectedVisible)
 		return;
@@ -838,50 +866,17 @@ void TacticalButtonsClass::SelectedTrigger(int buttonIndex)
 	if (buttonIndex > (currentCounts + 70))
 		return;
 
-	std::vector<ObjectClass*> deselects;
-	deselects.reserve(ObjectClass::CurrentObjects->Count);
+	TechnoTypeExt::ExtData* const pTypeExt = this->CurrentSelectCameo[buttonIndex - 71].TypeExt;
+	const char* groupID = pTypeExt->GetSelectionGroupID();
+	const bool shiftPressed = InputManagerClass::Instance->IsForceSelectKeyPressed();
 
-	if (currentCounts == 1)
+	if (select)
 	{
-		if (InputManagerClass::Instance->IsForceSelectKeyPressed())
+		if (shiftPressed)
 		{
-			for (auto const& pCurrent : ObjectClass::CurrentObjects())
-			{
-				deselects.push_back(pCurrent);
+			std::vector<ObjectClass*> deselects;
+			deselects.reserve(ObjectClass::CurrentObjects->Count);
 
-				break;
-			}
-		}
-		else
-		{
-			const int counts = ObjectClass::CurrentObjects->Count;
-
-			for (int i = 1; i < counts; ++i)
-			{
-				deselects.push_back(ObjectClass::CurrentObjects->Items[i]);
-			}
-		}
-	}
-	else
-	{
-		TechnoTypeExt::ExtData* const pTypeExt = this->CurrentSelectCameo[buttonIndex - 71].TypeExt;
-		const char* groupID = pTypeExt->GetSelectionGroupID();
-
-		if (InputManagerClass::Instance->IsForceSelectKeyPressed())
-		{
-			for (auto const& pCurrent : ObjectClass::CurrentObjects())
-			{
-				if (TechnoTypeExt::ExtData* const pCurrentTypeExt = TechnoTypeExt::ExtMap.Find(pCurrent->GetTechnoType()))
-				{
-					if (pCurrentTypeExt->GetSelectionGroupID() != groupID)
-						continue;
-				}
-
-				deselects.push_back(pCurrent);
-			}
-		}
-		else
-		{
 			for (auto const& pCurrent : ObjectClass::CurrentObjects())
 			{
 				if (TechnoTypeExt::ExtData* const pCurrentTypeExt = TechnoTypeExt::ExtMap.Find(pCurrent->GetTechnoType()))
@@ -892,12 +887,88 @@ void TacticalButtonsClass::SelectedTrigger(int buttonIndex)
 
 				deselects.push_back(pCurrent);
 			}
+
+			for (auto const& pDeselect : deselects)
+			{
+				pDeselect->Deselect();
+			}
+		}
+		else
+		{
+			const int counts = ObjectClass::CurrentObjects->Count;
+			std::vector<ObjectClass*> selects;
+			selects.reserve(counts);
+			std::vector<ObjectClass*> deselects;
+			deselects.reserve(counts);
+
+			for (auto const& pCurrent : ObjectClass::CurrentObjects())
+			{
+				if (TechnoTypeExt::ExtData* const pCurrentTypeExt = TechnoTypeExt::ExtMap.Find(pCurrent->GetTechnoType()))
+				{
+					if (pCurrentTypeExt->GetSelectionGroupID() == groupID)
+					{
+						selects.push_back(pCurrent);
+						continue;
+					}
+				}
+
+				deselects.push_back(pCurrent);
+			}
+
+			for (auto const& pDeselect : deselects)
+			{
+				pDeselect->Deselect();
+			}
+
+			const int size = selects.size();
+			const int random = Unsorted::CurrentFrame % size;
+
+			for (int i = 0; i < size; ++i)
+			{
+				if (i != random)
+					selects[i]->Deselect();
+			}
 		}
 	}
-
-	for (auto const& pDeselect : deselects)
+	else
 	{
-		pDeselect->Deselect();
+		if (shiftPressed)
+		{
+			std::vector<ObjectClass*> deselects;
+			deselects.reserve(ObjectClass::CurrentObjects->Count);
+
+			for (auto const& pCurrent : ObjectClass::CurrentObjects())
+			{
+				if (TechnoTypeExt::ExtData* const pCurrentTypeExt = TechnoTypeExt::ExtMap.Find(pCurrent->GetTechnoType()))
+				{
+					if (pCurrentTypeExt->GetSelectionGroupID() != groupID)
+						continue;
+				}
+
+				deselects.push_back(pCurrent);
+			}
+
+			for (auto const& pDeselect : deselects)
+			{
+				pDeselect->Deselect();
+			}
+		}
+		else
+		{
+			std::vector<ObjectClass*> selects;
+			selects.reserve(ObjectClass::CurrentObjects->Count);
+
+			for (auto const& pCurrent : ObjectClass::CurrentObjects())
+			{
+				if (TechnoTypeExt::ExtData* const pCurrentTypeExt = TechnoTypeExt::ExtMap.Find(pCurrent->GetTechnoType()))
+				{
+					if (pCurrentTypeExt->GetSelectionGroupID() == groupID)
+						selects.push_back(pCurrent);
+				}
+			}
+
+			selects[Unsorted::CurrentFrame % selects.size()]->Deselect();
+		}
 	}
 }
 
@@ -988,16 +1059,17 @@ void TacticalButtonsClass::SelectedDraw()
 	if (currentCounts > 1 || (currentCounts && this->CurrentSelectCameo[0].Count > 1))
 	{
 		Point2D position { 0, DSurface::Composite->GetHeight() - 80 };
+		Point2D textPosition { 1, position.Y + 1 };
 		RectangleStruct drawRect { 0, position.Y, 60, 48 };
 
-		const int gap = Math::min(60, ((DSurface::Composite->GetWidth() / 3 + 60) / currentCounts));
+		const int gap = Math::min(60, ((DSurface::Composite->GetWidth() << 1) / (5 * currentCounts)));
 		RectangleStruct surfaceRect { 0, 0, (gap * (currentCounts - 1) + 60), (position.Y + 48) };
 
 		const int maxIndex = currentCounts + 70;
 		const COLORREF color = Drawing::RGB_To_Int(Drawing::TooltipColor);
 		TextPrintType printType = TextPrintType::Background | TextPrintType::FullShadow | TextPrintType::Point8;
 
-		for (int i = 71; i < this->RecordIndex && i <= maxIndex; ++i, position.X += gap, drawRect.X = position.X)
+		for (int i = 71; i < this->RecordIndex && i <= maxIndex; ++i, position.X += gap, drawRect.X = position.X, textPosition.X += gap)
 		{
 			SelectRecordStruct pSelect = this->CurrentSelectCameo[i - 71];
 
@@ -1040,10 +1112,7 @@ void TacticalButtonsClass::SelectedDraw()
 			{
 				wchar_t text[0x20];
 				swprintf_s(text, L"%d", count);
-
-				++position.Y;
-				DSurface::Composite->DrawTextA(text, &surfaceRect, &position, color, 0, printType);
-				--position.Y;
+				DSurface::Composite->DrawTextA(text, &surfaceRect, &textPosition, color, 0, printType);
 			}
 		}
 
@@ -1051,9 +1120,9 @@ void TacticalButtonsClass::SelectedDraw()
 		drawRect.X = position.X;
 
 		printType |= TextPrintType::Right;
-		Point2D textPosition { surfaceRect.Width, position.Y + 1 };
+		textPosition.X = surfaceRect.Width - 1;
 
-		for (int i = maxIndex; i >= this->RecordIndex; --i, position.X -= gap, drawRect.X = position.X, textPosition.X -= gap)
+		for (int i = maxIndex; i > this->RecordIndex; --i, position.X -= gap, drawRect.X = position.X, textPosition.X -= gap)
 		{
 			SelectRecordStruct pSelect = this->CurrentSelectCameo[i - 71];
 
@@ -1096,25 +1165,63 @@ void TacticalButtonsClass::SelectedDraw()
 			{
 				wchar_t text[0x20];
 				swprintf_s(text, L"%d", count);
+				DSurface::Composite->DrawTextA(text, &surfaceRect, &textPosition, color, 0, printType);
+			}
+		}
 
-				if (i != this->RecordIndex)
+		const bool hovered = this->ButtonIndex == this->RecordIndex;
+
+		if (hovered)
+		{
+			position.Y -= 10;
+			drawRect.Y -= 10;
+			textPosition.Y -= 10;
+		}
+
+		if (this->RecordIndex <= maxIndex)
+		{
+			SelectRecordStruct pSelect = this->CurrentSelectCameo[this->RecordIndex - 71];
+
+			if (BSurface* const CameoPCX = pSelect.TypeExt->CameoPCX.GetSurface())
+			{
+				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
+			}
+			else if (SHPStruct* const pSHP = pSelect.TypeExt->OwnerObject()->GetCameo())
+			{
+				SHPReference* const pCameoRef = pSHP->AsReference();
+
+				char pFilename[0x20];
+				strcpy_s(pFilename, RulesExt::Global()->MissingCameo.data());
+				_strlwr_s(pFilename);
+
+				if (!_stricmp(pCameoRef->Filename, GameStrings::XXICON_SHP) && strstr(pFilename, ".pcx"))
 				{
-					DSurface::Composite->DrawTextA(text, &surfaceRect, &textPosition, color, 0, printType);
+					PCX::Instance->LoadFile(pFilename);
+
+					if (BSurface* const MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
+						PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+					else
+						DSurface::Composite->FillRect(&drawRect, COLOR_WHITE);
 				}
 				else
 				{
-					printType &= ~TextPrintType::Right;
-					printType |= TextPrintType::Center;
-
-					textPosition.X -= 30;
-					DSurface::Composite->DrawTextA(text, &surfaceRect, &textPosition, color, 0, printType);
+					RectangleStruct rect { 0, 0, (position.X + 60), (hovered ? (surfaceRect.Height - 10) : surfaceRect.Height) };
+					DSurface::Composite->DrawSHP(pSelect.TypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &rect,
+						BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 				}
 			}
-
-			if (i == this->RecordIndex)
+			else
 			{
-				DSurface::Composite->DrawRect(&drawRect, color);
-				return;
+				DSurface::Composite->FillRect(&drawRect, COLOR_WHITE);
+			}
+
+			const int count = pSelect.Count;
+
+			if (count > 1)
+			{
+				wchar_t text[0x20];
+				swprintf_s(text, L"%d", count);
+				DSurface::Composite->DrawTextA(text, &surfaceRect, &textPosition, color, 0, printType);
 			}
 		}
 	}
@@ -1129,16 +1236,19 @@ void TacticalButtonsClass::SelectedDraw()
 
 				if (pTypeExt->OwnerObject() == pType)
 				{
-					Point2D position { 0, DSurface::Composite->GetHeight() - 80 };
 					COLORREF color = Drawing::RGB_To_Int(Drawing::TooltipColor);
-					RectangleStruct drawRect { 0, position.Y, 180, 48};
+					RectangleStruct drawRect { 0, DSurface::Composite->GetHeight() - 80, 180, 48};
 
 					DSurface::Composite->FillRect(&drawRect, COLOR_BLACK);
 					DSurface::Composite->DrawRect(&drawRect, color);
 
+					Point2D position { 60, drawRect.Y };
+					Point2D nextPosition { 60, drawRect.Y + 48 };
+					DSurface::Composite->DrawLine(&position, &nextPosition, color);
+
 					const TextPrintType printType = TextPrintType::Center | TextPrintType::Point8;
 					RectangleStruct surfaceRect { 0, 0, 180, position.Y + 48 };
-					position += Point2D { 120, 3 };
+					position += Point2D { 60, 3 };
 
 					const wchar_t* name = pType->UIName;
 					BSurface* CameoPCX = pTypeExt->CameoPCX.GetSurface();
