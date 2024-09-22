@@ -1046,7 +1046,7 @@ void TacticalButtonsClass::SelectedUpdate()
 	const int maxIndex = this->CurrentSelectCameo.size() + 70;
 
 	if (this->RecordIndex > maxIndex)
-		this->RecordIndex = 71;
+		this->RecordIndex = maxIndex;
 }
 
 void TacticalButtonsClass::SelectedDraw()
