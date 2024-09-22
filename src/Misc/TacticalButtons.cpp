@@ -999,7 +999,6 @@ void TacticalButtonsClass::SelectedDraw()
 	}
 	else if (currentCounts)
 	{
-
 		for (auto const& pCurrent : ObjectClass::CurrentObjects())
 		{
 			if (TechnoClass* const pThis = abstract_cast<TechnoClass*>(pCurrent))
@@ -1035,7 +1034,7 @@ void TacticalButtonsClass::SelectedDraw()
 						{
 							wchar_t text2[0x20];
 							swprintf_s(text2, L"%d / %d", pSld->GetHP(), static_cast<int>(pSldType->Strength));
-							DSurface::Composite->DrawTextA(text2, &surfaceRect, &position, COLOR_BLUE, 0, printType);
+							DSurface::Composite->DrawTextA(text2, &surfaceRect, &position, COLOR_WHITE, 0, printType);
 						}
 						else
 						{
