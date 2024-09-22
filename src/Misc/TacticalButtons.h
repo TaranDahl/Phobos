@@ -15,15 +15,12 @@ private:
 public:
 	inline bool MouseIsOverButtons();
 	inline bool MouseIsOverTactical();
-
 	int GetButtonIndex();
-	void RecheckButtonIndex();
 	void SetMouseButtonIndex(const Point2D* pMousePosition);
 	void PressDesignatedButton(int triggerIndex);
 
 	// Button index 1-10 : Super weapons buttons
 	inline bool IndexInSWButtons();
-
 	void SWSidebarDraw();
 	void SWSidebarRecheck();
 	bool SWSidebarAdd(int& superIndex);
@@ -42,13 +39,26 @@ public:
 
 	// Button index 11 : SW sidebar switch
 	inline bool IndexIsSWSwitch();
-
 	void SWSidebarSwitch();
 
-	// Extra functions
+	// Extra functions for SW
 	bool SWQuickLaunch(int superIndex);
 
-	// TODO New buttons (Start from index = 12)
+	// TODO New buttons
+
+	// Button index 71-100 : Select buttons
+	inline bool IndexInSelectButtons();
+	inline void AddToCurrentSelect(TechnoTypeExt::ExtData* pTypeExt, int count, int checkIndex);
+	void SelectedTrigger(int buttonIndex);
+	void SelectedUpdate();
+	void SelectedDraw();
+	void SelectedSwitch();
+
+	struct SelectRecordStruct
+	{
+		TechnoTypeExt::ExtData* TypeExt { nullptr };
+		int Count { 0 };
+	};
 
 public:
 	bool PressedInButtonsLayer { false }; // Check press
@@ -56,14 +66,18 @@ public:
 	// Button index 1-10 : Super weapons buttons
 	bool DummyAction { false };
 	bool KeyboardCall { false };
-	std::wstring keyCodeText[10] {};
-	int keyCodeData[10] {};
+	std::wstring KeyCodeText[10] {};
+	int KeyCodeData[10] {};
 
-	// TODO New buttons (Start from index = 12)
+	// Button index 11 : SW sidebar switch
+
+	// TODO New buttons
+
+	// Button index 71-100 : Select buttons
+	const wchar_t* HoveredSelected { nullptr };
 
 private:
 	int ButtonIndex { -1 }; // -1 -> above no buttons, 0 -> above buttons background, POSITIVE -> above button who have this index
-	Point2D LastPosition { Point2D::Empty }; // Check moving
 
 	// Button index 1-10 : Super weapons buttons
 	std::vector<int> SWButtonData;
@@ -72,5 +86,10 @@ private:
 	// Button index 11 : SW sidebar switch
 	bool SuperVisible { true };
 
-	// TODO New buttons (Start from index = 12)
+	// TODO New buttons
+
+	// Button index 71-100 : Select buttons
+	bool SelectedVisible { true };
+	int RecordIndex { 71 };
+	std::vector<SelectRecordStruct> CurrentSelectCameo;
 };

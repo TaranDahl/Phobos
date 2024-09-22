@@ -239,6 +239,8 @@ public:
 		Nullable<bool> AlwaysExistTheCameo;
 		Valueable<TechnoTypeClass*> PrerequisiteForCameo;
 		Valueable<CSFText> UIExtraDescription;
+		PhobosPCXFile CameoPCX;
+		PhobosPCXFile GreyCameoPCX;
 
 		Nullable<bool> CombatAlert;
 		Nullable<bool> CombatAlert_NotBuilding;

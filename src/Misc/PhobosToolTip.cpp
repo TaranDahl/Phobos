@@ -224,7 +224,8 @@ DEFINE_HOOK(0x4AE511, DisplayClass_GetToolTip_SkipTacticalTip, 0x5)
 {
 	enum { UseButtonTip = 0x4AE5F8, SkipGameCode = 0x4AE69B };
 
-	const int buttonIndex = TacticalButtonsClass::Instance.GetButtonIndex();
+	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
+	const int buttonIndex = pButtons->GetButtonIndex();
 
 	if (buttonIndex < 0)
 		return 0;
@@ -234,6 +235,8 @@ DEFINE_HOOK(0x4AE511, DisplayClass_GetToolTip_SkipTacticalTip, 0x5)
 
 	if (buttonIndex <= 10) // Button index 1-10 : Super weapons buttons
 		R->EAX(PhobosToolTip::Instance.GetBuffer());
+	else if (buttonIndex > 70 && buttonIndex <= 100) // Button index 71-100 : Select buttons
+		R->EAX(pButtons->HoveredSelected);
 	else
 		R->EAX(0);
 

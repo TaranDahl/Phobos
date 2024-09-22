@@ -126,7 +126,15 @@ DEFINE_HOOK(0x6A9BC5, StripClass_Draw_DrawGreyCameoExtraCover, 0x6)
 			auto& vec = HouseExt::ExtMap.Find(pHouse)->OwnedExistCameoTechnoTypes;
 
 			if (std::find(vec.begin(), vec.end(), pTypeExt) != vec.end())
+			{
+				if (BSurface* const CameoPCX = pTypeExt->GreyCameoPCX.GetSurface())
+				{
+					RectangleStruct drawRect { destX, destY, 60, 48 };
+					PCX::Instance->BlitToSurface(&drawRect, DSurface::Sidebar, CameoPCX);
+				}
+
 				frame = frames.Z;
+			}
 		}
 
 		if (frame >= 0)
