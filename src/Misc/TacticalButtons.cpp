@@ -975,7 +975,7 @@ void TacticalButtonsClass::SelectedUpdate()
 	const int maxIndex = this->CurrentSelectCameo.size() + 70;
 
 	if (this->RecordIndex > maxIndex)
-		this->RecordIndex = maxIndex;
+		this->RecordIndex = 71;
 }
 
 void TacticalButtonsClass::SelectedDraw()
@@ -1175,7 +1175,7 @@ void TacticalButtonsClass::SelectedDraw()
 					swprintf_s(text1, L"%s", name);
 					DSurface::Composite->DrawTextA(text1, &surfaceRect, &position, color, 0, printType);
 
-					position.Y += 14;
+					position.Y += 15;
 
 					if (TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis))
 					{
@@ -1199,7 +1199,7 @@ void TacticalButtonsClass::SelectedDraw()
 						DSurface::Composite->DrawTextA(L"-- / --", &surfaceRect, &position, color, 0, printType);
 					}
 
-					position.Y += 14;
+					position.Y += 13;
 
 					RulesClass* const pRules = RulesClass::Instance;
 					const double ratio = pThis->GetHealthPercentage();
@@ -1233,8 +1233,10 @@ void TacticalButtonsClass::SelectedDraw()
 						}
 						else
 						{
-							RectangleStruct rect { 0, 0, 60, surfaceRect.Height };
-							DSurface::Composite->DrawSHP(pTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &rect,
+							position -= Point2D { 120, 31 };
+							surfaceRect.Width = 60;
+
+							DSurface::Composite->DrawSHP(pTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &surfaceRect,
 								BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 						}
 					}
