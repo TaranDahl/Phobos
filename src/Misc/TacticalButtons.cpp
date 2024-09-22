@@ -359,12 +359,9 @@ void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 			this->HoveredSelected = nullptr;
 		}
 	}
-	else
+	else if (this->HoveredSelected)
 	{
-		if (this->HoveredSelected)
-			this->HoveredSelected = nullptr;
-
-		this->RecordIndex = 71;
+		this->HoveredSelected = nullptr;
 	}
 }
 
@@ -978,7 +975,10 @@ void TacticalButtonsClass::SelectedUpdate()
 		this->CurrentSelectCameo.clear();
 
 	if (!this->SelectedVisible || ObjectClass::CurrentObjects->Count <= 0) // TODO Optimize
+	{
+		this->RecordIndex = 71;
 		return;
+	}
 
 	this->CurrentSelectCameo.reserve(10);
 
