@@ -197,7 +197,7 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 
 	// TODO New buttons
 
-	if (this->SelectedVisible) // Button index 71-100 : Select buttons
+	if (Phobos::Config::SelectedDisplay_Enable) // Button index 71-100 : Select buttons
 	{
 		if (const int currentCounts = Math::min(30, static_cast<int>(this->CurrentSelectCameo.size())))
 		{
@@ -273,7 +273,7 @@ bool TacticalButtonsClass::CheckMouseOverBackground(const Point2D* pMousePositio
 
 	// TODO New button backgrounds
 
-	if (this->SelectedVisible)
+	if (Phobos::Config::SelectedDisplay_Enable)
 	{
 		const int currentCounts = this->CurrentSelectCameo.size();
 
@@ -855,7 +855,7 @@ inline void TacticalButtonsClass::AddToCurrentSelect(TechnoTypeExt::ExtData* pTy
 
 void TacticalButtonsClass::SelectedTrigger(int buttonIndex, bool select)
 {
-	if (ScenarioClass::Instance->UserInputLocked || !this->SelectedVisible)
+	if (ScenarioClass::Instance->UserInputLocked || !Phobos::Config::SelectedDisplay_Enable)
 		return;
 
 	const int currentCounts = this->CurrentSelectCameo.size();
@@ -974,7 +974,7 @@ void TacticalButtonsClass::SelectedUpdate()
 	if (this->CurrentSelectCameo.size())
 		this->CurrentSelectCameo.clear();
 
-	if (!this->SelectedVisible || ObjectClass::CurrentObjects->Count <= 0) // TODO Optimize
+	if (!Phobos::Config::SelectedDisplay_Enable || ObjectClass::CurrentObjects->Count <= 0) // TODO Optimize
 	{
 		this->RecordIndex = 71;
 		return;
@@ -1051,7 +1051,7 @@ void TacticalButtonsClass::SelectedUpdate()
 
 void TacticalButtonsClass::SelectedDraw()
 {
-	if (!this->SelectedVisible)
+	if (!Phobos::Config::SelectedDisplay_Enable)
 		return;
 
 	const int currentCounts = Math::min(30, static_cast<int>(this->CurrentSelectCameo.size()));
@@ -1379,11 +1379,11 @@ void TacticalButtonsClass::SelectedDraw()
 
 void TacticalButtonsClass::SelectedSwitch()
 {
-	this->SelectedVisible = !this->SelectedVisible;
+	Phobos::Config::SelectedDisplay_Enable = !Phobos::Config::SelectedDisplay_Enable;
 
 	MessageListClass::Instance->PrintMessage
 	(
-		(this->SelectedVisible ?
+		(Phobos::Config::SelectedDisplay_Enable ?
 			GeneralUtils::LoadStringUnlessMissing("TXT_SELECT_VISIBLE", L"Set select info visible.") :
 			GeneralUtils::LoadStringUnlessMissing("TXT_SELECT_INVISIBLE", L"Set select info invisible.")),
 		RulesClass::Instance->MessageDelay,

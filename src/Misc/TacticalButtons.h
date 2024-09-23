@@ -89,7 +89,6 @@ private:
 	// TODO New buttons
 
 	// Button index 71-100 : Select buttons
-	bool SelectedVisible { true };
 	int RecordIndex { 71 };
 	std::vector<SelectRecordStruct> CurrentSelectCameo;
 };
