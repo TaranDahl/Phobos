@@ -840,6 +840,7 @@ DEFINE_HOOK(0x73AAB3, UnitClass_UpdateMoving_RallyPointAreaGuard, 0x5)
 	enum { SkipQueueMove = 0x73AAC1, NotSkip = 0 };
 
 	GET(UnitClass*, pThis, EBP);
+	GET(AbstractClass*, pFocus, EAX);
 
 	if (RulesExt::Global()->RallyPointAreaGuard)
 	{
