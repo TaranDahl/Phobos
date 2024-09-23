@@ -80,6 +80,10 @@ public:
 	Valueable<bool> WeaponTendency;
 	Valueable<bool> WeaponToAllies;
 	Valueable<bool> WeaponToGround;
+
+private:
+	template <typename T>
+	void Serialize(T& Stm);
 };
 
 class DisperseTrajectory final : public PhobosTrajectory
@@ -226,6 +230,9 @@ public:
 	double FirepowerMult;
 
 private:
+	template <typename T>
+	void Serialize(T& Stm);
+
 	void InitializeBulletNotCurve(BulletClass* pBullet, bool facing);
 	BulletVelocity RotateAboutTheAxis(BulletVelocity theSpeed, BulletVelocity theAxis, double theRadian);
 	bool CalculateBulletVelocity(BulletClass* pBullet, double trajectorySpeed);

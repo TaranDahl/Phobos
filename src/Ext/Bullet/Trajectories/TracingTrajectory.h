@@ -15,6 +15,10 @@ public:
 	virtual void Read(CCINIClass* const pINI, const char* pSection) override;
 
 	Valueable<int> TheDuration;
+
+private:
+	template <typename T>
+	void Serialize(T& Stm);
 };
 
 class TracingTrajectory final : public PhobosTrajectory
@@ -45,5 +49,6 @@ public:
 	CDTimerClass ExistTimer;
 
 private:
-
+	template <typename T>
+	void Serialize(T& Stm);
 };

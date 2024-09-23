@@ -63,6 +63,10 @@ public:
 	Valueable<bool> MirrorCoord;
 	Valueable<bool> UseDisperseBurst;
 	Valueable<CoordStruct> AxisOfRotation;
+
+private:
+	template <typename T>
+	void Serialize(T& Stm);
 };
 
 class ParabolaTrajectory final : public PhobosTrajectory
@@ -164,6 +168,9 @@ public:
 	BulletVelocity LastVelocity;
 
 private:
+	template <typename T>
+	void Serialize(T& Stm);
+
 	void PrepareForOpenFire(BulletClass* pBullet);
 	bool BulletPrepareCheck(BulletClass* pBullet);
 	void CalculateBulletVelocityRightNow(BulletClass* pBullet, CoordStruct* pSourceCoords, double gravity);

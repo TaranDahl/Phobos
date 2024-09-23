@@ -1,31 +1,31 @@
 #include "TracingTrajectory.h"
 #include <Ext/BulletType/Body.h>
 
-bool TracingTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+PhobosTrajectory* TracingTrajectoryType::CreateInstance() const
 {
-	this->PhobosTrajectoryType::Load(Stm, false);
+	return new TracingTrajectory(this);
+}
 
+template<typename T>
+void TracingTrajectoryType::Serialize(T& Stm)
+{
 	Stm
 		.Process(this->TheDuration, false)
 		;
+}
 
+bool TracingTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+{
+	this->PhobosTrajectoryType::Load(Stm, false);
+	this->Serialize(Stm);
 	return true;
 }
 
 bool TracingTrajectoryType::Save(PhobosStreamWriter& Stm) const
 {
 	this->PhobosTrajectoryType::Save(Stm);
-
-	Stm
-		.Process(this->TheDuration)
-		;
-
+	const_cast<TracingTrajectoryType*>(this)->Serialize(Stm);
 	return true;
-}
-
-PhobosTrajectory* TracingTrajectoryType::CreateInstance() const
-{
-	return new TracingTrajectory(this);
 }
 
 void TracingTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
@@ -34,27 +34,26 @@ void TracingTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 	this->TheDuration.Read(exINI, pSection, "Trajectory.Tracing.TheDuration");
 }
 
-bool TracingTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+template<typename T>
+void TracingTrajectory::Serialize(T& Stm)
 {
-	this->PhobosTrajectory::Load(Stm, false);
-
 	Stm
 		.Process(this->TheDuration)
 		.Process(this->ExistTimer)
 		;
+}
 
+bool TracingTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+{
+	this->PhobosTrajectory::Load(Stm, false);
+	this->Serialize(Stm);
 	return true;
 }
 
 bool TracingTrajectory::Save(PhobosStreamWriter& Stm) const
 {
 	this->PhobosTrajectory::Save(Stm);
-
-	Stm
-		.Process(this->TheDuration)
-		.Process(this->ExistTimer)
-		;
-
+	const_cast<TracingTrajectory*>(this)->Serialize(Stm);
 	return true;
 }
 

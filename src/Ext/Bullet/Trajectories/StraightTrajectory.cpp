@@ -156,8 +156,6 @@ bool StraightTrajectory::Save(PhobosStreamWriter& Stm) const
 
 void StraightTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity)
 {
-	auto const pType = this->GetTrajectoryType<StraightTrajectoryType>(pBullet);
-
 	this->LastCasualty.reserve(1);
 	this->LastTargetCoord = pBullet->TargetCoords;
 	pBullet->Velocity = BulletVelocity::Empty;
@@ -170,7 +168,7 @@ void StraightTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bu
 		this->AttenuationRange = pWeapon->Range;
 		this->CountOfBurst = pWeapon->Burst;
 
-		if (pType->ApplyRangeModifiers && pOwner)
+		if (this->ApplyRangeModifiers && pOwner)
 		{
 			if (this->DetonationDistance >= 0)
 				this->DetonationDistance = Leptons(WeaponTypeExt::GetRangeWithModifiers(pWeapon, pOwner, this->DetonationDistance));

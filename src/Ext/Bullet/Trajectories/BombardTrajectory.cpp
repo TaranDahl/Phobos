@@ -5,6 +5,11 @@
 
 #include <Ext/Bullet/Body.h>
 
+PhobosTrajectory* BombardTrajectoryType::CreateInstance() const
+{
+	return new BombardTrajectory(this);
+}
+
 template<typename T>
 void BombardTrajectoryType::Serialize(T& Stm)
 {
@@ -33,11 +38,6 @@ bool BombardTrajectoryType::Save(PhobosStreamWriter& Stm) const
 	this->PhobosTrajectoryType::Save(Stm);
 	const_cast<BombardTrajectoryType*>(this)->Serialize(Stm);
 	return true;
-}
-
-PhobosTrajectory* BombardTrajectoryType::CreateInstance() const
-{
-	return new BombardTrajectory(this);
 }
 
 void BombardTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)

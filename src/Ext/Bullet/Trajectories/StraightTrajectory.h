@@ -85,6 +85,7 @@ public:
 	StraightTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Straight)
 		, DetonationDistance { Leptons(102) }
 		, TargetSnapDistance { Leptons(128) }
+		, ApplyRangeModifiers { false }
 		, PassThrough { false }
 		, PassDetonate { false }
 		, PassDetonateWarhead {}
@@ -125,6 +126,7 @@ public:
 
 		this->DetonationDistance = pFinalType->DetonationDistance;
 		this->TargetSnapDistance = pFinalType->TargetSnapDistance;
+		this->ApplyRangeModifiers = pFinalType->ApplyRangeModifiers;
 		this->PassThrough = pFinalType->PassThrough;
 		this->PassDetonate = pFinalType->PassDetonate;
 		this->PassDetonateWarhead = pFinalType->PassDetonateWarhead;
@@ -171,6 +173,7 @@ public:
 
 	Leptons DetonationDistance;
 	Leptons TargetSnapDistance;
+	bool ApplyRangeModifiers;
 	bool PassThrough;
 	bool PassDetonate;
 	WarheadTypeClass* PassDetonateWarhead;

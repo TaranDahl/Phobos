@@ -5,40 +5,14 @@
 #include <OverlayTypeClass.h>
 #include <ScenarioClass.h>
 
-bool ParabolaTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+PhobosTrajectory* ParabolaTrajectoryType::CreateInstance() const
 {
-	this->PhobosTrajectoryType::Load(Stm, false);
-
-	Stm
-		.Process(this->DetonationDistance, false)
-		.Process(this->TargetSnapDistance, false)
-		.Process(this->OpenFireMode, false)
-		.Process(this->ThrowHeight, false)
-		.Process(this->LaunchAngle, false)
-		.Process(this->LeadTimeCalculate, false)
-		.Process(this->LeadTimeSimplify, false)
-		.Process(this->LeadTimeMultiplier, false)
-		.Process(this->DetonationAngle, false)
-		.Process(this->DetonationHeight, false)
-		.Process(this->BounceTimes, false)
-		.Process(this->BounceOnWater, false)
-		.Process(this->BounceDetonate, false)
-		.Process(this->BounceAttenuation, false)
-		.Process(this->BounceCoefficient, false)
-		.Process(this->OffsetCoord, false)
-		.Process(this->RotateCoord, false)
-		.Process(this->MirrorCoord, false)
-		.Process(this->UseDisperseBurst, false)
-		.Process(this->AxisOfRotation, false)
-		;
-
-	return true;
+	return new ParabolaTrajectory(this);
 }
 
-bool ParabolaTrajectoryType::Save(PhobosStreamWriter& Stm) const
+template<typename T>
+void ParabolaTrajectoryType::Serialize(T& Stm)
 {
-	this->PhobosTrajectoryType::Save(Stm);
-
 	Stm
 		.Process(this->DetonationDistance)
 		.Process(this->TargetSnapDistance)
@@ -61,13 +35,20 @@ bool ParabolaTrajectoryType::Save(PhobosStreamWriter& Stm) const
 		.Process(this->UseDisperseBurst)
 		.Process(this->AxisOfRotation)
 		;
+}
 
+bool ParabolaTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+{
+	this->PhobosTrajectoryType::Load(Stm, false);
+	this->Serialize(Stm);
 	return true;
 }
 
-PhobosTrajectory* ParabolaTrajectoryType::CreateInstance() const
+bool ParabolaTrajectoryType::Save(PhobosStreamWriter& Stm) const
 {
-	return new ParabolaTrajectory(this);
+	this->PhobosTrajectoryType::Save(Stm);
+	const_cast<ParabolaTrajectoryType*>(this)->Serialize(Stm);
+	return true;
 }
 
 void ParabolaTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
@@ -111,10 +92,9 @@ void ParabolaTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 	this->AxisOfRotation.Read(exINI, pSection, "Trajectory.Parabola.AxisOfRotation");
 }
 
-bool ParabolaTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+template<typename T>
+void ParabolaTrajectory::Serialize(T& Stm)
 {
-	this->PhobosTrajectory::Load(Stm, false);
-
 	Stm
 		.Process(this->DetonationDistance)
 		.Process(this->TargetSnapDistance)
@@ -145,45 +125,19 @@ bool ParabolaTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 		.Process(this->WaitOneFrame)
 		.Process(this->LastVelocity)
 		;
+}
 
+bool ParabolaTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+{
+	this->PhobosTrajectory::Load(Stm, false);
+	this->Serialize(Stm);
 	return true;
 }
 
 bool ParabolaTrajectory::Save(PhobosStreamWriter& Stm) const
 {
 	this->PhobosTrajectory::Save(Stm);
-
-	Stm
-		.Process(this->DetonationDistance)
-		.Process(this->TargetSnapDistance)
-		.Process(this->OpenFireMode)
-		.Process(this->ThrowHeight)
-		.Process(this->LaunchAngle)
-		.Process(this->LeadTimeCalculate)
-		.Process(this->LeadTimeSimplify)
-		.Process(this->LeadTimeMultiplier)
-		.Process(this->DetonationAngle)
-		.Process(this->DetonationHeight)
-		.Process(this->BounceTimes)
-		.Process(this->BounceOnWater)
-		.Process(this->BounceDetonate)
-		.Process(this->BounceAttenuation)
-		.Process(this->BounceCoefficient)
-		.Process(this->OffsetCoord)
-		.Process(this->RotateCoord)
-		.Process(this->MirrorCoord)
-		.Process(this->UseDisperseBurst)
-		.Process(this->AxisOfRotation)
-		.Process(this->ShouldDetonate)
-		.Process(this->ShouldBounce)
-		.Process(this->NeedExtraCheck)
-		.Process(this->LastTargetCoord)
-		.Process(this->CurrentBurst)
-		.Process(this->CountOfBurst)
-		.Process(this->WaitOneFrame)
-		.Process(this->LastVelocity)
-		;
-
+	const_cast<ParabolaTrajectory*>(this)->Serialize(Stm);
 	return true;
 }
 

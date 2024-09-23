@@ -6,36 +6,14 @@
 #include <TacticalClass.h>
 #include <LaserDrawClass.h>
 
-bool EngraveTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+PhobosTrajectory* EngraveTrajectoryType::CreateInstance() const
 {
-	this->PhobosTrajectoryType::Load(Stm, false);
-
-	Stm
-		.Process(this->ApplyRangeModifiers, false)
-		.Process(this->SourceCoord, false)
-		.Process(this->TargetCoord, false)
-		.Process(this->MirrorCoord, false)
-		.Process(this->TheDuration, false)
-		.Process(this->IsLaser, false)
-		.Process(this->IsSupported, false)
-		.Process(this->IsHouseColor, false)
-		.Process(this->IsSingleColor, false)
-		.Process(this->LaserInnerColor, false)
-		.Process(this->LaserOuterColor, false)
-		.Process(this->LaserOuterSpread, false)
-		.Process(this->LaserThickness, false)
-		.Process(this->LaserDuration, false)
-		.Process(this->LaserDelay, false)
-		.Process(this->DamageDelay, false)
-		;
-
-	return true;
+	return new EngraveTrajectory(this);
 }
 
-bool EngraveTrajectoryType::Save(PhobosStreamWriter& Stm) const
+template<typename T>
+void EngraveTrajectoryType::Serialize(T& Stm)
 {
-	this->PhobosTrajectoryType::Save(Stm);
-
 	Stm
 		.Process(this->ApplyRangeModifiers)
 		.Process(this->SourceCoord)
@@ -54,13 +32,20 @@ bool EngraveTrajectoryType::Save(PhobosStreamWriter& Stm) const
 		.Process(this->LaserDelay)
 		.Process(this->DamageDelay)
 		;
+}
 
+bool EngraveTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+{
+	this->PhobosTrajectoryType::Load(Stm, false);
+	this->Serialize(Stm);
 	return true;
 }
 
-PhobosTrajectory* EngraveTrajectoryType::CreateInstance() const
+bool EngraveTrajectoryType::Save(PhobosStreamWriter& Stm) const
 {
-	return new EngraveTrajectory(this);
+	this->PhobosTrajectoryType::Save(Stm);
+	const_cast<EngraveTrajectoryType*>(this)->Serialize(Stm);
+	return true;
 }
 
 void EngraveTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
@@ -84,10 +69,9 @@ void EngraveTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 	this->DamageDelay.Read(exINI, pSection, "Trajectory.Engrave.DamageDelay");
 }
 
-bool EngraveTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+template<typename T>
+void EngraveTrajectory::Serialize(T& Stm)
 {
-	this->PhobosTrajectory::Load(Stm, false);
-
 	Stm
 		.Process(this->SourceCoord)
 		.Process(this->TargetCoord)
@@ -111,45 +95,24 @@ bool EngraveTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 		.Process(this->FLHCoord)
 		.Process(this->BuildingCoord)
 		;
+}
 
+bool EngraveTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+{
+	this->PhobosTrajectory::Load(Stm, false);
+	this->Serialize(Stm);
 	return true;
 }
 
 bool EngraveTrajectory::Save(PhobosStreamWriter& Stm) const
 {
 	this->PhobosTrajectory::Save(Stm);
-
-	Stm
-		.Process(this->SourceCoord)
-		.Process(this->TargetCoord)
-		.Process(this->MirrorCoord)
-		.Process(this->TheDuration)
-		.Process(this->IsLaser)
-		.Process(this->IsSupported)
-		.Process(this->IsHouseColor)
-		.Process(this->IsSingleColor)
-		.Process(this->LaserInnerColor)
-		.Process(this->LaserOuterColor)
-		.Process(this->LaserOuterSpread)
-		.Process(this->LaserThickness)
-		.Process(this->LaserDuration)
-		.Process(this->LaserDelay)
-		.Process(this->DamageDelay)
-		.Process(this->LaserTimer)
-		.Process(this->DamageTimer)
-		.Process(this->TechnoInLimbo)
-		.Process(this->NotMainWeapon)
-		.Process(this->FLHCoord)
-		.Process(this->BuildingCoord)
-		;
-
+	const_cast<EngraveTrajectory*>(this)->Serialize(Stm);
 	return true;
 }
 
 void EngraveTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity)
 {
-	auto const pType = this->GetTrajectoryType<EngraveTrajectoryType>(pBullet);
-
 	this->FLHCoord = pBullet->SourceCoords;
 	this->BuildingCoord = CoordStruct::Empty;
 
@@ -180,7 +143,7 @@ void EngraveTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 
 	WeaponTypeClass* const pWeapon = pBullet->WeaponType;
 
-	if (pType->ApplyRangeModifiers && pWeapon && pTechno)
+	if (this->ApplyRangeModifiers && pWeapon && pTechno)
 		coordDistance = static_cast<double>(WeaponTypeExt::GetRangeWithModifiers(pWeapon, pTechno, static_cast<int>(coordDistance)));
 
 	if (this->TheDuration <= 0)

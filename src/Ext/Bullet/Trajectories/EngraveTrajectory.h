@@ -6,10 +6,10 @@ class EngraveTrajectoryType final : public PhobosTrajectoryType
 {
 public:
 	EngraveTrajectoryType() : PhobosTrajectoryType(TrajectoryFlag::Engrave)
-		, ApplyRangeModifiers { false }
 		, SourceCoord { { 0, 0 } }
 		, TargetCoord { { 0, 0 } }
 		, MirrorCoord { true }
+		, ApplyRangeModifiers { false }
 		, TheDuration { 0 }
 		, IsLaser { true }
 		, IsSupported { false }
@@ -29,10 +29,10 @@ public:
 	virtual PhobosTrajectory* CreateInstance() const override;
 	virtual void Read(CCINIClass* const pINI, const char* pSection) override;
 
-	Valueable<bool> ApplyRangeModifiers;
 	Valueable<Point2D> SourceCoord;
 	Valueable<Point2D> TargetCoord;
 	Valueable<bool> MirrorCoord;
+	Valueable<bool> ApplyRangeModifiers;
 	Valueable<int> TheDuration;
 	Valueable<bool> IsLaser;
 	Valueable<bool> IsSupported;
@@ -45,6 +45,10 @@ public:
 	Valueable<int> LaserDuration;
 	Valueable<int> LaserDelay;
 	Valueable<int> DamageDelay;
+
+private:
+	template <typename T>
+	void Serialize(T& Stm);
 };
 
 class EngraveTrajectory final : public PhobosTrajectory
@@ -56,6 +60,7 @@ public:
 		, SourceCoord {}
 		, TargetCoord {}
 		, MirrorCoord { true }
+		, ApplyRangeModifiers { false }
 		, TheDuration { 0 }
 		, IsLaser { true }
 		, IsSupported { false }
@@ -80,6 +85,7 @@ public:
 		this->SourceCoord = pFinalType->SourceCoord;
 		this->TargetCoord = pFinalType->TargetCoord;
 		this->MirrorCoord = pFinalType->MirrorCoord;
+		this->ApplyRangeModifiers = pFinalType->ApplyRangeModifiers;
 		this->TheDuration = pFinalType->TheDuration;
 		this->IsLaser = pFinalType->IsLaser;
 		this->IsSupported = pFinalType->IsSupported;
@@ -107,6 +113,7 @@ public:
 	Point2D SourceCoord;
 	Point2D TargetCoord;
 	bool MirrorCoord;
+	bool ApplyRangeModifiers;
 	int TheDuration;
 	bool IsLaser;
 	bool IsSupported;
@@ -127,6 +134,9 @@ public:
 	CoordStruct BuildingCoord;
 
 private:
+	template <typename T>
+	void Serialize(T& Stm);
+
 	void GetTechnoFLHCoord(BulletClass* pBullet, TechnoClass* pTechno);
 	void CheckMirrorCoord(TechnoClass* pTechno);
 	void SetEngraveDirection(BulletClass* pBullet, CoordStruct theSource, CoordStruct theTarget);
