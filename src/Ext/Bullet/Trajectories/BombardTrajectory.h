@@ -31,24 +31,16 @@ public:
 	Valueable<bool> FreeFallOnTarget;
 	Valueable<bool> NoLaunch;
 	Nullable<AnimTypeClass*> TurningPointAnim;
+
+private:
+	template <typename T>
+	void Serialize(T& Stm);
 };
 
 class BombardTrajectory final : public PhobosTrajectory
 {
 public:
-	BombardTrajectory() : PhobosTrajectory(TrajectoryFlag::Bombard)
-		, IsFalling { false }
-		, RemainingDistance { 1 }
-		, Height { 0.0 }
-		, FallPercent { 1.0 }
-		, FallPercentShift { 0.0 }
-		, FallScatterRange { Leptons(0) }
-		, FallSpeed { 0.0 }
-		, TargetSnapDistance { Leptons(128) }
-		, FreeFallOnTarget { true }
-		, NoLaunch { false }
-		, TurningPointAnim {}
-	{}
+	BombardTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
 
 	BombardTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Bombard)
 		, IsFalling { false }
@@ -62,7 +54,22 @@ public:
 		, FreeFallOnTarget { true }
 		, NoLaunch { false }
 		, TurningPointAnim {}
-	{}
+	{
+		auto const pFinalType = static_cast<const BombardTrajectoryType*>(pType);
+
+		this->Height = pFinalType->Height;
+		// use scaling since RandomRanged only support int
+		this->FallPercentShift = pFinalType->FallPercentShift;
+		double fallPercentShift = ScenarioClass::Instance()->Random.RandomRanged(0, static_cast<int>(200 * this->FallPercentShift)) / 100.0;
+		this->FallPercent = pFinalType->FallPercent - this->FallPercentShift + fallPercentShift;
+
+		this->FallScatterRange = pFinalType->FallScatterRange;
+		this->FallSpeed = pFinalType->FallSpeed;
+		this->TargetSnapDistance = pFinalType->TargetSnapDistance;
+		this->FreeFallOnTarget = pFinalType->FreeFallOnTarget;
+		this->NoLaunch = pFinalType->NoLaunch;
+		this->TurningPointAnim = pFinalType->TurningPointAnim.Get(nullptr);
+	}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
@@ -87,6 +94,9 @@ public:
 	AnimTypeClass* TurningPointAnim;
 
 private:
+	template <typename T>
+	void Serialize(T& Stm);
+
 	void ApplyTurningPointAnim(BulletClass* pBullet, CoordStruct Position);
 	bool BulletDetonatePreCheck(BulletClass* pBullet, HouseClass* pOwner, double StraightSpeed);
 };

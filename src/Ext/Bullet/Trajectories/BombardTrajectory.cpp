@@ -5,27 +5,9 @@
 
 #include <Ext/Bullet/Body.h>
 
-bool BombardTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+template<typename T>
+void BombardTrajectoryType::Serialize(T& Stm)
 {
-	this->PhobosTrajectoryType::Load(Stm, false);
-	Stm
-		.Process(this->Height, false)
-		.Process(this->FallPercent, false)
-		.Process(this->FallPercentShift, false)
-		.Process(this->FallScatterRange, false)
-		.Process(this->FallSpeed, false)
-		.Process(this->TargetSnapDistance, false)
-		.Process(this->FreeFallOnTarget, false)
-		.Process(this->NoLaunch, false)
-		.Process(this->TurningPointAnim, false)
-		;
-
-	return true;
-}
-
-bool BombardTrajectoryType::Save(PhobosStreamWriter& Stm) const
-{
-	this->PhobosTrajectoryType::Save(Stm);
 	Stm
 		.Process(this->Height)
 		.Process(this->FallPercent)
@@ -37,7 +19,19 @@ bool BombardTrajectoryType::Save(PhobosStreamWriter& Stm) const
 		.Process(this->NoLaunch)
 		.Process(this->TurningPointAnim)
 		;
+}
 
+bool BombardTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+{
+	this->PhobosTrajectoryType::Load(Stm, false);
+	this->Serialize(Stm);
+	return true;
+}
+
+bool BombardTrajectoryType::Save(PhobosStreamWriter& Stm) const
+{
+	this->PhobosTrajectoryType::Save(Stm);
+	const_cast<BombardTrajectoryType*>(this)->Serialize(Stm);
 	return true;
 }
 
@@ -61,10 +55,9 @@ void BombardTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 	this->TurningPointAnim.Read(exINI, pSection, "Trajectory.Bombard.TurningPointAnim");
 }
 
-bool BombardTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+template<typename T>
+void BombardTrajectory::Serialize(T& Stm)
 {
-	this->PhobosTrajectory::Load(Stm, false);
-
 	Stm
 		.Process(this->IsFalling)
 		.Process(this->RemainingDistance)
@@ -78,47 +71,26 @@ bool BombardTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 		.Process(this->NoLaunch)
 		.Process(this->TurningPointAnim)
 		;
+}
 
+bool BombardTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+{
+	this->PhobosTrajectory::Load(Stm, false);
+	this->Serialize(Stm);
 	return true;
 }
 
 bool BombardTrajectory::Save(PhobosStreamWriter& Stm) const
 {
 	this->PhobosTrajectory::Save(Stm);
-
-	Stm
-		.Process(this->IsFalling)
-		.Process(this->RemainingDistance)
-		.Process(this->Height)
-		.Process(this->FallPercent)
-		.Process(this->FallPercentShift)
-		.Process(this->FallScatterRange)
-		.Process(this->FallSpeed)
-		.Process(this->TargetSnapDistance)
-		.Process(this->FreeFallOnTarget)
-		.Process(this->NoLaunch)
-		.Process(this->TurningPointAnim)
-		;
-
+	const_cast<BombardTrajectory*>(this)->Serialize(Stm);
 	return true;
 }
 
 void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity)
 {
-	auto const pType = this->GetTrajectoryType<BombardTrajectoryType>(pBullet);
-	this->Height = pType->Height + pBullet->TargetCoords.Z;
-
-	// use scaling since RandomRanged only support int
-	this->FallPercentShift = pType->FallPercentShift;
-	double fallPercentShift = ScenarioClass::Instance()->Random.RandomRanged(0, static_cast<int>(200 * this->FallPercentShift)) / 100.0;
-	this->FallPercent = pType->FallPercent - this->FallPercentShift + fallPercentShift;
-
-	this->FallScatterRange = pType->FallScatterRange;
-	this->FallSpeed = pType->FallSpeed ? pType->FallSpeed : this->GetTrajectorySpeed(pBullet);
-	this->TargetSnapDistance = pType->TargetSnapDistance;
-	this->FreeFallOnTarget = pType->FreeFallOnTarget;
-	this->NoLaunch = pType->NoLaunch;
-	this->TurningPointAnim = pType->TurningPointAnim.Get(nullptr);
+	this->Height += pBullet->TargetCoords.Z;
+	this->FallSpeed = this->FallSpeed ? this->FallSpeed : this->GetTrajectorySpeed(pBullet);
 
 	if (pBullet->Type->Inaccurate)
 	{
