@@ -63,7 +63,6 @@ public:
 	Valueable<bool> MirrorCoord;
 	Valueable<bool> UseDisperseBurst;
 	Valueable<CoordStruct> AxisOfRotation;
-	// The faster the projectile's speed, the worse the visual effect of bounce function.
 };
 
 class ParabolaTrajectory final : public PhobosTrajectory
@@ -129,7 +128,30 @@ public:
 		, CountOfBurst { 0 }
 		, WaitOneFrame {}
 		, LastVelocity {}
-	{}
+	{
+		auto const pFinalType = static_cast<const ParabolaTrajectoryType*>(pType);
+
+		this->DetonationDistance = pFinalType->DetonationDistance;
+		this->TargetSnapDistance = pFinalType->TargetSnapDistance;
+		this->OpenFireMode = pFinalType->OpenFireMode;
+		this->ThrowHeight = pFinalType->ThrowHeight > 0 ? pFinalType->ThrowHeight : 600;
+		this->LaunchAngle = pFinalType->LaunchAngle;
+		this->LeadTimeCalculate = pFinalType->LeadTimeCalculate;
+		this->LeadTimeSimplify = pFinalType->LeadTimeSimplify;
+		this->LeadTimeMultiplier = pFinalType->LeadTimeMultiplier;
+		this->DetonationAngle = pFinalType->DetonationAngle;
+		this->DetonationHeight = pFinalType->DetonationHeight;
+		this->BounceTimes = pFinalType->BounceTimes;
+		this->BounceOnWater = pFinalType->BounceOnWater;
+		this->BounceDetonate = pFinalType->BounceDetonate;
+		this->BounceAttenuation = pFinalType->BounceAttenuation;
+		this->BounceCoefficient = pFinalType->BounceCoefficient;
+		this->OffsetCoord = pFinalType->OffsetCoord;
+		this->RotateCoord = pFinalType->RotateCoord;
+		this->MirrorCoord = pFinalType->MirrorCoord;
+		this->UseDisperseBurst = pFinalType->UseDisperseBurst;
+		this->AxisOfRotation = pFinalType->AxisOfRotation;
+	}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;

@@ -189,35 +189,7 @@ bool ParabolaTrajectory::Save(PhobosStreamWriter& Stm) const
 
 void ParabolaTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity)
 {
-	auto const pType = this->GetTrajectoryType<ParabolaTrajectoryType>(pBullet);
-
-	this->DetonationDistance = pType->DetonationDistance;
-	this->TargetSnapDistance = pType->TargetSnapDistance;
-	this->OpenFireMode = pType->OpenFireMode;
-	this->ThrowHeight = pType->ThrowHeight > 0 ? pType->ThrowHeight : 600;
-	this->LaunchAngle = pType->LaunchAngle;
-	this->LeadTimeCalculate = pType->LeadTimeCalculate;
-	this->LeadTimeSimplify = pType->LeadTimeSimplify;
-	this->LeadTimeMultiplier = pType->LeadTimeMultiplier;
-	this->DetonationAngle = pType->DetonationAngle;
-	this->DetonationHeight = pType->DetonationHeight;
-	this->BounceTimes = pType->BounceTimes;
-	this->BounceOnWater = pType->BounceOnWater;
-	this->BounceDetonate = pType->BounceDetonate;
-	this->BounceAttenuation = pType->BounceAttenuation;
-	this->BounceCoefficient = pType->BounceCoefficient;
-	this->OffsetCoord = pType->OffsetCoord;
-	this->RotateCoord = pType->RotateCoord;
-	this->MirrorCoord = pType->MirrorCoord;
-	this->UseDisperseBurst = pType->UseDisperseBurst;
-	this->AxisOfRotation = pType->AxisOfRotation;
-	this->ShouldDetonate = false;
-	this->ShouldBounce = false;
-	this->NeedExtraCheck = false;
 	this->LastTargetCoord = pBullet->TargetCoords;
-	this->CurrentBurst = 0;
-	this->CountOfBurst = 0;
-	this->LastVelocity = BulletVelocity::Empty;
 	pBullet->Velocity = BulletVelocity::Empty;
 
 	FootClass* const pTarget = abstract_cast<FootClass*>(pBullet->Target);
