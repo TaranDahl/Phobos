@@ -49,7 +49,6 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ShowTimer_Priority)
 		.Process(this->Convert_Pairs)
 		.Process(this->ShowDesignatorRange)
-		.Process(this->CameoTabIdx)
 		.Process(this->SW_QuickFireAtMouse)
 		.Process(this->SW_QuickFireInScreen)
 		.Process(this->SW_InScreen_Show)
@@ -175,8 +174,6 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	TypeConvertGroup::Parse(this->Convert_Pairs, exINI, pSection, AffectedHouse::Owner);
 
 	this->ShowDesignatorRange.Read(exINI, pSection, "ShowDesignatorRange");
-
-	this->CameoTabIdx.Read(exINI, pSection, "CameoTabIdx");
 
 	this->SW_QuickFireAtMouse.Read(exINI, pSection, "SW.QuickFireAtMouse");
 	this->SW_QuickFireInScreen.Read(exINI, pSection, "SW.QuickFireInScreen");
