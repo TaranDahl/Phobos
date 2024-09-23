@@ -60,8 +60,7 @@ public:
 		this->Height = pFinalType->Height;
 		// use scaling since RandomRanged only support int
 		this->FallPercentShift = pFinalType->FallPercentShift;
-		double fallPercentShift = ScenarioClass::Instance()->Random.RandomRanged(0, static_cast<int>(200 * this->FallPercentShift)) / 100.0;
-		this->FallPercent = pFinalType->FallPercent - this->FallPercentShift + fallPercentShift;
+		this->FallPercent = pFinalType->FallPercent;
 
 		this->FallScatterRange = pFinalType->FallScatterRange;
 		this->FallSpeed = pFinalType->FallSpeed;

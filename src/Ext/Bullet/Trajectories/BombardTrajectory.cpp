@@ -91,6 +91,8 @@ void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 {
 	this->Height += pBullet->TargetCoords.Z;
 	this->FallSpeed = this->FallSpeed ? this->FallSpeed : this->GetTrajectorySpeed(pBullet);
+	double fallPercentShift = ScenarioClass::Instance()->Random.RandomRanged(0, static_cast<int>(200 * this->FallPercentShift)) / 100.0;
+	this->FallPercent = this->FallPercent - this->FallPercentShift + fallPercentShift;
 
 	if (pBullet->Type->Inaccurate)
 	{
