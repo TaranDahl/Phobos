@@ -85,52 +85,7 @@ public:
 class DisperseTrajectory final : public PhobosTrajectory
 {
 public:
-	DisperseTrajectory() : PhobosTrajectory(TrajectoryFlag::Disperse)
-		, UniqueCurve { false }
-		, PreAimCoord {}
-		, RotateCoord { 0 }
-		, MirrorCoord { true }
-		, FacingCoord { false }
-		, ReduceCoord { true }
-		, UseDisperseBurst { false }
-		, AxisOfRotation {}
-		, LaunchSpeed { 0 }
-		, Acceleration { 10.0 }
-		, ROT { 30.0 }
-		, LockDirection { false }
-		, CruiseEnable { false }
-		, CruiseUnableRange { 5.0 }
-		, LeadTimeCalculate { true }
-		, TargetSnapDistance { Leptons(128) }
-		, RetargetRadius { 0 }
-		, RetargetAllies { false }
-		, SuicideShortOfROT { true }
-		, SuicideAboveRange { 0 }
-		, SuicideIfNoWeapon { true }
-		, Weapons {}
-		, WeaponBurst {}
-		, WeaponCount { 0 }
-		, WeaponDelay { 1 }
-		, WeaponTimer {}
-		, WeaponScope { Leptons(0) }
-		, WeaponSeparate { false }
-		, WeaponRetarget { false }
-		, WeaponLocation { false }
-		, WeaponTendency { false }
-		, WeaponToAllies { false }
-		, WeaponToGround { false }
-		, InStraight { false }
-		, Accelerate { true }
-		, TargetInTheAir { false }
-		, TargetIsTechno { false }
-		, OriginalDistance { 0 }
-		, CurrentBurst { 0 }
-		, ThisWeaponIndex { 0 }
-		, LastTargetCoord {}
-		, PreAimDistance { 0 }
-		, LastReviseMult { 0 }
-		, FirepowerMult { 1.0 }
-	{}
+	DisperseTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
 
 	DisperseTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Disperse)
 		, UniqueCurve { false }

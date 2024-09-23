@@ -154,8 +154,6 @@ void EngraveTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 	this->BuildingCoord = CoordStruct::Empty;
 
 	TechnoClass* const pTechno = pBullet->Owner;
-	Point2D sourceOffset = pType->SourceCoord;
-	Point2D targetOffset = pType->TargetCoord;
 
 	if (pTechno)
 	{

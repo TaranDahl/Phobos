@@ -68,36 +68,7 @@ public:
 class ParabolaTrajectory final : public PhobosTrajectory
 {
 public:
-	ParabolaTrajectory() : PhobosTrajectory(TrajectoryFlag::Parabola)
-		, DetonationDistance { Leptons(102) }
-		, TargetSnapDistance { Leptons(128) }
-		, OpenFireMode { ParabolaFireMode::Speed }
-		, ThrowHeight { 600 }
-		, LaunchAngle { 30.0 }
-		, LeadTimeCalculate { false }
-		, LeadTimeSimplify { false }
-		, LeadTimeMultiplier { 1.0 }
-		, DetonationAngle { -90.0 }
-		, DetonationHeight { -1 }
-		, BounceTimes { 0 }
-		, BounceOnWater { false }
-		, BounceDetonate { false }
-		, BounceAttenuation { 0.8 }
-		, BounceCoefficient { 0.8 }
-		, OffsetCoord {}
-		, RotateCoord { 0 }
-		, MirrorCoord { true }
-		, UseDisperseBurst { false }
-		, AxisOfRotation {}
-		, ShouldDetonate { false }
-		, ShouldBounce { false }
-		, NeedExtraCheck { false }
-		, LastTargetCoord {}
-		, CurrentBurst { 0 }
-		, CountOfBurst { 0 }
-		, WaitOneFrame {}
-		, LastVelocity {}
-	{}
+	ParabolaTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
 
 	ParabolaTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Parabola)
 		, DetonationDistance { Leptons(102) }

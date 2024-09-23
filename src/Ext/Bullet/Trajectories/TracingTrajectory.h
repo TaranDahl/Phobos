@@ -20,10 +20,7 @@ public:
 class TracingTrajectory final : public PhobosTrajectory
 {
 public:
-	TracingTrajectory() : PhobosTrajectory(TrajectoryFlag::Tracing)
-		, TheDuration { 0 }
-		, ExistTimer {}
-	{}
+	TracingTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
 
 	TracingTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Tracing)
 		, TheDuration { 0 }

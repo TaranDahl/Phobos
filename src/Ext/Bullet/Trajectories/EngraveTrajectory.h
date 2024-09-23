@@ -50,29 +50,7 @@ public:
 class EngraveTrajectory final : public PhobosTrajectory
 {
 public:
-	EngraveTrajectory() : PhobosTrajectory(TrajectoryFlag::Engrave)
-		, SourceCoord {}
-		, TargetCoord {}
-		, MirrorCoord { true }
-		, TheDuration { 0 }
-		, IsLaser { true }
-		, IsSupported { false }
-		, IsHouseColor { false }
-		, IsSingleColor { false }
-		, LaserInnerColor {}
-		, LaserOuterColor {}
-		, LaserOuterSpread {}
-		, LaserThickness { 3 }
-		, LaserDuration { 1 }
-		, LaserDelay { 1 }
-		, DamageDelay { 2 }
-		, LaserTimer {}
-		, DamageTimer {}
-		, TechnoInLimbo { false }
-		, NotMainWeapon { false }
-		, FLHCoord {}
-		, BuildingCoord {}
-	{}
+	EngraveTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
 
 	EngraveTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Engrave)
 		, SourceCoord {}
