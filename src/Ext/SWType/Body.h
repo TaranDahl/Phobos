@@ -68,6 +68,8 @@ public:
 		DWORD SW_InScreen_PriorityHouses;
 		DWORD SW_InScreen_RequiredHouses;
 
+		Valueable<int> TabIndex;
+
 		std::vector<ValueableVector<int>> LimboDelivery_RandomWeightsData;
 		std::vector<ValueableVector<int>> SW_Next_RandomWeightsData;
 		std::vector<ValueableVector<int>> SW_GrantOneTime_RandomWeightsData;
@@ -129,6 +131,7 @@ public:
 			, SW_InScreen_Show { false }
 			, SW_InScreen_PriorityHouses { 0u }
 			, SW_InScreen_RequiredHouses { 0xFFFFFFFFu }
+			, TabIndex { 1 }
 			, UseWeeds { false }
 			, UseWeeds_Amount { RulesClass::Instance->WeedCapacity }
 			, UseWeeds_StorageTimer { false }

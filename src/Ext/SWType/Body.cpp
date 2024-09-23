@@ -54,6 +54,7 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SW_InScreen_Show)
 		.Process(this->SW_InScreen_PriorityHouses)
 		.Process(this->SW_InScreen_RequiredHouses)
+		.Process(this->TabIndex)
 		.Process(this->UseWeeds)
 		.Process(this->UseWeeds_Amount)
 		.Process(this->UseWeeds_StorageTimer)
@@ -180,6 +181,9 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SW_InScreen_Show.Read(exINI, pSection, "SW.InScreen.Show");
 	this->SW_InScreen_PriorityHouses = pINI->ReadHouseTypesList(pSection, "SW.InScreen.PriorityHouses", this->SW_InScreen_PriorityHouses);
 	this->SW_InScreen_RequiredHouses = pINI->ReadHouseTypesList(pSection, "SW.InScreen.RequiredHouses", this->SW_InScreen_RequiredHouses);
+
+	this->TabIndex.Read(exINI, pSection, "TabIndex");
+	GeneralUtils::IntValidCheck(&this->TabIndex, pSection, "TabIndex", 1, 0, 3);
 
 	this->UseWeeds.Read(exINI, pSection, "UseWeeds");
 	this->UseWeeds_Amount.Read(exINI, pSection, "UseWeeds.Amount");
