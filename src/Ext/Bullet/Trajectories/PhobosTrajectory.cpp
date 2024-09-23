@@ -165,16 +165,16 @@ PhobosTrajectory* PhobosTrajectory::LoadFromStream(PhobosStreamReader& Stm)
 			pTraj = new BombardTrajectory(noinit_t {});
 			break;
 		case TrajectoryFlag::Disperse:
-			pTraj = DLLCreate<DisperseTrajectory>();
+			pTraj = new DisperseTrajectory(noinit_t {});
 			break;
 		case TrajectoryFlag::Engrave:
-			pTraj = DLLCreate<EngraveTrajectory>();
+			pTraj = new EngraveTrajectory(noinit_t {});
 			break;
 		case TrajectoryFlag::Parabola:
-			pTraj = DLLCreate<ParabolaTrajectory>();
+			pTraj = new ParabolaTrajectory(noinit_t {});
 			break;
 		case TrajectoryFlag::Tracing:
-			pTraj = DLLCreate<TracingTrajectory>();
+			pTraj = new TracingTrajectory(noinit_t {});
 			break;
 		default:
 			return nullptr;
