@@ -21,12 +21,18 @@ class TracingTrajectory final : public PhobosTrajectory
 {
 public:
 	TracingTrajectory() : PhobosTrajectory(TrajectoryFlag::Tracing)
+		, TheDuration { 0 }
 		, ExistTimer {}
 	{}
 
 	TracingTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Tracing)
+		, TheDuration { 0 }
 		, ExistTimer {}
-	{}
+	{
+		auto const pFinalType = static_cast<const TracingTrajectoryType*>(pType);
+
+		this->TheDuration = pFinalType->TheDuration;
+	}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
@@ -38,6 +44,7 @@ public:
 	virtual TrajectoryCheckReturnType OnAITargetCoordCheck(BulletClass* pBullet) override;
 	virtual TrajectoryCheckReturnType OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno) override;
 
+	int TheDuration;
 	CDTimerClass ExistTimer;
 
 private:

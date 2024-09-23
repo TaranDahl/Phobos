@@ -39,6 +39,7 @@ bool TracingTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 	this->PhobosTrajectory::Load(Stm, false);
 
 	Stm
+		.Process(this->TheDuration)
 		.Process(this->ExistTimer)
 		;
 
@@ -50,6 +51,7 @@ bool TracingTrajectory::Save(PhobosStreamWriter& Stm) const
 	this->PhobosTrajectory::Save(Stm);
 
 	Stm
+		.Process(this->TheDuration)
 		.Process(this->ExistTimer)
 		;
 
@@ -58,28 +60,24 @@ bool TracingTrajectory::Save(PhobosStreamWriter& Stm) const
 
 void TracingTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity)
 {
-	auto const pType = this->GetTrajectoryType<TracingTrajectoryType>(pBullet);
-
-	int theDuration = pType->TheDuration;
-
-	if (theDuration <= 0)
+	if (this->TheDuration <= 0)
 	{
 		if (auto const pWeapon = pBullet->WeaponType)
 		{
 			const int weaponROF = pBullet->WeaponType->ROF;
 
 			if (weaponROF > 10)
-				theDuration = weaponROF - 10;
+				this->TheDuration = weaponROF - 10;
 			else
-				theDuration = 1;
+				this->TheDuration = 1;
 		}
 		else
 		{
-			theDuration = 120;
+			this->TheDuration = 120;
 		}
 	}
 
-	this->ExistTimer.Start(theDuration);
+	this->ExistTimer.Start(this->TheDuration);
 }
 
 bool TracingTrajectory::OnAI(BulletClass* pBullet)
