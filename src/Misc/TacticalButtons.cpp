@@ -1281,9 +1281,24 @@ void TacticalButtonsClass::SelectedDraw()
 						}
 					}
 
-					wchar_t text1[0x20];
-					swprintf_s(text1, L"%s", name);
-					DSurface::Composite->DrawTextA(text1, &surfaceRect, &position, color, 0, printType);
+					if (name)
+					{
+						size_t length = Math::min(wcslen(name), static_cast<size_t>(31));
+
+						for (const wchar_t* check = name; *check != L'\0'; ++check)
+						{
+							if (*check == L'\n')
+							{
+								length = static_cast<size_t>(check - name);
+								break;
+							}
+						}
+
+						wchar_t text1[0x20] = {0};
+						wcsncpy_s(text1, name, length);
+						text1[length] = L'\0';
+						DSurface::Composite->DrawTextA(text1, &surfaceRect, &position, color, 0, printType);
+					}
 
 					position.Y += 15;
 
