@@ -19,7 +19,6 @@ public:
 
 	static constexpr DWORD Canary = 0x55555555;
 	static constexpr size_t ExtPointerOffset = 0x34C;
-	static constexpr bool ShouldConsiderInvalidatePointer = true; // Not sure if techno lives longer than house on this one
 
 	class ExtData final : public Extension<TechnoClass>
 	{
@@ -27,6 +26,8 @@ public:
 		TechnoTypeExt::ExtData* TypeExtData;
 		std::unique_ptr<ShieldClass> Shield;
 		std::vector<LaserTrailClass> LaserTrails;
+		std::vector<std::unique_ptr<AttachEffectClass>> AttachedEffects;
+		AttachEffectTechnoProperties AE;
 		bool ReceiveDamage;
 		bool LastKillWasTeamTarget;
 		CDTimerClass PassengerDeletionTimer;
@@ -35,36 +36,32 @@ public:
 		CDTimerClass AutoDeathTimer;
 		AnimTypeClass* MindControlRingAnimType;
 		int DamageNumberOffset;
+		int Strafe_BombsDroppedThisRound;
+		int CurrentAircraftWeaponIndex;
 		bool IsInTunnel;
 		bool IsBurrowed;
 		bool HasBeenPlacedOnMap; // Set to true on first Unlimbo() call.
 		CDTimerClass DeployFireTimer;
+		bool SkipTargetChangeResetSequence;
 		bool ForceFullRearmDelay;
 		bool CanCloakDuringRearm; // Current rearm timer was started by DecloakToFire=no weapon.
 		int WHAnimRemainingCreationInterval;
 		bool CanCurrentlyDeployIntoBuilding; // Only set on UnitClass technos with DeploysInto set in multiplayer games, recalculated once per frame so no need to serialize.
-		std::vector<std::unique_ptr<AttachEffectClass>> AttachedEffects;
-		WeaponStruct* LastWeaponStruct;
-		CoordStruct LastWeaponFLH;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
 		// as neither is guaranteed to point to the house the TechnoClass had prior to entering transport and cannot be safely overridden.
 		HouseClass* OriginalPassengerOwner;
-
-		// AttachEffect stuff.
-		double AE_FirepowerMultiplier;
-		double AE_ArmorMultiplier;
-		double AE_SpeedMultiplier;
-		double AE_ROFMultiplier;
-		bool AE_Cloakable;
-		bool AE_ForceDecloak;
-		bool AE_DisableWeapons;
+		bool HasRemainingWarpInDelay;          // Converted from object with Teleport Locomotor to one with a different Locomotor while still phasing in OR set if ChronoSphereDelay > 0.
+		int LastWarpInDelay;                   // Last-warp in delay for this unit, used by HasCarryoverWarpInDelay.
+		bool IsBeingChronoSphered;             // Set to true on units currently being ChronoSphered, does not apply to Ares-ChronoSphere'd buildings or Chrono reinforcements.
 
 		ExtData(TechnoClass* OwnerObject) : Extension<TechnoClass>(OwnerObject)
 			, TypeExtData { nullptr }
 			, Shield {}
 			, LaserTrails {}
+			, AttachedEffects {}
+			, AE {}
 			, ReceiveDamage { false }
 			, LastKillWasTeamTarget { false }
 			, PassengerDeletionTimer {}
@@ -73,26 +70,22 @@ public:
 			, AutoDeathTimer {}
 			, MindControlRingAnimType { nullptr }
 			, DamageNumberOffset { INT32_MIN }
-			, OriginalPassengerOwner {}
+			, Strafe_BombsDroppedThisRound { 0 }
+			, CurrentAircraftWeaponIndex {}
 			, IsInTunnel { false }
 			, IsBurrowed { false }
 			, HasBeenPlacedOnMap { false }
 			, DeployFireTimer {}
+			, SkipTargetChangeResetSequence { false }
 			, ForceFullRearmDelay { false }
 			, CanCloakDuringRearm { false }
 			, WHAnimRemainingCreationInterval { 0 }
 			, CanCurrentlyDeployIntoBuilding { false }
-			, AttachedEffects {}
-			, AE_FirepowerMultiplier { 1.0 }
-			, AE_ArmorMultiplier { 1.0 }
-			, AE_SpeedMultiplier { 1.0 }
-			, AE_ROFMultiplier { 1.0 }
-			, AE_Cloakable { false }
-			, AE_ForceDecloak { false }
-			, AE_DisableWeapons { false }
-			, LastWeaponStruct {}
-			, LastWeaponFLH {}
 			, FiringObstacleCell {}
+			, OriginalPassengerOwner {}
+			, HasRemainingWarpInDelay { false }
+			, LastWarpInDelay { 0 }
+			, IsBeingChronoSphered { false}
 		{ }
 
 		void OnEarlyUpdate();
@@ -107,22 +100,18 @@ public:
 		void UpdateTypeData(TechnoTypeClass* currentType);
 		void UpdateLaserTrails();
 		void UpdateAttachEffects();
-		void UpdateCumulativeAttachEffects(AttachEffectTypeClass* pAttachEffectType);
+		void UpdateCumulativeAttachEffects(AttachEffectTypeClass* pAttachEffectType, AttachEffectClass* pRemoved = nullptr);
 		void RecalculateStatMultipliers();
 		void UpdateTemporal();
 		void UpdateMindControlAnim();
 		void InitializeLaserTrails();
 		void InitializeAttachEffects();
-		bool HasAttachedEffects(std::vector<AttachEffectTypeClass*> attachEffectTypes, bool requireAll, bool ignoreSameSource, TechnoClass* pInvoker, AbstractClass* pSource, std::vector<int> const& minCounts, std::vector<int> const& maxCounts) const;
+		void UpdateSelfOwnedAttachEffects();
+		bool HasAttachedEffects(std::vector<AttachEffectTypeClass*> attachEffectTypes, bool requireAll, bool ignoreSameSource, TechnoClass* pInvoker, AbstractClass* pSource, std::vector<int> const* minCounts, std::vector<int> const* maxCounts) const;
 		int GetAttachedEffectCumulativeCount(AttachEffectTypeClass* pAttachEffectType, bool ignoreSameSource = false, TechnoClass* pInvoker = nullptr, AbstractClass* pSource = nullptr) const;
 
 		virtual ~ExtData() override;
-
-		virtual void InvalidatePointer(void* ptr, bool bRemoved) override
-		{
-			AnnounceInvalidPointer(OriginalPassengerOwner, ptr);
-		}
-
+		virtual void InvalidatePointer(void* ptr, bool bRemoved) override { }
 		virtual void LoadFromStream(PhobosStreamReader& Stm) override;
 		virtual void SaveToStream(PhobosStreamWriter& Stm) override;
 
@@ -136,19 +125,6 @@ public:
 	public:
 		ExtContainer();
 		~ExtContainer();
-
-		virtual bool InvalidateExtDataIgnorable(void* const ptr) const override
-		{
-			auto const abs = static_cast<AbstractClass*>(ptr)->WhatAmI();
-
-			switch (abs)
-			{
-			case AbstractType::House:
-				return false;
-			}
-
-			return true;
-		}
 	};
 
 	static ExtContainer ExtMap;
@@ -187,6 +163,11 @@ public:
 	static int GetCustomTintColor(TechnoClass* pThis);
 	static int GetCustomTintIntensity(TechnoClass* pThis);
 	static void ApplyCustomTintValues(TechnoClass* pThis, int& color, int& intensity);
+	static Point2D GetScreenLocation(TechnoClass* pThis);
+	static Point2D GetFootSelectBracketPosition(TechnoClass* pThis, Anchor anchor);
+	static Point2D GetBuildingSelectBracketPosition(TechnoClass* pThis, BuildingSelectBracketPosition bracketPosition);
+	static void ProcessDigitalDisplays(TechnoClass* pThis);
+	static void GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType, int& value, int& maxValue);
 
 	// WeaponHelpers.cpp
 	static int PickWeaponIndex(TechnoClass* pThis, TechnoClass* pTargetTechno, AbstractClass* pTarget, int weaponIndexOne, int weaponIndexTwo, bool allowFallback = true, bool allowAAFallback = true);
@@ -196,9 +177,5 @@ public:
 	static WeaponTypeClass* GetDeployFireWeapon(TechnoClass* pThis);
 	static WeaponTypeClass* GetCurrentWeapon(TechnoClass* pThis, int& weaponIndex, bool getSecondary = false);
 	static WeaponTypeClass* GetCurrentWeapon(TechnoClass* pThis, bool getSecondary = false);
-	static Point2D GetScreenLocation(TechnoClass* pThis);
-	static Point2D GetFootSelectBracketPosition(TechnoClass* pThis, Anchor anchor);
-	static Point2D GetBuildingSelectBracketPosition(TechnoClass* pThis, BuildingSelectBracketPosition bracketPosition);
-	static void ProcessDigitalDisplays(TechnoClass* pThis);
-	static void GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType, int& value, int& maxValue);
+	static int GetWeaponIndexAgainstWall(TechnoClass* pThis, OverlayTypeClass* pWallOverlayType);
 };

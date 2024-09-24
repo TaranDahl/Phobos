@@ -17,16 +17,19 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	GET(TechnoClass*, pThis, ECX);
 	LEA_STACK(args_ReceiveDamage*, args, 0x4);
 
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+
+	int nDamageLeft = *args->Damage;
+
 	if (!args->IgnoreDefenses)
 	{
-		const auto pExt = TechnoExt::ExtMap.Find(pThis);
-
 		if (const auto pShieldData = pExt->Shield.get())
 		{
 			if (!pShieldData->IsActive())
 				return 0;
 
-			const int nDamageLeft = pShieldData->ReceiveDamage(args);
+			nDamageLeft = pShieldData->ReceiveDamage(args);
+
 			if (nDamageLeft >= 0)
 			{
 				*args->Damage = nDamageLeft;
@@ -39,6 +42,7 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 				RD::SkipLowDamageCheck = true;
 		}
 	}
+
 	return 0;
 }
 
@@ -272,67 +276,40 @@ private:
 	}
 };
 
-#pragma region UnitClass_GetFireError_Heal
-
-FireError __fastcall UnitClass__GetFireError(UnitClass* pThis, void* _, ObjectClass* pObj, int nWeaponIndex, bool ignoreRange)
-{
-	JMP_THIS(0x740FD0);
-}
 
 FireError __fastcall UnitClass__GetFireError_Wrapper(UnitClass* pThis, void* _, ObjectClass* pObj, int nWeaponIndex, bool ignoreRange)
 {
 	AresScheme::Prefix(pThis, pObj, nWeaponIndex, false);
-	auto const result = UnitClass__GetFireError(pThis, _, pObj, nWeaponIndex, ignoreRange);
+	auto const result = pThis->UnitClass::GetFireError(pObj, nWeaponIndex, ignoreRange);
 	AresScheme::Suffix();
 	return result;
 }
 DEFINE_JUMP(VTABLE, 0x7F6030, GET_OFFSET(UnitClass__GetFireError_Wrapper))
-#pragma endregion UnitClass_GetFireError_Heal
 
-#pragma region InfantryClass_GetFireError_Heal
-FireError __fastcall InfantryClass__GetFireError(InfantryClass* pThis, void* _, ObjectClass* pObj, int nWeaponIndex, bool ignoreRange)
-{
-	JMP_THIS(0x51C8B0);
-}
 FireError __fastcall InfantryClass__GetFireError_Wrapper(InfantryClass* pThis, void* _, ObjectClass* pObj, int nWeaponIndex, bool ignoreRange)
 {
 	AresScheme::Prefix(pThis, pObj, nWeaponIndex, false);
-	auto const result = InfantryClass__GetFireError(pThis, _, pObj, nWeaponIndex, ignoreRange);
+	auto const result = pThis->InfantryClass::GetFireError(pObj, nWeaponIndex, ignoreRange);
 	AresScheme::Suffix();
 	return result;
 }
 DEFINE_JUMP(VTABLE, 0x7EB418, GET_OFFSET(InfantryClass__GetFireError_Wrapper))
-#pragma endregion InfantryClass_GetFireError_Heal
-
-#pragma region UnitClass__WhatAction
-Action __fastcall UnitClass__WhatAction(UnitClass* pThis, void* _, ObjectClass* pObj, bool ignoreForce)
-{
-	JMP_THIS(0x73FD50);
-}
 
 Action __fastcall UnitClass__WhatAction_Wrapper(UnitClass* pThis, void* _, ObjectClass* pObj, bool ignoreForce)
 {
 	AresScheme::Prefix(pThis, pObj, -1, false);
-	auto const result = UnitClass__WhatAction(pThis, _, pObj, ignoreForce);
+	auto const result = pThis->UnitClass::MouseOverObject(pObj, ignoreForce);
 	AresScheme::Suffix();
 	return result;
 }
 DEFINE_JUMP(VTABLE, 0x7F5CE4, GET_OFFSET(UnitClass__WhatAction_Wrapper))
-#pragma endregion UnitClass__WhatAction
-
-#pragma region InfantryClass__WhatAction
-Action __fastcall InfantryClass__WhatAction(InfantryClass* pThis, void* _, ObjectClass* pObj, bool ignoreForce)
-{
-	JMP_THIS(0x51E3B0);
-}
 
 Action __fastcall InfantryClass__WhatAction_Wrapper(InfantryClass* pThis, void* _, ObjectClass* pObj, bool ignoreForce)
 {
 	AresScheme::Prefix(pThis, pObj, -1, pThis->Type->Engineer);
-	auto const result = InfantryClass__WhatAction(pThis, _, pObj, ignoreForce);
+	auto const result = pThis->InfantryClass::MouseOverObject(pObj, ignoreForce);
 	AresScheme::Suffix();
 	return result;
 }
 DEFINE_JUMP(VTABLE, 0x7EB0CC, GET_OFFSET(InfantryClass__WhatAction_Wrapper))
-#pragma endregion InfantryClass__WhatAction
 #pragma endregion HealingWeapons

@@ -1,84 +1,43 @@
 #include "StraightTrajectory.h"
 #include <Ext/Bullet/Body.h>
-#include <Ext/WarheadType/Body.h>
-#include <Ext/Techno/Body.h>
-#include <OverlayTypeClass.h>
-#include <ScenarioClass.h>
+#include <Ext/WeaponType/Body.h>
+
+PhobosTrajectory* StraightTrajectoryType::CreateInstance() const
+{
+	return new StraightTrajectory(this);
+}
+
+template<typename T>
+void StraightTrajectoryType::Serialize(T& Stm)
+{
+	Stm
+		.Process(this->DetonationDistance)
+		.Process(this->ApplyRangeModifiers)
+		.Process(this->TargetSnapDistance)
+		.Process(this->PassThrough)
+		;
+}
 
 bool StraightTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 {
 	this->PhobosTrajectoryType::Load(Stm, false);
-
-	Stm
-		.Process(this->DetonationDistance, false)
-		.Process(this->TargetSnapDistance, false)
-		.Process(this->PassThrough, false)
-		.Process(this->PassDetonate, false)
-		.Process(this->PassDetonateDamage, false)
-		.Process(this->PassDetonateDelay, false)
-		.Process(this->PassDetonateTimer, false)
-		.Process(this->PassDetonateLocal, false)
-		.Process(this->LeadTimeCalculate, false)
-		.Process(this->OffsetCoord, false)
-		.Process(this->RotateCoord, false)
-		.Process(this->MirrorCoord, false)
-		.Process(this->UseDisperseBurst, false)
-		.Process(this->AxisOfRotation, false)
-		.Process(this->ProximityImpact, false)
-		.Process(this->ProximityDamage, false)
-		.Process(this->ProximityRadius, false)
-		.Process(this->ProximityAllies, false)
-		.Process(this->ProximityFlight, false)
-		.Process(this->ThroughVehicles, false)
-		.Process(this->ThroughBuilding, false)
-		.Process(this->SubjectToGround, false)
-		.Process(this->ConfineAtHeight, false)
-		.Process(this->EdgeAttenuation, false)
-		;
-
+	this->Serialize(Stm);
 	return true;
 }
 
 bool StraightTrajectoryType::Save(PhobosStreamWriter& Stm) const
 {
 	this->PhobosTrajectoryType::Save(Stm);
-
-	Stm
-		.Process(this->DetonationDistance)
-		.Process(this->TargetSnapDistance)
-		.Process(this->PassThrough)
-		.Process(this->PassDetonate)
-		.Process(this->PassDetonateDamage)
-		.Process(this->PassDetonateDelay)
-		.Process(this->PassDetonateTimer)
-		.Process(this->PassDetonateLocal)
-		.Process(this->LeadTimeCalculate)
-		.Process(this->OffsetCoord)
-		.Process(this->RotateCoord)
-		.Process(this->MirrorCoord)
-		.Process(this->UseDisperseBurst)
-		.Process(this->AxisOfRotation)
-		.Process(this->ProximityImpact)
-		.Process(this->ProximityDamage)
-		.Process(this->ProximityRadius)
-		.Process(this->ProximityAllies)
-		.Process(this->ProximityFlight)
-		.Process(this->ThroughVehicles)
-		.Process(this->ThroughBuilding)
-		.Process(this->SubjectToGround)
-		.Process(this->ConfineAtHeight)
-		.Process(this->EdgeAttenuation)
-		;
-
+	const_cast<StraightTrajectoryType*>(this)->Serialize(Stm);
 	return true;
 }
-
 
 void StraightTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 {
 	INI_EX exINI(pINI);
 
 	this->DetonationDistance.Read(exINI, pSection, "Trajectory.Straight.DetonationDistance");
+	this->ApplyRangeModifiers.Read(exINI, pSection, "Trajectory.Straight.ApplyRangeModifiers");
 	this->TargetSnapDistance.Read(exINI, pSection, "Trajectory.Straight.TargetSnapDistance");
 	this->PassThrough.Read(exINI, pSection, "Trajectory.Straight.PassThrough");
 	this->PassDetonate.Read(exINI, pSection, "Trajectory.Straight.PassDetonate");
@@ -104,10 +63,9 @@ void StraightTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 	this->EdgeAttenuation.Read(exINI, pSection, "Trajectory.Straight.EdgeAttenuation");
 }
 
-bool StraightTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+template<typename T>
+void StraightTrajectory::Serialize(T& Stm)
 {
-	this->PhobosTrajectory::Load(Stm, false);
-
 	Stm
 		.Process(this->DetonationDistance)
 		.Process(this->TargetSnapDistance)
@@ -142,6 +100,12 @@ bool StraightTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 		.Process(this->CountOfBurst)
 		.Process(this->WaitOneFrame)
 		;
+}
+
+bool StraightTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+{
+	this->PhobosTrajectory::Load(Stm, false);
+	this->Serialize(Stm);
 
 	return true;
 }
@@ -150,40 +114,7 @@ bool StraightTrajectory::Save(PhobosStreamWriter& Stm) const
 {
 	this->PhobosTrajectory::Save(Stm);
 
-	Stm
-		.Process(this->DetonationDistance)
-		.Process(this->TargetSnapDistance)
-		.Process(this->PassThrough)
-		.Process(this->PassDetonate)
-		.Process(this->PassDetonateDamage)
-		.Process(this->PassDetonateDelay)
-		.Process(this->PassDetonateTimer)
-		.Process(this->PassDetonateLocal)
-		.Process(this->LeadTimeCalculate)
-		.Process(this->OffsetCoord)
-		.Process(this->RotateCoord)
-		.Process(this->MirrorCoord)
-		.Process(this->UseDisperseBurst)
-		.Process(this->AxisOfRotation)
-		.Process(this->ProximityImpact)
-		.Process(this->ProximityDamage)
-		.Process(this->ProximityRadius)
-		.Process(this->ProximityAllies)
-		.Process(this->ProximityFlight)
-		.Process(this->ThroughVehicles)
-		.Process(this->ThroughBuilding)
-		.Process(this->SubjectToGround)
-		.Process(this->ConfineAtHeight)
-		.Process(this->EdgeAttenuation)
-		.Process(this->RemainingDistance)
-		.Process(this->ExtraCheck)
-		.Process(this->LastCasualty)
-		.Process(this->FirepowerMult)
-		.Process(this->LastTargetCoord)
-		.Process(this->CurrentBurst)
-		.Process(this->CountOfBurst)
-		.Process(this->WaitOneFrame)
-		;
+	const_cast<StraightTrajectory*>(this)->Serialize(Stm);
 
 	return true;
 }
@@ -193,6 +124,10 @@ void StraightTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bu
 	auto const pType = this->GetTrajectoryType<StraightTrajectoryType>(pBullet);
 
 	this->DetonationDistance = pType->DetonationDistance;
+
+	if (pType->ApplyRangeModifiers)
+		this->DetonationDistance = Leptons(WeaponTypeExt::GetRangeWithModifiers(pBullet->WeaponType, pBullet->Owner, this->DetonationDistance));
+
 	this->TargetSnapDistance = pType->TargetSnapDistance;
 	this->PassThrough = pType->PassThrough;
 	this->PassDetonate = pType->PassDetonate;

@@ -152,7 +152,7 @@ enum class AutoDeathBehavior
 
 enum class SelfHealGainType
 {
-	None = 0,
+	NoHeal = 0,
 	Infantry = 1,
 	Units = 2
 };
@@ -221,6 +221,8 @@ enum class DiscardCondition : unsigned char
 	Move = 0x2,
 	Stationary = 0x4,
 	Drain = 0x8,
+	InRange = 0x10,
+	OutOfRange = 0x20
 };
 
 MAKE_ENUM_FLAGS(DiscardCondition);

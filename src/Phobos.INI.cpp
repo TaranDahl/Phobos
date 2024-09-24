@@ -32,11 +32,13 @@ double Phobos::UI::PowerDelta_ConditionYellow = 0.75;
 double Phobos::UI::PowerDelta_ConditionRed = 1.0;
 bool Phobos::UI::CenterPauseMenuBackground = false;
 bool Phobos::UI::WeedsCounter_Show = false;
+bool Phobos::UI::AnchoredToolTips = false;
 
 bool Phobos::Config::ToolTipDescriptions = true;
 bool Phobos::Config::ToolTipBlur = false;
 bool Phobos::Config::PrioritySelectionFiltering = true;
 bool Phobos::Config::DevelopmentCommands = true;
+bool Phobos::Config::ShowPlanningPath = false;
 bool Phobos::Config::ArtImageSwap = false;
 bool Phobos::Config::ShowPlacementPreview = false;
 bool Phobos::Config::DigitalDisplay_Enable = false;
@@ -72,6 +74,22 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 	Phobos::Config::ShowHarvesterCounter = CCINIClass::INI_RA2MD->ReadBool("Phobos", "ShowHarvesterCounter", true);
 	Phobos::Config::ShowWeedsCounter = CCINIClass::INI_RA2MD->ReadBool("Phobos", "ShowWeedsCounter", true);
 
+	// Custom game speeds, 6 - i so that GS6 is index 0, just like in the engine
+	Phobos::Config::CampaignDefaultGameSpeed = 6 - CCINIClass::INI_RA2MD->ReadInteger("Phobos", "CampaignDefaultGameSpeed", 4);
+	if (Phobos::Config::CampaignDefaultGameSpeed > 6 || Phobos::Config::CampaignDefaultGameSpeed < 0)
+	{
+		Phobos::Config::CampaignDefaultGameSpeed = 2;
+	}
+
+	{
+		const byte temp = (byte)Phobos::Config::CampaignDefaultGameSpeed;
+
+		Patch::Apply_RAW(0x55D77A, { temp }); // We overwrite the instructions that force GameSpeed to 2 (GS4)
+		Patch::Apply_RAW(0x55D78D, { temp }); // when speed control is off. Doesn't need a hook.
+	}
+
+	Phobos::Config::ShowDesignatorRange = CCINIClass::INI_RA2MD->ReadBool("Phobos", "ShowDesignatorRange", false);
+
 	CCINIClass* pINI_UIMD = CCINIClass::LoadINIFile(GameStrings::UIMD_INI);
 
 	// LoadingScreen
@@ -84,6 +102,9 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 	{
 		Phobos::UI::ExtendedToolTips =
 			pINI_UIMD->ReadBool(TOOLTIPS_SECTION, "ExtendedToolTips", false);
+
+		Phobos::UI::AnchoredToolTips =
+			pINI_UIMD->ReadBool(TOOLTIPS_SECTION, "AnchoredToolTips", false);
 
 		Phobos::UI::MaxToolTipWidth =
 			pINI_UIMD->ReadInteger(TOOLTIPS_SECTION, "MaxWidth", 0);
@@ -145,25 +166,17 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 
 	CCINIClass::UnloadINIFile(pINI_UIMD);
 
-	CCINIClass* pINI_RULESMD = CCINIClass::LoadINIFile(GameStrings::RULESMD_INI);
+	return 0;
+}
+
+DEFINE_HOOK(0x52D21F, InitRules_ThingsThatShouldntBeSerailized, 0x6)
+{
+	CCINIClass* const pINI_RULESMD = CCINIClass::INI_Rules;
+
+	RulesClass::Instance->Read_JumpjetControls(pINI_RULESMD);
 
 	Phobos::Config::ArtImageSwap = pINI_RULESMD->ReadBool(GameStrings::General, "ArtImageSwap", false);
 
-	// Custom game speeds, 6 - i so that GS6 is index 0, just like in the engine
-	Phobos::Config::CampaignDefaultGameSpeed = 6 - CCINIClass::INI_RA2MD->ReadInteger("Phobos", "CampaignDefaultGameSpeed", 4);
-	if (Phobos::Config::CampaignDefaultGameSpeed > 6 || Phobos::Config::CampaignDefaultGameSpeed < 0)
-	{
-		Phobos::Config::CampaignDefaultGameSpeed = 2;
-	}
-
-	{
-		const byte temp = (byte)Phobos::Config::CampaignDefaultGameSpeed;
-
-		Patch::Apply_RAW(0x55D77A, { temp }); // We overwrite the instructions that force GameSpeed to 2 (GS4)
-		Patch::Apply_RAW(0x55D78D, { temp }); // when speed control is off. Doesn't need a hook.
-	}
-
-	Phobos::Config::ShowDesignatorRange = CCINIClass::INI_RA2MD->ReadBool("Phobos", "ShowDesignatorRange", false);
 
 	Phobos::Misc::CustomGS = pINI_RULESMD->ReadBool(GameStrings::General, "CustomGS", false);
 
@@ -196,11 +209,14 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 		Patch::Apply_RAW(0x69A310, { 0x8B, 0x44, 0x24, 0x04, 0xD1, 0xE0, 0x40 });
 
 	Phobos::Config::SaveVariablesOnScenarioEnd = pINI_RULESMD->ReadBool(GameStrings::General, "SaveVariablesOnScenarioEnd", false);
-
-	CCINIClass::UnloadINIFile(pINI_RULESMD);
+#ifndef DEBUG
+	Phobos::Config::DevelopmentCommands = pINI_RULESMD->ReadBool("GlobalControls", "DebugKeysEnabled", Phobos::Config::DevelopmentCommands);
+#endif
+	Phobos::Config::ShowPlanningPath = pINI_RULESMD->ReadBool("GlobalControls", "DebugPlanningPaths", Phobos::Config::ShowPlanningPath);
 
 	return 0;
 }
+
 
 bool Phobos::ShouldQuickSave = false;
 std::wstring Phobos::CustomGameSaveDescription {};

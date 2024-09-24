@@ -46,6 +46,7 @@
 #include <UnitTypeClass.h>
 #include <BuildingTypeClass.h>
 #include <WarheadTypeClass.h>
+#include <SuperWeaponTypeClass.h>
 #include <FootClass.h>
 #include <Powerups.h>
 #include <VocClass.h>
@@ -57,11 +58,6 @@
 
 namespace detail
 {
-	template<typename T>
-	concept HasFindOrAllocate = requires(const char* arg){
-		{ T::FindOrAllocate(arg) }->std::same_as<T*>;
-	};
-
 	template <typename T, bool allocate = false>
 	inline bool read(T &value, INI_EX &parser, const char *pSection, const char *pKey)
 	{
@@ -70,7 +66,7 @@ namespace detail
 			using base_type = std::remove_pointer_t<T>;
 			auto const pValue = parser.value();
 			T parsed;
-			if constexpr (HasFindOrAllocate<base_type> && allocate)
+			if constexpr (allocate)
 				parsed = base_type::FindOrAllocate(pValue);
 			else
 				parsed = base_type::Find(pValue);
@@ -234,6 +230,15 @@ namespace detail
 	inline bool read<Vector2D<double>>(Vector2D<double> &value, INI_EX &parser, const char *pSection, const char *pKey)
 	{
 		if (parser.Read2Doubles(pSection, pKey, (double*)&value))
+			return true;
+
+		return false;
+	}
+
+	template <>
+	inline bool read<Vector3D<float>>(Vector3D<float> &value, INI_EX &parser, const char *pSection, const char *pKey)
+	{
+		if (parser.Read<float, 3>(pSection, pKey, (float*)&value))
 			return true;
 
 		return false;
@@ -833,9 +838,9 @@ namespace detail
 	{
 		if (parser.ReadString(pSection, pKey))
 		{
-			if (_strcmpi(parser.value(), "none") == 0)
+			if (_strcmpi(parser.value(), "noheal") == 0)
 			{
-				value = SelfHealGainType::None;
+				value = SelfHealGainType::NoHeal;
 			}
 			else if (_strcmpi(parser.value(), "infantry") == 0)
 			{
@@ -1088,6 +1093,14 @@ namespace detail
 				else if (!_strcmpi(cur, "drain"))
 				{
 					parsed |= DiscardCondition::Drain;
+				}
+				else if (!_strcmpi(cur, "inrange"))
+				{
+					parsed |= DiscardCondition::InRange;
+				}
+				else if (!_strcmpi(cur, "outofrange"))
+				{
+					parsed |= DiscardCondition::OutOfRange;
 				}
 				else
 				{
