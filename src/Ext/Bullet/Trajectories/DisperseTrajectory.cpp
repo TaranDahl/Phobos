@@ -1,9 +1,10 @@
 #include "DisperseTrajectory.h"
 #include "StraightTrajectory.h"
-#include "EngraveTrajectory.h"
+#include "ParabolaTrajectory.h"
 #include <Ext/Bullet/Body.h>
 #include <Ext/BulletType/Body.h>
 #include <Ext/WeaponType/Body.h>
+#include <Utilities/EnumFunctions.h>
 #include <AnimClass.h>
 #include <LaserDrawClass.h>
 #include <EBolt.h>
@@ -11,53 +12,16 @@
 #include <ParticleSystemClass.h>
 #include <ScenarioClass.h>
 #include <Utilities/Helpers.Alex.h>
+#include <AircraftTrackerClass.h>
 
-bool DisperseTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+PhobosTrajectory* DisperseTrajectoryType::CreateInstance() const
 {
-	this->PhobosTrajectoryType::Load(Stm, false);
-
-	Stm
-		.Process(this->UniqueCurve, false)
-		.Process(this->PreAimCoord, false)
-		.Process(this->RotateCoord, false)
-		.Process(this->MirrorCoord, false)
-		.Process(this->FacingCoord, false)
-		.Process(this->ReduceCoord, false)
-		.Process(this->UseDisperseBurst, false)
-		.Process(this->AxisOfRotation, false)
-		.Process(this->LaunchSpeed, false)
-		.Process(this->Acceleration, false)
-		.Process(this->ROT, false)
-		.Process(this->LockDirection, false)
-		.Process(this->CruiseEnable, false)
-		.Process(this->CruiseUnableRange, false)
-		.Process(this->LeadTimeCalculate, false)
-		.Process(this->TargetSnapDistance, false)
-		.Process(this->RetargetRadius, false)
-		.Process(this->RetargetAllies, false)
-		.Process(this->SuicideShortOfROT, false)
-		.Process(this->SuicideAboveRange, false)
-		.Process(this->SuicideIfNoWeapon, false)
-		.Process(this->WeaponBurst, false)
-		.Process(this->WeaponCount, false)
-		.Process(this->WeaponDelay, false)
-		.Process(this->WeaponTimer, false)
-		.Process(this->WeaponScope, false)
-		.Process(this->WeaponSeparate, false)
-		.Process(this->WeaponRetarget, false)
-		.Process(this->WeaponLocation, false)
-		.Process(this->WeaponTendency, false)
-		.Process(this->WeaponToAllies, false)
-		.Process(this->WeaponToGround, false)
-		;
-
-	return true;
+	return new DisperseTrajectory(this);
 }
 
-bool DisperseTrajectoryType::Save(PhobosStreamWriter& Stm) const
+template<typename T>
+void DisperseTrajectoryType::Serialize(T& Stm)
 {
-	this->PhobosTrajectoryType::Save(Stm);
-
 	Stm
 		.Process(this->UniqueCurve)
 		.Process(this->PreAimCoord)
@@ -80,6 +44,7 @@ bool DisperseTrajectoryType::Save(PhobosStreamWriter& Stm) const
 		.Process(this->SuicideShortOfROT)
 		.Process(this->SuicideAboveRange)
 		.Process(this->SuicideIfNoWeapon)
+		.Process(this->Weapons)
 		.Process(this->WeaponBurst)
 		.Process(this->WeaponCount)
 		.Process(this->WeaponDelay)
@@ -92,7 +57,19 @@ bool DisperseTrajectoryType::Save(PhobosStreamWriter& Stm) const
 		.Process(this->WeaponToAllies)
 		.Process(this->WeaponToGround)
 		;
+}
 
+bool DisperseTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+{
+	this->PhobosTrajectoryType::Load(Stm, false);
+	this->Serialize(Stm);
+	return true;
+}
+
+bool DisperseTrajectoryType::Save(PhobosStreamWriter& Stm) const
+{
+	this->PhobosTrajectoryType::Save(Stm);
+	const_cast<DisperseTrajectoryType*>(this)->Serialize(Stm);
 	return true;
 }
 
@@ -120,6 +97,7 @@ void DisperseTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 	this->SuicideShortOfROT.Read(exINI, pSection, "Trajectory.Disperse.SuicideShortOfROT");
 	this->SuicideAboveRange.Read(exINI, pSection, "Trajectory.Disperse.SuicideAboveRange");
 	this->SuicideIfNoWeapon.Read(exINI, pSection, "Trajectory.Disperse.SuicideIfNoWeapon");
+	this->Weapons.Read(exINI, pSection, "Trajectory.Disperse.Weapons");
 	this->WeaponBurst.Read(exINI, pSection, "Trajectory.Disperse.WeaponBurst");
 	this->WeaponCount.Read(exINI, pSection, "Trajectory.Disperse.WeaponCount");
 	this->WeaponDelay.Read(exINI, pSection, "Trajectory.Disperse.WeaponDelay");
@@ -133,10 +111,9 @@ void DisperseTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 	this->WeaponToGround.Read(exINI, pSection, "Trajectory.Disperse.WeaponToGround");
 }
 
-bool DisperseTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+template<typename T>
+void DisperseTrajectory::Serialize(T& Stm)
 {
-	this->PhobosTrajectory::Load(Stm, false);
-
 	Stm
 		.Process(this->UniqueCurve)
 		.Process(this->PreAimCoord)
@@ -159,6 +136,7 @@ bool DisperseTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 		.Process(this->SuicideShortOfROT)
 		.Process(this->SuicideAboveRange)
 		.Process(this->SuicideIfNoWeapon)
+		.Process(this->Weapons)
 		.Process(this->WeaponBurst)
 		.Process(this->WeaponCount)
 		.Process(this->WeaponDelay)
@@ -182,127 +160,46 @@ bool DisperseTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 		.Process(this->LastReviseMult)
 		.Process(this->FirepowerMult)
 		;
+}
 
+bool DisperseTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+{
+	this->PhobosTrajectory::Load(Stm, false);
+	this->Serialize(Stm);
 	return true;
 }
 
 bool DisperseTrajectory::Save(PhobosStreamWriter& Stm) const
 {
 	this->PhobosTrajectory::Save(Stm);
-
-	Stm
-		.Process(this->UniqueCurve)
-		.Process(this->PreAimCoord)
-		.Process(this->RotateCoord)
-		.Process(this->MirrorCoord)
-		.Process(this->FacingCoord)
-		.Process(this->ReduceCoord)
-		.Process(this->UseDisperseBurst)
-		.Process(this->AxisOfRotation)
-		.Process(this->LaunchSpeed)
-		.Process(this->Acceleration)
-		.Process(this->ROT)
-		.Process(this->LockDirection)
-		.Process(this->CruiseEnable)
-		.Process(this->CruiseUnableRange)
-		.Process(this->LeadTimeCalculate)
-		.Process(this->TargetSnapDistance)
-		.Process(this->RetargetRadius)
-		.Process(this->RetargetAllies)
-		.Process(this->SuicideShortOfROT)
-		.Process(this->SuicideAboveRange)
-		.Process(this->SuicideIfNoWeapon)
-		.Process(this->WeaponBurst)
-		.Process(this->WeaponCount)
-		.Process(this->WeaponDelay)
-		.Process(this->WeaponTimer)
-		.Process(this->WeaponScope)
-		.Process(this->WeaponSeparate)
-		.Process(this->WeaponRetarget)
-		.Process(this->WeaponLocation)
-		.Process(this->WeaponTendency)
-		.Process(this->WeaponToAllies)
-		.Process(this->WeaponToGround)
-		.Process(this->InStraight)
-		.Process(this->Accelerate)
-		.Process(this->TargetInTheAir)
-		.Process(this->TargetIsTechno)
-		.Process(this->OriginalDistance)
-		.Process(this->CurrentBurst)
-		.Process(this->ThisWeaponIndex)
-		.Process(this->LastTargetCoord)
-		.Process(this->PreAimDistance)
-		.Process(this->LastReviseMult)
-		.Process(this->FirepowerMult)
-		;
-
+	const_cast<DisperseTrajectory*>(this)->Serialize(Stm);
 	return true;
 }
 
 void DisperseTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity)
 {
-	auto const pType = this->GetTrajectoryType<DisperseTrajectoryType>(pBullet);
-
-	this->UniqueCurve = pType->UniqueCurve;
-	this->PreAimCoord = pType->PreAimCoord;
-	this->RotateCoord = pType->RotateCoord;
-	this->MirrorCoord = pType->MirrorCoord;
-	this->FacingCoord = pType->FacingCoord;
-	this->ReduceCoord = pType->ReduceCoord;
-	this->UseDisperseBurst = pType->UseDisperseBurst;
-	this->AxisOfRotation = pType->AxisOfRotation;
-	this->LaunchSpeed = pType->LaunchSpeed;
-	this->Acceleration = pType->Acceleration > 0.001 ? pType->Acceleration : 0.001;
-	this->ROT = pType->ROT > 0.001 ? pType->ROT : 0.001;
-	this->LockDirection = pType->LockDirection;
-	this->CruiseEnable = pType->CruiseEnable;
-	this->CruiseUnableRange = pType->CruiseUnableRange > 0.25 ? pType->CruiseUnableRange * 256 : 64;
-	this->LeadTimeCalculate = pType->LeadTimeCalculate;
-	this->TargetSnapDistance = pType->TargetSnapDistance;
-	this->RetargetRadius = pType->RetargetRadius;
-	this->RetargetAllies = pType->RetargetAllies;
-	this->SuicideShortOfROT = pType->SuicideShortOfROT;
-	this->SuicideAboveRange = pType->SuicideAboveRange * 256;
-	this->SuicideIfNoWeapon = pType->SuicideIfNoWeapon;
-	this->WeaponBurst = pType->WeaponBurst;
-	this->WeaponCount = pType->WeaponCount;
-	this->WeaponDelay = pType->WeaponDelay > 0 ? pType->WeaponDelay : 1;
-	this->WeaponTimer.Start(pType->WeaponTimer > 0 ? pType->WeaponTimer : 0);
-	this->WeaponScope = pType->WeaponScope;
-	this->WeaponSeparate = pType->WeaponSeparate;
-	this->WeaponRetarget = pType->WeaponRetarget;
-	this->WeaponLocation = pType->WeaponLocation;
-	this->WeaponTendency = pType->WeaponTendency;
-	this->WeaponToAllies = pType->WeaponToAllies;
-	this->WeaponToGround = pType->WeaponToGround;
-	this->InStraight = false;
-	this->Accelerate = true;
 	this->TargetIsTechno = static_cast<bool>(abstract_cast<TechnoClass*>(pBullet->Target));
 	this->OriginalDistance = static_cast<int>(pBullet->TargetCoords.DistanceFrom(pBullet->SourceCoords));
-	this->CurrentBurst = 0;
-	this->ThisWeaponIndex = 0;
 	this->LastTargetCoord = pBullet->TargetCoords;
-	this->LastReviseMult = 0;
-	this->FirepowerMult = 1.0;
 
 	if (const ObjectClass* const pTarget = abstract_cast<ObjectClass*>(pBullet->Target))
-		this->TargetInTheAir = (pTarget->GetHeight() > 200);
+		this->TargetInTheAir = (pTarget->GetHeight() > Unsorted::CellHeight);
 	else
 		this->TargetInTheAir = false;
 
 	if (this->LaunchSpeed > 256.0)
 		this->LaunchSpeed = 256.0;
-	else if (this->LaunchSpeed < 0.001)
+	else if (this->LaunchSpeed < 1e-10)
 		this->LaunchSpeed = 0.001;
 
 	this->PreAimDistance = !this->ReduceCoord ? this->PreAimCoord.Magnitude() + this->LaunchSpeed: this->PreAimCoord.Magnitude() * this->OriginalDistance / 2560 + this->LaunchSpeed;
 
-	if (pBullet->Owner)
+	if (TechnoClass* const pFirer = pBullet->Owner)
 	{
-		this->CurrentBurst = pBullet->Owner->CurrentBurstIndex;
-		this->FirepowerMult = pBullet->Owner->FirepowerMultiplier;
+		this->CurrentBurst = pFirer->CurrentBurstIndex;
+		this->FirepowerMult = pFirer->FirepowerMultiplier;
 
-		if (this->MirrorCoord && pBullet->Owner->CurrentBurstIndex % 2 == 1)
+		if (this->MirrorCoord && pFirer->CurrentBurstIndex % 2 == 1)
 			this->PreAimCoord.Y = -(this->PreAimCoord.Y);
 	}
 
@@ -332,7 +229,7 @@ void DisperseTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bu
 		}
 		else
 		{
-			this->InitializeBulletNotCurve(pBullet);
+			this->InitializeBulletNotCurve(pBullet, this->FacingCoord);
 		}
 
 		if (this->CalculateBulletVelocity(pBullet, this->LaunchSpeed))
@@ -362,13 +259,13 @@ bool DisperseTrajectory::OnAI(BulletClass* pBullet)
 void DisperseTrajectory::OnAIPreDetonate(BulletClass* pBullet)
 {
 	const ObjectClass* const pTarget = abstract_cast<ObjectClass*>(pBullet->Target);
-	const CoordStruct pCoords = pTarget ? pTarget->GetCoords() : pBullet->Data.Location;
+	const CoordStruct coords = pTarget ? pTarget->GetCoords() : pBullet->Data.Location;
 
-	if (pCoords.DistanceFrom(pBullet->Location) <= this->TargetSnapDistance)
+	if (coords.DistanceFrom(pBullet->Location) <= this->TargetSnapDistance)
 	{
 		auto const pExt = BulletExt::ExtMap.Find(pBullet);
 		pExt->SnappedToTarget = true;
-		pBullet->SetLocation(pCoords);
+		pBullet->SetLocation(coords);
 	}
 
 	if (this->WeaponScope < 0 && this->WeaponCount != 0)
@@ -394,97 +291,95 @@ TrajectoryCheckReturnType DisperseTrajectory::OnAITechnoCheck(BulletClass* pBull
 	return TrajectoryCheckReturnType::SkipGameCheck;
 }
 
-void DisperseTrajectory::InitializeBulletNotCurve(BulletClass* pBullet)
+void DisperseTrajectory::InitializeBulletNotCurve(BulletClass* pBullet, bool facing)
 {
-	double RotateAngle = 0.0;
-	CoordStruct TheSource = pBullet->SourceCoords;
+	double rotateAngle = 0.0;
+	TechnoClass* const pFirer = pBullet->Owner;
+	const CoordStruct theSource = pFirer ? pFirer->GetCoords() : pBullet->SourceCoords;
 
-	if (pBullet->Owner)
-		TheSource = pBullet->Owner->GetCoords();
-
-	if (this->FacingCoord || (pBullet->TargetCoords.Y == TheSource.Y && pBullet->TargetCoords.X == TheSource.X) && pBullet->Owner)
+	if ((facing || (pBullet->TargetCoords.Y == theSource.Y && pBullet->TargetCoords.X == theSource.X)) && pFirer)
 	{
-		if (pBullet->Owner->HasTurret())
-			RotateAngle = -(pBullet->Owner->TurretFacing().GetRadian<32>());
+		if (pFirer->HasTurret())
+			rotateAngle = -(pFirer->TurretFacing().GetRadian<32>());
 		else
-			RotateAngle = -(pBullet->Owner->PrimaryFacing.Current().GetRadian<32>());
+			rotateAngle = -(pFirer->PrimaryFacing.Current().GetRadian<32>());
 	}
 	else
 	{
-		RotateAngle = Math::atan2(pBullet->TargetCoords.Y - TheSource.Y , pBullet->TargetCoords.X - TheSource.X);
+		rotateAngle = Math::atan2(pBullet->TargetCoords.Y - theSource.Y , pBullet->TargetCoords.X - theSource.X);
 	}
 
-	const double CoordMult = this->OriginalDistance / (32768 / this->ROT);
+	const double coordMult = this->OriginalDistance / (32768 / this->ROT);
 
-	if (this->ReduceCoord && CoordMult < 1.0)
+	if (this->ReduceCoord && coordMult < 1.0)
 	{
-		CoordStruct TheAimCoord
+		CoordStruct theAimCoord
 		{
-			static_cast<int>(this->PreAimCoord.X * Math::cos(RotateAngle) + this->PreAimCoord.Y * Math::sin(RotateAngle)),
-			static_cast<int>(this->PreAimCoord.X * Math::sin(RotateAngle) - this->PreAimCoord.Y * Math::cos(RotateAngle)),
+			static_cast<int>(this->PreAimCoord.X * Math::cos(rotateAngle) + this->PreAimCoord.Y * Math::sin(rotateAngle)),
+			static_cast<int>(this->PreAimCoord.X * Math::sin(rotateAngle) - this->PreAimCoord.Y * Math::cos(rotateAngle)),
 			this->PreAimCoord.Z
 		};
 
-		CoordStruct TheDistance = pBullet->TargetCoords - pBullet->SourceCoords;
-		CoordStruct TheDifferece = TheDistance - TheAimCoord;
+		CoordStruct theDistance = pBullet->TargetCoords - pBullet->SourceCoords;
+		CoordStruct theDifferece = theDistance - theAimCoord;
 
-		pBullet->Velocity.X = TheAimCoord.X + (1 - CoordMult) * TheDifferece.X;
-		pBullet->Velocity.Y = TheAimCoord.Y + (1 - CoordMult) * TheDifferece.Y;
-		pBullet->Velocity.Z = TheAimCoord.Z + (1 - CoordMult) * TheDifferece.Z;
+		pBullet->Velocity.X = theAimCoord.X + (1 - coordMult) * theDifferece.X;
+		pBullet->Velocity.Y = theAimCoord.Y + (1 - coordMult) * theDifferece.Y;
+		pBullet->Velocity.Z = theAimCoord.Z + (1 - coordMult) * theDifferece.Z;
 	}
 	else
 	{
-		pBullet->Velocity.X = this->PreAimCoord.X * Math::cos(RotateAngle) + this->PreAimCoord.Y * Math::sin(RotateAngle);
-		pBullet->Velocity.Y = this->PreAimCoord.X * Math::sin(RotateAngle) - this->PreAimCoord.Y * Math::cos(RotateAngle);
+		pBullet->Velocity.X = this->PreAimCoord.X * Math::cos(rotateAngle) + this->PreAimCoord.Y * Math::sin(rotateAngle);
+		pBullet->Velocity.Y = this->PreAimCoord.X * Math::sin(rotateAngle) - this->PreAimCoord.Y * Math::cos(rotateAngle);
 		pBullet->Velocity.Z = this->PreAimCoord.Z;
 	}
 
-	if (!this->UseDisperseBurst && this->RotateCoord != 0 && pBullet->WeaponType && pBullet->WeaponType->Burst > 1)
+	if (!this->UseDisperseBurst && abs(this->RotateCoord) > 1e-10 && pBullet->WeaponType && pBullet->WeaponType->Burst > 1)
 	{
-		BulletVelocity RotationAxis
+		BulletVelocity rotationAxis
 		{
-			this->AxisOfRotation.X * Math::cos(RotateAngle) + this->AxisOfRotation.Y * Math::sin(RotateAngle),
-			this->AxisOfRotation.X * Math::sin(RotateAngle) - this->AxisOfRotation.Y * Math::cos(RotateAngle),
+			this->AxisOfRotation.X * Math::cos(rotateAngle) + this->AxisOfRotation.Y * Math::sin(rotateAngle),
+			this->AxisOfRotation.X * Math::sin(rotateAngle) - this->AxisOfRotation.Y * Math::cos(rotateAngle),
 			static_cast<double>(this->AxisOfRotation.Z)
 		};
 
-		double ExtraRotate = 0;
+		double extraRotate = 0.0;
 
 		if (this->MirrorCoord)
 		{
-			if (pBullet->Owner && pBullet->Owner->CurrentBurstIndex % 2 == 1)
-				RotationAxis *= -1;
+			if (pFirer && pFirer->CurrentBurstIndex % 2 == 1)
+				rotationAxis *= -1;
 
-			ExtraRotate = Math::Pi * (this->RotateCoord * ((this->CurrentBurst / 2) / (pBullet->WeaponType->Burst - 1.0) - 0.5)) / 180;
+			extraRotate = Math::Pi * (this->RotateCoord * ((this->CurrentBurst / 2) / (pBullet->WeaponType->Burst - 1.0) - 0.5)) / 180;
 		}
 		else
 		{
-			ExtraRotate = Math::Pi * (this->RotateCoord * (this->CurrentBurst / (pBullet->WeaponType->Burst - 1.0) - 0.5)) / 180;
+			extraRotate = Math::Pi * (this->RotateCoord * (this->CurrentBurst / (pBullet->WeaponType->Burst - 1.0) - 0.5)) / 180;
 		}
 
-		pBullet->Velocity = this->RotateAboutTheAxis(pBullet->Velocity, RotationAxis, ExtraRotate);
+		pBullet->Velocity = this->RotateAboutTheAxis(pBullet->Velocity, rotationAxis, extraRotate);
 	}
 }
 
-BulletVelocity DisperseTrajectory::RotateAboutTheAxis(BulletVelocity TheSpeed, BulletVelocity TheAxis, double TheRadian)
+BulletVelocity DisperseTrajectory::RotateAboutTheAxis(BulletVelocity theSpeed, BulletVelocity theAxis, double theRadian)
 {
-	const double TheAxisLengthSquared = TheAxis.MagnitudeSquared();
+	const double theAxisLengthSquared = theAxis.MagnitudeSquared();
 
-	if (TheAxisLengthSquared == 0)
-		return TheSpeed;
+	if (abs(theAxisLengthSquared) < 1e-10)
+		return theSpeed;
 
-	TheAxis *= 1 / sqrt(TheAxisLengthSquared);
-	const double CosRotate = Math::cos(TheRadian);
+	theAxis *= 1 / sqrt(theAxisLengthSquared);
+	const double cosRotate = Math::cos(theRadian);
 
-	return ((TheSpeed * CosRotate) + (TheAxis * ((1 - CosRotate) * (TheSpeed * TheAxis))) + (TheAxis.CrossProduct(TheSpeed) * Math::sin(TheRadian)));
+	return ((theSpeed * cosRotate) + (theAxis * ((1 - cosRotate) * (theSpeed * theAxis))) + (theAxis.CrossProduct(theSpeed) * Math::sin(theRadian)));
 }
 
-bool DisperseTrajectory::CalculateBulletVelocity(BulletClass* pBullet, double StraightSpeed)
+bool DisperseTrajectory::CalculateBulletVelocity(BulletClass* pBullet, double trajectorySpeed)
 {
-	const double VelocityLength = pBullet->Velocity.Magnitude();
+	const double velocityLength = pBullet->Velocity.Magnitude();
 
-	if (VelocityLength > 0)
-		pBullet->Velocity *= StraightSpeed / VelocityLength;
+	if (velocityLength > 1e-10)
+		pBullet->Velocity *= trajectorySpeed / velocityLength;
 	else
 		return true;
 
@@ -493,71 +388,96 @@ bool DisperseTrajectory::CalculateBulletVelocity(BulletClass* pBullet, double St
 
 bool DisperseTrajectory::BulletRetargetTechno(BulletClass* pBullet, HouseClass* pOwner)
 {
-	bool Check = false;
+	bool check = false;
 
 	if (!pBullet->Target)
-		Check = true;
+		check = true;
 	else if (TechnoClass* const pTargetTechno = abstract_cast<TechnoClass*>(pBullet->Target))
-		Check = this->CheckTechnoIsInvalid(pTargetTechno);
+		check = this->CheckTechnoIsInvalid(pTargetTechno);
 	else if (this->TargetIsTechno)
-		Check = true;
+		check = true;
 
-	if (!Check)
+	if (!check)
 		return false;
 
-	if (this->RetargetRadius < 0)
+	if (this->RetargetRadius < 1e-10)
 		return true;
 
-	const double RetargetRange = this->RetargetRadius * 256.0;
-	CoordStruct RetargetCoords = pBullet->TargetCoords;
+	const double retargetRange = this->RetargetRadius * Unsorted::LeptonsPerCell;
+	CoordStruct retargetCoords = pBullet->TargetCoords;
 	TechnoClass* pNewTechno = nullptr;
 
 	if (this->InStraight)
 	{
-		const BulletVelocity FutureVelocity = pBullet->Velocity * (RetargetRange / this->LaunchSpeed);
-		RetargetCoords.X = pBullet->Location.X + static_cast<int>(FutureVelocity.X);
-		RetargetCoords.Y = pBullet->Location.Y + static_cast<int>(FutureVelocity.Y);
-		RetargetCoords.Z = pBullet->Location.Z;
+		const BulletVelocity futureVelocity = pBullet->Velocity * (retargetRange / this->LaunchSpeed);
+		retargetCoords.X = pBullet->Location.X + static_cast<int>(futureVelocity.X);
+		retargetCoords.Y = pBullet->Location.Y + static_cast<int>(futureVelocity.Y);
+		retargetCoords.Z = pBullet->Location.Z;
 	}
 
-	if (!this->TargetInTheAir)
+	if (!this->TargetInTheAir) // Only get same type (on ground / in air)
 	{
-		for (CellSpreadEnumerator ThisCell(static_cast<size_t>(this->RetargetRadius + 0.99)); ThisCell; ++ThisCell)
+		for (CellSpreadEnumerator thisCell(static_cast<size_t>(this->RetargetRadius + 0.99)); thisCell; ++thisCell)
 		{
-			if (const CellClass* const pCell = MapClass::Instance->GetCellAt(*ThisCell + CellClass::Coord2Cell(RetargetCoords)))
+			if (const CellClass* const pCell = MapClass::Instance->GetCellAt(*thisCell + CellClass::Coord2Cell(retargetCoords)))
 			{
 				ObjectClass* pObject = pCell->FirstObject;
 
 				while (pObject)
 				{
-					auto const pTechno = abstract_cast<TechnoClass*>(pObject);
+					TechnoClass* const pTechno = abstract_cast<TechnoClass*>(pObject);
 					pObject = pObject->NextObject;
 
-					if (!pTechno || pTechno->GetHeight() > 200 || this->CheckTechnoIsInvalid(pTechno))
+					if (!pTechno || this->CheckTechnoIsInvalid(pTechno))
 						continue;
 
-					const AbstractType TechnoType = pTechno->WhatAmI();
+					TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
 
-					if (TechnoType == AbstractType::Building && static_cast<BuildingClass*>(pTechno)->Type->InvisibleInGame)
+					if (!pTechnoType->LegalTarget)
 						continue;
 
-					if (TechnoType == AbstractType::Unit && pTechno->IsDisguised())
+					const AbstractType absType = pTechno->WhatAmI();
+
+					if (absType == AbstractType::Building && static_cast<BuildingClass*>(pTechno)->Type->InvisibleInGame)
 						continue;
 
-					if (!this->RetargetAllies && (pOwner->IsAlliedWith(pTechno->Owner) || TechnoType == AbstractType::Infantry && pTechno->IsDisguisedAs(pOwner)))
+					HouseClass* const pHouse = pTechno->Owner;
+
+					if (pOwner->IsAlliedWith(pHouse))
+					{
+						if (!this->RetargetAllies)
+							continue;
+					}
+					else
+					{
+						if (!this->RetargetAllies && absType == AbstractType::Infantry && pTechno->IsDisguisedAs(pOwner) && !pCell->DisguiseSensors_InclHouse(pOwner->ArrayIndex))
+							continue;
+
+						if (absType == AbstractType::Unit && pTechno->IsDisguised() && !pCell->DisguiseSensors_InclHouse(pOwner->ArrayIndex))
+							continue;
+
+						if (pTechno->CloakState == CloakState::Cloaked && !pCell->Sensors_InclHouse(pOwner->ArrayIndex))
+							continue;
+					}
+
+					if (MapClass::GetTotalDamage(100, pBullet->WH, pTechnoType->Armor, 0) == 0)
 						continue;
 
-					if (pTechno->CloakState == CloakState::Cloaked)
+					if (pTechno->GetCoords().DistanceFrom(retargetCoords) > retargetRange)
 						continue;
 
-					if (MapClass::GetTotalDamage(100, pBullet->WH, pTechno->GetTechnoType()->Armor, 0) == 0)
-						continue;
+					WeaponTypeClass* const pWeapon = pBullet->WeaponType;
 
-					if (pTechno->GetCoords().DistanceFrom(RetargetCoords) > RetargetRange)
-						continue;
+					if (pWeapon)
+					{
+						TechnoClass* const pFirer = pBullet->Owner;
 
-					if (pBullet->WeaponType && pTechno->GetCoords().DistanceFrom(pBullet->Owner ? pBullet->Owner->GetCoords() : pBullet->SourceCoords) > pBullet->WeaponType->Range)
-						continue;
+						if (pTechno->GetCoords().DistanceFrom(pFirer ? pFirer->GetCoords() : pBullet->SourceCoords) > pWeapon->Range)
+							continue;
+
+						if (!this->CheckWeaponCanTarget(WeaponTypeExt::ExtMap.Find(pWeapon), pFirer, pTechno, pOwner, pHouse))
+							continue;
+					}
 
 					pNewTechno = pTechno;
 					break;
@@ -570,25 +490,50 @@ bool DisperseTrajectory::BulletRetargetTechno(BulletClass* pBullet, HouseClass* 
 	}
 	else
 	{
-		for (auto const& pTechno : *TechnoClass::Array)
+		AircraftTrackerClass* const airTracker = &AircraftTrackerClass::Instance.get();
+		airTracker->FillCurrentVector(MapClass::Instance->GetCellAt(retargetCoords), Game::F2I(this->RetargetRadius));
+
+		for (TechnoClass* pTechno = airTracker->Get(); pTechno; pTechno = airTracker->Get())
 		{
-			if (pTechno->GetHeight() <= 200 || this->CheckTechnoIsInvalid(pTechno))
+			if (this->CheckTechnoIsInvalid(pTechno))
 				continue;
 
-			if (!this->RetargetAllies && pOwner->IsAlliedWith(pTechno->Owner))
+			TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
+
+			if (!pTechnoType->LegalTarget)
 				continue;
 
-			if (pTechno->CloakState == CloakState::Cloaked)
+			HouseClass* const pHouse = pTechno->Owner;
+
+			if (pOwner->IsAlliedWith(pHouse))
+			{
+				if (!this->RetargetAllies)
+					continue;
+			}
+			else if (CellClass* const pCell = pTechno->GetCell())
+			{
+				if (pTechno->CloakState == CloakState::Cloaked && !pCell->Sensors_InclHouse(pOwner->ArrayIndex))
+					continue;
+			}
+
+			if (MapClass::GetTotalDamage(100, pBullet->WH, pTechnoType->Armor, 0) == 0)
 				continue;
 
-			if (MapClass::GetTotalDamage(100, pBullet->WH, pTechno->GetTechnoType()->Armor, 0) == 0)
+			if (pTechno->GetCoords().DistanceFrom(retargetCoords) > retargetRange)
 				continue;
 
-			if (pTechno->GetCoords().DistanceFrom(RetargetCoords) > RetargetRange)
-				continue;
+			WeaponTypeClass* const pWeapon = pBullet->WeaponType;
 
-			if (pBullet->WeaponType && pTechno->GetCoords().DistanceFrom(pBullet->Owner ? pBullet->Owner->GetCoords() : pBullet->SourceCoords) > pBullet->WeaponType->Range)
-				continue;
+			if (pWeapon)
+			{
+				TechnoClass* const pFirer = pBullet->Owner;
+
+				if (pTechno->GetCoords().DistanceFrom(pFirer ? pFirer->GetCoords() : pBullet->SourceCoords) > pWeapon->Range)
+					continue;
+
+				if (!this->CheckWeaponCanTarget(WeaponTypeExt::ExtMap.Find(pWeapon), pFirer, pTechno, pOwner, pHouse))
+					continue;
+			}
 
 			pNewTechno = pTechno;
 			break;
@@ -610,43 +555,48 @@ bool DisperseTrajectory::CheckTechnoIsInvalid(TechnoClass* pTechno)
 	return (!pTechno->IsAlive || !pTechno->IsOnMap || pTechno->InLimbo || pTechno->IsSinking || pTechno->Health <= 0);
 }
 
+bool DisperseTrajectory::CheckWeaponCanTarget(WeaponTypeExt::ExtData* pWeaponExt, TechnoClass* pFirer, TechnoClass* pTarget, HouseClass* pFirerHouse, HouseClass* pTargetHouse)
+{
+	return EnumFunctions::CanTargetHouse(pWeaponExt->CanTargetHouses, pFirerHouse, pTargetHouse) && EnumFunctions::IsTechnoEligible(pTarget, pWeaponExt->CanTarget) && pWeaponExt->HasRequiredAttachedEffects(pTarget, pFirer);
+}
+
 bool DisperseTrajectory::CurveVelocityChange(BulletClass* pBullet)
 {
 	TechnoClass* const pTargetTechno = abstract_cast<TechnoClass*>(pBullet->Target);
-	const bool CheckValid = pTargetTechno && !CheckTechnoIsInvalid(pTargetTechno);
-	CoordStruct TargetLocation = pBullet->TargetCoords;
+	const bool checkValid = pTargetTechno && !CheckTechnoIsInvalid(pTargetTechno);
+	CoordStruct targetLocation = pBullet->TargetCoords;
 
-	if (CheckValid)
-		TargetLocation = pTargetTechno->GetCoords();
+	if (checkValid)
+		targetLocation = pTargetTechno->GetCoords();
 
-	pBullet->TargetCoords = TargetLocation;
+	pBullet->TargetCoords = targetLocation;
 
 	if (!this->InStraight)
 	{
-		int OffHeight = this->OriginalDistance - 1600;
+		int offHeight = this->OriginalDistance - 1600;
 
 		if (this->OriginalDistance < 3200)
-			OffHeight = this->OriginalDistance / 2;
+			offHeight = this->OriginalDistance / 2;
 
-		const CoordStruct HorizonVelocity { TargetLocation.X - pBullet->Location.X, TargetLocation.Y - pBullet->Location.Y, 0 };
-		const double HorizonDistance = HorizonVelocity.Magnitude();
+		const CoordStruct horizonVelocity { targetLocation.X - pBullet->Location.X, targetLocation.Y - pBullet->Location.Y, 0 };
+		const double horizonDistance = horizonVelocity.Magnitude();
 
-		if (HorizonDistance > 0)
+		if (horizonDistance > 1e-10)
 		{
-			double HorizonMult = abs(pBullet->Velocity.Z / 64.0) / HorizonDistance;
-			pBullet->Velocity.X += HorizonMult * HorizonVelocity.X;
-			pBullet->Velocity.Y += HorizonMult * HorizonVelocity.Y;
-			const double HorizonLength = sqrt(pBullet->Velocity.X * pBullet->Velocity.X + pBullet->Velocity.Y * pBullet->Velocity.Y);
+			double horizonMult = abs(pBullet->Velocity.Z / 64.0) / horizonDistance;
+			pBullet->Velocity.X += horizonMult * horizonVelocity.X;
+			pBullet->Velocity.Y += horizonMult * horizonVelocity.Y;
+			const double horizonLength = sqrt(pBullet->Velocity.X * pBullet->Velocity.X + pBullet->Velocity.Y * pBullet->Velocity.Y);
 
-			if (HorizonLength > 64)
+			if (horizonLength > 64.0)
 			{
-				HorizonMult = 64 / HorizonLength;
-				pBullet->Velocity.X *= HorizonMult;
-				pBullet->Velocity.Y *= HorizonMult;
+				horizonMult = 64.0 / horizonLength;
+				pBullet->Velocity.X *= horizonMult;
+				pBullet->Velocity.Y *= horizonMult;
 			}
 		}
 
-		if ((pBullet->Location.Z - pBullet->SourceCoords.Z) < OffHeight && this->Accelerate)
+		if ((pBullet->Location.Z - pBullet->SourceCoords.Z) < offHeight && this->Accelerate)
 		{
 			if (pBullet->Velocity.Z < 160.0)
 				pBullet->Velocity.Z += 4.0;
@@ -654,29 +604,29 @@ bool DisperseTrajectory::CurveVelocityChange(BulletClass* pBullet)
 		else
 		{
 			this->Accelerate = false;
-			const double FutureHeight = pBullet->Location.Z + 8 * pBullet->Velocity.Z;
+			const double futureHeight = pBullet->Location.Z + 8 * pBullet->Velocity.Z;
 
 			if (pBullet->Velocity.Z > -160.0)
 				pBullet->Velocity.Z -= 4.0;
 
-			if (FutureHeight <= TargetLocation.Z)
+			if (futureHeight <= targetLocation.Z)
 				this->InStraight = true;
-			else if (FutureHeight <= pBullet->SourceCoords.Z)
+			else if (futureHeight <= pBullet->SourceCoords.Z)
 				this->InStraight = true;
 		}
 	}
 	else
 	{
-		const double TimeMult = TargetLocation.DistanceFrom(pBullet->Location) / 192.0;
-		TargetLocation.Z += static_cast<int>(TimeMult * 48);
+		const double timeMult = targetLocation.DistanceFrom(pBullet->Location) / 192.0;
+		targetLocation.Z += static_cast<int>(timeMult * 48);
 
-		if (CheckValid)
+		if (checkValid)
 		{
-			TargetLocation.X += static_cast<int>(TimeMult * (TargetLocation.X - this->LastTargetCoord.X));
-			TargetLocation.Y += static_cast<int>(TimeMult * (TargetLocation.Y - this->LastTargetCoord.Y));
+			targetLocation.X += static_cast<int>(timeMult * (targetLocation.X - this->LastTargetCoord.X));
+			targetLocation.Y += static_cast<int>(timeMult * (targetLocation.Y - this->LastTargetCoord.Y));
 		}
 
-		if (this->ChangeBulletVelocity(pBullet, TargetLocation, 24.0, true))
+		if (this->ChangeBulletVelocity(pBullet, targetLocation, 24.0, true))
 			return true;
 	}
 
@@ -685,50 +635,50 @@ bool DisperseTrajectory::CurveVelocityChange(BulletClass* pBullet)
 
 bool DisperseTrajectory::NotCurveVelocityChange(BulletClass* pBullet, HouseClass* pOwner)
 {
-	if (this->SuicideAboveRange > 0)
+	if (this->SuicideAboveRange > 1e-10)
 	{
 		this->SuicideAboveRange -= this->LaunchSpeed;
 
-		if (this->SuicideAboveRange <= 0)
+		if (this->SuicideAboveRange <= 1e-10)
 			return true;
 	}
 
-	if (this->PreAimDistance > 0)
+	if (this->PreAimDistance > 1e-10)
 		this->PreAimDistance -= this->LaunchSpeed;
 
-	bool VelocityUp = false;
+	bool velocityUp = false;
 
 	if (this->Accelerate)
 	{
 		this->LaunchSpeed += this->Acceleration;
-		const double TrajectorySpeed = this->GetTrajectorySpeed(pBullet);
+		const double trajectorySpeed = this->GetTrajectorySpeed(pBullet);
 
 		if (this->LaunchSpeed >= 256.0)
 		{
 			this->LaunchSpeed = 256.0;
 			this->Accelerate = false;
 		}
-		else if (this->LaunchSpeed >= TrajectorySpeed)
+		else if (this->LaunchSpeed >= trajectorySpeed)
 		{
-			this->LaunchSpeed = TrajectorySpeed;
+			this->LaunchSpeed = trajectorySpeed;
 			this->Accelerate = false;
 		}
 
-		VelocityUp = true;
+		velocityUp = true;
 	}
 
 	if (!this->LockDirection || !this->InStraight)
 	{
-		if (this->RetargetRadius != 0 && this->BulletRetargetTechno(pBullet, pOwner))
+		if (abs(this->RetargetRadius) < 1e-10 && this->BulletRetargetTechno(pBullet, pOwner))
 			return true;
 
-		if (this->PreAimDistance <= 0 && this->StandardVelocityChange(pBullet))
+		if (this->PreAimDistance <= 1e-10 && this->StandardVelocityChange(pBullet))
 			return true;
 
-		VelocityUp = true;
+		velocityUp = true;
 	}
 
-	if (VelocityUp && this->CalculateBulletVelocity(pBullet, this->LaunchSpeed))
+	if (velocityUp && this->CalculateBulletVelocity(pBullet, this->LaunchSpeed))
 		return true;
 
 	return false;
@@ -737,121 +687,121 @@ bool DisperseTrajectory::NotCurveVelocityChange(BulletClass* pBullet, HouseClass
 bool DisperseTrajectory::StandardVelocityChange(BulletClass* pBullet)
 {
 	TechnoClass* const pTargetTechno = abstract_cast<TechnoClass*>(pBullet->Target);
-	const bool CheckValid = pTargetTechno && !this->CheckTechnoIsInvalid(pTargetTechno);
-	CoordStruct TargetLocation = pBullet->TargetCoords;
+	const bool checkValid = pTargetTechno && !this->CheckTechnoIsInvalid(pTargetTechno);
+	CoordStruct targetLocation = pBullet->TargetCoords;
 
-	if (CheckValid)
-		TargetLocation = pTargetTechno->GetCoords();
+	if (checkValid)
+		targetLocation = pTargetTechno->GetCoords();
 
-	pBullet->TargetCoords = TargetLocation;
+	pBullet->TargetCoords = targetLocation;
 
-	const CoordStruct TargetHorizon { TargetLocation.X, TargetLocation.Y, 0 };
-	const CoordStruct BulletHorizon { pBullet->Location.X, pBullet->Location.Y, 0 };
+	const CoordStruct targetHorizon { targetLocation.X, targetLocation.Y, 0 };
+	const CoordStruct bulletHorizon { pBullet->Location.X, pBullet->Location.Y, 0 };
 
-	if (this->CruiseEnable && TargetHorizon.DistanceFrom(BulletHorizon) > this->CruiseUnableRange)
-		TargetLocation.Z = pBullet->Location.Z;
+	if (this->CruiseEnable && targetHorizon.DistanceFrom(bulletHorizon) > this->CruiseUnableRange)
+		targetLocation.Z = pBullet->Location.Z;
 
-	const double TrajectorySpeed = this->GetTrajectorySpeed(pBullet);
+	const double trajectorySpeed = this->GetTrajectorySpeed(pBullet);
 
-	if (this->LeadTimeCalculate && CheckValid && TrajectorySpeed > 64.0)
+	if (this->LeadTimeCalculate && checkValid && trajectorySpeed > 64.0)
 	{
-		double LeadSpeed = (this->GetTrajectorySpeed(pBullet) + this->LaunchSpeed) / 2;
-		double TimeMult = TargetLocation.DistanceFrom(pBullet->Location) / LeadSpeed;
-		TargetLocation += (TargetLocation - this->LastTargetCoord) * TimeMult;
+		const double leadSpeed = (trajectorySpeed + this->LaunchSpeed) / 2;
+		const double timeMult = targetLocation.DistanceFrom(pBullet->Location) / leadSpeed;
+		targetLocation += (targetLocation - this->LastTargetCoord) * timeMult;
 	}
 
-	const double TurningRadius = this->ROT * this->LaunchSpeed * this->LaunchSpeed / 16384;
+	const double turningRadius = this->ROT * this->LaunchSpeed * this->LaunchSpeed / 16384;
 
-	if (this->ChangeBulletVelocity(pBullet, TargetLocation, TurningRadius, false))
+	if (this->ChangeBulletVelocity(pBullet, targetLocation, turningRadius, false))
 		return true;
 
 	return false;
 }
 
-bool DisperseTrajectory::ChangeBulletVelocity(BulletClass* pBullet, CoordStruct TargetLocation, double TurningRadius, bool Curve)
+bool DisperseTrajectory::ChangeBulletVelocity(BulletClass* pBullet, CoordStruct targetLocation, double turningRadius, bool curve)
 {
-	const BulletVelocity TargetVelocity
+	const BulletVelocity targetVelocity
 	{
-		static_cast<double>(TargetLocation.X - pBullet->Location.X),
-		static_cast<double>(TargetLocation.Y - pBullet->Location.Y),
-		static_cast<double>(TargetLocation.Z - pBullet->Location.Z)
+		static_cast<double>(targetLocation.X - pBullet->Location.X),
+		static_cast<double>(targetLocation.Y - pBullet->Location.Y),
+		static_cast<double>(targetLocation.Z - pBullet->Location.Z)
 	};
 
-	const BulletVelocity MoveToVelocity = pBullet->Velocity;
-	const BulletVelocity FutureVelocity = TargetVelocity - MoveToVelocity;
+	const BulletVelocity moveToVelocity = pBullet->Velocity;
+	const BulletVelocity futureVelocity = targetVelocity - moveToVelocity;
 
-	BulletVelocity ReviseVelocity {0, 0, 0};
-	BulletVelocity DirectVelocity {0, 0, 0};
+	BulletVelocity reviseVelocity {0, 0, 0};
+	BulletVelocity directVelocity {0, 0, 0};
 
-	const double TargetSquared = TargetVelocity.MagnitudeSquared();
-	const double BulletSquared = MoveToVelocity.MagnitudeSquared();
-	const double FutureSquared = FutureVelocity.MagnitudeSquared();
+	const double targetSquared = targetVelocity.MagnitudeSquared();
+	const double bulletSquared = moveToVelocity.MagnitudeSquared();
+	const double futureSquared = futureVelocity.MagnitudeSquared();
 
-	const double TargetSide = sqrt(TargetSquared);
-	const double BulletSide = sqrt(BulletSquared);
+	const double targetSide = sqrt(targetSquared);
+	const double bulletSide = sqrt(bulletSquared);
 
-	const double ReviseMult = (TargetSquared + BulletSquared - FutureSquared);
-	const double ReviseBase = 2 * TargetSide * BulletSide;
+	const double reviseMult = (targetSquared + bulletSquared - futureSquared);
+	const double reviseBase = 2 * targetSide * bulletSide;
 
-	if (TargetSide > 0)
+	if (targetSide > 1e-10)
 	{
-		if (ReviseMult < 0.001 * ReviseBase && ReviseMult > -0.001 * ReviseBase)
+		if (reviseMult < 0.001 * reviseBase && reviseMult > -0.001 * reviseBase)
 		{
-			const double VelocityMult = TurningRadius / TargetSide;
-			pBullet->Velocity += TargetVelocity * VelocityMult;
+			const double velocityMult = turningRadius / targetSide;
+			pBullet->Velocity += targetVelocity * velocityMult;
 		}
 		else
 		{
-			const double DirectLength = ReviseBase * BulletSide / ReviseMult;
-			const double VelocityMult = DirectLength / TargetSide;
+			const double directLength = reviseBase * bulletSide / reviseMult;
+			const double velocityMult = directLength / targetSide;
 
-			DirectVelocity = TargetVelocity * VelocityMult;
+			directVelocity = targetVelocity * velocityMult;
 
-			if (DirectVelocity.IsCollinearTo(MoveToVelocity))
+			if (directVelocity.IsCollinearTo(moveToVelocity))
 			{
-				if (ReviseMult < 0)
-					ReviseVelocity.Z += TurningRadius;
+				if (reviseMult < 0)
+					reviseVelocity.Z += turningRadius;
 			}
 			else
 			{
-				if (ReviseMult > 0)
-					ReviseVelocity = DirectVelocity - MoveToVelocity;
+				if (reviseMult > 0)
+					reviseVelocity = directVelocity - moveToVelocity;
 				else
-					ReviseVelocity = MoveToVelocity - DirectVelocity;
+					reviseVelocity = moveToVelocity - directVelocity;
 			}
 
-			const double ReviseLength = ReviseVelocity.Magnitude();
+			const double reviseLength = reviseVelocity.Magnitude();
 
-			if (!Curve && this->SuicideShortOfROT && ReviseMult < 0 && this->LastReviseMult > 0 && this->LastTargetCoord == pBullet->TargetCoords)
+			if (!curve && this->SuicideShortOfROT && reviseMult < 0 && this->LastReviseMult > 0 && this->LastTargetCoord == pBullet->TargetCoords)
 				return true;
 
-			if (TurningRadius < ReviseLength)
+			if (turningRadius < reviseLength)
 			{
-				ReviseVelocity *= TurningRadius / ReviseLength;
-				pBullet->Velocity += ReviseVelocity;
+				reviseVelocity *= turningRadius / reviseLength;
+				pBullet->Velocity += reviseVelocity;
 			}
 			else
 			{
-				pBullet->Velocity = TargetVelocity;
+				pBullet->Velocity = targetVelocity;
 				this->InStraight = true;
 			}
 		}
 	}
 
-	this->LastReviseMult = ReviseMult;
+	this->LastReviseMult = reviseMult;
 	this->LastTargetCoord = pBullet->TargetCoords;
 
-	if (Curve)
+	if (curve)
 	{
-		double TheVelocity = BulletSide;
+		double trajectorySpeed = bulletSide;
 
-		if (TheVelocity < 192)
-			TheVelocity += 4;
+		if (trajectorySpeed < 192.0)
+			trajectorySpeed += 4.0;
 
-		if (TheVelocity > 192)
-			TheVelocity = 192;
+		if (trajectorySpeed > 192.0)
+			trajectorySpeed = 192.0;
 
-		if (this->CalculateBulletVelocity(pBullet, TheVelocity))
+		if (this->CalculateBulletVelocity(pBullet, trajectorySpeed))
 			return true;
 	}
 
@@ -863,14 +813,13 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 	if (this->WeaponTimer.Completed())
 	{
 		this->WeaponTimer.Start(this->WeaponDelay);
-		size_t ValidWeapons = 0;
-		const size_t BurstSize = this->WeaponBurst.size();
-		auto const pBulletTypeExt = BulletTypeExt::ExtMap.Find(pBullet->Type);
+		size_t validWeapons = 0;
+		const size_t burstSize = this->WeaponBurst.size();\
 
-		if (BurstSize > 0)
-			ValidWeapons = pBulletTypeExt->Disperse_Weapons.size();
+		if (burstSize > 0)
+			validWeapons = this->Weapons.size();
 
-		if (ValidWeapons == 0)
+		if (validWeapons == 0)
 			return this->SuicideIfNoWeapon;
 
 		if (this->WeaponCount > 0)
@@ -878,124 +827,139 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 
 		AbstractClass* const pTarget = pBullet->Target ? pBullet->Target : MapClass::Instance->TryGetCellAt(pBullet->TargetCoords);
 
-		for (size_t WeaponNum = 0; WeaponNum < ValidWeapons; WeaponNum++)
+		for (size_t weaponNum = 0; weaponNum < validWeapons; weaponNum++)
 		{
-			size_t CurIndex = WeaponNum;
-			int BurstCount = 0;
+			size_t curIndex = weaponNum;
+			int burstCount = 0;
 
-			if (static_cast<int>(BurstSize) > this->ThisWeaponIndex)
-				BurstCount = this->WeaponBurst[this->ThisWeaponIndex];
+			if (static_cast<int>(burstSize) > this->ThisWeaponIndex)
+				burstCount = this->WeaponBurst[this->ThisWeaponIndex];
 			else
-				BurstCount = this->WeaponBurst[BurstSize - 1];
+				burstCount = this->WeaponBurst[burstSize - 1];
 
-			if (BurstCount <= 0)
+			if (burstCount <= 0)
 				continue;
 
 			if (this->WeaponSeparate)
 			{
-				CurIndex = this->ThisWeaponIndex;
-				WeaponNum = ValidWeapons;
+				curIndex = this->ThisWeaponIndex;
+				weaponNum = validWeapons;
 
 				this->ThisWeaponIndex++;
-				this->ThisWeaponIndex %= ValidWeapons;
+				this->ThisWeaponIndex %= validWeapons;
 			}
 
-			WeaponTypeClass* const pWeapon = pBulletTypeExt->Disperse_Weapons[CurIndex];
+			WeaponTypeClass* const pWeapon = this->Weapons[curIndex];
 
 			if (!this->WeaponRetarget)
 			{
-				for (int BurstNum = 0; BurstNum < BurstCount; BurstNum++)
-					this->CreateDisperseBullets(pBullet, pWeapon, pTarget, pOwner, BurstNum, BurstCount);
+				if (pTarget)
+				{
+					for (int burstNum = 0; burstNum < burstCount; burstNum++)
+					{
+						this->CreateDisperseBullets(pBullet, pWeapon, pTarget, pOwner, burstNum, burstCount);
+					}
+				}
 
 				continue;
 			}
 
-			int BurstNow = 0;
+			int burstNow = 0;
 
-			if (this->WeaponTendency && BurstCount > 0)
+			if (this->WeaponTendency && burstCount > 0 && pTarget)
 			{
-				this->CreateDisperseBullets(pBullet, pWeapon, pTarget, pOwner, BurstNow, BurstCount);
-				BurstNow++;
+				this->CreateDisperseBullets(pBullet, pWeapon, pTarget, pOwner, burstNow, burstCount);
+				burstNow++;
 
-				if (BurstCount <= 1)
+				if (burstCount <= 1)
 					continue;
 			}
 
-			const double Spread = pWeapon->Range / 256.0;
-			const bool IncludeInAir = (this->TargetInTheAir && pWeapon->Projectile->AA);
-			const CoordStruct CenterCoords = this->WeaponLocation ? pBullet->Location : pBullet->TargetCoords;
-			std::vector<TechnoClass*> Technos = Helpers::Alex::getCellSpreadItems(CenterCoords, Spread, IncludeInAir);
-			std::vector<TechnoClass*> ValidTechnos = this->GetValidTechnosInSame(Technos, pOwner, pWeapon->Warhead, pTarget);
-			size_t ValidTechnoNums = ValidTechnos.size();
-			std::vector<AbstractClass*> ValidTargets;
-			ValidTargets.reserve(BurstCount);
+			const double spread = static_cast<double>(pWeapon->Range) / Unsorted::LeptonsPerCell;
+			const bool includeInAir = (this->TargetInTheAir && pWeapon->Projectile->AA);
+			const CoordStruct centerCoords = this->WeaponLocation ? pBullet->Location : pBullet->TargetCoords;
+			std::vector<TechnoClass*> technos = Helpers::Alex::getCellSpreadItems(centerCoords, spread, includeInAir);
+			std::vector<TechnoClass*> validTechnos = this->GetValidTechnosInSame(technos, pBullet->Owner, pOwner, pWeapon, pTarget);
+			size_t validTechnoNums = validTechnos.size();
+			std::vector<AbstractClass*> validTargets;
+			validTargets.reserve(burstCount);
 
 			if (this->WeaponToGround)
-				ValidTechnoNums = 0;
+				validTechnoNums = 0;
 
-			if (static_cast<int>(ValidTechnoNums) <= BurstCount - BurstNow)
+			if (static_cast<int>(validTechnoNums) <= burstCount - burstNow)
 			{
-				for (int BurstNum = BurstNow; BurstNum < BurstCount; BurstNum++)
+				for (int burstNum = burstNow; burstNum < burstCount; burstNum++)
 				{
-					if (static_cast<int>(ValidTechnoNums) > BurstNum)
+					if (static_cast<int>(validTechnoNums) > burstNum)
 					{
-						ValidTargets.push_back(ValidTechnos[BurstNum]);
+						validTargets.push_back(validTechnos[burstNum]);
 					}
 					else
 					{
-						CellClass* RandomCell = nullptr;
-						int RandomRange = ScenarioClass::Instance->Random.RandomRanged(0, pWeapon->Range);
-						CoordStruct RandomCoords = MapClass::GetRandomCoordsNear(CenterCoords, RandomRange, false);
+						CellClass* randomCell = nullptr;
+						int randomRange = ScenarioClass::Instance->Random.RandomRanged(0, pWeapon->Range);
+						CoordStruct randomCoords = MapClass::GetRandomCoordsNear(centerCoords, randomRange, false);
 
-						while (!RandomCell)
+						do
 						{
-							RandomCell = MapClass::Instance->TryGetCellAt(RandomCoords);
+							randomCell = MapClass::Instance->TryGetCellAt(randomCoords);
 
-							if (RandomRange > 256)
-								RandomRange = RandomRange / 2;
-							else if (RandomRange > 1)
-								RandomRange = 1;
+							if (randomCell)
+							{
+								if (EnumFunctions::IsCellEligible(randomCell, WeaponTypeExt::ExtMap.Find(pWeapon)->CanTarget, true, true))
+								{
+									validTargets.push_back(randomCell);
+									break;
+								}
+							}
 							else
-								break;
+							{
+								if (randomRange > Unsorted::LeptonsPerCell)
+									randomRange = randomRange / 2;
+								else if (randomRange > 1)
+									randomRange = 1;
+								else
+									break;
+							}
 
-							RandomCoords = MapClass::GetRandomCoordsNear(CenterCoords, RandomRange, false);
+							randomCoords = MapClass::GetRandomCoordsNear(centerCoords, randomRange, false);
 						}
-
-						ValidTargets.push_back(RandomCell);
+						while (true);
 					}
 				}
 			}
-			else
+			else // TODO Looking forward to better solution
 			{
-				int TechnoNum = ScenarioClass::Instance->Random.RandomRanged(0, ValidTechnoNums - 1);
-				int OffsetNum = static_cast<int>(ValidTechnoNums) - BurstCount;
-				const double OffsetChance = static_cast<double>(OffsetNum) / static_cast<double>(ValidTechnoNums);
-				double OffsetRandom = 0.0;
+				int technoNum = ScenarioClass::Instance->Random.RandomRanged(0, validTechnoNums - 1);
+				int offsetNum = static_cast<int>(validTechnoNums) - burstCount;
+				const double offsetChance = static_cast<double>(offsetNum) / static_cast<double>(validTechnoNums);
+				double offsetRandom = 0.0;
 
-				for (int BurstNum = BurstNow; BurstNum < BurstCount; BurstNum++)
+				for (int burstNum = burstNow; burstNum < burstCount; burstNum++)
 				{
-					ValidTargets.push_back(ValidTechnos[TechnoNum]);
+					validTargets.push_back(validTechnos[technoNum]);
 
-					TechnoNum++;
-					TechnoNum %= ValidTechnoNums;
+					technoNum++;
+					technoNum %= validTechnoNums;
 
-					OffsetRandom = ScenarioClass::Instance->Random.RandomDouble();
+					offsetRandom = ScenarioClass::Instance->Random.RandomDouble();
 
-					while (OffsetNum > 0 && OffsetRandom < OffsetChance)
+					while (offsetNum > 0 && offsetRandom < offsetChance)
 					{
-						TechnoNum++;
-						TechnoNum %= ValidTechnoNums;
+						technoNum++;
+						technoNum %= validTechnoNums;
 
-						OffsetNum--;
-						OffsetRandom = ScenarioClass::Instance->Random.RandomDouble();
+						offsetNum--;
+						offsetRandom = ScenarioClass::Instance->Random.RandomDouble();
 					}
 				}
 			}
 
-			for (auto const& pNewTarget : ValidTargets)
+			for (auto const& pNewTarget : validTargets)
 			{
-				this->CreateDisperseBullets(pBullet, pWeapon, pNewTarget, pOwner, BurstNow, BurstCount);
-				BurstNow++;
+				this->CreateDisperseBullets(pBullet, pWeapon, pNewTarget, pOwner, burstNow, burstCount);
+				burstNow++;
 			}
 		}
 	}
@@ -1006,162 +970,218 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 	return false;
 }
 
-std::vector<TechnoClass*> DisperseTrajectory::GetValidTechnosInSame(std::vector<TechnoClass*> Technos,
-	HouseClass* pOwner, WarheadTypeClass* pWH, AbstractClass* pTarget)
+std::vector<TechnoClass*> DisperseTrajectory::GetValidTechnosInSame(std::vector<TechnoClass*> technos, TechnoClass* pFirer, HouseClass* pOwner, WeaponTypeClass* pWeapon, AbstractClass* pTarget)
 {
-	std::vector<TechnoClass*> ValidTechnos;
-	ValidTechnos.reserve(Technos.size());
+	std::vector<TechnoClass*> validTechnos;
+	validTechnos.reserve(technos.size());
 	const TechnoClass* const pTargetTechno = abstract_cast<TechnoClass*>(pTarget);
 
-	for (auto const& pTechno : Technos)
+	for (auto const& pTechno : technos)
 	{
-		if (this->TargetInTheAir != pTechno->GetHeight() > 200 || this->CheckTechnoIsInvalid(pTechno))
+		if (this->TargetInTheAir != pTechno->GetHeight() > Unsorted::CellHeight || this->CheckTechnoIsInvalid(pTechno))
+			continue;
+
+		TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
+
+		if (!pTechnoType->LegalTarget)
 			continue;
 
 		if (this->WeaponTendency && pTargetTechno && pTechno == pTargetTechno)
 			continue;
 
-		if (!this->WeaponToAllies && (pOwner->IsAlliedWith(pTechno->Owner) || pTechno->WhatAmI() == AbstractType::Infantry && pTechno->IsDisguisedAs(pOwner)))
+		HouseClass* const pHouse = pTechno->Owner;
+
+		if (pOwner->IsAlliedWith(pHouse))
+		{
+			if (!this->WeaponToAllies)
+				continue;
+		}
+		else if (CellClass* const pCell = pTechno->GetCell())
+		{
+			const AbstractType absType = pTechno->WhatAmI();
+
+			if (!this->WeaponToAllies && absType == AbstractType::Infantry && pTechno->IsDisguisedAs(pOwner) && !pCell->DisguiseSensors_InclHouse(pOwner->ArrayIndex))
+				continue;
+
+			if (absType == AbstractType::Unit && pTechno->IsDisguised() && !pCell->DisguiseSensors_InclHouse(pOwner->ArrayIndex))
+				continue;
+
+			if (pTechno->CloakState == CloakState::Cloaked && !pCell->Sensors_InclHouse(pOwner->ArrayIndex))
+				continue;
+		}
+
+		if (MapClass::GetTotalDamage(100, pWeapon->Warhead, pTechnoType->Armor, 0) == 0)
 			continue;
 
-		if (pTechno->WhatAmI() == AbstractType::Unit && pTechno->IsDisguised())
+		if (!this->CheckWeaponCanTarget(WeaponTypeExt::ExtMap.Find(pWeapon), pFirer, pTechno, pOwner, pHouse))
 			continue;
 
-		if (pTechno->CloakState == CloakState::Cloaked)
-			continue;
-
-		if (MapClass::GetTotalDamage(100, pWH, pTechno->GetTechnoType()->Armor, 0) == 0)
-			continue;
-
-		ValidTechnos.push_back(pTechno);
+		validTechnos.push_back(pTechno);
 	}
 
-	return ValidTechnos;
+	return validTechnos;
 }
 
-void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeClass* pWeapon, AbstractClass* pTarget,
-	HouseClass* pOwner, int CurBurst, int MaxBurst)
+void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeClass* pWeapon, AbstractClass* pTarget, HouseClass* pOwner, int curBurst, int maxBurst)
 {
-	const int FinalDamage = static_cast<int>(pWeapon->Damage * this->FirepowerMult);
+	const int finalDamage = static_cast<int>(pWeapon->Damage * this->FirepowerMult);
 
-	if (BulletClass* const pCreateBullet = pWeapon->Projectile->CreateBullet(pTarget, pBullet->Owner, FinalDamage, pWeapon->Warhead, pWeapon->Speed, pWeapon->Bright))
+	if (BulletClass* const pCreateBullet = pWeapon->Projectile->CreateBullet(pTarget, pBullet->Owner, finalDamage, pWeapon->Warhead, pWeapon->Speed, pWeapon->Bright))
 	{
 		pCreateBullet->WeaponType = pWeapon;
 		auto const pBulletExt = BulletExt::ExtMap.Find(pCreateBullet);
 		pBulletExt->FirerHouse = BulletExt::ExtMap.Find(pBullet)->FirerHouse;
 		pCreateBullet->MoveTo(pBullet->Location, BulletVelocity::Empty);
 
-		if (pBulletExt->Trajectory && CurBurst >= 0)
+		if (pBulletExt->Trajectory && curBurst >= 0)
 		{
-			if (pBulletExt->Trajectory->Flag == TrajectoryFlag::Disperse)
+			const TrajectoryFlag flag = pBulletExt->Trajectory->Flag;
+
+			if (flag == TrajectoryFlag::Disperse)
 			{
 				DisperseTrajectory* const pTrajectory = static_cast<DisperseTrajectory*>(pBulletExt->Trajectory);
 				pTrajectory->FirepowerMult = this->FirepowerMult;
 
 				//The created bullet's velocity calculation has been completed, so we should stack the calculations.
-				if (!pTrajectory->UniqueCurve && pTrajectory->PreAimCoord != CoordStruct::Empty && pTrajectory->UseDisperseBurst && pTrajectory->RotateCoord != 0 && MaxBurst > 1)
+				if (!pTrajectory->UniqueCurve && pTrajectory->PreAimCoord != CoordStruct::Empty && pTrajectory->UseDisperseBurst && abs(pTrajectory->RotateCoord) > 1e-10 && maxBurst > 1)
 				{
-					const CoordStruct CreateBulletTargetToSource = pCreateBullet->TargetCoords - pCreateBullet->SourceCoords;
-					const double RotateAngle = Math::atan2(CreateBulletTargetToSource.Y , CreateBulletTargetToSource.X);
+					const CoordStruct createBulletTargetToSource = pCreateBullet->TargetCoords - pCreateBullet->SourceCoords;
+					const double rotateAngle = Math::atan2(createBulletTargetToSource.Y , createBulletTargetToSource.X);
 
-					BulletVelocity RotationAxis
+					BulletVelocity rotationAxis
 					{
-						pTrajectory->AxisOfRotation.X * Math::cos(RotateAngle) + pTrajectory->AxisOfRotation.Y * Math::sin(RotateAngle),
-						pTrajectory->AxisOfRotation.X * Math::sin(RotateAngle) - pTrajectory->AxisOfRotation.Y * Math::cos(RotateAngle),
+						pTrajectory->AxisOfRotation.X * Math::cos(rotateAngle) + pTrajectory->AxisOfRotation.Y * Math::sin(rotateAngle),
+						pTrajectory->AxisOfRotation.X * Math::sin(rotateAngle) - pTrajectory->AxisOfRotation.Y * Math::cos(rotateAngle),
 						static_cast<double>(pTrajectory->AxisOfRotation.Z)
 					};
 
-					double ExtraRotate = 0;
+					double extraRotate = 0.0;
 
 					if (pTrajectory->MirrorCoord)
 					{
-						if (CurBurst % 2 == 1)
-							RotationAxis *= -1;
+						if (curBurst % 2 == 1)
+							rotationAxis *= -1;
 
-						ExtraRotate = Math::Pi * (pTrajectory->RotateCoord * ((CurBurst / 2) / (MaxBurst - 1.0) - 0.5)) / 180;
+						extraRotate = Math::Pi * (pTrajectory->RotateCoord * ((curBurst / 2) / (maxBurst - 1.0) - 0.5)) / 180;
 					}
 					else
 					{
-						ExtraRotate = Math::Pi * (pTrajectory->RotateCoord * (CurBurst / (MaxBurst - 1.0) - 0.5)) / 180;
+						extraRotate = Math::Pi * (pTrajectory->RotateCoord * (curBurst / (maxBurst - 1.0) - 0.5)) / 180;
 					}
 
-					pCreateBullet->Velocity = this->RotateAboutTheAxis(pCreateBullet->Velocity, RotationAxis, ExtraRotate);
+					pCreateBullet->Velocity = this->RotateAboutTheAxis(pCreateBullet->Velocity, rotationAxis, extraRotate);
 				}
 			}
-			else if (pBulletExt->Trajectory->Flag == TrajectoryFlag::Straight)
+			else if (flag == TrajectoryFlag::Straight)
 			{
 				StraightTrajectory* const pTrajectory = static_cast<StraightTrajectory*>(pBulletExt->Trajectory);
 				pTrajectory->FirepowerMult = this->FirepowerMult;
 
 				//The straight trajectory bullets has LeadTimeCalculate=true are not calculate its velocity yet.
-				if (pTrajectory->LeadTimeCalculate)
+				if (pTrajectory->LeadTimeCalculate && abstract_cast<FootClass*>(pTarget))
 				{
-					pTrajectory->CurrentBurst = CurBurst;
-					pTrajectory->CountOfBurst = MaxBurst;
+					pTrajectory->CurrentBurst = curBurst;
+					pTrajectory->CountOfBurst = maxBurst;
 					pTrajectory->UseDisperseBurst = false;
 				}
-				else if (pTrajectory->UseDisperseBurst && pTrajectory->RotateCoord != 0 && MaxBurst > 1)
+				else if (pTrajectory->UseDisperseBurst && abs(pTrajectory->RotateCoord) > 1e-10 && maxBurst > 1)
 				{
-					const CoordStruct CreateBulletTargetToSource = pCreateBullet->TargetCoords - pCreateBullet->SourceCoords;
-					const double RotateAngle = Math::atan2(CreateBulletTargetToSource.Y , CreateBulletTargetToSource.X);
+					const CoordStruct createBulletTargetToSource = pCreateBullet->TargetCoords - pCreateBullet->SourceCoords;
+					const double rotateAngle = Math::atan2(createBulletTargetToSource.Y , createBulletTargetToSource.X);
 
-					BulletVelocity RotationAxis
+					BulletVelocity rotationAxis
 					{
-						pTrajectory->AxisOfRotation.X * Math::cos(RotateAngle) + pTrajectory->AxisOfRotation.Y * Math::sin(RotateAngle),
-						pTrajectory->AxisOfRotation.X * Math::sin(RotateAngle) - pTrajectory->AxisOfRotation.Y * Math::cos(RotateAngle),
+						pTrajectory->AxisOfRotation.X * Math::cos(rotateAngle) + pTrajectory->AxisOfRotation.Y * Math::sin(rotateAngle),
+						pTrajectory->AxisOfRotation.X * Math::sin(rotateAngle) - pTrajectory->AxisOfRotation.Y * Math::cos(rotateAngle),
 						static_cast<double>(pTrajectory->AxisOfRotation.Z)
 					};
 
-					double ExtraRotate = 0;
+					double extraRotate = 0.0;
 
 					if (pTrajectory->MirrorCoord)
 					{
-						if (CurBurst % 2 == 1)
-							RotationAxis *= -1;
+						if (curBurst % 2 == 1)
+							rotationAxis *= -1;
 
-						ExtraRotate = Math::Pi * (pTrajectory->RotateCoord * ((CurBurst / 2) / (MaxBurst - 1.0) - 0.5)) / 180;
+						extraRotate = Math::Pi * (pTrajectory->RotateCoord * ((curBurst / 2) / (maxBurst - 1.0) - 0.5)) / 180;
 					}
 					else
 					{
-						ExtraRotate = Math::Pi * (pTrajectory->RotateCoord * (CurBurst / (MaxBurst - 1.0) - 0.5)) / 180;
+						extraRotate = Math::Pi * (pTrajectory->RotateCoord * (curBurst / (maxBurst - 1.0) - 0.5)) / 180;
 					}
 
-					pCreateBullet->Velocity = this->RotateAboutTheAxis(pCreateBullet->Velocity, RotationAxis, ExtraRotate);
+					pCreateBullet->Velocity = this->RotateAboutTheAxis(pCreateBullet->Velocity, rotationAxis, extraRotate);
 				}
 			}
-			else if (pBulletExt->Trajectory->Flag == TrajectoryFlag::Engrave)
+			else if (flag == TrajectoryFlag::Parabola)
 			{
-				EngraveTrajectory* const pTrajectory = static_cast<EngraveTrajectory*>(pBulletExt->Trajectory);
-				pTrajectory->FirepowerMult = this->FirepowerMult;
+				ParabolaTrajectory* const pTrajectory = static_cast<ParabolaTrajectory*>(pBulletExt->Trajectory);
+
+				//The parabola trajectory bullets has LeadTimeCalculate=true are not calculate its velocity yet.
+				if (pTrajectory->LeadTimeCalculate && abstract_cast<FootClass*>(pTarget))
+				{
+					pTrajectory->CurrentBurst = curBurst;
+					pTrajectory->CountOfBurst = maxBurst;
+					pTrajectory->UseDisperseBurst = false;
+				}
+				else if (pTrajectory->UseDisperseBurst && abs(pTrajectory->RotateCoord) > 1e-10 && maxBurst > 1)
+				{
+					const CoordStruct createBulletTargetToSource = pCreateBullet->TargetCoords - pCreateBullet->SourceCoords;
+					const double rotateAngle = Math::atan2(createBulletTargetToSource.Y , createBulletTargetToSource.X);
+
+					BulletVelocity rotationAxis
+					{
+						pTrajectory->AxisOfRotation.X * Math::cos(rotateAngle) + pTrajectory->AxisOfRotation.Y * Math::sin(rotateAngle),
+						pTrajectory->AxisOfRotation.X * Math::sin(rotateAngle) - pTrajectory->AxisOfRotation.Y * Math::cos(rotateAngle),
+						static_cast<double>(pTrajectory->AxisOfRotation.Z)
+					};
+
+					double extraRotate = 0.0;
+
+					if (pTrajectory->MirrorCoord)
+					{
+						if (curBurst % 2 == 1)
+							rotationAxis *= -1;
+
+						extraRotate = Math::Pi * (pTrajectory->RotateCoord * ((curBurst / 2) / (maxBurst - 1.0) - 0.5)) / 180;
+					}
+					else
+					{
+						extraRotate = Math::Pi * (pTrajectory->RotateCoord * (curBurst / (maxBurst - 1.0) - 0.5)) / 180;
+					}
+
+					pCreateBullet->Velocity = this->RotateAboutTheAxis(pCreateBullet->Velocity, rotationAxis, extraRotate);
+				}
 			}
 		}
 
-		const int AnimCounts = pWeapon->Anim.Count;
+		const int animCounts = pWeapon->Anim.Count;
 
-		if (AnimCounts > 0)
+		if (animCounts > 0)
 		{
-			int AnimIndex = 0;
+			int animIndex = 0;
 
-			if (AnimCounts % 8 == 0)
+			if (animCounts % 8 == 0)
 			{
 				if (pBulletExt->Trajectory)
 				{
-					AnimIndex = static_cast<int>((Math::atan2(pCreateBullet->Velocity.Y , pCreateBullet->Velocity.X) + Math::TwoPi + Math::Pi) * AnimCounts / Math::TwoPi - (AnimCounts / 8) + 0.5) % AnimCounts;
+					animIndex = static_cast<int>((Math::atan2(pCreateBullet->Velocity.Y , pCreateBullet->Velocity.X) + Math::TwoPi + Math::Pi) * animCounts / Math::TwoPi - (animCounts / 8) + 0.5) % animCounts;
 				}
 				else
 				{
-					const CoordStruct SourceCoord = pBullet->Location;
-					const CoordStruct TargetCoord = pTarget->GetCoords();
-					AnimIndex = static_cast<int>((Math::atan2(TargetCoord.Y - SourceCoord.Y , TargetCoord.X - SourceCoord.X) + Math::TwoPi + Math::Pi) * AnimCounts / Math::TwoPi - (AnimCounts / 8) + 0.5) % AnimCounts;
+					const CoordStruct theSourceCoord = pBullet->Location;
+					const CoordStruct theTargetCoord = pTarget->GetCoords();
+					animIndex = static_cast<int>((Math::atan2(theTargetCoord.Y - theSourceCoord.Y , theTargetCoord.X - theSourceCoord.X) + Math::TwoPi + Math::Pi) * animCounts / Math::TwoPi - (animCounts / 8) + 0.5) % animCounts;
 				}
 			}
 			else
 			{
-				AnimIndex = ScenarioClass::Instance->Random.RandomRanged(0 , AnimCounts - 1);
+				animIndex = ScenarioClass::Instance->Random.RandomRanged(0 , animCounts - 1);
 			}
 
-			if (AnimClass* const pAnim = GameCreate<AnimClass>(pWeapon->Anim[AnimIndex], pBullet->Location))
+			if (AnimTypeClass* const pAnimType = pWeapon->Anim[animIndex])
 			{
+				AnimClass* const pAnim = GameCreate<AnimClass>(pAnimType, pBullet->Location);
 				pAnim->SetOwnerObject(pBullet->Owner);
 				pAnim->Owner = pOwner;
 			}
@@ -1174,10 +1194,10 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 
 	if (pWeapon->Report.Count > 0)
 	{
-		const int ReportIndex = pWeapon->Report.GetItem(ScenarioClass::Instance->Random.RandomRanged(0 , pWeapon->Report.Count - 1));
+		const int reportIndex = pWeapon->Report.GetItem((pBullet->Owner ? pBullet->Owner->unknown_short_3C8 : ScenarioClass::Instance->Random.Random()) % pWeapon->Report.Count);
 
-		if (ReportIndex != -1)
-			VocClass::PlayAt(ReportIndex, pBullet->Location, nullptr);
+		if (reportIndex != -1)
+			VocClass::PlayAt(reportIndex, pBullet->Location, nullptr);
 	}
 
 	if (pWeapon->IsLaser)
@@ -1209,10 +1229,7 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 	{
 		if (EBolt* const pEBolt = GameCreate<EBolt>())
 		{
-			if (pWeapon->IsAlternateColor)
-				pEBolt->AlternateColor = true;
-			else
-				pEBolt->AlternateColor = false;
+			pEBolt->AlternateColor = pWeapon->IsAlternateColor;
 
 			//TODO Weapon's Bolt.Color1, Bolt.Color2, Bolt.Color3(Ares)
 			//Although I can reread the Ares tags but how to do with Bolt_Disable1, Bolt_Disable2, Bolt_Disable3, Bolt_Arcs(Phobos)

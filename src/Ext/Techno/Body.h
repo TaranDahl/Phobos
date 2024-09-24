@@ -47,6 +47,8 @@ public:
 		bool CanCloakDuringRearm; // Current rearm timer was started by DecloakToFire=no weapon.
 		int WHAnimRemainingCreationInterval;
 		bool CanCurrentlyDeployIntoBuilding; // Only set on UnitClass technos with DeploysInto set in multiplayer games, recalculated once per frame so no need to serialize.
+		WeaponTypeClass* LastWeaponType;
+		CoordStruct LastWeaponFLH;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
@@ -81,6 +83,8 @@ public:
 			, CanCloakDuringRearm { false }
 			, WHAnimRemainingCreationInterval { 0 }
 			, CanCurrentlyDeployIntoBuilding { false }
+			, LastWeaponType {}
+			, LastWeaponFLH {}
 			, FiringObstacleCell {}
 			, OriginalPassengerOwner {}
 			, HasRemainingWarpInDelay { false }

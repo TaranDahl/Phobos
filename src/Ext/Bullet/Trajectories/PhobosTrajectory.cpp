@@ -7,10 +7,12 @@
 #include <BulletClass.h>
 #include <Helpers/Macro.h>
 
-#include "BombardTrajectory.h"
 #include "StraightTrajectory.h"
+#include "BombardTrajectory.h"
 #include "DisperseTrajectory.h"
 #include "EngraveTrajectory.h"
+#include "ParabolaTrajectory.h"
+#include "TracingTrajectory.h"
 
 bool PhobosTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 {
@@ -40,6 +42,10 @@ void PhobosTrajectoryType::CreateType(PhobosTrajectoryType*& pType, CCINIClass* 
 		pNewType = DLLCreate<DisperseTrajectoryType>();
 	else if (_stricmp(Phobos::readBuffer, "Engrave") == 0)
 		pNewType = DLLCreate<EngraveTrajectoryType>();
+	else if (_stricmp(Phobos::readBuffer, "Parabola") == 0)
+		pNewType = DLLCreate<ParabolaTrajectoryType>();
+	else if (_stricmp(Phobos::readBuffer, "Tracing") == 0)
+		pNewType = DLLCreate<TracingTrajectoryType>();
 	else
 		bUpdateType = false;
 
@@ -76,6 +82,12 @@ PhobosTrajectoryType* PhobosTrajectoryType::LoadFromStream(PhobosStreamReader& S
 			break;
 		case TrajectoryFlag::Engrave:
 			pType = DLLCreate<EngraveTrajectoryType>();
+			break;
+		case TrajectoryFlag::Parabola:
+			pType = DLLCreate<ParabolaTrajectoryType>();
+			break;
+		case TrajectoryFlag::Tracing:
+			pType = DLLCreate<TracingTrajectoryType>();
 			break;
 		default:
 			return nullptr;
@@ -127,14 +139,11 @@ double PhobosTrajectory::GetTrajectorySpeed(BulletClass* pBullet) const
 {
 	if (auto const pBulletTypeExt = BulletTypeExt::ExtMap.Find(pBullet->Type))
 	{
-		double StraightSpeed = pBulletTypeExt->Trajectory_Speed;
-		StraightSpeed = StraightSpeed > 0.001 ? StraightSpeed : 0.001 ;
-		return StraightSpeed;
+		const double trajectorySpeed = pBulletTypeExt->Trajectory_Speed;
+		return abs(trajectorySpeed) > 1e-10 ? trajectorySpeed : 0.001;
 	}
-	else
-	{
-		return 100.0;
-	}
+
+	return 100.0;
 }
 
 PhobosTrajectory* PhobosTrajectory::LoadFromStream(PhobosStreamReader& Stm)
@@ -156,10 +165,16 @@ PhobosTrajectory* PhobosTrajectory::LoadFromStream(PhobosStreamReader& Stm)
 			pTraj = new BombardTrajectory(noinit_t {});
 			break;
 		case TrajectoryFlag::Disperse:
-			pTraj = DLLCreate<DisperseTrajectory>();
+			pTraj = new DisperseTrajectory(noinit_t {});
 			break;
 		case TrajectoryFlag::Engrave:
-			pTraj = DLLCreate<EngraveTrajectory>();
+			pTraj = new EngraveTrajectory(noinit_t {});
+			break;
+		case TrajectoryFlag::Parabola:
+			pTraj = new ParabolaTrajectory(noinit_t {});
+			break;
+		case TrajectoryFlag::Tracing:
+			pTraj = new TracingTrajectory(noinit_t {});
 			break;
 		default:
 			return nullptr;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PhobosTrajectory.h"
+#include <Ext/WeaponType/Body.h>
 
 class DisperseTrajectoryType final : public PhobosTrajectoryType
 {
@@ -27,6 +28,7 @@ public:
 		, SuicideShortOfROT { true }
 		, SuicideAboveRange { 0 }
 		, SuicideIfNoWeapon { true }
+		, Weapons {}
 		, WeaponBurst {}
 		, WeaponCount { 0 }
 		, WeaponDelay { 1 }
@@ -42,7 +44,7 @@ public:
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
-
+	virtual PhobosTrajectory* CreateInstance() const override;
 	virtual void Read(CCINIClass* const pINI, const char* pSection) override;
 
 	Valueable<bool> UniqueCurve;
@@ -66,6 +68,7 @@ public:
 	Valueable<bool> SuicideShortOfROT;
 	Valueable<double> SuicideAboveRange;
 	Valueable<bool> SuicideIfNoWeapon;
+	ValueableVector<WeaponTypeClass*> Weapons;
 	ValueableVector<int> WeaponBurst;
 	Valueable<int> WeaponCount;
 	Valueable<int> WeaponDelay;
@@ -77,58 +80,18 @@ public:
 	Valueable<bool> WeaponTendency;
 	Valueable<bool> WeaponToAllies;
 	Valueable<bool> WeaponToGround;
+
+private:
+	template <typename T>
+	void Serialize(T& Stm);
 };
 
 class DisperseTrajectory final : public PhobosTrajectory
 {
 public:
-	DisperseTrajectory() : PhobosTrajectory(TrajectoryFlag::Disperse)
-		, UniqueCurve { false }
-		, PreAimCoord {}
-		, RotateCoord { 0 }
-		, MirrorCoord { true }
-		, FacingCoord { false }
-		, ReduceCoord { true }
-		, UseDisperseBurst { false }
-		, AxisOfRotation {}
-		, LaunchSpeed { 0 }
-		, Acceleration { 10.0 }
-		, ROT { 30.0 }
-		, LockDirection { false }
-		, CruiseEnable { false }
-		, CruiseUnableRange { 5.0 }
-		, LeadTimeCalculate { true }
-		, TargetSnapDistance { Leptons(128) }
-		, RetargetRadius { 0 }
-		, RetargetAllies { false }
-		, SuicideShortOfROT { true }
-		, SuicideAboveRange { 0 }
-		, SuicideIfNoWeapon { true }
-		, WeaponBurst {}
-		, WeaponCount { 0 }
-		, WeaponDelay { 1 }
-		, WeaponTimer {}
-		, WeaponScope { Leptons(0) }
-		, WeaponSeparate { false }
-		, WeaponRetarget { false }
-		, WeaponLocation { false }
-		, WeaponTendency { false }
-		, WeaponToAllies { false }
-		, WeaponToGround { false }
-		, InStraight { false }
-		, Accelerate { true }
-		, TargetInTheAir { false }
-		, TargetIsTechno { false }
-		, OriginalDistance { 0 }
-		, CurrentBurst { 0 }
-		, ThisWeaponIndex { 0 }
-		, LastTargetCoord {}
-		, PreAimDistance { 0 }
-		, LastReviseMult { 0 }
-		, FirepowerMult { 1.0 }
-	{}
+	DisperseTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
 
-	DisperseTrajectory(PhobosTrajectoryType* pType) : PhobosTrajectory(TrajectoryFlag::Disperse)
+	DisperseTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Disperse)
 		, UniqueCurve { false }
 		, PreAimCoord {}
 		, RotateCoord { 0 }
@@ -150,6 +113,7 @@ public:
 		, SuicideShortOfROT { true }
 		, SuicideAboveRange { 0 }
 		, SuicideIfNoWeapon { true }
+		, Weapons {}
 		, WeaponBurst {}
 		, WeaponCount { 0 }
 		, WeaponDelay { 1 }
@@ -172,7 +136,43 @@ public:
 		, PreAimDistance { 0 }
 		, LastReviseMult { 0 }
 		, FirepowerMult { 1.0 }
-	{}
+	{
+		auto const pFinalType = static_cast<const DisperseTrajectoryType*>(pType);
+
+		this->UniqueCurve = pFinalType->UniqueCurve;
+		this->PreAimCoord = pFinalType->PreAimCoord;
+		this->RotateCoord = pFinalType->RotateCoord;
+		this->MirrorCoord = pFinalType->MirrorCoord;
+		this->FacingCoord = pFinalType->FacingCoord;
+		this->ReduceCoord = pFinalType->ReduceCoord;
+		this->UseDisperseBurst = pFinalType->UseDisperseBurst;
+		this->AxisOfRotation = pFinalType->AxisOfRotation;
+		this->LaunchSpeed = pFinalType->LaunchSpeed;
+		this->Acceleration = pFinalType->Acceleration > 1e-10 ? pFinalType->Acceleration : 0.001;
+		this->ROT = pFinalType->ROT > 1e-10 ? pFinalType->ROT : 0.001;
+		this->LockDirection = pFinalType->LockDirection;
+		this->CruiseEnable = pFinalType->CruiseEnable;
+		this->CruiseUnableRange = pFinalType->CruiseUnableRange > 0.5 ? pFinalType->CruiseUnableRange * Unsorted::LeptonsPerCell : Unsorted::LeptonsPerCell / 2;
+		this->LeadTimeCalculate = pFinalType->LeadTimeCalculate;
+		this->TargetSnapDistance = pFinalType->TargetSnapDistance;
+		this->RetargetRadius = pFinalType->RetargetRadius;
+		this->RetargetAllies = pFinalType->RetargetAllies;
+		this->SuicideShortOfROT = pFinalType->SuicideShortOfROT;
+		this->SuicideAboveRange = pFinalType->SuicideAboveRange * Unsorted::LeptonsPerCell;
+		this->SuicideIfNoWeapon = pFinalType->SuicideIfNoWeapon;
+		this->Weapons = pFinalType->Weapons;
+		this->WeaponBurst = pFinalType->WeaponBurst;
+		this->WeaponCount = pFinalType->WeaponCount;
+		this->WeaponDelay = pFinalType->WeaponDelay > 0 ? pFinalType->WeaponDelay : 1;
+		this->WeaponTimer.Start(pFinalType->WeaponTimer > 0 ? pFinalType->WeaponTimer : 0);
+		this->WeaponScope = pFinalType->WeaponScope;
+		this->WeaponSeparate = pFinalType->WeaponSeparate;
+		this->WeaponRetarget = pFinalType->WeaponRetarget;
+		this->WeaponLocation = pFinalType->WeaponLocation;
+		this->WeaponTendency = pFinalType->WeaponTendency;
+		this->WeaponToAllies = pFinalType->WeaponToAllies;
+		this->WeaponToGround = pFinalType->WeaponToGround;
+	}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
@@ -205,6 +205,7 @@ public:
 	bool SuicideShortOfROT;
 	double SuicideAboveRange;
 	bool SuicideIfNoWeapon;
+	std::vector<WeaponTypeClass*> Weapons;
 	std::vector<int> WeaponBurst;
 	int WeaponCount;
 	int WeaponDelay;
@@ -229,16 +230,20 @@ public:
 	double FirepowerMult;
 
 private:
-	void InitializeBulletNotCurve(BulletClass* pBullet);
-	BulletVelocity RotateAboutTheAxis(BulletVelocity TheSpeed, BulletVelocity TheAxis, double TheRadian);
-	bool CalculateBulletVelocity(BulletClass* pBullet, double StraightSpeed);
+	template <typename T>
+	void Serialize(T& Stm);
+
+	void InitializeBulletNotCurve(BulletClass* pBullet, bool facing);
+	BulletVelocity RotateAboutTheAxis(BulletVelocity theSpeed, BulletVelocity theAxis, double theRadian);
+	bool CalculateBulletVelocity(BulletClass* pBullet, double trajectorySpeed);
 	bool BulletRetargetTechno(BulletClass* pBullet, HouseClass* pOwner);
 	bool CheckTechnoIsInvalid(TechnoClass* pTechno);
+	bool CheckWeaponCanTarget(WeaponTypeExt::ExtData* pWeaponExt, TechnoClass* pFirer, TechnoClass* pTarget, HouseClass* pFirerHouse, HouseClass* pTargetHouse);
 	bool CurveVelocityChange(BulletClass* pBullet);
 	bool NotCurveVelocityChange(BulletClass* pBullet, HouseClass* pOwner);
 	bool StandardVelocityChange(BulletClass* pBullet);
-	bool ChangeBulletVelocity(BulletClass* pBullet, CoordStruct TargetLocation, double TurningRadius, bool Curve);
+	bool ChangeBulletVelocity(BulletClass* pBullet, CoordStruct targetLocation, double turningRadius, bool curve);
 	bool PrepareDisperseWeapon(BulletClass* pBullet, HouseClass* pOwner);
-	std::vector<TechnoClass*> GetValidTechnosInSame(std::vector<TechnoClass*> Technos, HouseClass* pOwner, WarheadTypeClass* pWH, AbstractClass* pTarget);
-	void CreateDisperseBullets(BulletClass* pBullet, WeaponTypeClass* pWeapon, AbstractClass* pTarget, HouseClass* pOwner, int CurBurst, int MaxBurst);
+	std::vector<TechnoClass*> GetValidTechnosInSame(std::vector<TechnoClass*> technos, TechnoClass* pFirer, HouseClass* pOwner, WeaponTypeClass* pWeapon, AbstractClass* pTarget);
+	void CreateDisperseBullets(BulletClass* pBullet, WeaponTypeClass* pWeapon, AbstractClass* pTarget, HouseClass* pOwner, int curBurst, int maxBurst);
 };

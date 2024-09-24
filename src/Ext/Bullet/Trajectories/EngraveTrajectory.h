@@ -9,6 +9,7 @@ public:
 		, SourceCoord { { 0, 0 } }
 		, TargetCoord { { 0, 0 } }
 		, MirrorCoord { true }
+		, ApplyRangeModifiers { false }
 		, TheDuration { 0 }
 		, IsLaser { true }
 		, IsSupported { false }
@@ -25,12 +26,13 @@ public:
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
-
+	virtual PhobosTrajectory* CreateInstance() const override;
 	virtual void Read(CCINIClass* const pINI, const char* pSection) override;
 
 	Valueable<Point2D> SourceCoord;
 	Valueable<Point2D> TargetCoord;
 	Valueable<bool> MirrorCoord;
+	Valueable<bool> ApplyRangeModifiers;
 	Valueable<int> TheDuration;
 	Valueable<bool> IsLaser;
 	Valueable<bool> IsSupported;
@@ -43,40 +45,22 @@ public:
 	Valueable<int> LaserDuration;
 	Valueable<int> LaserDelay;
 	Valueable<int> DamageDelay;
+
+private:
+	template <typename T>
+	void Serialize(T& Stm);
 };
 
 class EngraveTrajectory final : public PhobosTrajectory
 {
 public:
-	EngraveTrajectory() : PhobosTrajectory(TrajectoryFlag::Engrave)
-		, SourceCoord {}
-		, TargetCoord {}
-		, MirrorCoord { true }
-		, TheDuration { 0 }
-		, IsLaser { true }
-		, IsSupported { false }
-		, IsHouseColor { false }
-		, IsSingleColor { false }
-		, LaserInnerColor {}
-		, LaserOuterColor {}
-		, LaserOuterSpread {}
-		, LaserThickness { 3 }
-		, LaserDuration { 1 }
-		, LaserDelay { 1 }
-		, DamageDelay { 2 }
-		, LaserTimer {}
-		, DamageTimer {}
-		, TechnoInLimbo { false }
-		, NotMainWeapon { false }
-		, FirepowerMult { 1.0 }
-		, FLHCoord {}
-		, TemporaryCoord {}
-	{}
+	EngraveTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
 
-	EngraveTrajectory(PhobosTrajectoryType* pType) : PhobosTrajectory(TrajectoryFlag::Engrave)
+	EngraveTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Engrave)
 		, SourceCoord {}
 		, TargetCoord {}
 		, MirrorCoord { true }
+		, ApplyRangeModifiers { false }
 		, TheDuration { 0 }
 		, IsLaser { true }
 		, IsSupported { false }
@@ -93,10 +77,28 @@ public:
 		, DamageTimer {}
 		, TechnoInLimbo { false }
 		, NotMainWeapon { false }
-		, FirepowerMult { 1.0 }
 		, FLHCoord {}
-		, TemporaryCoord {}
-	{}
+		, BuildingCoord {}
+	{
+		auto const pFinalType = static_cast<const EngraveTrajectoryType*>(pType);
+
+		this->SourceCoord = pFinalType->SourceCoord;
+		this->TargetCoord = pFinalType->TargetCoord;
+		this->MirrorCoord = pFinalType->MirrorCoord;
+		this->ApplyRangeModifiers = pFinalType->ApplyRangeModifiers;
+		this->TheDuration = pFinalType->TheDuration;
+		this->IsLaser = pFinalType->IsLaser;
+		this->IsSupported = pFinalType->IsSupported;
+		this->IsHouseColor = pFinalType->IsHouseColor;
+		this->IsSingleColor = pFinalType->IsSingleColor;
+		this->LaserInnerColor = pFinalType->LaserInnerColor;
+		this->LaserOuterColor = pFinalType->LaserOuterColor;
+		this->LaserOuterSpread = pFinalType->LaserOuterSpread;
+		this->LaserThickness = pFinalType->LaserThickness > 0 ? pFinalType->LaserThickness : 1;
+		this->LaserDuration = pFinalType->LaserDuration > 0 ? pFinalType->LaserDuration : 1;
+		this->LaserDelay = pFinalType->LaserDelay > 0 ? pFinalType->LaserDelay : 1;
+		this->DamageDelay = pFinalType->DamageDelay > 0 ? pFinalType->DamageDelay : 1;
+	}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
@@ -111,6 +113,7 @@ public:
 	Point2D SourceCoord;
 	Point2D TargetCoord;
 	bool MirrorCoord;
+	bool ApplyRangeModifiers;
 	int TheDuration;
 	bool IsLaser;
 	bool IsSupported;
@@ -127,16 +130,18 @@ public:
 	CDTimerClass DamageTimer;
 	bool TechnoInLimbo;
 	bool NotMainWeapon;
-	double FirepowerMult;
 	CoordStruct FLHCoord;
-	CoordStruct TemporaryCoord;
+	CoordStruct BuildingCoord;
 
 private:
-	void GetTechnoFLHCoord(BulletClass* pBullet);
+	template <typename T>
+	void Serialize(T& Stm);
+
+	void GetTechnoFLHCoord(BulletClass* pBullet, TechnoClass* pTechno);
 	void CheckMirrorCoord(TechnoClass* pTechno);
-	void SetEngraveDirection(BulletClass* pBullet, CoordStruct Source, CoordStruct Target);
-	int GetFloorCoordHeight(BulletClass* pBullet, CoordStruct Coord);
+	void SetEngraveDirection(BulletClass* pBullet, CoordStruct theSource, CoordStruct theTarget);
+	int GetFloorCoordHeight(BulletClass* pBullet, CoordStruct coord);
 	bool PlaceOnCorrectHeight(BulletClass* pBullet);
-	bool DrawEngraveLaser(BulletClass* pBullet, TechnoClass* pTechno, HouseClass* pOwner);
+	void DrawEngraveLaser(BulletClass* pBullet, TechnoClass* pTechno, HouseClass* pOwner);
 	void DetonateLaserWarhead(BulletClass* pBullet, TechnoClass* pTechno, HouseClass* pOwner);
 };

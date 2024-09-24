@@ -670,6 +670,7 @@ Currently interceptor weapons with projectiles that do not have `Inviso=true` wi
     - In `Trajectory=Bombard`, it refers to the initial speed of the projectile and it has no restrictions.
     - In `Trajectory=Disperse`, it refers to the maximum speed of the projectile and it cannot exceed 256. `Trajectory.Speed` will be fixed at 192 by setting `Trajectory.Disperse.UniqueCurve=true`.
     - In `Trajectory=Engrave`, it refers to the engrave speed of the projectile and it cannot exceed 128. Recommend set as about 40.
+    - In `Trajectory=Parabola`, it refers to the horizontal velocity of the projectile and is only used for modes 0, 3, or 5 and it has no restrictions.
 
   In `rulesmd.ini`:
 ```ini
@@ -683,7 +684,7 @@ Trajectory.Speed=100.0  ; floating point value
 *Straight trajectory used to make blasters in a private mod by @brsajo#9745*
 
 - Self-explanatory, is a straight-shot trajectory.
-  - `Trajectory.Straight.DetonationDistance` controls the maximum distance in cells from intended target (checked at start of each game frame, before the projectile moves) at which the projectile will be forced to detonate. Set to 0 to disable forced detonation (note that this can cause the projectile to overshoot the target). By setting `Trajectory.Straight.PassThrough=true`, it refers to the distance that projectile should travel from itself when it above 0, and the distance that projectile should move behind the target when it below 0 (use the absolute value).
+  - `Trajectory.Straight.DetonationDistance` controls the maximum distance in cells from intended target (checked at start of each game frame, before the projectile moves) at which the projectile will be forced to detonate. Set to 0 to disable forced detonation (note that this can cause the projectile to overshoot the target). If `Trajectory.Straight.ApplyRangeModifiers` is set to true, any applicable weapon range modifiers from the firer are applied here as well. By setting `Trajectory.Straight.PassThrough=true`, it refers to the distance that projectile should travel from itself when it above 0, and the distance that projectile should move behind the target when it below 0 (use the absolute value).
   - `Trajectory.Straight.TargetSnapDistance` controls the maximum distance in cells from intended target the projectile can be at moment of detonation to make the projectile 'snap' on the intended target. Set to 0 to disable snapping.
   - `Trajectory.Straight.PassThrough` enables special case logic where the projectile does not detonate in contact with the target but instead travels up to a distance defined by `Trajectory.Straight.DetonationDistance`. Note that the firing angle of the projectile is adjusted with this in mind, making it fire straight ahead if the target is on same elevation.
   - `Trajectory.Straight.PassDetonate` enables extra detonations when the projectile is traveling.
@@ -700,7 +701,9 @@ Trajectory.Speed=100.0  ; floating point value
   - `Trajectory.Straight.ProximityImpact` controls the initial proximity fuse times. When there are enough remaining times and the projectile approaches another valid target, it will detonate a warhead defined by `Trajectory.Straight.Warhead` on it. If the times is about to run out, it will also detonate itself at its location. This function can be cancelled by setting to 0. A negative integer means unlimited times. By the way, you can use the weapon's `Warhead` with low versus only to aim at the target, and use the `Trajectory.Straight.ProximityWarhead` to causing actual harm.
     - `Trajectory.Straight.ProximityWarhead` defined the warhead detonated by `Trajectory.Straight.ProximityImpact`, and `Trajectory.Straight.ProximityDamage` defined the damage caused by `Trajectory.Straight.ProximityWarhead`.
     - `Trajectory.Straight.ProximityRadius` controls the range of proximity fuse. It can NOT be set as a negative integer.
-    - `Trajectory.Straight.ProximityAllies` controls the damage ratio if the target of proximity fuse is ally. It will not detonate at allies by setting as 0. Note that this is not related to whether the warhead itself affect allies.
+    - `Trajectory.Straight.ProximityDirect` controls whether let the target receive damage instead of detonating the warhead.
+    - `Trajectory.Straight.ProximityMedial` controls whether to detonate `Trajectory.Straight.ProximityWarhead` at the bullet's location rather than the proximity target's location. If `Trajectory.Straight.ProximityDirect` is set to true, this will only affect the calculation result of `Trajectory.Straight.EdgeAttenuation`.
+    - `Trajectory.Straight.ProximityAllies` controls whether allies will also trigger the proximity fuse.
     - `Trajectory.Straight.ProximityFlight` controls whether to count units in the air.
   - `Trajectory.Straight.ThroughVehicles` controls whether the projectile will not be obstructed by vehicles or aircrafts on the ground. When it is obstructed, it will be directly detonated at its location. If it still have `Trajectory.Straight.ProximityImpact` times, it will also detonate a `Trajectory.Straight.ProximityImpact` at the location of the obstacle.
   - `Trajectory.Straight.ThroughBuilding` controls whether the projectile will not be obstructed by buildings. When it is obstructed, it will be directly detonated at its location. If it still have `Trajectory.Straight.ProximityImpact` times, it will also detonate a `Trajectory.Straight.ProximityImpact` at the location of the obstacle.
@@ -712,6 +715,7 @@ In `rulesmd.ini`:
 ```ini
 [SOMEPROJECTILE]                                ; Projectile
 Trajectory=Straight                             ; Trajectory type
+Trajectory.Straight.ApplyRangeModifiers=false   ; boolean
 Trajectory.Straight.DetonationDistance=0.4      ; floating point value
 Trajectory.Straight.TargetSnapDistance=0.5      ; floating point value
 Trajectory.Straight.PassThrough=false           ; boolean
@@ -731,7 +735,9 @@ Trajectory.Straight.ProximityImpact=0           ; integer
 Trajectory.Straight.ProximityWarhead=           ; WarheadType
 Trajectory.Straight.ProximityDamage=0           ; integer
 Trajectory.Straight.ProximityRadius=0.7         ; floating point value
-Trajectory.Straight.ProximityAllies=0           ; floating point value
+Trajectory.Straight.ProximityDirect=false       ; boolean
+Trajectory.Straight.ProximityMedial=false       ; boolean
+Trajectory.Straight.ProximityAllies=false       ; boolean
 Trajectory.Straight.ProximityFlight=false       ; boolean
 Trajectory.Straight.ThroughVehicles=true        ; boolean
 Trajectory.Straight.ThroughBuilding=true        ; boolean
@@ -748,13 +754,30 @@ Trajectory.Straight.ConfineAtHeight=0           ; integer
 
 #### Bombard trajectory
 
-- Similar trajectory to `Straight`, but targets a coordinate above the intended target (height determined by `Trajectory.Bombard.Height`). When the projectile approaches that coordinate, it will free fall and explodes when it hits the target or ground.
+- Similar trajectory to `Straight`, but targets a coordinate between the attacker and intended target first. When the projectile approaches that turning point, it'll turn to the intended target and explodes when it hits the target or ground.
+  - `Trajectory.Bombard.Height` controls the height of the turning point.
+  - `Trajectory.Bombard.FallPercent` controls the distance of the turning point by its percentage of the total distance between attacker and intended target. If set to 0%, then it'll fly up vertically. If set to 100%, then it'll travel to the top of the intended target.
+    - For each launch the turning point percentage could add or minus a random value, which is not greater than `Trajectory.Bombard.FallPercentShift`. If set to 0%, random shift will be disabled.
+    - You can also makes the turning point scatter randomly in a circle with `Trajectory.Bombard.FallScatterRange` as its radius. If set to 0, random scatter will be disabled.
+  - `Trajectory.Bombard.FreeFallOnTarget` controls how it'll hit the intended target. If set to true, the projectile will be respawned above the intended target and free fall. If set to false, the projectile will travel to the intended target from the turning point.
+  - `Trajectory.Bombard.NoLaunch` controls whether the attacker will fire the projectile by itself. If set to true, projectile will directly fall from the turning point.
+  - `Trajectory.Bombard.FallSpeed` controls the initial speed of the projectile after it turns. If set to 0.0, then it'll use `Trajectory.Speed`. Can't work together with `Trajectory.Bombard.FreeFallOnTarget=true`.
+  - `Trajectory.Bombard.TargetSnapDistance` controls the maximum distance in cells from intended target the projectile can be at moment of detonation to make the projectile 'snap' on the intended target. Set to 0 to disable snapping.
+  - `Trajectory.Bombard.TurningPointAnim`, if set, will play an anim when the projectile reaches the turning point. If `Trajectory.Bombard.FreeFallOnTarget` is set to true, it'll be spawned above the target with the projectile together. If `Trajectory.Bombard.NoLaunch` is set to true, it'll be played at where the projectile falls, no matter if it's free fall or not.
 
 In `rulesmd.ini`:
 ```ini
-[SOMEPROJECTILE]                                ; Projectile
-Trajectory=Bombard                              ; Trajectory type
-Trajectory.Bombard.Height=0.0                   ; double
+[SOMEPROJECTILE]                          ; Projectile
+Trajectory=Bombard                        ; Trajectory type
+Trajectory.Bombard.Height=0.0             ; double
+Trajectory.Bombard.FallPercent=1.0        ; double
+Trajectory.Bombard.FallPercentShift=0.0   ; double
+Trajectory.Bombard.FallScatterRange=0.0   ; floating point value
+Trajectory.Bombard.FreeFallOnTarget=true  ; boolean
+Trajectory.Bombard.NoLaunch=false         ; boolean
+Trajectory.Bombard.FallSpeed=0.0          ; double
+Trajectory.Bombard.TargetSnapDistance=0.5 ; floating point value
+Trajectory.Bombard.TurningPointAnim=      ; Animation
 ```
 
 #### Disperse trajectory
@@ -842,6 +865,7 @@ Trajectory.Disperse.WeaponToGround=false        ; boolean
 #### Engrave trajectory
 
 - Visually, like the thermal lance. Calling it 'trajectory' may not be appropriate. It does not read the settings on the weapon.
+  - `Trajectory.Engrave.ApplyRangeModifiers` controls whether any applicable weapon range modifiers from the firer are applied to the engrave process.
   - `Trajectory.Engrave.SourceCoord` controls the starting point of engraving line segment. Taking the target as the coordinate center. Specifically, it will start from the firing position when set to 0,0 . The height of the point will always at ground level.
   - `Trajectory.Engrave.TargetCoord` controls the end point of engraving line segment. Taking the target as the coordinate center. The height of the point will always at ground level.
     - `Trajectory.Engrave.MirrorCoord` controls whether `Trajectory.Engrave.SourceCoord` and `Trajectory.Engrave.TargetCoord` need to mirror the lateral value to adapt to the current FLH.
@@ -861,6 +885,7 @@ Trajectory.Disperse.WeaponToGround=false        ; boolean
 In `rulesmd.ini`:
 ```ini
 Trajectory=Engrave                             ; Trajectory type
+Trajectory.Engrave.ApplyRangeModifiers=false   ; boolean
 Trajectory.Engrave.SourceCoord=0,0             ; integer - Forward,Lateral
 Trajectory.Engrave.TargetCoord=0,0             ; integer - Forward,Lateral
 Trajectory.Engrave.MirrorCoord=true            ; boolean
@@ -881,6 +906,68 @@ Trajectory.Engrave.DamageDelay=2               ; integer
 ```{note}
 - It's best not to let it be intercepted.
 ```
+
+#### Parabola trajectory
+
+- As the name says, this is a completely reset `Arcing` with different enhanced functions. Without doubt, It supported linkage with `Trajectory=Disperse`.
+  - `Trajectory.Parabola.DetonationDistance` controls the maximum distance in cells from intended target (checked at start of each game frame, before the projectile moves) at which the projectile will be forced to detonate. Set to 0 to disable forced detonation. More specifically, when it is set to a negative value, if the target is movable, it will change its target to the cell where the target is located (This is a function expanded for `Disperse` and `Airburst` purposes).
+  - `Trajectory.Parabola.TargetSnapDistance` controls the maximum distance in cells from intended target the projectile can be at moment of detonation to make the projectile 'snap' on the intended target. Set to 0 to disable snapping.
+  - `Trajectory.Parabola.OpenFireMode` controls how should the projectile be launched. This has the following 6 modes.
+    - Speed - Automatic calculation mode with fixed horizontal velocity, using `Trajectory.Speed` and target coordinates as calculation conditions, i.e. the flight time of the projectile is permanently fixed.
+    - Height - Automatic calculation mode with fixed maximum height, useing `Trajectory.Parabola.ThrowHeight` and target coordinates as calculation conditions, i.e. the detonation time of the projectile is relatively fixed.
+    - Angle - Automatic calculation mode with fixed fire angle, useing `Trajectory.Parabola.LaunchAngle` and target coordinates as calculation conditions. In this mode, the performance consumption is high, and may have no solution. It is not recommended to enable `SubjectToCliffs` or enable `AA` with a smaller `MinimumRange` when using this mode.
+    - SpeedAndHeight - Fixed horizontal velocity and maximum height mode, using `Trajectory.Speed` and `Trajectory.Parabola.ThrowHeight` as calculation conditions, i.e. the trajectory will only undergo altitude changes with the height of the target.
+    - HeightAndAngle - Fixed maximum height and fire angle mode, using `Trajectory.Parabola.ThrowHeight` and `Trajectory.Parabola.LaunchAngle` as calculation conditions, i.e. the trajectory will change horizontally with the height of the target.
+    - SpeedAndAngle - Fixed horizontal velocity and fire angle mode, using `Trajectory.Speed` and `Trajectory.Parabola.LaunchAngle` as calculation conditions, i.e. the trajectory will be permanently fixed.
+  - `Trajectory.Parabola.ThrowHeight` controls the maximum height of the projectile and is only used for modes 1, 3, or 4. The specific height will be determined by taking the larger of the launch height and the target height then increasing this value. Non positive numbers are not supported.
+  - `Trajectory.Parabola.LaunchAngle` controls the fire angle of the projectile and is only used for modes 2, 4, or 5. Only supports -90.0 ~ 90.0 (Cannot use boundary values) in Mode 2 or 5, and 0.0 ~ 90.0 (Cannot use boundary values) in Mode 4.
+  - `Trajectory.Parabola.LeadTimeCalculate` controls whether the projectile need to calculate the lead time of the target when firing. Note that this will not affect the facing of the turret.
+    - `Trajectory.Parabola.LeadTimeSimplify` controls whether only perform simplified calculations when calculate the lead time. You can simply consider this as another calculation mode.
+    - `Trajectory.Parabola.LeadTimeMultiplier` is an additional lead time multiplier, it will affect the aiming position. You can use this to reduce the errors caused by target speed and target distance.
+  - `Trajectory.Parabola.DetonationAngle` controls when the angle between the projectile in the current velocity direction and the horizontal plane is less than this value, it will detonate prematurely. Taking effect when the value is at -90.0 ~ 90.0 (Cannot use boundary values).
+  - `Trajectory.Parabola.DetonationHeight` controls when the projectile is in a descending state and below the height of the launch position plus this value, it will detonate prematurely. Taking effect when it is set to non negative value.
+  - `Trajectory.Parabola.BounceTimes` controls how many times can it bounce back when the projectile hits the ground or cliff. Be aware that excessive projectile speed may cause abnormal operation. And `Trajectory.Parabola.DetonationDistance` do not conflict with this and will take effect simultaneously. So if you want to explode the bullet only after the times of bounces is exhausted, you should set `Trajectory.Parabola.DetonationDistance` to a non positive value.
+    - `Trajectory.Parabola.BounceOnWater` controls whether it can bounce on the water surface.
+    - `Trajectory.Parabola.BounceDetonate` controls whether it detonates the warhead once extra during each bounce.
+    - `Trajectory.Parabola.BounceAttenuation` controls the attenuation coefficient of projectile bounce damage, that is, how many times the next damage after each bounce is the damage just caused. This will also affect the damage of the final detonation.
+    - `Trajectory.Parabola.BounceCoefficient` controls the attenuation coefficient of projectile bounce elasticity, that is, how many times the speed after each bounce is the speed before bouncing.
+  - `Trajectory.Parabola.OffsetCoord` controls the offsets of the target. Projectile will aim at this position to attack. It also supports `Inaccurate=yes` and `Trajectory.Parabola.LeadTimeCalculate=true` on this basis.
+    - `Trajectory.Parabola.RotateCoord` controls whether to rotate the projectile's firing direction within the angle bisector of `Trajectory.Parabola.OffsetCoord` according to the weapon's `Burst`. Set to 0 to disable this function.
+    - `Trajectory.Parabola.MirrorCoord` controls whether `Trajectory.Parabola.OffsetCoord` need to mirror the lateral value to adapt to the current burst index. At the same time, the rotation direction calculated by `Trajectory.Parabola.RotateCoord` will also be reversed, and the rotation angle between each adjacent projectile on each side will not change as a result.
+    - `Trajectory.Parabola.UseDisperseBurst` controls whether the calculation of `Trajectory.Parabola.RotateCoord` is based on its superior's `Trajectory.Disperse.WeaponBurst` of the dispersed trajectory, rather than `Burst` of the weapon. If this value is not appropriate, it will result in unsatisfactory visual displays.
+    - `Trajectory.Parabola.AxisOfRotation` controls the rotation axis when calculating `Trajectory.Parabola.RotateCoord`. The axis will rotates with the unit orientation or the vector that from target position to the source position.
+
+In `rulesmd.ini`:
+```ini
+Trajectory=Parabola                             ; Trajectory type
+Trajectory.Parabola.DetonationDistance=0.4      ; floating point value
+Trajectory.Parabola.TargetSnapDistance=0.5      ; floating point value
+Trajectory.Parabola.OpenFireMode=Speed          ; ParabolaFireMode value enumeration (Speed|Height|Angle|SpeedAndHeight|HeightAndAngle|SpeedAndAngle)
+Trajectory.Parabola.ThrowHeight=600             ; integer
+Trajectory.Parabola.LaunchAngle=30              ; floating point value
+Trajectory.Parabola.LeadTimeCalculate=no        ; boolean
+Trajectory.Parabola.LeadTimeSimplify=no         ; boolean
+Trajectory.Parabola.LeadTimeMultiplier=1.0      ; floating point value
+Trajectory.Parabola.DetonationAngle=-90.0       ; floating point value
+Trajectory.Parabola.DetonationHeight=-1         ; integer
+Trajectory.Parabola.BounceTimes=0               ; integer
+Trajectory.Parabola.BounceOnWater=no            ; boolean
+Trajectory.Parabola.BounceDetonate=no           ; boolean
+Trajectory.Parabola.BounceAttenuation=0.8       ; floating point value
+Trajectory.Parabola.BounceCoefficient=0.8       ; floating point value
+Trajectory.Parabola.OffsetCoord=0,0,0           ; integer - Forward,Lateral,Height
+Trajectory.Parabola.RotateCoord=0               ; floating point value
+Trajectory.Parabola.MirrorCoord=yes             ; boolean
+Trajectory.Parabola.UseDisperseBurst=no         ; boolean
+Trajectory.Parabola.AxisOfRotation=0,0,1        ; integer - Forward,Lateral,Height
+```
+
+```{note}
+- Compared to vanilla `Arcing`, this can also be used for aircrafts and airburst weapon.
+- Certainly, `Gravity` can also affect the trajectory.
+```
+
+#### Tracing trajectory
 
 ### Shrapnel enhancements
 
@@ -903,7 +990,7 @@ Shrapnel.UseWeaponTargeting=false  ; boolean
 
 - It is now possible to make projectiles consider either land or water as obstacles that block their path by setting `SubjectToLand/Water` to true, respectively. Weapons firing such projectiles will consider targets blocked by such obstacles as out of range and will attempt to reposition themselves so they can fire without being blocked by the said obstacles before firing and if `SubjectToLand/Water.Detonate` is set to true, the projectiles will detonate if they somehow manage to collide with the said obstacles.
   - `Level=true` projectiles detonate on tiles belonging to non-water tilesets by default, but will not consider such tiles as true obstacles. This behaviour can be overridden by setting these keys.
-- As for `SubjectToGround`, if set it to true ,it will predict will predict the height of the connecting straight line from the bullet's source coordinates to target coordinates. If the predicted height is lower than the ground height of the current predicted position, the firer will also consider targets blocked by such obstacles as out of range and will attempt to reposition themselves.
+- As for `SubjectToGround`, if set it to true ,it will predict the height of the connecting straight line from the bullet's source coordinates to target coordinates. If the predicted height is lower than the ground height of the current predicted position, the firer will also consider targets blocked by such obstacles as out of range and will attempt to reposition themselves.
 
 In `rulesmd.ini`:
 ```ini
