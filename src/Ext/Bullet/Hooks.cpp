@@ -309,9 +309,7 @@ DEFINE_HOOK(0x467CCA, BulletClass_AI_TargetSnapChecks, 0x6)
 		{
 			const TrajectoryFlag flag = pTrajectory->Flag;
 
-			// All true now, reverse to check `flag != TrajectoryFlag::Invalid` may be better
-			if (flag == TrajectoryFlag::Straight || flag == TrajectoryFlag::Bombard || flag == TrajectoryFlag::Disperse
-				|| flag == TrajectoryFlag::Engrave || flag == TrajectoryFlag::Parabola || flag == TrajectoryFlag::Tracing)
+			if (flag != TrajectoryFlag::Invalid)
 			{
 				R->EAX(pThis->Type);
 				return SkipChecks;
@@ -346,9 +344,7 @@ DEFINE_HOOK(0x468E61, BulletClass_Explode_TargetSnapChecks1, 0x6)
 			{
 				const TrajectoryFlag flag = pTrajectory->Flag;
 
-				// All true now, reverse to check `flag != TrajectoryFlag::Invalid` may be better
-				if (flag == TrajectoryFlag::Straight || flag == TrajectoryFlag::Bombard || flag == TrajectoryFlag::Disperse
-					|| flag == TrajectoryFlag::Engrave || flag == TrajectoryFlag::Parabola || flag == TrajectoryFlag::Tracing)
+				if (flag != TrajectoryFlag::Invalid)
 				{
 					R->EAX(pThis->Type);
 					return SkipChecks;
@@ -387,12 +383,8 @@ DEFINE_HOOK(0x468E9F, BulletClass_Explode_TargetSnapChecks2, 0x6)
 			{
 				const TrajectoryFlag flag = pTrajectory->Flag;
 
-				// All true now, reverse to check `flag != TrajectoryFlag::Invalid` may be better
-				if (flag == TrajectoryFlag::Straight || flag == TrajectoryFlag::Bombard || flag == TrajectoryFlag::Disperse
-					|| flag == TrajectoryFlag::Engrave || flag == TrajectoryFlag::Parabola || flag == TrajectoryFlag::Tracing)
-				{
+				if (flag != TrajectoryFlag::Invalid)
 					return SkipSetCoordinate;
-				}
 			}
 		}
 	}
@@ -412,12 +404,8 @@ DEFINE_HOOK(0x468D3F, BulletClass_ShouldExplode_AirTarget, 0x6)
 		{
 			const TrajectoryFlag flag = pTrajectory->Flag;
 
-			// All true now, reverse to check `flag != TrajectoryFlag::Invalid` may be better
-			if (flag == TrajectoryFlag::Straight || flag == TrajectoryFlag::Bombard || flag == TrajectoryFlag::Disperse
-				|| flag == TrajectoryFlag::Engrave || flag == TrajectoryFlag::Parabola || flag == TrajectoryFlag::Tracing)
-			{
+			if (flag != TrajectoryFlag::Invalid)
 				return SkipCheck;
-			}
 		}
 	}
 
