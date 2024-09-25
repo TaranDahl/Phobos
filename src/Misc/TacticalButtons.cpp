@@ -1253,8 +1253,10 @@ void TacticalButtonsClass::SelectedDraw()
 					const wchar_t* name = pType->UIName;
 					BSurface* CameoPCX = pTypeExt->CameoPCX.GetSurface();
 					SHPStruct* pSHP = pType->GetCameo();
+					ConvertClass* pPal = pTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL);
+					HouseClass* const pPlayer = HouseClass::CurrentPlayer;
 
-					if (!HouseClass::CurrentPlayer->IsAlliedWith(pThis))
+					if (!pPlayer->IsAlliedWith(pThis) && !pPlayer->IsObserver())
 					{
 						if (TechnoTypeClass* const pFakeType = pTypeExt->FakeOf)
 						{
@@ -1266,9 +1268,14 @@ void TacticalButtonsClass::SelectedDraw()
 									name = pFakeType->UIName;
 
 								if (BSurface* const FakeCameoPCX = pFakeTypeExt->CameoPCX.GetSurface())
+								{
 									CameoPCX = FakeCameoPCX;
+								}
 								else if (SHPStruct* const pFakeSHP = pFakeType->GetCameo())
+								{
 									pSHP = pFakeSHP;
+									pPal = pFakeTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL);
+								}
 							}
 							else
 							{
@@ -1361,8 +1368,7 @@ void TacticalButtonsClass::SelectedDraw()
 							position -= Point2D { 120, 31 };
 							surfaceRect.Width = 60;
 
-							DSurface::Composite->DrawSHP(pTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &surfaceRect,
-								BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
+							DSurface::Composite->DrawSHP(pPal, pSHP, 0, &position, &surfaceRect, BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 						}
 					}
 					else
