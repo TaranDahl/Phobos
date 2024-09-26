@@ -443,8 +443,6 @@ New:
 - CellSpread damage check if victim is in air (by TaranDahl)
 - Toggle waypoint for building and aircraft (by TaranDahl)
 - Weapon range finding in cylinder (by TaranDahl)
-- Skirmish AI "sell all and all in" behavior dehardcode (by TaranDahl)
-- Skirmish AI "regroup when mcv deploy" behavior dehardcode (by TaranDahl)
 - Force shield effect sync on deploy & vs. organic targets effect customization to complement the Iron Curtain ones (by Starkku)
 - Map trigger action 41 (Play animation at waypoint) now uses additional parameter to determine if animation can play sound, deal damage etc. (by Starkku)
 - Allow restricting how many times per frame a single radiation site can damage a building (by Starkku)

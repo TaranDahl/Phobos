@@ -39,7 +39,6 @@ public:
 		BuildingClass* Factory_AircraftType;
 
 		CDTimerClass CombatAlertTimer;
-		CDTimerClass AIFireSaleDelayTimer;
 		CDTimerClass AISuperWeaponDelayTimer;
 		CDTimerClass AIFireSaleDelayTimer;
 
@@ -84,7 +83,6 @@ public:
 			, CurrentBuildingTimer {}
 			, CurrentBuildingTimes { 0 }
 			, CombatAlertTimer {}
-			, AIFireSaleDelayTimer {}
 			, AISuperWeaponDelayTimer {}
 			, RepairBaseNodes { false,false,false }
 			, RestrictedFactoryPlants {}

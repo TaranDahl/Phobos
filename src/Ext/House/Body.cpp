@@ -611,7 +611,8 @@ void HouseExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	readBaseNodeRepairInfo.Read(exINI, pSection, "RepairBaseNodes");
 	size_t nWritten = readBaseNodeRepairInfo.size();
 	size_t nWrittenGlobal = RulesExt::Global()->RepairBaseNodes.size();
-	if ( nWrittenGlobal > 0)
+
+	if (nWrittenGlobal > 0)
 	{
 		for (size_t i = 0; i < 3; i++)
 		{
@@ -659,7 +660,6 @@ void HouseExt::ExtData::Serialize(T& Stm)
 		.Process(this->LastBuiltNavalVehicleType)
 		.Process(this->ProducingNavalUnitTypeIndex)
 		.Process(this->CombatAlertTimer)
-		.Process(this->AIFireSaleDelayTimer)
 		.Process(this->NumAirpads_NonMFB)
 		.Process(this->NumBarracks_NonMFB)
 		.Process(this->NumWarFactories_NonMFB)
