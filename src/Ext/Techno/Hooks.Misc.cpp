@@ -104,8 +104,11 @@ DEFINE_HOOK(0x6B7600, SpawnManagerClass_AI_InitDestination, 0x6)
 // I must not regroup my forces.
 DEFINE_HOOK(0x739920, UnitClass_TryToDeploy_DisableRegroupAtNewConYard, 0x6)
 {
-	enum { SkipRegroup = 0x73992B };
-	return RulesExt::Global()->GatherWhenMCVDeploy ? 0 : SkipRegroup;
+	enum { SkipRegroup = 0x73992B, DoNotSkipRegroup = 0 };
+
+	auto const pRules = RulesExt::Global();
+
+	return pRules->GatherWhenMCVDeploy ? DoNotSkipRegroup : SkipRegroup;
 }
 
 DEFINE_HOOK(0x6F7891, TechnoClass_IsCloseEnough_CylinderRangefinding, 0x7)

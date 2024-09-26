@@ -39,8 +39,8 @@ public:
 		BuildingClass* Factory_AircraftType;
 
 		CDTimerClass CombatAlertTimer;
-		CDTimerClass AIFireSaleDelayTimer;
 		CDTimerClass AISuperWeaponDelayTimer;
+		CDTimerClass AIFireSaleDelayTimer;
 
 		BuildingTypeClass* CurrentBuildingType;
 		CellStruct CurrentBuildingTopLeft;
@@ -83,7 +83,6 @@ public:
 			, CurrentBuildingTimer {}
 			, CurrentBuildingTimes { 0 }
 			, CombatAlertTimer {}
-			, AIFireSaleDelayTimer {}
 			, AISuperWeaponDelayTimer {}
 			, RepairBaseNodes { false,false,false }
 			, RestrictedFactoryPlants {}
@@ -94,6 +93,7 @@ public:
 			, NumWarFactories_NonMFB { 0 }
 			, NumConYards_NonMFB { 0 }
 			, NumShipyards_NonMFB { 0 }
+			, AIFireSaleDelayTimer {}
 		{ }
 
 		bool OwnsLimboDeliveredBuilding(BuildingClass* pBuilding);

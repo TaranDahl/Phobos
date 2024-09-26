@@ -237,12 +237,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->CombatAlert_UseFeedbackVoice.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseFeedbackVoice");
 	this->CombatAlert_UseAttackVoice.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseAttackVoice");
 	this->CombatAlert_UseEVA.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseEVA");
-	this->GatherWhenMCVDeploy.Read(exINI, GameStrings::General, "GatherWhenMCVDeploy");
-	this->AIFireSale.Read(exINI, GameStrings::General, "AIFireSale");
-	this->AIFireSaleDelay.Read(exINI, GameStrings::General, "AIFireSaleDelay");
-	this->AIAllToHunt.Read(exINI, GameStrings::General, "AIAllToHunt");
-	this->RepairBaseNodes.Read(exINI, GameStrings::General, "RepairBaseNodes");
-	this->MCVRedeploysInCampaign.Read(exINI, GameStrings::General, "MCVRedeploysInCampaign");
 	this->CylinderRangefinding.Read(exINI, GameStrings::General, "CylinderRangefinding");
 	this->AircraftWaypoint.Read(exINI, GameStrings::General, "AircraftWaypoint");
 	this->BuildingWaypoint.Read(exINI, GameStrings::General, "BuildingWaypoint");
@@ -272,12 +266,22 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->RallyPointAreaGuard.Read(exINI, GameStrings::General, "RallyPointAreaGuard");
 	this->EnableEnhancedExitCoords.Read(exINI, GameStrings::General, "EnableEnhancedExitCoords");
 
+	this->AircraftLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "AircraftLevelLightMultiplier");
+	this->JumpjetLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "JumpjetLevelLightMultiplier");
+
 	this->VoxelLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelLightSource");
 	// this->VoxelShadowLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelShadowLightSource");
 
 	this->ReplaceVoxelLightSources();
 
 	this->UseFixedVoxelLighting.Read(exINI, GameStrings::AudioVisual, "UseFixedVoxelLighting");
+
+	this->GatherWhenMCVDeploy.Read(exINI, GameStrings::General, "GatherWhenMCVDeploy");
+	this->AIFireSale.Read(exINI, GameStrings::General, "AIFireSale");
+	this->AIFireSaleDelay.Read(exINI, GameStrings::General, "AIFireSaleDelay");
+	this->AIAllToHunt.Read(exINI, GameStrings::General, "AIAllToHunt");
+	this->RepairBaseNodes.Read(exINI, GameStrings::General, "RepairBaseNodes");
+	this->MCVRedeploysInCampaign.Read(exINI, GameStrings::General, "MCVRedeploysInCampaign");
 
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
@@ -498,12 +502,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->CombatAlert_UseFeedbackVoice)
 		.Process(this->CombatAlert_UseAttackVoice)
 		.Process(this->CombatAlert_UseEVA)
-		.Process(this->GatherWhenMCVDeploy)
-		.Process(this->AIFireSale)
-		.Process(this->AIFireSaleDelay)
-		.Process(this->AIAllToHunt)
-		.Process(this->RepairBaseNodes)
-		.Process(this->MCVRedeploysInCampaign)
 		.Process(this->CylinderRangefinding)
 		.Process(this->AircraftWaypoint)
 		.Process(this->BuildingWaypoint)
@@ -532,9 +530,17 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->RallyPointForceMove)
 		.Process(this->RallyPointAreaGuard)
 		.Process(this->EnableEnhancedExitCoords)
+		.Process(this->AircraftLevelLightMultiplier)
+		.Process(this->JumpjetLevelLightMultiplier)
 		.Process(this->VoxelLightSource)
 		// .Process(this->VoxelShadowLightSource)
 		.Process(this->UseFixedVoxelLighting)
+		.Process(this->GatherWhenMCVDeploy)
+		.Process(this->AIFireSale)
+		.Process(this->AIFireSaleDelay)
+		.Process(this->AIAllToHunt)
+		.Process(this->RepairBaseNodes)
+		.Process(this->MCVRedeploysInCampaign)
 		;
 }
 

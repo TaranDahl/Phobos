@@ -443,8 +443,6 @@ New:
 - CellSpread damage check if victim is in air (by TaranDahl)
 - Toggle waypoint for building and aircraft (by TaranDahl)
 - Weapon range finding in cylinder (by TaranDahl)
-- Skirmish AI "sell all and all in" behavior dehardcode (by TaranDahl)
-- Skirmish AI "regroup when mcv deploy" behavior dehardcode (by TaranDahl)
 - Force shield effect sync on deploy & vs. organic targets effect customization to complement the Iron Curtain ones (by Starkku)
 - Map trigger action 41 (Play animation at waypoint) now uses additional parameter to determine if animation can play sound, deal damage etc. (by Starkku)
 - Allow restricting how many times per frame a single radiation site can damage a building (by Starkku)
@@ -487,6 +485,7 @@ New:
 - Option to restore `PowerSurplus` setting for AI (by Starkku)
 - `FireOnce` infantry sequence reset toggle (by Starkku)
 - Assign Super Weapon cameo to any sidebar tab (by NetsuNegi)
+- Customizing effect of level lighting on air units (by Starkku)
 
 Vanilla fixes:
 - Allow AI to repair structures built from base nodes/trigger action 125/SW delivery in single player missions (by Trsdy)
@@ -567,6 +566,7 @@ Vanilla fixes:
 - Fixed `Temporal=true` Warheads potentially crashing game if used to attack `Slaved=true` infantry (by Starkku)
 - Fixed some locomotors (Tunnel, Walk, Mech) getting stuck when moving too fast (by NetsuNegi)
 - Animations with `MakeInfantry` and `UseNormalLight=false` that are drawn in unit palette will now have cell lighting changes applied on them (by Starkku)
+- Fixed Nuke & Dominator Level lighting not applying to AircraftTypes (by Starkku)
 
 Phobos fixes:
 - Fixed a few errors of calling for superweapon launch by `LaunchSW` or building infiltration (by Trsdy)
@@ -753,6 +753,8 @@ New:
 - Animated (non-tiberium spawning) TerrainTypes (by Starkku)
 - Toggleable passenger killing for Explodes=true units (by Starkku)
 - New condition for automatic self-destruction logic when TechnoTypes exist/don't exist (by FlyStar)
+- Skirmish AI "sell all buildings and set all technos to hunt" behavior dehardcode (by TaranDahl/航味麻酱)
+- Skirmish AI "gather when MCV deploy" behavior dehardcode (by TaranDahl/航味麻酱)
 
 Vanilla fixes:
 - Fixed laser drawing code to allow for thicker lasers in house color draw mode (by Kerbiter, ChrisLv_CN)

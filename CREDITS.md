@@ -245,6 +245,7 @@ This page lists all the individual contributions to the project by their author.
   - Vehicles keeping target on move command
   - Reimplemented `Airburst` & `Splits` logic with more customization options
   - Nonprovocative Warheads
+  - Customizing effect of level lighting on air units
 - **Morton (MortonPL)**:
   - `XDrawOffset` for animations
   - Shield passthrough & absorption
@@ -383,7 +384,15 @@ This page lists all the individual contributions to the project by their author.
   - Exclusive Sidebar for Superweapons
   - Fix `LimboKill` not working reliably
   - Observer sidebar in skirmish game mode
-- **TaranDahl**
+- **Ollerus**
+  - Build limit group enhancement
+  - Customizable rocker amplitude
+  - Enhance bombard trajectory with vertical & meteor trajectory
+- **handama** - AI script action to jump back to previous script
+- **TaranDahl (航味麻酱)**
+  - Skirmish AI "sell all buildings and set all technos to hunt" behavior dehardcode
+  - Skirmish AI "gather when MCV deploy" behavior dehardcode
+  - Global value of `RepairBaseNodes` and `MCVRedeploys`
   - Raise alert when technos are taking damage
   - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller
   - `Spawner.RecycleRange`
@@ -396,14 +405,6 @@ This page lists all the individual contributions to the project by their author.
   - Toggle waypoint for building and aircraft
   - Weapon range finding in cylinder
   - Units are now unable to kick out from a factory that is in construction process
-  - Skirmish AI "sell all and all in" behavior dehardcode
-  - Skirmish AI "regroup when mcv deploy" behavior dehardcode
-  - Global value of `RepairBaseNodes`
-- **Ollerus**
-  - Build limit group enhancement
-  - Customizable rocker amplitude
-  - Enhance bombard trajectory with vertical & meteor trajectory
-- **handama** - AI script action to jump back to previous script
 - **Ares developers**
   - YRpp and Syringe which are used, save/load, project foundation and generally useful code from Ares
   - unfinished RadTypes code
