@@ -1246,7 +1246,7 @@ void TacticalButtonsClass::SelectedDraw()
 					Point2D nextPosition { 60, drawRect.Y + 48 };
 					DSurface::Composite->DrawLine(&position, &nextPosition, color);
 
-					const TextPrintType printType = TextPrintType::Center | TextPrintType::Point8;
+					TextPrintType printType = TextPrintType::Center | TextPrintType::Point8;
 					RectangleStruct surfaceRect { 0, 0, 180, position.Y + 48 };
 					position += Point2D { 60, 3 };
 
@@ -1316,10 +1316,23 @@ void TacticalButtonsClass::SelectedDraw()
 
 						if (pSld && pSldType)
 						{
-							color = Drawing::RGB_To_Int(ColorStruct{ static_cast<byte>(153), static_cast<byte>(153), static_cast<byte>(255) });
-							wchar_t text2[0x20];
-							swprintf_s(text2, L"%d / %d", pSld->GetHP(), static_cast<int>(pSldType->Strength));
+							color = 0x949F;
+							wchar_t text2[0x20] = {0};
+
+							position.X += 10;
+							printType &= ~TextPrintType::Center;
+							swprintf_s(text2, L"%d", static_cast<int>(pSldType->Strength));
 							DSurface::Composite->DrawTextA(text2, &surfaceRect, &position, color, 0, printType);
+
+							position.X -= 20;
+							printType |= TextPrintType::Right;
+							swprintf_s(text2, L"%d", pSld->GetHP());
+							DSurface::Composite->DrawTextA(text2, &surfaceRect, &position, color, 0, printType);
+
+							position.X += 10;
+							printType &= ~TextPrintType::Right;
+							printType |= TextPrintType::Center;
+							DSurface::Composite->DrawTextA(L"/", &surfaceRect, &position, color, 0, printType);
 						}
 						else
 						{
@@ -1332,15 +1345,27 @@ void TacticalButtonsClass::SelectedDraw()
 					}
 
 					position.Y += 13;
+					drawRect.Width = 60;
 
 					RulesClass* const pRules = RulesClass::Instance;
 					const double ratio = pThis->GetHealthPercentage();
-					color = (ratio > pRules->ConditionYellow) ? COLOR_GREEN : (ratio > pRules->ConditionRed ? COLOR_YELLOW : COLOR_RED);
+					color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
+					wchar_t text3[0x20] = {0};
 
-					wchar_t text3[0x20];
-					swprintf_s(text3, L"%d / %d", pThis->Health, pType->Strength);
+					position.X += 10;
+					printType &= ~TextPrintType::Center;
+					swprintf_s(text3, L"%d", pType->Strength);
 					DSurface::Composite->DrawTextA(text3, &surfaceRect, &position, color, 0, printType);
-					drawRect.Width = 60;
+
+					position.X -= 20;
+					printType |= TextPrintType::Right;
+					swprintf_s(text3, L"%d", pThis->Health);
+					DSurface::Composite->DrawTextA(text3, &surfaceRect, &position, color, 0, printType);
+
+					position.X += 10;
+					printType &= ~TextPrintType::Right;
+					printType |= TextPrintType::Center;
+					DSurface::Composite->DrawTextA(L"/", &surfaceRect, &position, color, 0, printType);
 
 					if (CameoPCX)
 					{
