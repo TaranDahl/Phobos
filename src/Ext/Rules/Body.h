@@ -199,12 +199,6 @@ public:
 		Valueable<bool> CombatAlert_UseFeedbackVoice;
 		Valueable<bool> CombatAlert_UseAttackVoice;
 		Valueable<bool> CombatAlert_UseEVA;
-		Valueable<bool> GatherWhenMCVDeploy;
-		Valueable<bool> AIFireSale;
-		Valueable<int> AIFireSaleDelay;
-		Valueable<bool> AIAllToHunt;
-		ValueableVector<bool> RepairBaseNodes;
-		Valueable<bool> MCVRedeploysInCampaign;
 		Valueable<bool> CylinderRangefinding;
 		Valueable<bool> BuildingWaypoint;
 		Valueable<bool> AircraftWaypoint;
@@ -234,9 +228,19 @@ public:
 		Valueable<bool> RallyPointAreaGuard;
 		Valueable<bool> EnableEnhancedExitCoords;
 
+		Valueable<double> AircraftLevelLightMultiplier;
+		Valueable<double> JumpjetLevelLightMultiplier;
+
 		Nullable<Vector3D<float>> VoxelLightSource;
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
 		Valueable<bool> UseFixedVoxelLighting;
+
+		Valueable<bool> GatherWhenMCVDeploy;
+		Valueable<bool> AIFireSale;
+		Valueable<int> AIFireSaleDelay;
+		Valueable<bool> AIAllToHunt;
+		ValueableVector<bool> RepairBaseNodes;
+		Valueable<bool> MCVRedeploysInCampaign;
 
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
@@ -395,12 +399,6 @@ public:
 			, CombatAlert_UseFeedbackVoice { true }
 			, CombatAlert_UseAttackVoice { true }
 			, CombatAlert_UseEVA { true }
-			, GatherWhenMCVDeploy { true }
-			, AIFireSale { true }
-			, AIFireSaleDelay { 0 }
-			, AIAllToHunt { true }
-			, RepairBaseNodes {}
-			, MCVRedeploysInCampaign { false }
 			, CylinderRangefinding { false }
 			, BuildingWaypoint { false }
 			, AircraftWaypoint { false }
@@ -429,9 +427,17 @@ public:
 			, RallyPointForceMove { false }
 			, RallyPointAreaGuard { false }
 			, EnableEnhancedExitCoords { false }
+			, AircraftLevelLightMultiplier { 1.0 }
+			, JumpjetLevelLightMultiplier { 0.0 }
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 			, UseFixedVoxelLighting { false }
+			, GatherWhenMCVDeploy { true }
+			, AIFireSale { true }
+			, AIFireSaleDelay { 0 }
+			, AIAllToHunt { true }
+			, RepairBaseNodes {}
+			, MCVRedeploysInCampaign { false }
 		{ }
 
 		virtual ~ExtData() = default;
