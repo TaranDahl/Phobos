@@ -1,3 +1,4 @@
+#pragma once
 #include <GameOptionsClass.h>
 #include <EventClass.h>
 #include <SuperClass.h>
