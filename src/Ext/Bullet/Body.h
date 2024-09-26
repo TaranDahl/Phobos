@@ -28,6 +28,7 @@ public:
 		std::vector<LaserTrailClass> LaserTrails;
 		bool SnappedToTarget; // Used for custom trajectory projectile target snap checks
 		int DamageNumberOffset;
+		bool LimboedLauncher;
 
 		PhobosTrajectory* Trajectory; // TODO: why not unique_ptr
 
@@ -42,6 +43,7 @@ public:
 			, Trajectory { nullptr }
 			, SnappedToTarget { false }
 			, DamageNumberOffset { INT32_MIN }
+			, LimboedLauncher { false }
 		{ }
 
 		virtual ~ExtData() = default;
