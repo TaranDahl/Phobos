@@ -98,3 +98,17 @@ DEFINE_HOOK(0x6B7600, SpawnManagerClass_AI_InitDestination, 0x6)
 
 	return R->Origin() == 0x6B7600 ? SkipGameCode1 : SkipGameCode2;
 }
+
+DEFINE_HOOK(0x6B73C4, SpawnManagerClass_Update_MissileSpawnFLH, 0x6)
+{
+	enum { SkipCurrentBurstReset = 0x6B73FC, DontSkip = 0 };
+
+	GET(SpawnManagerClass* const, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Owner->GetTechnoType());
+
+	if (pTypeExt && pTypeExt->MissileSpawnUseOtherFLHs)
+		return SkipCurrentBurstReset;
+
+	return DontSkip;
+}
