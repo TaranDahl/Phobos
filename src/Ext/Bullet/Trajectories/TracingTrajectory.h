@@ -27,13 +27,9 @@ public:
 	TracingTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
 
 	TracingTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Tracing)
-		, TheDuration { 0 }
+		, Type { static_cast<TracingTrajectoryType*>(const_cast<PhobosTrajectoryType*>(pType)) }
 		, ExistTimer {}
-	{
-		auto const pFinalType = static_cast<const TracingTrajectoryType*>(pType);
-
-		this->TheDuration = pFinalType->TheDuration;
-	}
+	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
@@ -45,7 +41,7 @@ public:
 	virtual TrajectoryCheckReturnType OnAITargetCoordCheck(BulletClass* pBullet) override;
 	virtual TrajectoryCheckReturnType OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno) override;
 
-	int TheDuration;
+	TracingTrajectoryType* Type;
 	CDTimerClass ExistTimer;
 
 private:

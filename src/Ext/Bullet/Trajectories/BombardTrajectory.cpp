@@ -89,10 +89,19 @@ bool BombardTrajectory::Save(PhobosStreamWriter& Stm) const
 
 void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity)
 {
-	this->Height += pBullet->TargetCoords.Z;
-	this->FallSpeed = this->FallSpeed ? this->FallSpeed : this->GetTrajectorySpeed(pBullet);
+	auto const pType = this->GetTrajectoryType<BombardTrajectoryType>(pBullet);
+
+	this->Height = pType->Height + pBullet->TargetCoords.Z;
+	// use scaling since RandomRanged only support int
+	this->FallScatterRange = pType->FallScatterRange;
+	this->FallSpeed = pType->FallSpeed ? pType->FallSpeed : this->GetTrajectorySpeed(pBullet);
+	this->TargetSnapDistance = pType->TargetSnapDistance;
+	this->FreeFallOnTarget = pType->FreeFallOnTarget;
+	this->NoLaunch = pType->NoLaunch;
+	this->TurningPointAnim = pType->TurningPointAnim.Get(nullptr);
+	this->FallPercentShift = pType->FallPercentShift;
 	double fallPercentShift = ScenarioClass::Instance()->Random.RandomRanged(0, static_cast<int>(200 * this->FallPercentShift)) / 100.0;
-	this->FallPercent = this->FallPercent - this->FallPercentShift + fallPercentShift;
+	this->FallPercent = pType->FallPercent - this->FallPercentShift + fallPercentShift;
 
 	if (pBullet->Type->Inaccurate)
 	{
