@@ -54,21 +54,7 @@ public:
 		, FreeFallOnTarget { true }
 		, NoLaunch { false }
 		, TurningPointAnim {}
-	{
-		auto const pFinalType = static_cast<const BombardTrajectoryType*>(pType);
-
-		this->Height = pFinalType->Height;
-		// use scaling since RandomRanged only support int
-		this->FallPercentShift = pFinalType->FallPercentShift;
-		this->FallPercent = pFinalType->FallPercent;
-
-		this->FallScatterRange = pFinalType->FallScatterRange;
-		this->FallSpeed = pFinalType->FallSpeed;
-		this->TargetSnapDistance = pFinalType->TargetSnapDistance;
-		this->FreeFallOnTarget = pFinalType->FreeFallOnTarget;
-		this->NoLaunch = pFinalType->NoLaunch;
-		this->TurningPointAnim = pFinalType->TurningPointAnim.Get(nullptr);
-	}
+	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;

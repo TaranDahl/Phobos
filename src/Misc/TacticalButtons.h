@@ -80,7 +80,7 @@ private:
 	int ButtonIndex { -1 }; // -1 -> above no buttons, 0 -> above buttons background, POSITIVE -> above button who have this index
 
 	// Button index 1-10 : Super weapons buttons
-	std::vector<int> SWButtonData;
+	std::vector<int> SWButtonData {};
 	SuperClass* RecordSuper { nullptr }; // Cannot be used, only for comparison purposes
 
 	// Button index 11 : SW sidebar switch
@@ -90,5 +90,5 @@ private:
 
 	// Button index 71-100 : Select buttons
 	int RecordIndex { 71 };
-	std::vector<SelectRecordStruct> CurrentSelectCameo;
+	std::vector<SelectRecordStruct> CurrentSelectCameo {};
 };

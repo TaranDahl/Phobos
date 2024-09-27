@@ -313,7 +313,6 @@ int TacticalButtonsClass::GetButtonIndex()
 // General functions
 void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 {
-	this->SelectedUpdate();
 	this->ButtonIndex = this->CheckMouseOverButtons(pMousePosition);
 
 	CCToolTip* const toolTips = CCToolTip::Instance;
@@ -350,10 +349,13 @@ void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 
 		if (currentCounts > 1 || (currentCounts && this->CurrentSelectCameo[0].Count > 1))
 		{
-			const wchar_t* name = this->CurrentSelectCameo[this->ButtonIndex - 71].TypeExt->OwnerObject()->UIName;
+			if (TechnoTypeClass* const pObj = this->CurrentSelectCameo[this->ButtonIndex - 71].TypeExt->OwnerObject())
+			{
+				const wchar_t* name = pObj->UIName;
 
-			if (name && name != this->HoveredSelected)
-				this->HoveredSelected = name;
+				if (name && name != this->HoveredSelected)
+					this->HoveredSelected = name;
+			}
 		}
 		else if (this->HoveredSelected)
 		{
@@ -521,19 +523,12 @@ void TacticalButtonsClass::SWSidebarDraw()
 
 					if (BSurface* const MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
 						PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
-					else
-						DSurface::Composite->FillRect(&drawRect, COLOR_WHITE);
 				}
 				else
 				{
 					DSurface::Composite->DrawSHP(pTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &rect,
 						BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 				}
-			}
-			else
-			{
-				RectangleStruct drawRect { position.X, position.Y, 60, 48 };
-				DSurface::Composite->FillRect(&drawRect, COLOR_WHITE);
 			}
 		}
 
@@ -1081,7 +1076,6 @@ void TacticalButtonsClass::SelectedDraw()
 			else if (SHPStruct* const pSHP = pSelect.TypeExt->OwnerObject()->GetCameo())
 			{
 				SHPReference* const pCameoRef = pSHP->AsReference();
-
 				char pFilename[0x20];
 				strcpy_s(pFilename, RulesExt::Global()->MissingCameo.data());
 				_strlwr_s(pFilename);
@@ -1092,8 +1086,6 @@ void TacticalButtonsClass::SelectedDraw()
 
 					if (BSurface* const MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
 						PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
-					else
-						DSurface::Composite->FillRect(&drawRect, COLOR_WHITE);
 				}
 				else
 				{
@@ -1101,10 +1093,6 @@ void TacticalButtonsClass::SelectedDraw()
 					DSurface::Composite->DrawSHP(pSelect.TypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &rect,
 						BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 				}
-			}
-			else
-			{
-				DSurface::Composite->FillRect(&drawRect, COLOR_WHITE);
 			}
 
 			const int count = pSelect.Count;
@@ -1134,7 +1122,6 @@ void TacticalButtonsClass::SelectedDraw()
 			else if (SHPStruct* const pSHP = pSelect.TypeExt->OwnerObject()->GetCameo())
 			{
 				SHPReference* const pCameoRef = pSHP->AsReference();
-
 				char pFilename[0x20];
 				strcpy_s(pFilename, RulesExt::Global()->MissingCameo.data());
 				_strlwr_s(pFilename);
@@ -1145,8 +1132,6 @@ void TacticalButtonsClass::SelectedDraw()
 
 					if (BSurface* const MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
 						PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
-					else
-						DSurface::Composite->FillRect(&drawRect, COLOR_WHITE);
 				}
 				else
 				{
@@ -1154,10 +1139,6 @@ void TacticalButtonsClass::SelectedDraw()
 					DSurface::Composite->DrawSHP(pSelect.TypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &rect,
 						BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 				}
-			}
-			else
-			{
-				DSurface::Composite->FillRect(&drawRect, COLOR_WHITE);
 			}
 
 			const int count = pSelect.Count;
@@ -1190,7 +1171,6 @@ void TacticalButtonsClass::SelectedDraw()
 			else if (SHPStruct* const pSHP = pSelect.TypeExt->OwnerObject()->GetCameo())
 			{
 				SHPReference* const pCameoRef = pSHP->AsReference();
-
 				char pFilename[0x20];
 				strcpy_s(pFilename, RulesExt::Global()->MissingCameo.data());
 				_strlwr_s(pFilename);
@@ -1201,8 +1181,6 @@ void TacticalButtonsClass::SelectedDraw()
 
 					if (BSurface* const MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
 						PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
-					else
-						DSurface::Composite->FillRect(&drawRect, COLOR_WHITE);
 				}
 				else
 				{
@@ -1210,10 +1188,6 @@ void TacticalButtonsClass::SelectedDraw()
 					DSurface::Composite->DrawSHP(pSelect.TypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &rect,
 						BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 				}
-			}
-			else
-			{
-				DSurface::Composite->FillRect(&drawRect, COLOR_WHITE);
 			}
 
 			const int count = pSelect.Count;
@@ -1386,8 +1360,6 @@ void TacticalButtonsClass::SelectedDraw()
 
 							if (BSurface* const MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
 								PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
-							else
-								DSurface::Composite->FillRect(&drawRect, COLOR_WHITE);
 						}
 						else
 						{
@@ -1396,10 +1368,6 @@ void TacticalButtonsClass::SelectedDraw()
 
 							DSurface::Composite->DrawSHP(pPal, pSHP, 0, &position, &surfaceRect, BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 						}
-					}
-					else
-					{
-						DSurface::Composite->FillRect(&drawRect, COLOR_WHITE);
 					}
 
 					return;
@@ -1532,7 +1500,9 @@ DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
 	// TODO New buttons (The later draw, the higher layer)
 
+	pButtons->SelectedUpdate();
 	pButtons->SelectedDraw();
+
 	pButtons->SWSidebarDraw();
 
 	return 0;

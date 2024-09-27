@@ -38,7 +38,7 @@ template<typename T>
 void TracingTrajectory::Serialize(T& Stm)
 {
 	Stm
-		.Process(this->TheDuration)
+		.Process(this->Type)
 		.Process(this->ExistTimer)
 		;
 }
@@ -59,28 +59,36 @@ bool TracingTrajectory::Save(PhobosStreamWriter& Stm) const
 
 void TracingTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity)
 {
-	if (this->TheDuration <= 0)
+	if (!this->Type) // After load
+		this->Type = this->GetTrajectoryType<TracingTrajectoryType>(pBullet);
+
+	int duration = this->Type->TheDuration;
+
+	if (duration <= 0)
 	{
 		if (auto const pWeapon = pBullet->WeaponType)
 		{
 			const int weaponROF = pBullet->WeaponType->ROF;
 
 			if (weaponROF > 10)
-				this->TheDuration = weaponROF - 10;
+				duration = weaponROF - 10;
 			else
-				this->TheDuration = 1;
+				duration = 1;
 		}
 		else
 		{
-			this->TheDuration = 120;
+			duration = 120;
 		}
 	}
 
-	this->ExistTimer.Start(this->TheDuration);
+	this->ExistTimer.Start(duration);
 }
 
 bool TracingTrajectory::OnAI(BulletClass* pBullet)
 {
+	if (!this->Type) // After load
+		this->Type = this->GetTrajectoryType<TracingTrajectoryType>(pBullet);
+
 	if (auto const pTechno = pBullet->Owner)
 		pBullet->Target = pTechno->Target;
 
