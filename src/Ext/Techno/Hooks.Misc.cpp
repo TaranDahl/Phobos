@@ -99,16 +99,24 @@ DEFINE_HOOK(0x6B7600, SpawnManagerClass_AI_InitDestination, 0x6)
 	return R->Origin() == 0x6B7600 ? SkipGameCode1 : SkipGameCode2;
 }
 
-DEFINE_HOOK(0x6B73C4, SpawnManagerClass_Update_MissileSpawnFLH, 0x6)
+DEFINE_HOOK(0x6B73EA, SpawnManagerClass_Update_MissileSpawnFLH, 0x5)
 {
 	enum { SkipCurrentBurstReset = 0x6B73FC, DontSkip = 0 };
 
 	GET(SpawnManagerClass* const, pThis, ESI);
+	GET(int, idx, EBX);
+	GET(WeaponTypeClass* const, pWeaponType, EAX);
 
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Owner->GetTechnoType());
+	auto const pSpawner = pThis->Owner;
+	auto const pType = pSpawner->GetTechnoType();
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pSpawner->GetTechnoType());
 
 	if (pTypeExt && pTypeExt->MissileSpawnUseOtherFLHs)
+	{
+		int burst = pWeaponType->Burst;
+		pSpawner->CurrentBurstIndex = idx % burst;
 		return SkipCurrentBurstReset;
+	}
 
 	return DontSkip;
 }
