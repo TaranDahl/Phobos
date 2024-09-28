@@ -174,6 +174,7 @@ void BulletExt::ExtData::Serialize(T& Stm)
 		.Process(this->SnappedToTarget)
 		.Process(this->DamageNumberOffset)
 		.Process(this->LimboedLauncher)
+		.Process(this->LimboedDir)
 		;
 
 	this->Trajectory = PhobosTrajectory::ProcessFromStream(Stm, this->Trajectory);
