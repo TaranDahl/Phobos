@@ -368,6 +368,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->ExplodeOnDestroy.Read(exINI, pSection, "ExplodeOnDestroy");
 	this->FireDeathWeaponOnCrushed.Read(exINI, pSection, "FireDeathWeaponOnCrushed");
 	this->ExitCoord.Read(exINI, pSection, "ExitCoord");
+	this->MissileSpawnUseOtherFLHs.Read(exINI, pSection, "MissileSpawnUseOtherFLHs");
 
 	this->InitialPayload_Types.Read(exINI, pSection, "InitialPayload.Types");
 	this->InitialPayload_Nums.Read(exINI, pSection, "InitialPayload.Nums");
@@ -804,6 +805,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ExplodeOnDestroy)
 		.Process(this->FireDeathWeaponOnCrushed)
 		.Process(this->ExitCoord)
+		.Process(this->MissileSpawnUseOtherFLHs)
 
 		.Process(this->InitialPayload_Types)
 		.Process(this->InitialPayload_Nums)

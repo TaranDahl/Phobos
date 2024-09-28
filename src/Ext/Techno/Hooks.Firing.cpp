@@ -655,8 +655,6 @@ DEFINE_HOOK(0x6FF4CC, TechnoClass_FireAt_ToggleLaserWeaponIndex, 0x6)
 	return 0;
 }
 
-#pragma endregion
-
 DEFINE_HOOK_AGAIN(0x6FE71C, TechnoClass_Fire_BallisticScatterPhobos, 0x6);
 DEFINE_HOOK(0x6FE821, TechnoClass_Fire_BallisticScatterPhobos, 0x6)
 {
@@ -700,6 +698,27 @@ DEFINE_HOOK(0x6FE821, TechnoClass_Fire_BallisticScatterPhobos, 0x6)
 	R->EAX(scatter);
 	return 0;
 }
+
+DEFINE_HOOK(0x6FF7EF, TechnoClass_Fire_LimboLaunchRecord, 0xA)
+{
+	enum { SkipGameCode = 0x6FF7F9 };
+
+	GET(TechnoClass* const, pThis, ESI);
+	GET_STACK(BulletClass* const, pBullet, STACK_OFFSET(0xB0, -0x74));
+
+	if (!pThis->InLimbo)
+	{
+		auto const pBulletExt = BulletExt::ExtMap.Find(pBullet);
+		pBulletExt->LimboedLauncher = pThis;
+		pBulletExt->LimboedDir = pThis->PrimaryFacing.Current().GetDir();
+	}
+
+	pThis->Limbo();
+
+	return SkipGameCode;
+}
+
+#pragma endregion
 
 #pragma region TechnoClass_GetFLH
 // Feature: Allow Units using AlternateFLHs - by Trsdy
@@ -1110,6 +1129,120 @@ DEFINE_HOOK(0x6F8BB2, TechnoClass_TryAutoTargetObject_Engineer2, 0x6)
 
 	R->AL(pThis->IsEngineer() && !(pTypeExt && pTypeExt->Engineer_CanAutoFire));
 	return SkipGameCode;
+}
+
+#pragma endregion
+
+#pragma region NoBurstDelay
+
+DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstNoDelay, 0x5)
+{
+	enum { SkipVanillaFire = 0x520A57 };
+
+	GET(InfantryClass* const, pThis, EBP);
+	GET(int, wpIdx, ESI);
+	GET(AbstractClass* const, pTarget, EAX);
+
+	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
+	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
+
+	if (pWeapon && pWeaponExt && pWeapon->Burst > 1 && pWeaponExt->Burst_NoDelay)
+	{
+		for (int i = 0; i != pWeapon->Burst; i++)
+			pThis->Fire(pTarget, wpIdx);
+
+		return SkipVanillaFire;
+	}
+
+	return 0;
+}
+
+namespace BurstNoDelayTemp
+{
+	bool isProcessing;
+}
+
+DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
+{
+	enum { SkipVanillaFire = 0x737063 };
+
+	GET(UnitClass* const, pThis, ESI);
+	GET(int, wpIdx, EDI);
+	GET(AbstractClass* const, pTarget, EAX);
+
+	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
+	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
+
+	if (pWeapon && pWeaponExt && pWeapon->Burst > 1 && pWeaponExt->Burst_NoDelay)
+	{
+		for (int i = 0; i != pWeapon->Burst; i++)
+		{
+			BurstNoDelayTemp::isProcessing = true;
+			pThis->Fire(pTarget, wpIdx);
+		}
+
+		BurstNoDelayTemp::isProcessing = false;
+
+		return SkipVanillaFire;
+	}
+
+	return 0;
+}
+
+// Units check fire error again in the Fire vfunc.
+DEFINE_HOOK(0x7413C2, UnitClass_Fire_SkipROFError, 0x8)
+{
+	enum { Fire = 0x7413CA, DontFire = 0x74147B };
+
+	GET(FireError, err, EAX);
+
+	if (err == FireError::OK || err == FireError::REARM && BurstNoDelayTemp::isProcessing)
+		return Fire;
+
+	return DontFire;
+}
+
+DEFINE_HOOK(0x44B630, BuildingClass_MissionAttack_AnimDelayedFire, 0x6)
+{
+	enum { JustFire = 0x44B6C4, VanillaCheck = 0 };
+
+	GET(BuildingClass* const, pThis, ESI);
+
+	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
+
+	return (pTypeExt && pTypeExt->AnimDontDelayBurst && pThis->CurrentBurstIndex != 0) ? JustFire : VanillaCheck;
+}
+
+#pragma endregion
+
+#pragma region NoBurstDelay
+
+DEFINE_HOOK(0x6F8C18, TechnoClass_ScanToAttackWall_PlayerDestroyWall, 0x6)
+{
+	enum { SkipIsAIChecks = 0x6F8C52 };
+	return RulesExt::Global()->PlayerDestroyWalls ? SkipIsAIChecks : 0;
+}
+
+DEFINE_HOOK(0x6F8D32, TechnoClass_ScanToAttackWall_DestroyOwnerlessWalls, 0x9)
+{
+	enum { GoOtherChecks = 0x6F8D58, NotOkToFire = 0x6F8DE3 };
+
+	GET(int, OwnerIdx, EAX);
+	GET(TechnoClass*, pThis, ESI);
+
+	if (auto const pOwner = (OwnerIdx != -1) ? HouseClass::Array->Items[OwnerIdx] : nullptr)
+	{
+		if (pOwner->IsAlliedWith(pThis->Owner)
+			&& (!RulesExt::Global()->DestroyOwnerlessWalls
+			|| (pOwner != HouseClass::FindSpecial()
+			&& pOwner != HouseClass::FindCivilianSide()
+			&& pOwner != HouseClass::FindNeutral())))
+		{
+			return NotOkToFire;
+		}
+	}
+
+	return GoOtherChecks;
 }
 
 #pragma endregion
