@@ -1052,7 +1052,7 @@ void TacticalButtonsClass::SelectedDraw()
 
 	const int currentCounts = Math::min(30, static_cast<int>(this->CurrentSelectCameo.size()));
 
-	if (currentCounts > 1 || (currentCounts && this->CurrentSelectCameo[0].Count > 1))
+	if (currentCounts > 1 || (currentCounts && this->CurrentSelectCameo[0].Count > 1)) // Mass
 	{
 		Point2D position { 0, DSurface::Composite->GetHeight() - 80 };
 		Point2D textPosition { 1, position.Y + 1 };
@@ -1200,7 +1200,7 @@ void TacticalButtonsClass::SelectedDraw()
 			}
 		}
 	}
-	else if (currentCounts)
+	else if (currentCounts) // Only 1
 	{
 		for (auto const& pCurrent : ObjectClass::CurrentObjects())
 		{
@@ -1211,97 +1211,108 @@ void TacticalButtonsClass::SelectedDraw()
 
 				if (pTypeExt->OwnerObject() == pType)
 				{
+					TextPrintType printType = TextPrintType::Center | TextPrintType::Point8;
 					COLORREF color = Drawing::RGB_To_Int(Drawing::TooltipColor);
 					RectangleStruct drawRect { 0, DSurface::Composite->GetHeight() - 80, 180, 48};
-
-					DSurface::Composite->FillRect(&drawRect, COLOR_BLACK);
-					DSurface::Composite->DrawRect(&drawRect, color);
-
+					{
+						DSurface::Composite->FillRect(&drawRect, COLOR_BLACK);
+						drawRect.X += 60;
+						DSurface::Composite->DrawRect(&drawRect, color);
+						drawRect.X -= 60;
+					}
+					drawRect.Width = 60;
 					Point2D position { 60, drawRect.Y };
-					Point2D nextPosition { 60, drawRect.Y + 48 };
-					DSurface::Composite->DrawLine(&position, &nextPosition, color);
-
-					TextPrintType printType = TextPrintType::Center | TextPrintType::Point8;
 					RectangleStruct surfaceRect { 0, 0, 180, position.Y + 48 };
-					position += Point2D { 60, 3 };
 
-					const wchar_t* name = pType->UIName;
 					BSurface* CameoPCX = pTypeExt->CameoPCX.GetSurface();
 					SHPStruct* pSHP = pType->GetCameo();
 					ConvertClass* pPal = pTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL);
-					HouseClass* const pPlayer = HouseClass::CurrentPlayer;
 
-					if (!pPlayer->IsAlliedWith(pThis) && !pPlayer->IsObserver())
+					position += Point2D { 60, 3 };
 					{
-						if (TechnoTypeClass* const pFakeType = pTypeExt->FakeOf)
+						HouseClass* const pPlayer = HouseClass::CurrentPlayer;
+						const wchar_t* name = pType->UIName;
+
+						if (!pPlayer->IsAlliedWith(pThis) && !pPlayer->IsObserver())
 						{
-							if (TechnoTypeExt::ExtData* const pFakeTypeExt = TechnoTypeExt::ExtMap.Find(pFakeType))
+							if (TechnoTypeClass* const pFakeType = pTypeExt->FakeOf)
 							{
-								if (const wchar_t* fakeName = pFakeTypeExt->EnemyUIName.Get().Text)
-									name = fakeName;
+								if (TechnoTypeExt::ExtData* const pFakeTypeExt = TechnoTypeExt::ExtMap.Find(pFakeType))
+								{
+									if (const wchar_t* fakeName = pFakeTypeExt->EnemyUIName.Get().Text)
+										name = fakeName;
+									else
+										name = pFakeType->UIName;
+
+									if (BSurface* const FakeCameoPCX = pFakeTypeExt->CameoPCX.GetSurface())
+									{
+										CameoPCX = FakeCameoPCX;
+									}
+									else if (SHPStruct* const pFakeSHP = pFakeType->GetCameo())
+									{
+										pSHP = pFakeSHP;
+										pPal = pFakeTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL);
+									}
+								}
 								else
+								{
 									name = pFakeType->UIName;
-
-								if (BSurface* const FakeCameoPCX = pFakeTypeExt->CameoPCX.GetSurface())
-								{
-									CameoPCX = FakeCameoPCX;
-								}
-								else if (SHPStruct* const pFakeSHP = pFakeType->GetCameo())
-								{
-									pSHP = pFakeSHP;
-									pPal = pFakeTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL);
 								}
 							}
-							else
+							else if (const wchar_t* enemyName = pTypeExt->EnemyUIName.Get().Text)
 							{
-								name = pFakeType->UIName;
-							}
-						}
-						else if (const wchar_t* enemyName = pTypeExt->EnemyUIName.Get().Text)
-						{
-							name = enemyName;
-						}
-					}
-
-					if (name)
-					{
-						size_t length = Math::min(wcslen(name), static_cast<size_t>(31));
-
-						for (const wchar_t* check = name; *check != L'\0'; ++check)
-						{
-							if (*check == L'\n')
-							{
-								length = static_cast<size_t>(check - name);
-								break;
+								name = enemyName;
 							}
 						}
 
-						wchar_t text1[0x20] = {0};
-						wcsncpy_s(text1, name, length);
-						text1[length] = L'\0';
-						DSurface::Composite->DrawTextA(text1, &surfaceRect, &position, color, 0, printType);
+						if (name)
+						{
+							size_t length = Math::min(wcslen(name), static_cast<size_t>(31));
+
+							for (const wchar_t* check = name; *check != L'\0'; ++check)
+							{
+								if (*check == L'\n')
+								{
+									length = static_cast<size_t>(check - name);
+									break;
+								}
+							}
+
+							wchar_t text1[0x20] = {0};
+							wcsncpy_s(text1, name, length);
+							text1[length] = L'\0';
+							DSurface::Composite->DrawTextA(text1, &surfaceRect, &position, color, 0, printType);
+						}
 					}
 
 					position.Y += 15;
-
-					if (TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis))
 					{
-						ShieldClass* const pSld = pExt->Shield.get();
-						ShieldTypeClass* const pSldType = pExt->CurrentShieldType;
+						int value = -1, maxValue = 0;
+						TechnoExt::GetValuesForDisplay(pThis, pTypeExt->UpperSelectedInfoType, value, maxValue);
 
-						if (pSld && pSldType)
+						if (value >= 0 && maxValue > 0)
 						{
-							color = 0x949F;
+							if (pTypeExt->UpperSelectedInfoColor == ColorStruct{ 0, 0, 0 })
+							{
+								RulesClass* const pRules = RulesClass::Instance;
+								const double ratio = static_cast<double>(value) / maxValue;
+								color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
+							}
+							else
+							{
+								color = Drawing::RGB_To_Int(pTypeExt->UpperSelectedInfoColor);
+							}
+
 							wchar_t text2[0x20] = {0};
 
 							position.X += 10;
 							printType &= ~TextPrintType::Center;
-							swprintf_s(text2, L"%d", static_cast<int>(pSldType->Strength));
+							swprintf_s(text2, L"%d", maxValue);
 							DSurface::Composite->DrawTextA(text2, &surfaceRect, &position, color, 0, printType);
 
 							position.X -= 20;
 							printType |= TextPrintType::Right;
-							swprintf_s(text2, L"%d", pSld->GetHP());
+							swprintf_s(text2, L"%d", value);
 							DSurface::Composite->DrawTextA(text2, &surfaceRect, &position, color, 0, printType);
 
 							position.X += 10;
@@ -1314,33 +1325,47 @@ void TacticalButtonsClass::SelectedDraw()
 							DSurface::Composite->DrawTextA(L"-- / --", &surfaceRect, &position, color, 0, printType);
 						}
 					}
-					else
-					{
-						DSurface::Composite->DrawTextA(L"-- / --", &surfaceRect, &position, color, 0, printType);
-					}
 
 					position.Y += 13;
-					drawRect.Width = 60;
+					{
+						int value = -1, maxValue = 0;
+						TechnoExt::GetValuesForDisplay(pThis, pTypeExt->BelowSelectedInfoType, value, maxValue);
 
-					RulesClass* const pRules = RulesClass::Instance;
-					const double ratio = pThis->GetHealthPercentage();
-					color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
-					wchar_t text3[0x20] = {0};
+						if (value >= 0 && maxValue > 0)
+						{
+							if (pTypeExt->BelowSelectedInfoColor == ColorStruct{ 0, 0, 0 })
+							{
+								RulesClass* const pRules = RulesClass::Instance;
+								const double ratio = static_cast<double>(value) / maxValue;
+								color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
+							}
+							else
+							{
+								color = Drawing::RGB_To_Int(pTypeExt->BelowSelectedInfoColor);
+							}
 
-					position.X += 10;
-					printType &= ~TextPrintType::Center;
-					swprintf_s(text3, L"%d", pType->Strength);
-					DSurface::Composite->DrawTextA(text3, &surfaceRect, &position, color, 0, printType);
+							wchar_t text3[0x20] = {0};
 
-					position.X -= 20;
-					printType |= TextPrintType::Right;
-					swprintf_s(text3, L"%d", pThis->Health);
-					DSurface::Composite->DrawTextA(text3, &surfaceRect, &position, color, 0, printType);
+							position.X += 10;
+							printType &= ~TextPrintType::Center;
+							swprintf_s(text3, L"%d", maxValue);
+							DSurface::Composite->DrawTextA(text3, &surfaceRect, &position, color, 0, printType);
 
-					position.X += 10;
-					printType &= ~TextPrintType::Right;
-					printType |= TextPrintType::Center;
-					DSurface::Composite->DrawTextA(L"/", &surfaceRect, &position, color, 0, printType);
+							position.X -= 20;
+							printType |= TextPrintType::Right;
+							swprintf_s(text3, L"%d", value);
+							DSurface::Composite->DrawTextA(text3, &surfaceRect, &position, color, 0, printType);
+
+							position.X += 10;
+							printType &= ~TextPrintType::Right;
+							printType |= TextPrintType::Center;
+							DSurface::Composite->DrawTextA(L"/", &surfaceRect, &position, color, 0, printType);
+						}
+						else
+						{
+							DSurface::Composite->DrawTextA(L"-- / --", &surfaceRect, &position, color, 0, printType);
+						}
+					}
 
 					if (CameoPCX)
 					{

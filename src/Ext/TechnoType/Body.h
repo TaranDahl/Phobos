@@ -241,6 +241,10 @@ public:
 		Valueable<CSFText> UIExtraDescription;
 		PhobosPCXFile CameoPCX;
 		PhobosPCXFile GreyCameoPCX;
+		Valueable<DisplayInfoType> UpperSelectedInfoType;
+		Valueable<ColorStruct> UpperSelectedInfoColor;
+		Valueable<DisplayInfoType> BelowSelectedInfoType;
+		Valueable<ColorStruct> BelowSelectedInfoColor;
 		Valueable<TechnoTypeClass*> FakeOf;
 		CustomPalette CameoPal;
 
@@ -526,6 +530,10 @@ public:
 			, AlwaysExistTheCameo {}
 			, PrerequisiteForCameo {}
 			, UIExtraDescription {}
+			, UpperSelectedInfoType { DisplayInfoType::Shield }
+			, UpperSelectedInfoColor { { 153, 153, 255 } }
+			, BelowSelectedInfoType { DisplayInfoType::Health }
+			, BelowSelectedInfoColor { { 0, 0, 0 } }
 			, FakeOf {}
 			, CameoPal {}
 
