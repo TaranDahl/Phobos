@@ -42,6 +42,7 @@ public:
 		CDTimerClass AISuperWeaponDelayTimer;
 		CDTimerClass AIFireSaleDelayTimer;
 
+		std::vector<int> SWButtonData;
 		BuildingTypeClass* CurrentBuildingType;
 		CellStruct CurrentBuildingTopLeft;
 		CDTimerClass CurrentBuildingTimer;
@@ -78,6 +79,7 @@ public:
 			, Factory_VehicleType { nullptr }
 			, Factory_NavyType { nullptr }
 			, Factory_AircraftType { nullptr }
+			, SWButtonData {}
 			, CurrentBuildingType { nullptr }
 			, CurrentBuildingTopLeft {}
 			, CurrentBuildingTimer {}
