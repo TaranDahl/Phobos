@@ -1222,7 +1222,7 @@ void TacticalButtonsClass::SelectedDraw()
 				{
 					TextPrintType printType = TextPrintType::Center | TextPrintType::Point8;
 					COLORREF color = Drawing::RGB_To_Int(Drawing::TooltipColor);
-					RectangleStruct drawRect { 0, DSurface::Composite->GetHeight() - 80, 180, 48};
+					RectangleStruct drawRect { 0, DSurface::Composite->GetHeight() - 80, 120, 48};
 					{
 						DSurface::Composite->FillRect(&drawRect, COLOR_BLACK);
 						drawRect.X += 60;
