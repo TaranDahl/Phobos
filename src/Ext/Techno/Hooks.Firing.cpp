@@ -482,12 +482,13 @@ DEFINE_HOOK(0x6FDD7D, TechnoClass_FireAt_UpdateWeaponType, 0x5)
 				const int rof = static_cast<int>(ratio * pExt->LastWeaponType->ROF * pExt->AE.ROFMultiplier);
 				pThis->ChargeTurretDelay = rof;
 				pThis->RearmTimer.Start(rof);
+				pThis->CurrentBurstIndex = 0;
+				pExt->LastWeaponType = pWeapon;
+
+				return CanNotFire;
 			}
 
 			pThis->CurrentBurstIndex = 0;
-			pExt->LastWeaponType = pWeapon;
-
-			return CanNotFire;
 		}
 
 		pExt->LastWeaponType = pWeapon;
@@ -1143,15 +1144,18 @@ DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstNoDelay, 0x5)
 	GET(int, wpIdx, ESI);
 	GET(AbstractClass* const, pTarget, EAX);
 
-	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
-	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
-
-	if (pWeapon && pWeaponExt && pWeapon->Burst > 1 && pWeaponExt->Burst_NoDelay)
+	if (auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType)
 	{
-		for (int i = 0; i != pWeapon->Burst; i++)
-			pThis->Fire(pTarget, wpIdx);
+		if (auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
+		{
+			if (pWeapon->Burst > 1 && pWeaponExt->Burst_NoDelay)
+			{
+				for (int i = 0; i != pWeapon->Burst; ++i)
+					pThis->Fire(pTarget, wpIdx);
 
-		return SkipVanillaFire;
+				return SkipVanillaFire;
+			}
+		}
 	}
 
 	return 0;
@@ -1159,7 +1163,7 @@ DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstNoDelay, 0x5)
 
 namespace BurstNoDelayTemp
 {
-	bool isProcessing;
+	bool isProcessing = false;
 }
 
 DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
@@ -1170,20 +1174,21 @@ DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 	GET(int, wpIdx, EDI);
 	GET(AbstractClass* const, pTarget, EAX);
 
-	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
-	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
-
-	if (pWeapon && pWeaponExt && pWeapon->Burst > 1 && pWeaponExt->Burst_NoDelay)
+	if (auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType)
 	{
-		for (int i = 0; i != pWeapon->Burst; i++)
+		if (auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
 		{
-			BurstNoDelayTemp::isProcessing = true;
-			pThis->Fire(pTarget, wpIdx);
+			if (pWeapon->Burst > 1 && pWeaponExt->Burst_NoDelay)
+			{
+				BurstNoDelayTemp::isProcessing = true;
+
+				for (int i = 0; i != pWeapon->Burst; ++i)
+					pThis->Fire(pTarget, wpIdx);
+
+				BurstNoDelayTemp::isProcessing = false;
+				return SkipVanillaFire;
+			}
 		}
-
-		BurstNoDelayTemp::isProcessing = false;
-
-		return SkipVanillaFire;
 	}
 
 	return 0;
@@ -1215,7 +1220,7 @@ DEFINE_HOOK(0x44B630, BuildingClass_MissionAttack_AnimDelayedFire, 0x6)
 
 #pragma endregion
 
-#pragma region NoBurstDelay
+#pragma region AttackWall
 
 DEFINE_HOOK(0x6F8C18, TechnoClass_ScanToAttackWall_PlayerDestroyWall, 0x6)
 {
