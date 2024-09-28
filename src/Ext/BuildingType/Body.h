@@ -65,6 +65,7 @@ public:
 
 		Valueable<bool> JustHasRallyPoint;
 		Nullable<CoordStruct> JumpjetExitCoord;
+		Valueable<bool> AnimDontDelayBurst;
 
 		std::vector<OptionalStruct<DirType, true>> AircraftDockingDirs;
 
@@ -110,6 +111,7 @@ public:
 			, SellBuildupLength { 23 }
 			, JustHasRallyPoint { false }
 			, JumpjetExitCoord { }
+			, AnimDontDelayBurst { false }
 			, AircraftDockingDirs {}
 			, FactoryPlant_AllowTypes {}
 			, FactoryPlant_DisallowTypes {}

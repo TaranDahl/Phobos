@@ -227,6 +227,8 @@ public:
 		Valueable<bool> RallyPointForceMove;
 		Valueable<bool> RallyPointAreaGuard;
 		Valueable<bool> EnableEnhancedExitCoords;
+		Valueable<bool> PlayerDestroyWalls;
+		Valueable<bool> DestroyOwnerlessWalls;
 
 		Valueable<double> AircraftLevelLightMultiplier;
 		Valueable<double> JumpjetLevelLightMultiplier;
@@ -427,6 +429,8 @@ public:
 			, RallyPointForceMove { false }
 			, RallyPointAreaGuard { false }
 			, EnableEnhancedExitCoords { false }
+			, PlayerDestroyWalls { false }
+			, DestroyOwnerlessWalls { false }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
 			, VoxelLightSource { }

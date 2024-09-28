@@ -284,6 +284,7 @@ public:
 		Nullable<bool> ExplodeOnDestroy;
 		Nullable<bool> FireDeathWeaponOnCrushed;
 		Nullable<CoordStruct> ExitCoord;
+		Valueable<bool> MissileSpawnUseOtherFLHs;
 
 		ValueableVector<TechnoTypeClass*> InitialPayload_Types;
 		ValueableVector<int> InitialPayload_Nums;
@@ -573,6 +574,7 @@ public:
 			, ExplodeOnDestroy { }
 			, FireDeathWeaponOnCrushed { }
 			, ExitCoord { }
+			, MissileSpawnUseOtherFLHs { false }
 
 			, InitialPayload_Types {}
 			, InitialPayload_Nums {}

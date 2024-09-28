@@ -956,7 +956,7 @@ DEFINE_HOOK(0x71ADE4, TemporalClass_Release_SlaveTargetFix, 0x5)
 }
 
 // In the following three places the distance check was hardcoded to compare with 20, 17 and 16 respectively,
-// which means it didn't consider the actual speed of the unit. Now we check it and the units won't get stuck 
+// which means it didn't consider the actual speed of the unit. Now we check it and the units won't get stuck
 // even at high speeds - NetsuNegi
 
 DEFINE_HOOK(0x7295C5, TunnelLocomotionClass_ProcessDigging_SlowdownDistance, 0x9)
@@ -988,3 +988,7 @@ DEFINE_HOOK(0x5B11DD, MechLocomotionClass_ProcessMoving_SlowdownDistance, 0x9)
 
 	return distance >= pLinkedTo->GetCurrentSpeed() ? KeepMoving : CloseEnough;
 }
+
+// ReselectIfLimboed only works if the target is infantry.
+// Why did you do this, WW?
+DEFINE_JUMP(LJMP, 0x6FF78F, 0x6FF79C) // TechnoClass_Fire_ReselectIfLimboedCheck

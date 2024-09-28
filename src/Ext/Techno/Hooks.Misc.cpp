@@ -111,6 +111,8 @@ DEFINE_HOOK(0x739920, UnitClass_TryToDeploy_DisableRegroupAtNewConYard, 0x6)
 	return pRules->GatherWhenMCVDeploy ? DoNotSkipRegroup : SkipRegroup;
 }
 
+#pragma region CylinderRange
+
 DEFINE_HOOK(0x6F7891, TechnoClass_IsCloseEnough_CylinderRangefinding, 0x7)
 {
 	enum { SkipGameCode = 0x6F789A };
@@ -127,6 +129,10 @@ DEFINE_HOOK(0x6F7891, TechnoClass_IsCloseEnough_CylinderRangefinding, 0x7)
 	return SkipGameCode;
 }
 
+#pragma endregion
+
+#pragma region NewWaypoints
+
 bool __fastcall BuildingTypeClass_CanUseWaypoint(BuildingTypeClass* pThis)
 {
 	return RulesExt::Global()->BuildingWaypoint;
@@ -138,6 +144,10 @@ bool __fastcall AircraftTypeClass_CanUseWaypoint(AircraftTypeClass* pThis)
 	return RulesExt::Global()->AircraftWaypoint;
 }
 DEFINE_JUMP(VTABLE, 0x7E2908, GET_OFFSET(AircraftTypeClass_CanUseWaypoint))
+
+#pragma endregion
+
+#pragma region RecycleSpawned
 
 DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 {
@@ -196,6 +206,10 @@ DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 	return 0;
 }
 
+#pragma endregion
+
+#pragma region ScatterFix
+
 DEFINE_HOOK(0x481778, CellClass_ScatterContent_Fix, 0x6)
 {
 	enum { SkipGameCode = 0x481793 };
@@ -206,6 +220,10 @@ DEFINE_HOOK(0x481778, CellClass_ScatterContent_Fix, 0x6)
 	R->CL(pTechno && pTechno->Owner->IsHumanPlayer && RulesClass::Instance()->PlayerScatter);
 	return SkipGameCode;
 }
+
+#pragma endregion
+
+#pragma region PlanWaypoint
 
 DEFINE_HOOK(0x63745D, UnknownClass_PlanWaypoint_ContinuePlanningOnEnter, 0x6)
 {
@@ -235,6 +253,10 @@ DEFINE_HOOK(0x638D73, UnknownClass_CheckLastWaypoint_ContinuePlanningWaypoint, 0
 
 	return SkipDeselect;
 }
+
+#pragma endregion
+
+#pragma region ScanDelay
 
 DEFINE_HOOK(0x6FA697, TechnoClass_Update_DontScanIfUnarmed, 0x6)
 {
@@ -283,6 +305,10 @@ DEFINE_HOOK(0x70989C, TechnoClass_TargetAndEstimateDamage_ScanDelayNormal, 0x6)
 	return 0;
 }
 
+#pragma endregion
+
+#pragma region ReturnFire
+
 DEFINE_HOOK(0x702B31, TechnoClass_ReceiveDamage_ReturnFireCheck, 0x7)
 {
 	enum { SkipReturnFire = 0x702B47, NotSkip = 0 };
@@ -307,6 +333,10 @@ DEFINE_HOOK(0x702B31, TechnoClass_ReceiveDamage_ReturnFireCheck, 0x7)
 	return (isJJMoving || (mission == Mission::Move && pThisFoot->GetHeight() <= 0)) ? SkipReturnFire : NotSkip;
 }
 
+#pragma endregion
+
+#pragma region TargetIronCurtain
+
 DEFINE_HOOK(0x6FC22A, TechnoClass_GetFireError_TargetingIronCurtain, 0x6)
 {
 	enum { CantFire = 0x6FC86A, GoOtherChecks = 0x6FC24D };
@@ -329,6 +359,10 @@ DEFINE_HOOK(0x6FC22A, TechnoClass_GetFireError_TargetingIronCurtain, 0x6)
 
 	return (pWpExt && pWpExt->AttackIronCurtain.Get(isHealing)) ? GoOtherChecks : CantFire;
 }
+
+#pragma endregion
+
+#pragma region KeepTemporal
 
 DEFINE_HOOK(0x6F50A9, TechnoClass_UpdatePosition_TemporalLetGo, 0x7)
 {
@@ -360,23 +394,6 @@ DEFINE_HOOK(0x709A43, TechnoClass_EnterIdleMode_TemporalLetGo, 0x7)
 	return (!pTypeExt || !pTypeExt->KeepWarping) ? LetGo : SkipLetGo;
 }
 
-DEFINE_HOOK(0x70023B, TechnoClass_MouseOverObject_AttackUnderGround, 0x5)
-{
-	enum { FireIsOK = 0x700246, FireIsNotOK = 0x70056C };
-
-	GET(ObjectClass*, pObject, EDI);
-	GET(TechnoClass*, pThis, ESI);
-	GET(int, wpIdx, EAX);
-
-	if (pObject->IsSurfaced())
-		return FireIsOK;
-
-	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
-	auto const pProjExt = pWeapon ? BulletTypeExt::ExtMap.Find(pWeapon->Projectile) : nullptr;
-
-	return (!pProjExt || !pProjExt->AU) ? FireIsNotOK : FireIsOK;
-}
-
 // This is a fix to KeepWarping.
 // But I think it has no difference with vanilla behavior, so no check for KeepWarping.
 DEFINE_HOOK(0x4C7643, EventClass_RespondToEvent_StopTemporal, 0x6)
@@ -404,6 +421,31 @@ DEFINE_HOOK(0x71A7A8, TemporalClass_Update_CheckRange, 0x6)
 
 	return (pTypeExt && pTypeExt->KeepWarping) ? CheckRange : DontCheckRange;
 }
+
+#pragma endregion
+
+#pragma region AttackUnderGround
+
+DEFINE_HOOK(0x70023B, TechnoClass_MouseOverObject_AttackUnderGround, 0x5)
+{
+	enum { FireIsOK = 0x700246, FireIsNotOK = 0x70056C };
+
+	GET(ObjectClass*, pObject, EDI);
+	GET(TechnoClass*, pThis, ESI);
+	GET(int, wpIdx, EAX);
+
+	if (pObject->IsSurfaced())
+		return FireIsOK;
+
+	auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType;
+	auto const pProjExt = pWeapon ? BulletTypeExt::ExtMap.Find(pWeapon->Projectile) : nullptr;
+
+	return (!pProjExt || !pProjExt->AU) ? FireIsNotOK : FireIsOK;
+}
+
+#pragma endregion
+
+#pragma region GuardRange
 
 DEFINE_HOOK(0x4D6E83, FootClass_MissionAreaGuard_FollowStray, 0x6)
 {
@@ -470,6 +512,21 @@ DEFINE_HOOK(0x707F08, TechnoClass_GetGuardRange_AreaGuardRange, 0x5)
 	return SkipGameCode;
 }
 
+DEFINE_HOOK(0x4D6D34, FootClass_MissionAreaGuard_Miner, 0x5)
+{
+	enum { GuardArea = 0x4D6D69 };
+
+	GET(FootClass*, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	return (pTypeExt && pTypeExt->Harvester_CanGuardArea) ? GuardArea : 0;
+}
+
+#pragma endregion
+
+#pragma region Bunkerable
+
 DEFINE_HOOK(0x70FB73, FootClass_IsBunkerableNow_Dehardcode, 0x6)
 {
 	enum { SkipVanillaChecks = 0x70FBAF };
@@ -481,13 +538,29 @@ DEFINE_HOOK(0x70FB73, FootClass_IsBunkerableNow_Dehardcode, 0x6)
 	return (pTypeExt && pTypeExt->BunkerableAnyWay) ? SkipVanillaChecks : 0;
 }
 
-DEFINE_HOOK(0x4D6D34, FootClass_MissionAreaGuard_Miner, 0x5)
+#pragma endregion
+
+#pragma region MissileSpawnFLH
+
+DEFINE_HOOK(0x6B73EA, SpawnManagerClass_Update_MissileSpawnFLH, 0x5)
 {
-	enum { GuardArea = 0x4D6D69 };
+	enum { SkipCurrentBurstReset = 0x6B73FC };
 
-	GET(FootClass*, pThis, ESI);
+	GET(SpawnManagerClass* const, pThis, ESI);
+	GET(WeaponTypeClass* const, pWeaponType, EAX);
+	GET(int, idx, EBX);
 
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	auto const pSpawner = pThis->Owner;
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pSpawner->GetTechnoType());
 
-	return (pTypeExt && pTypeExt->Harvester_CanGuardArea) ? GuardArea : 0;
+	if (pTypeExt && pTypeExt->MissileSpawnUseOtherFLHs)
+	{
+		int burst = pWeaponType->Burst;
+		pSpawner->CurrentBurstIndex = idx % burst;
+		return SkipCurrentBurstReset;
+	}
+
+	return 0;
 }
+
+#pragma endregion

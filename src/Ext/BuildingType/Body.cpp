@@ -749,6 +749,8 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	}
 
 	// Art
+	this->AnimDontDelayBurst.Read(exArtINI, pSection, "AnimDontDelayBurst");
+
 	this->ZShapePointMove_OnBuildup.Read(exArtINI, pSection, "ZShapePointMove.OnBuildup");
 }
 
@@ -801,6 +803,7 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SellBuildupLength)
 		.Process(this->JustHasRallyPoint)
 		.Process(this->JumpjetExitCoord)
+		.Process(this->AnimDontDelayBurst)
 		.Process(this->AircraftDockingDirs)
 		.Process(this->FactoryPlant_AllowTypes)
 		.Process(this->FactoryPlant_DisallowTypes)
