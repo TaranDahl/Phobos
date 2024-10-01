@@ -241,8 +241,7 @@ public:
 		Valueable<bool> AIFireSale;
 		Valueable<int> AIFireSaleDelay;
 		Valueable<bool> AIAllToHunt;
-		ValueableVector<bool> RepairBaseNodes;
-		Valueable<bool> MCVRedeploysInCampaign;
+		Valueable<bool> RepairBaseNodes;
 
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
@@ -440,8 +439,7 @@ public:
 			, AIFireSale { true }
 			, AIFireSaleDelay { 0 }
 			, AIAllToHunt { true }
-			, RepairBaseNodes {}
-			, MCVRedeploysInCampaign { false }
+			, RepairBaseNodes { false }
 		{ }
 
 		virtual ~ExtData() = default;

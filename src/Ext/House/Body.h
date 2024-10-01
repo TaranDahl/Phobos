@@ -49,7 +49,7 @@ public:
 		int CurrentBuildingTimes;
 
 		//Read from INI
-		bool RepairBaseNodes[3];
+		Nullable<bool> RepairBaseNodes[3];
 
 		// FactoryPlants with Allow/DisallowTypes set.
 		std::vector<BuildingClass*> RestrictedFactoryPlants;
@@ -86,7 +86,7 @@ public:
 			, CurrentBuildingTimes { 0 }
 			, CombatAlertTimer {}
 			, AISuperWeaponDelayTimer {}
-			, RepairBaseNodes { false,false,false }
+			, RepairBaseNodes { }
 			, RestrictedFactoryPlants {}
 			, LastBuiltNavalVehicleType { -1 }
 			, ProducingNavalUnitTypeIndex { -1 }
