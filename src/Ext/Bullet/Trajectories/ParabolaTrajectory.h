@@ -78,7 +78,7 @@ public:
 		, Type { static_cast<ParabolaTrajectoryType*>(const_cast<PhobosTrajectoryType*>(pType)) }
 		, ThrowHeight { Type->ThrowHeight > 0 ? Type->ThrowHeight : 600 }
 		, BounceTimes { Type->BounceTimes }
-		, OffsetCoord { static_cast<CoordStruct>(Type->OffsetCoord) }
+		, OffsetCoord { Type->OffsetCoord.Get() }
 		, UseDisperseBurst { Type->UseDisperseBurst }
 		, ShouldDetonate { false }
 		, ShouldBounce { false }
