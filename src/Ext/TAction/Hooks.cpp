@@ -59,7 +59,7 @@ DEFINE_HOOK(0x6E427D, TActionClass_CreateBuildingAt, 0x9)
 		}
 		else
 		{
-			if(!bPlayBuildUp)
+			if (!bPlayBuildUp)
 				pBld->Place(false);
 
 			pBld->IsReadyToCommence = true;
@@ -87,6 +87,16 @@ namespace RetintTemp
 DEFINE_HOOK_AGAIN(0x6E2F47, TActionClass_Retint_LightSourceFix, 0x3) // Blue
 DEFINE_HOOK_AGAIN(0x6E2EF7, TActionClass_Retint_LightSourceFix, 0x3) // Green
 DEFINE_HOOK(0x6E2EA7, TActionClass_Retint_LightSourceFix, 0x3) // Red
+{
+	// Flag the light sources to update, actually do it later and only once to prevent redundancy.
+	RetintTemp::UpdateLightSources = true;
+
+	return 0;
+}
+
+// Same as above, but needed to work with pr#1202.
+// See Misc/Hooks.MapTint.cpp hook @ 0x683E7F.
+DEFINE_HOOK(0x683E94, Start_Scenario_RetintLightSourceFix, 0x5)
 {
 	// Flag the light sources to update, actually do it later and only once to prevent redundancy.
 	RetintTemp::UpdateLightSources = true;

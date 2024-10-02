@@ -10,7 +10,7 @@ public:
 		, ApplyRangeModifiers { false }
 		, TargetSnapDistance { Leptons(128) }
 		, PassThrough { false }
-	{}
+	{ }
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
@@ -32,13 +32,13 @@ class StraightTrajectory final : public PhobosTrajectory
 public:
 	StraightTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
 
-	StraightTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Straight)
-		, DetonationDistance { Leptons(102) }
-		, TargetSnapDistance { Leptons(128) }
-		, PassThrough { false }
+	StraightTrajectory(StraightTrajectoryType const* trajType) : PhobosTrajectory(TrajectoryFlag::Straight)
+		, DetonationDistance { trajType->DetonationDistance }
+		, TargetSnapDistance { trajType->TargetSnapDistance }
+		, PassThrough { trajType->PassThrough }
 		, FirerZPosition { 0 }
 		, TargetZPosition { 0 }
-	{}
+	{ }
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;

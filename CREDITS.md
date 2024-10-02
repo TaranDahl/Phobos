@@ -260,6 +260,7 @@ This page lists all the individual contributions to the project by their author.
   - Show designator & inhibitor range
   - Dump variables to file on scenario end / hotkey
   - "House owns TechnoType" and "House doesn't own TechnoType" trigger events
+  - Fixed units, buildings and tiberiums not being affected by map lighting color tint
   - Help with docs
   - Voxel light source position customization
 - **ChrisLv_CN** (work relicensed under [following permission](https://github.com/Phobos-developers/Phobos/blob/develop/images/ChrisLv-relicense.png)):
@@ -366,7 +367,7 @@ This page lists all the individual contributions to the project by their author.
 - **TaranDahl (航味麻酱)**
   - Skirmish AI "sell all buildings and set all technos to hunt" behavior dehardcode
   - Skirmish AI "gather when MCV deploy" behavior dehardcode
-  - Global value of `RepairBaseNodes` and `MCVRedeploys`
+  - Global value of `RepairBaseNodes`
 - **Ares developers**
   - YRpp and Syringe which are used, save/load, project foundation and generally useful code from Ares
   - unfinished RadTypes code

@@ -297,7 +297,7 @@ void BuildingExt::ExtData::ApplyPoweredKillSpawns()
 	}
 }
 
-bool BuildingExt::ExtData::HandleInfiltrate(HouseClass* pInfiltratorHouse,int moneybefore)
+bool BuildingExt::ExtData::HandleInfiltrate(HouseClass* pInfiltratorHouse, int moneybefore)
 {
 	auto pVictimHouse = this->OwnerObject()->Owner;
 	this->AccumulatedIncome += pVictimHouse->Available_Money() - moneybefore;
@@ -334,7 +334,7 @@ bool BuildingExt::ExtData::HandleInfiltrate(HouseClass* pInfiltratorHouse,int mo
 		int idx = this->TypeExtData->SpyEffect_VictimSuperWeapon;
 		if (idx >= 0)
 			launchTheSWHere(pVictimHouse->Supers.Items[idx], pVictimHouse);
-		
+
 		idx = this->TypeExtData->SpyEffect_InfiltratorSuperWeapon;
 		if (idx >= 0)
 			launchTheSWHere(pInfiltratorHouse->Supers.Items[idx], pInfiltratorHouse);
