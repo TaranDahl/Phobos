@@ -93,7 +93,7 @@ public:
 
 	DisperseTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Disperse)
 		, Type { static_cast<DisperseTrajectoryType*>(const_cast<PhobosTrajectoryType*>(pType)) }
-		, PreAimCoord { static_cast<CoordStruct>(Type->PreAimCoord) }
+		, PreAimCoord { Type->PreAimCoord.Get() }
 		, UseDisperseBurst { Type->UseDisperseBurst }
 		, LaunchSpeed { Type->LaunchSpeed }
 		, SuicideAboveRange { Type->SuicideAboveRange * Unsorted::LeptonsPerCell }

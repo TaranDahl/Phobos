@@ -86,7 +86,7 @@ public:
 		, Type { static_cast<StraightTrajectoryType*>(const_cast<PhobosTrajectoryType*>(pType)) }
 		, DetonationDistance { Type->DetonationDistance }
 		, PassDetonateTimer {}
-		, OffsetCoord { static_cast<CoordStruct>(Type->OffsetCoord) }
+		, OffsetCoord { Type->OffsetCoord.Get() }
 		, UseDisperseBurst { Type->UseDisperseBurst }
 		, ProximityImpact { Type->ProximityImpact }
 		, RemainingDistance { 1 }

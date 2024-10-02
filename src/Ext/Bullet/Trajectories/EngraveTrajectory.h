@@ -58,8 +58,8 @@ public:
 
 	EngraveTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Engrave)
 		, Type { static_cast<EngraveTrajectoryType*>(const_cast<PhobosTrajectoryType*>(pType)) }
-		, SourceCoord { static_cast<Point2D>(Type->SourceCoord) }
-		, TargetCoord { static_cast<Point2D>(Type->TargetCoord) }
+		, SourceCoord { Type->SourceCoord.Get() }
+		, TargetCoord { Type->TargetCoord.Get() }
 		, TheDuration { Type->TheDuration }
 		, LaserTimer {}
 		, DamageTimer {}
