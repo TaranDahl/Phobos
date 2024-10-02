@@ -1141,29 +1141,36 @@ DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstNoDelay, 0x5)
 	enum { SkipVanillaFire = 0x520A57 };
 
 	GET(InfantryClass* const, pThis, EBP);
-	GET(int, wpIdx, ESI);
+	GET(const int, wpIdx, ESI);
 	GET(AbstractClass* const, pTarget, EAX);
 
-	if (auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType)
+	if (const WeaponTypeClass* const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType)
 	{
-		if (auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
+		if (pWeapon->Burst > 1)
 		{
-			if (pWeapon->Burst > 1 && pWeaponExt->Burst_NoDelay)
+			if (const WeaponTypeExt::ExtData* const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
 			{
-				for (int i = 0; i != pWeapon->Burst; ++i)
-					pThis->Fire(pTarget, wpIdx);
+				if (pWeaponExt->Burst_NoDelay)
+				{
+					for (int i = 1; pThis->Fire(pTarget, wpIdx) && i != pWeapon->Burst; ++i)
+					{
+						const int rof = pThis->RearmTimer.TimeLeft;
+						pThis->RearmTimer.Start(0);
 
-				return SkipVanillaFire;
+						if (pThis->GetFireError(pTarget, wpIdx, true) != FireError::OK)
+						{
+							pThis->RearmTimer.Start(rof);
+							break;
+						}
+					}
+
+					return SkipVanillaFire;
+				}
 			}
 		}
 	}
 
 	return 0;
-}
-
-namespace BurstNoDelayTemp
-{
-	bool isProcessing = false;
 }
 
 DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
@@ -1171,40 +1178,36 @@ DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 	enum { SkipVanillaFire = 0x737063 };
 
 	GET(UnitClass* const, pThis, ESI);
-	GET(int, wpIdx, EDI);
+	GET(const int, wpIdx, EDI);
 	GET(AbstractClass* const, pTarget, EAX);
 
-	if (auto const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType)
+	if (const WeaponTypeClass* const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType)
 	{
-		if (auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
+		if (pWeapon->Burst > 1)
 		{
-			if (pWeapon->Burst > 1 && pWeaponExt->Burst_NoDelay)
+			if (const WeaponTypeExt::ExtData* const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
 			{
-				BurstNoDelayTemp::isProcessing = true;
+				if (pWeaponExt->Burst_NoDelay)
+				{
+					for (int i = 1; pThis->Fire(pTarget, wpIdx) && i != pWeapon->Burst; ++i)
+					{
+						const int rof = pThis->RearmTimer.TimeLeft;
+						pThis->RearmTimer.Start(0);
 
-				for (int i = 0; i != pWeapon->Burst; ++i)
-					pThis->Fire(pTarget, wpIdx);
+						if (pThis->GetFireError(pTarget, wpIdx, true) != FireError::OK)
+						{
+							pThis->RearmTimer.Start(rof);
+							break;
+						}
+					}
 
-				BurstNoDelayTemp::isProcessing = false;
-				return SkipVanillaFire;
+					return SkipVanillaFire;
+				}
 			}
 		}
 	}
 
 	return 0;
-}
-
-// Units check fire error again in the Fire vfunc.
-DEFINE_HOOK(0x7413C2, UnitClass_Fire_SkipROFError, 0x8)
-{
-	enum { Fire = 0x7413CA, DontFire = 0x74147B };
-
-	GET(FireError, err, EAX);
-
-	if (err == FireError::OK || err == FireError::REARM && BurstNoDelayTemp::isProcessing)
-		return Fire;
-
-	return DontFire;
 }
 
 DEFINE_HOOK(0x44B630, BuildingClass_MissionAttack_AnimDelayedFire, 0x6)
