@@ -1184,6 +1184,7 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 			if (AnimTypeClass* const pAnimType = pWeapon->Anim[animIndex])
 			{
 				AnimClass* const pAnim = GameCreate<AnimClass>(pAnimType, pBullet->Location);
+				pAnim->SetOwnerObject(pBullet->Owner);
 				pAnim->Owner = pOwner;
 
 				if (AnimExt::ExtData* const pAnimExt = AnimExt::ExtMap.Find(pAnim))
