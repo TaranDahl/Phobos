@@ -614,3 +614,11 @@ DEFINE_HOOK(0x51B20E, InfantryClass_AssignTarget_FireOnce, 0x6)
 
 	return 0;
 }
+
+DEFINE_HOOK(0x517BBD, InfantryClass_Constructor_LoadROT, 0x8)
+{
+	enum { ret = 0x517BCA };
+	GET(InfantryClass*, pThis, ESI);
+	pThis->PrimaryFacing.SetROT(pThis->Type->ROT);
+	return ret;
+}
