@@ -20,8 +20,8 @@ public:
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
 	virtual std::unique_ptr<PhobosTrajectory> CreateInstance() const override;
-	virtual TrajectoryFlag Flag() const { return TrajectoryFlag::Bombard; }
 	virtual void Read(CCINIClass* const pINI, const char* pSection) override;
+	virtual TrajectoryFlag Flag() const { return TrajectoryFlag::Bombard; }
 
 	Valueable<double> Height;
 	Valueable<double> FallPercent;
