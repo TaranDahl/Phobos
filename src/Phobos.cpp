@@ -26,7 +26,7 @@ bool Phobos::IsLoadingSaveGame = false;
 #ifdef STR_GIT_COMMIT
 const wchar_t* Phobos::VersionDescription = L"Phobos nightly build (" STR_GIT_COMMIT L" @ " STR_GIT_BRANCH L"). DO NOT SHIP IN MODS!";
 #elif !defined(IS_RELEASE_VER)
-const wchar_t* Phobos::VersionDescription = L" Phobos special merge build #b" _STR(BUILD_NUMBER) L"+3_0. Please test the build before shipping.";
+const wchar_t* Phobos::VersionDescription = L" Phobos special merge build #b" _STR(BUILD_NUMBER) L"+3_1. Please test the build before shipping.";
 #else
 //const wchar_t* Phobos::VersionDescription = L"Phobos release build v" FILE_VERSION_STR L".";
 #endif
