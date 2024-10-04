@@ -229,6 +229,7 @@ public:
 		Valueable<bool> EnableEnhancedExitCoords;
 		Valueable<bool> PlayerDestroyWalls;
 		Valueable<bool> DestroyOwnerlessWalls;
+		Valueable<bool> AIAngerOnAlly;
 
 		Valueable<double> AircraftLevelLightMultiplier;
 		Valueable<double> JumpjetLevelLightMultiplier;
@@ -430,6 +431,7 @@ public:
 			, EnableEnhancedExitCoords { false }
 			, PlayerDestroyWalls { false }
 			, DestroyOwnerlessWalls { false }
+			, AIAngerOnAlly { true }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
 			, VoxelLightSource { }
