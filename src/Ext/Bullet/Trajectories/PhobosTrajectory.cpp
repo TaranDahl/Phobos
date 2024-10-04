@@ -1,5 +1,3 @@
-#include "PhobosTrajectory.h"
-
 #include <Ext/BulletType/Body.h>
 #include <Ext/Bullet/Body.h>
 #include <Ext/WeaponType/Body.h>
@@ -14,15 +12,120 @@
 #include "ParabolaTrajectory.h"
 #include "TracingTrajectory.h"
 
+TrajectoryTypePointer::TrajectoryTypePointer(TrajectoryFlag flag)
+{
+	switch (flag)
+	{
+	case TrajectoryFlag::Straight:
+		_ptr = std::make_unique<StraightTrajectoryType>();
+		return;
+	case TrajectoryFlag::Bombard:
+		_ptr = std::make_unique<BombardTrajectoryType>();
+		return;
+	case TrajectoryFlag::Disperse:
+		_ptr = std::make_unique<DisperseTrajectoryType>();
+		return;
+	case TrajectoryFlag::Engrave:
+		_ptr = std::make_unique<EngraveTrajectoryType>();
+		return;
+	case TrajectoryFlag::Parabola:
+		_ptr = std::make_unique<ParabolaTrajectoryType>();
+		return;
+	case TrajectoryFlag::Tracing:
+		_ptr = std::make_unique<TracingTrajectoryType>();
+		return;
+	}
+	_ptr.reset();
+}
+
+namespace detail
+{
+	template <>
+	inline bool read<TrajectoryFlag>(TrajectoryFlag& value, INI_EX& parser, const char* pSection, const char* pKey)
+	{
+		if (parser.ReadString(pSection, pKey))
+		{
+			static std::pair<const char*, TrajectoryFlag> FlagNames[] =
+			{
+				{"Straight", TrajectoryFlag::Straight},
+				{"Bombard" ,TrajectoryFlag::Bombard},
+				{"Disperse", TrajectoryFlag::Disperse},
+				{"Engrave" ,TrajectoryFlag::Engrave},
+				{"Parabola", TrajectoryFlag::Parabola},
+				{"Tracing" ,TrajectoryFlag::Tracing},
+			};
+			for (auto [name, flag] : FlagNames)
+			{
+				if (_strcmpi(parser.value(), name) == 0)
+				{
+					value = flag;
+					return true;
+				}
+			}
+			Debug::INIParseFailed(pSection, pKey, parser.value(), "Expected a new trajectory type");
+		}
+
+		return false;
+	}
+}
+
+void TrajectoryTypePointer::LoadFromINI(CCINIClass* pINI, const char* pSection)
+{
+	INI_EX exINI(pINI);
+	Nullable<TrajectoryFlag> flag;
+	flag.Read(exINI, pSection, "Trajectory");// I assume this shit is parsed once and only once, so I keep the impl here
+	if (flag.isset())
+	{
+		if (!_ptr || _ptr->Flag != flag.Get())
+			std::construct_at(this, flag.Get());
+	}
+	if (_ptr)
+	{
+		_ptr->Trajectory_Speed.Read(exINI, pSection, "Trajectory.Speed");
+		_ptr->Read(pINI, pSection);
+	}
+}
+
+bool TrajectoryTypePointer::Load(PhobosStreamReader& Stm, bool RegisterForChange)
+{
+	PhobosTrajectoryType* PTR = nullptr;
+	if (!Stm.Load(PTR))
+		return false;
+	TrajectoryFlag flag;
+	if (PTR && Stm.Load(flag))
+	{
+		std::construct_at(this, flag);
+		PhobosSwizzle::RegisterChange(PTR, _ptr.get());
+		return _ptr->Load(Stm, RegisterForChange);
+	}
+	return true;
+}
+
+bool TrajectoryTypePointer::Save(PhobosStreamWriter& Stm) const
+{
+	auto* raw = get();
+	Stm.Process(raw);
+	if (raw)
+	{
+		Stm.Process(raw->Flag);
+		return raw->Save(Stm);
+	}
+	return true;
+}
+
 bool PhobosTrajectoryType::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 {
-	Stm.Process(this->Flag, false);
+	Stm
+		.Process(this->Flag)
+		.Process(this->Trajectory_Speed);
 	return true;
 }
 
 bool PhobosTrajectoryType::Save(PhobosStreamWriter& Stm) const
 {
-	Stm.Process(this->Flag);
+	Stm
+		.Process(this->Flag)
+		.Process(this->Trajectory_Speed);
 	return true;
 }
 
@@ -135,17 +238,7 @@ bool PhobosTrajectory::Save(PhobosStreamWriter& Stm) const
 	return true;
 }
 
-double PhobosTrajectory::GetTrajectorySpeed(BulletClass* pBullet) const
-{
-	if (auto const pBulletTypeExt = BulletTypeExt::ExtMap.Find(pBullet->Type))
-	{
-		const double trajectorySpeed = pBulletTypeExt->Trajectory_Speed;
-		return abs(trajectorySpeed) > 1e-10 ? trajectorySpeed : 0.001;
-	}
-
-	return 100.0;
-}
-
+#pragma region RedoAllThesePleaseItsInFactVerySimpleJustFollowTemplateDef_h
 PhobosTrajectory* PhobosTrajectory::LoadFromStream(PhobosStreamReader& Stm)
 {
 	PhobosTrajectory* pTraj = nullptr;
@@ -155,7 +248,7 @@ PhobosTrajectory* PhobosTrajectory::LoadFromStream(PhobosStreamReader& Stm)
 	if (pTraj)
 	{
 		Stm.Process(flag, false);
-
+		auto old = pTraj;
 		switch (flag)
 		{
 		case TrajectoryFlag::Straight:
@@ -182,6 +275,7 @@ PhobosTrajectory* PhobosTrajectory::LoadFromStream(PhobosStreamReader& Stm)
 
 		pTraj->Flag = flag;
 		pTraj->Load(Stm, false);
+		PhobosSwizzle::RegisterChange(old, pTraj);
 	}
 
 	return pTraj;
@@ -208,7 +302,7 @@ PhobosTrajectory* PhobosTrajectory::ProcessFromStream(PhobosStreamWriter& Stm, P
 	WriteToStream(Stm, pTraj);
 	return pTraj;
 }
-
+#pragma endregion
 
 DEFINE_HOOK(0x4666F7, BulletClass_AI_Trajectories, 0x6)
 {

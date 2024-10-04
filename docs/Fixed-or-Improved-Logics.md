@@ -174,7 +174,8 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Enable the observer data panel, which could only be displayed in multiplayer games, to also be displayed in skirmish games.
 - Fixed `Temporal=true` Warheads potentially crashing game if used to attack `Slaved=true` infantry.
 - Fixed some locomotors (Tunnel, Walk, Mech) getting stuck when moving too fast.
-- Animations with `MakeInfantry` and `UseNormalLight=false` that are drawn in unit palette will now have cell lighting changes applied on them (by Starkku)
+- Animations with `MakeInfantry` and `UseNormalLight=false` that are drawn in unit palette will now have cell lighting changes applied on them.
+- Removed 0 damage effect on jumpjet infantries from `InfDeath=9` warhead.
 - Fixed Nuke & Dominator Level lighting not applying to AircraftTypes.
 
 ## Fixes / interactions with other extensions

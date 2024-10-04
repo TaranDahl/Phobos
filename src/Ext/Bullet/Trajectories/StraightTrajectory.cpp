@@ -135,10 +135,7 @@ bool StraightTrajectory::Save(PhobosStreamWriter& Stm) const
 
 void StraightTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity)
 {
-	if (!this->Type) // After load
-		this->Type = this->GetTrajectoryType<StraightTrajectoryType>(pBullet);
-
-	StraightTrajectoryType* const pType = this->Type;
+	const StraightTrajectoryType* const pType = this->Type;
 	this->PassDetonateTimer.Start(pType->PassDetonateTimer > 0 ? pType->PassDetonateTimer : 0);
 	this->LastCasualty.reserve(1);
 	this->LastTargetCoord = pBullet->TargetCoords;
@@ -181,9 +178,6 @@ void StraightTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bu
 
 bool StraightTrajectory::OnAI(BulletClass* pBullet)
 {
-	if (!this->Type) // After load
-		this->Type = this->GetTrajectoryType<StraightTrajectoryType>(pBullet);
-
 	if (this->WaitOneFrame.IsTicking() && this->BulletPrepareCheck(pBullet))
 		return false;
 
@@ -193,7 +187,7 @@ bool StraightTrajectory::OnAI(BulletClass* pBullet)
 	if (this->BulletDetonatePreCheck(pBullet, straightSpeed))
 		return true;
 
-	StraightTrajectoryType* const pType = this->Type;
+	const StraightTrajectoryType* const pType = this->Type;
 
 	if (pType->PassDetonate)
 		this->PassWithDetonateAt(pBullet, pOwner);
@@ -211,7 +205,7 @@ bool StraightTrajectory::OnAI(BulletClass* pBullet)
 
 void StraightTrajectory::OnAIPreDetonate(BulletClass* pBullet)
 {
-	StraightTrajectoryType* const pType = this->Type;
+	const StraightTrajectoryType* const pType = this->Type;
 	TechnoClass* pTechno = abstract_cast<TechnoClass*>(pBullet->Target);
 	pBullet->Health = this->GetTheTrueDamage(pBullet->Health, pBullet, pTechno, true);
 
@@ -255,7 +249,7 @@ TrajectoryCheckReturnType StraightTrajectory::OnAITechnoCheck(BulletClass* pBull
 
 void StraightTrajectory::PrepareForOpenFire(BulletClass* pBullet)
 {
-	StraightTrajectoryType* const pType = this->Type;
+	const StraightTrajectoryType* const pType = this->Type;
 	double rotateAngle = 0.0;
 	const double straightSpeed = this->GetTrajectorySpeed(pBullet);
 	const AbstractClass* const pTarget = pBullet->Target;
@@ -411,7 +405,7 @@ void StraightTrajectory::PrepareForOpenFire(BulletClass* pBullet)
 
 int StraightTrajectory::GetVelocityZ(BulletClass* pBullet)
 {
-	StraightTrajectoryType* const pType = this->Type;
+	const StraightTrajectoryType* const pType = this->Type;
 	int bulletVelocity = static_cast<int>(pBullet->TargetCoords.Z - pBullet->SourceCoords.Z);
 
 	if (!pType->PassThrough)
@@ -474,7 +468,7 @@ bool StraightTrajectory::BulletDetonatePreCheck(BulletClass* pBullet, double str
 	if (this->RemainingDistance < 0)
 		return true;
 
-	StraightTrajectoryType* const pType = this->Type;
+	const StraightTrajectoryType* const pType = this->Type;
 
 	if (!pType->PassThrough && pBullet->TargetCoords.DistanceFrom(pBullet->Location) < this->DetonationDistance)
 		return true;
@@ -491,7 +485,7 @@ bool StraightTrajectory::BulletDetonatePreCheck(BulletClass* pBullet, double str
 //If the check result here is true, it only needs to be detonated in the next frame, without returning.
 void StraightTrajectory::BulletDetonateLastCheck(BulletClass* pBullet, HouseClass* pOwner, double straightSpeed)
 {
-	StraightTrajectoryType* const pType = this->Type;
+	const StraightTrajectoryType* const pType = this->Type;
 	bool velocityCheck = false;
 	double locationDistance = this->RemainingDistance;
 
@@ -581,7 +575,7 @@ void StraightTrajectory::BulletDetonateLastCheck(BulletClass* pBullet, HouseClas
 
 bool StraightTrajectory::CheckThroughAndSubjectInCell(BulletClass* pBullet, CellClass* pCell, HouseClass* pOwner)
 {
-	StraightTrajectoryType* const pType = this->Type;
+	const StraightTrajectoryType* const pType = this->Type;
 	ObjectClass* pObject = pCell->FirstObject;
 	TechnoClass* pNearest = nullptr;
 
@@ -632,7 +626,7 @@ void StraightTrajectory::PassWithDetonateAt(BulletClass* pBullet, HouseClass* pO
 {
 	if (this->PassDetonateTimer.Completed())
 	{
-		StraightTrajectoryType* const pType = this->Type;
+		const StraightTrajectoryType* const pType = this->Type;
 		this->PassDetonateTimer.Start(pType->PassDetonateDelay > 0 ? pType->PassDetonateDelay : 1);
 		CoordStruct detonateCoords = pBullet->Location;
 
@@ -652,7 +646,7 @@ void StraightTrajectory::PassWithDetonateAt(BulletClass* pBullet, HouseClass* pO
 //Select suitable targets and choose the closer targets then attack each target only once.
 void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* pOwner)
 {
-	StraightTrajectoryType* const pType = this->Type;
+	const StraightTrajectoryType* const pType = this->Type;
 
 	//Step 1: Find valid targets on the ground within range.
 	std::vector<CellClass*> recCellClass = this->GetCellsInProximityRadius(pBullet);
@@ -1165,7 +1159,7 @@ int StraightTrajectory::GetTheTrueDamage(int damage, BulletClass* pBullet, Techn
 	if (damage == 0)
 		return 0;
 
-	StraightTrajectoryType* const pType = this->Type;
+	const StraightTrajectoryType* const pType = this->Type;
 	double edgeAttenuation = pType->EdgeAttenuation > 0.0 ? pType->EdgeAttenuation : 0.0;
 
 	if (edgeAttenuation != 1.0)
@@ -1221,7 +1215,7 @@ bool StraightTrajectory::PassAndConfineAtHeight(BulletClass* pBullet, double str
 
 		if (abs(checkDifference) < 384 || !pBullet->Type->SubjectToCliffs)
 		{
-			StraightTrajectoryType* const pType = this->Type;
+			const StraightTrajectoryType* const pType = this->Type;
 			pBullet->Velocity.Z += static_cast<double>(checkDifference + pType->ConfineAtHeight);
 
 			if (!pType->PassDetonateLocal && this->CalculateBulletVelocity(pBullet, straightSpeed))

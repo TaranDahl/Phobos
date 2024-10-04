@@ -91,7 +91,7 @@ void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 {
 	auto const pType = this->GetTrajectoryType<BombardTrajectoryType>(pBullet);
 
-	this->Height = pType->Height + pBullet->TargetCoords.Z;
+	this->Height += pBullet->TargetCoords.Z;
 	// use scaling since RandomRanged only support int
 	this->FallScatterRange = pType->FallScatterRange;
 	this->FallSpeed = pType->FallSpeed ? pType->FallSpeed : this->GetTrajectorySpeed(pBullet);
