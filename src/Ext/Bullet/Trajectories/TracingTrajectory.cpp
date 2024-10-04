@@ -1,9 +1,9 @@
 #include "TracingTrajectory.h"
 #include <Ext/BulletType/Body.h>
 
-PhobosTrajectory* TracingTrajectoryType::CreateInstance() const
+std::unique_ptr<PhobosTrajectory> TracingTrajectoryType::CreateInstance() const
 {
-	return new TracingTrajectory(this);
+	return std::make_unique<TracingTrajectory>(this);
 }
 
 template<typename T>
@@ -59,9 +59,6 @@ bool TracingTrajectory::Save(PhobosStreamWriter& Stm) const
 
 void TracingTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity)
 {
-	if (!this->Type) // After load
-		this->Type = this->GetTrajectoryType<TracingTrajectoryType>(pBullet);
-
 	int duration = this->Type->TheDuration;
 
 	if (duration <= 0)
@@ -86,16 +83,12 @@ void TracingTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 
 bool TracingTrajectory::OnAI(BulletClass* pBullet)
 {
-	if (!this->Type) // After load
-		this->Type = this->GetTrajectoryType<TracingTrajectoryType>(pBullet);
-
 	if (auto const pTechno = pBullet->Owner)
 		pBullet->Target = pTechno->Target;
 
 	if (auto const pTarget = pBullet->Target)
 		pBullet->TargetCoords = pTarget->GetCoords();
 
-	const double trajectorySpeed = this->GetTrajectorySpeed(pBullet);
 	const CoordStruct distanceCoords = pBullet->TargetCoords - pBullet->Location; // TODO Need to calculate 1 frame ahead
 	const double distance = distanceCoords.Magnitude();
 
@@ -103,8 +96,8 @@ bool TracingTrajectory::OnAI(BulletClass* pBullet)
 	pBullet->Velocity.Y = static_cast<double>(distanceCoords.Y);
 	pBullet->Velocity.Z = static_cast<double>(distanceCoords.Z);
 
-	if (distance > trajectorySpeed)
-		pBullet->Velocity *= trajectorySpeed / distance;
+	if (distance > this->Speed)
+		pBullet->Velocity *= this->Speed / distance;
 
 	if (!this->ExistTimer.Completed())
 		return false;
