@@ -5,9 +5,9 @@
 
 #include <Ext/Bullet/Body.h>
 
-PhobosTrajectory* BombardTrajectoryType::CreateInstance() const
+std::unique_ptr<PhobosTrajectory> BombardTrajectoryType::CreateInstance() const
 {
-	return new BombardTrajectory(this);
+	return std::make_unique<BombardTrajectory>(this);
 }
 
 template<typename T>
