@@ -631,8 +631,7 @@ void BuildingTypeExt::DrawAdjacentLines()
 }
 
 void BuildingTypeExt::ExtData::Initialize()
-{
-}
+{ }
 
 // =============================
 // load / save

@@ -19,7 +19,7 @@ public:
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
-	virtual PhobosTrajectory* CreateInstance() const override;
+	virtual std::unique_ptr<PhobosTrajectory> CreateInstance() const override;
 	virtual void Read(CCINIClass* const pINI, const char* pSection) override;
 
 	Valueable<double> Height;
@@ -42,18 +42,19 @@ class BombardTrajectory final : public PhobosTrajectory
 public:
 	BombardTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
 
-	BombardTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Bombard)
+	BombardTrajectory(BombardTrajectoryType const* trajType) : PhobosTrajectory(TrajectoryFlag::Bombard, trajType->Trajectory_Speed)
+		, Type { trajType }
 		, IsFalling { false }
 		, RemainingDistance { 1 }
-		, Height { 0.0 }
-		, FallPercent { 1.0 }
-		, FallPercentShift { 0.0 }
-		, FallScatterRange { Leptons(0) }
-		, FallSpeed { 0.0 }
-		, TargetSnapDistance { Leptons(128) }
-		, FreeFallOnTarget { true }
-		, NoLaunch { false }
-		, TurningPointAnim {}
+		, Height { trajType->Height }
+		, FallPercent { trajType->FallPercent }
+		, FallPercentShift { trajType->FallPercentShift }
+		, FallScatterRange { trajType->FallScatterRange }
+		, FallSpeed { trajType->FallSpeed ? trajType->FallSpeed : trajType->Trajectory_Speed }
+		, TargetSnapDistance { trajType->TargetSnapDistance }
+		, FreeFallOnTarget { trajType->FreeFallOnTarget }
+		, NoLaunch { trajType->NoLaunch }
+		, TurningPointAnim { trajType->TurningPointAnim.Get(nullptr) }
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -66,6 +67,7 @@ public:
 	virtual TrajectoryCheckReturnType OnAITargetCoordCheck(BulletClass* pBullet) override;
 	virtual TrajectoryCheckReturnType OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno) override;
 
+	const BombardTrajectoryType* Type;
 	bool IsFalling;
 	int RemainingDistance;
 	double Height;

@@ -714,8 +714,7 @@ void HouseExt::ExtData::InvalidatePointer(void* ptr, bool bRemoved)
 // container
 
 HouseExt::ExtContainer::ExtContainer() : Container("HouseClass")
-{
-}
+{ }
 
 HouseExt::ExtContainer::~ExtContainer() = default;
 

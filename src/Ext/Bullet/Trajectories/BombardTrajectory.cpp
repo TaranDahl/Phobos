@@ -5,9 +5,9 @@
 
 #include <Ext/Bullet/Body.h>
 
-PhobosTrajectory* BombardTrajectoryType::CreateInstance() const
+std::unique_ptr<PhobosTrajectory> BombardTrajectoryType::CreateInstance() const
 {
-	return new BombardTrajectory(this);
+	return std::make_unique<BombardTrajectory>(this);
 }
 
 template<typename T>
@@ -59,6 +59,7 @@ template<typename T>
 void BombardTrajectory::Serialize(T& Stm)
 {
 	Stm
+		.Process(this->Type)
 		.Process(this->IsFalling)
 		.Process(this->RemainingDistance)
 		.Process(this->Height)
@@ -89,19 +90,10 @@ bool BombardTrajectory::Save(PhobosStreamWriter& Stm) const
 
 void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity)
 {
-	auto const pType = this->GetTrajectoryType<BombardTrajectoryType>(pBullet);
-
-	this->Height = pType->Height + pBullet->TargetCoords.Z;
+	this->Height += pBullet->TargetCoords.Z;
 	// use scaling since RandomRanged only support int
-	this->FallScatterRange = pType->FallScatterRange;
-	this->FallSpeed = pType->FallSpeed ? pType->FallSpeed : this->GetTrajectorySpeed(pBullet);
-	this->TargetSnapDistance = pType->TargetSnapDistance;
-	this->FreeFallOnTarget = pType->FreeFallOnTarget;
-	this->NoLaunch = pType->NoLaunch;
-	this->TurningPointAnim = pType->TurningPointAnim.Get(nullptr);
-	this->FallPercentShift = pType->FallPercentShift;
 	double fallPercentShift = ScenarioClass::Instance()->Random.RandomRanged(0, static_cast<int>(200 * this->FallPercentShift)) / 100.0;
-	this->FallPercent = pType->FallPercent - this->FallPercentShift + fallPercentShift;
+	this->FallPercent += fallPercentShift - this->FallPercentShift;
 
 	if (pBullet->Type->Inaccurate)
 	{
@@ -128,7 +120,7 @@ void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 		pBullet->Velocity.X = static_cast<double>(pBullet->TargetCoords.X - pBullet->SourceCoords.X) * this->FallPercent;
 		pBullet->Velocity.Y = static_cast<double>(pBullet->TargetCoords.Y - pBullet->SourceCoords.Y) * this->FallPercent;
 		pBullet->Velocity.Z = static_cast<double>(this->Height - pBullet->SourceCoords.Z);
-		pBullet->Velocity *= this->GetTrajectorySpeed(pBullet) / pBullet->Velocity.Magnitude();
+		pBullet->Velocity *= this->Speed / pBullet->Velocity.Magnitude();
 	}
 	else
 	{
@@ -222,15 +214,16 @@ void BombardTrajectory::OnAIVelocity(BulletClass* pBullet, BulletVelocity* pSpee
 
 				if (this->FallPercent != 1.0) // change position and recreate laser trail
 				{
+					const BombardTrajectoryType* const pType = this->Type;
 					auto pExt = BulletExt::ExtMap.Find(pBullet);
 					pExt->LaserTrails.clear();
 					CoordStruct target = pBullet->TargetCoords;
-					target.Z += static_cast<int>(this->GetTrajectoryType<BombardTrajectoryType>(pBullet)->Height);
+					target.Z += static_cast<int>(pType->Height);
 					pBullet->Limbo();
 					pBullet->Unlimbo(target, static_cast<DirType>(0));
 					pPosition->X = pBullet->TargetCoords.X;
 					pPosition->Y = pBullet->TargetCoords.Y;
-					pPosition->Z = pBullet->TargetCoords.Z + this->GetTrajectoryType<BombardTrajectoryType>(pBullet)->Height;
+					pPosition->Z = pBullet->TargetCoords.Z + pType->Height;
 
 					if (auto pTypeExt = BulletTypeExt::ExtMap.Find(pBullet->Type))
 					{

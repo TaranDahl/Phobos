@@ -292,12 +292,9 @@ void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget, TechnoE
 		// Apply other modifiers.
 		if (pTargetExt->Shield)
 		{
-			auto isShieldTypeEligible = [pTargetExt](Iterator<ShieldTypeClass*> elements) -> bool
+			auto isShieldTypeEligible = [pTargetExt](Iterator<ShieldTypeClass*> pShieldTypeList) -> bool
 				{
-				if (elements.size() > 0 && !elements.contains(pTargetExt->Shield->GetType()))
-						return false;
-
-					return true;
+					return !(pShieldTypeList.size() > 0 && !pShieldTypeList.contains(pTargetExt->Shield->GetType()));
 				};
 
 			if (this->Shield_Break && pTargetExt->Shield->IsActive() && isShieldTypeEligible(this->Shield_Break_Types.GetElements(this->Shield_AffectTypes)))
@@ -423,7 +420,7 @@ void WarheadTypeExt::ExtData::InterceptBullets(TechnoClass* pOwner, WeaponTypeCl
 	}
 	else
 	{
-		for (auto const pBullet: *BulletClass::Array)
+		for (auto const pBullet : *BulletClass::Array)
 		{
 			if (pBullet->Location.DistanceFrom(coords) > cellSpread * Unsorted::LeptonsPerCell)
 				continue;
@@ -538,4 +535,3 @@ double WarheadTypeExt::ExtData::GetCritChance(TechnoClass* pFirer) const
 
 	return critChance + extraChance;
 }
-
