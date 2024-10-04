@@ -35,50 +35,50 @@ DEFINE_HOOK(0x65DF81, TeamTypeClass_CreateMembers_LoadOntoTransport, 0x7)
 
 void __fastcall PayloadFix(FootClass* pThis)
 {
-	if (!pThis || pThis->WhatAmI() == AbstractType::Infantry)
+	if (!pThis || pThis->WhatAmI() == AbstractType::Infantry || pThis->Transporter || pThis->GetTechnoType()->Passengers <= 0 || pThis->Passengers.NumPassengers > 0)
 		return;
 
-	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
-
-	if (!pTypeExt || pTypeExt->InitialPayload_Types.empty() || pThis->Transporter || pThis->GetTechnoType()->Passengers <= 0 || pThis->Passengers.NumPassengers > 0)
-		return;
-
-	for (size_t idx = 0; idx < pTypeExt->InitialPayload_Types.size(); idx++)
+	if (const TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType()))
 	{
-		auto pType = pTypeExt->InitialPayload_Types.at(idx);
+		if (pTypeExt->InitialPayload_Types.empty())
+			return;
 
-		if (!pType || pType->WhatAmI() == AbstractType::AircraftType || pType->WhatAmI() == AbstractType::BuildingType)
-			continue;
-
-		int pNum = pTypeExt->InitialPayload_Nums.size() > idx ? pTypeExt->InitialPayload_Nums.at(idx) : 1;
-
-		if (pNum <= 0)
-			continue;
-
-		for (int i = 0; i < pNum; i++)
+		for (size_t idx = 0; idx < pTypeExt->InitialPayload_Types.size(); idx++)
 		{
-			TechnoClass* pTechno = abstract_cast<TechnoClass*>(pType->CreateObject(pThis->Owner));
-			FootClass* pFoot = abstract_cast<FootClass*>(pTechno);
+			if (TechnoTypeClass* const pType = pTypeExt->InitialPayload_Types.at(idx))
+			{
+				const AbstractType absType = pType->WhatAmI();
 
-			pTechno->OnBridge = pThis->OnBridge;
-			Unsorted::IKnowWhatImDoing++;
-			pTechno->Unlimbo(pThis->GetCoords(), DirType::North);
-			Unsorted::IKnowWhatImDoing--;
+				if (absType == AbstractType::InfantryType || pType->WhatAmI() == AbstractType::UnitType)
+				{
+					const int num = pTypeExt->InitialPayload_Nums.size() > idx ? pTypeExt->InitialPayload_Nums.at(idx) : 1;
 
-			pTechno->SetLocation(pThis->GetCoords());
-			pTechno->Limbo();
-			pTechno->Transporter = pThis;
+					for (int i = 0; i < num; i++)
+					{
+						FootClass* pFoot = static_cast<FootClass*>(pType->CreateObject(pThis->Owner));
 
-			const bool old = VocClass::VoicesEnabled;
-			VocClass::VoicesEnabled = false;
-			pThis->AddPassenger(pFoot);
-			VocClass::VoicesEnabled = old;
+						pFoot->OnBridge = pThis->OnBridge;
+						Unsorted::IKnowWhatImDoing++;
+						pFoot->Unlimbo(pThis->GetCoords(), DirType::North);
+						Unsorted::IKnowWhatImDoing--;
 
-			if (pThis->GetTechnoType()->OpenTopped)
-				pThis->EnteredOpenTopped(pTechno);
+						pFoot->SetLocation(pThis->GetCoords());
+						pFoot->Limbo();
+						pFoot->Transporter = pThis;
 
-			if (pThis->GetTechnoType()->Gunner && pThis->Passengers.NumPassengers == 1)
-				pThis->ReceiveGunner(pFoot);
+						const bool old = VocClass::VoicesEnabled;
+						VocClass::VoicesEnabled = false;
+						pThis->AddPassenger(pFoot);
+						VocClass::VoicesEnabled = old;
+
+						if (pThis->GetTechnoType()->OpenTopped)
+							pThis->EnteredOpenTopped(pFoot);
+
+						if (pThis->GetTechnoType()->Gunner && pThis->Passengers.NumPassengers == 1)
+							pThis->ReceiveGunner(pFoot);
+					}
+				}
+			}
 		}
 	}
 }

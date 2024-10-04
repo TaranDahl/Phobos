@@ -267,6 +267,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->EnableEnhancedExitCoords.Read(exINI, GameStrings::General, "EnableEnhancedExitCoords");
 	this->PlayerDestroyWalls.Read(exINI, GameStrings::General, "PlayerDestroyWalls");
 	this->DestroyOwnerlessWalls.Read(exINI, GameStrings::General, "DestroyOwnerlessWalls");
+	this->AIAngerOnAlly.Read(exINI, GameStrings::General, "AIAngerOnAlly");
 
 	this->AircraftLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "AircraftLevelLightMultiplier");
 	this->JumpjetLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "JumpjetLevelLightMultiplier");
@@ -533,6 +534,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->EnableEnhancedExitCoords)
 		.Process(this->PlayerDestroyWalls)
 		.Process(this->DestroyOwnerlessWalls)
+		.Process(this->AIAngerOnAlly)
 		.Process(this->AircraftLevelLightMultiplier)
 		.Process(this->JumpjetLevelLightMultiplier)
 		.Process(this->VoxelLightSource)

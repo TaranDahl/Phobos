@@ -151,6 +151,7 @@ public:
 		Valueable<int> SetAmbientRed;
 		Valueable<int> SetAmbientGreen;
 		Valueable<int> SetAmbientBlue;
+		Valueable<bool> ReduceTiberium;
 
 		Valueable<bool> Nonprovocative;
 
@@ -320,6 +321,7 @@ public:
 			, SetAmbientRed { -1 }
 			, SetAmbientGreen { -1 }
 			, SetAmbientBlue { -1 }
+			, ReduceTiberium { false }
 
 			, Nonprovocative { false }
 

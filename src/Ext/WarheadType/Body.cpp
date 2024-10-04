@@ -268,6 +268,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SetAmbientRed.Read(exINI, pSection, "SetAmbientRed");
 	this->SetAmbientGreen.Read(exINI, pSection, "SetAmbientGreen");
 	this->SetAmbientBlue.Read(exINI, pSection, "SetAmbientBlue");
+	this->ReduceTiberium.Read(exINI, pSection, "ReduceTiberium");
 
 	this->Nonprovocative.Read(exINI, pSection, "Nonprovocative");
 
@@ -502,6 +503,7 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SetAmbientRed)
 		.Process(this->SetAmbientGreen)
 		.Process(this->SetAmbientBlue)
+		.Process(this->ReduceTiberium)
 
 		.Process(this->AttachEffect_AttachTypes)
 		.Process(this->AttachEffect_RemoveTypes)

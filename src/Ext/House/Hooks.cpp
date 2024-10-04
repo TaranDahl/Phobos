@@ -401,3 +401,14 @@ DEFINE_HOOK(0x4FD8F7, HouseClass_UpdateAI_OnLastLegs, 0x10)
 
 	return ret;
 }
+
+// WW's code set anger on every houses, even on the allies.
+DEFINE_HOOK(0x4FD616, HouseClass_sub4FD500_DontAngerOnAlly, 0x9)
+{
+	enum { SkipAlly = 0x4FD6FE };
+
+	GET(HouseClass*, pThis, EBX);
+	GET(HouseClass*, pTargetHouse, ESI);
+
+	return (!RulesExt::Global()->AIAngerOnAlly && pThis->IsAlliedWith(pTargetHouse)) ? SkipAlly : 0;
+}
