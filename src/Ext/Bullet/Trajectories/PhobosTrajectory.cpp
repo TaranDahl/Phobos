@@ -82,6 +82,10 @@ void TrajectoryTypePointer::LoadFromINI(CCINIClass* pINI, const char* pSection)
 	if (_ptr)
 	{
 		_ptr->Trajectory_Speed.Read(exINI, pSection, "Trajectory.Speed");
+
+		if (abs(_ptr->Trajectory_Speed) < 1e-10)
+			_ptr->Trajectory_Speed = 0.001;
+
 		_ptr->Read(pINI, pSection);
 	}
 }
@@ -129,112 +133,17 @@ bool PhobosTrajectoryType::Save(PhobosStreamWriter& Stm) const
 	return true;
 }
 
-void PhobosTrajectoryType::CreateType(PhobosTrajectoryType*& pType, CCINIClass* const pINI, const char* pSection, const char* pKey)
-{
-	PhobosTrajectoryType* pNewType = nullptr;
-	bool bUpdateType = true;
-
-	pINI->ReadString(pSection, pKey, "", Phobos::readBuffer);
-	if (INIClass::IsBlank(Phobos::readBuffer))
-		pNewType = nullptr;
-	else if (_stricmp(Phobos::readBuffer, "Straight") == 0)
-		pNewType = DLLCreate<StraightTrajectoryType>();
-	else if (_stricmp(Phobos::readBuffer, "Bombard") == 0)
-		pNewType = DLLCreate<BombardTrajectoryType>();
-	else if (_stricmp(Phobos::readBuffer, "Disperse") == 0)
-		pNewType = DLLCreate<DisperseTrajectoryType>();
-	else if (_stricmp(Phobos::readBuffer, "Engrave") == 0)
-		pNewType = DLLCreate<EngraveTrajectoryType>();
-	else if (_stricmp(Phobos::readBuffer, "Parabola") == 0)
-		pNewType = DLLCreate<ParabolaTrajectoryType>();
-	else if (_stricmp(Phobos::readBuffer, "Tracing") == 0)
-		pNewType = DLLCreate<TracingTrajectoryType>();
-	else
-		bUpdateType = false;
-
-	if (pNewType)
-		pNewType->Read(pINI, pSection);
-
-	if (bUpdateType)
-	{
-		DLLDelete(pType); // GameDelete already has if(pType) check here.
-		pType = pNewType;
-	}
-}
-
-PhobosTrajectoryType* PhobosTrajectoryType::LoadFromStream(PhobosStreamReader& Stm)
-{
-	PhobosTrajectoryType* pType = nullptr;
-	TrajectoryFlag flag = TrajectoryFlag::Invalid;
-	Stm.Process(pType, false);
-
-	if (pType)
-	{
-		Stm.Process(flag, false);
-
-		switch (flag)
-		{
-		case TrajectoryFlag::Straight:
-			pType = DLLCreate<StraightTrajectoryType>();
-			break;
-		case TrajectoryFlag::Bombard:
-			pType = DLLCreate<BombardTrajectoryType>();
-			break;
-		case TrajectoryFlag::Disperse:
-			pType = DLLCreate<DisperseTrajectoryType>();
-			break;
-		case TrajectoryFlag::Engrave:
-			pType = DLLCreate<EngraveTrajectoryType>();
-			break;
-		case TrajectoryFlag::Parabola:
-			pType = DLLCreate<ParabolaTrajectoryType>();
-			break;
-		case TrajectoryFlag::Tracing:
-			pType = DLLCreate<TracingTrajectoryType>();
-			break;
-		default:
-			return nullptr;
-		}
-
-		pType->Flag = flag;
-		pType->Load(Stm, false);
-	}
-
-	return pType;
-}
-
-void PhobosTrajectoryType::WriteToStream(PhobosStreamWriter& Stm, PhobosTrajectoryType* pType)
-{
-	Stm.Process(pType);
-	if (pType)
-	{
-		Stm.Process(pType->Flag);
-		pType->Save(Stm);
-	}
-}
-
-PhobosTrajectoryType* PhobosTrajectoryType::ProcessFromStream(PhobosStreamReader& Stm, PhobosTrajectoryType* pType)
-{
-	UNREFERENCED_PARAMETER(pType);
-	return LoadFromStream(Stm);
-}
-
-PhobosTrajectoryType* PhobosTrajectoryType::ProcessFromStream(PhobosStreamWriter& Stm, PhobosTrajectoryType* pType)
-{
-	WriteToStream(Stm, pType);
-	return pType;
-}
-
 bool PhobosTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 {
 	Stm.Process(this->Flag, false);
-
+	Stm.Process(this->Speed, false);
 	return true;
 }
 
 bool PhobosTrajectory::Save(PhobosStreamWriter& Stm) const
 {
 	Stm.Process(this->Flag);
+	Stm.Process(this->Speed);
 	return true;
 }
 

@@ -26,8 +26,8 @@ class TracingTrajectory final : public PhobosTrajectory
 public:
 	TracingTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
 
-	TracingTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Tracing)
-		, Type { static_cast<TracingTrajectoryType*>(const_cast<PhobosTrajectoryType*>(pType)) }
+	TracingTrajectory(TracingTrajectoryType const* trajType) : PhobosTrajectory(TrajectoryFlag::Tracing, trajType->Trajectory_Speed)
+		, Type { trajType }
 		, ExistTimer {}
 	{}
 
@@ -41,7 +41,7 @@ public:
 	virtual TrajectoryCheckReturnType OnAITargetCoordCheck(BulletClass* pBullet) override;
 	virtual TrajectoryCheckReturnType OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno) override;
 
-	TracingTrajectoryType* Type;
+	const TracingTrajectoryType* Type;
 	CDTimerClass ExistTimer;
 
 private:

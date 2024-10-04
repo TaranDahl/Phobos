@@ -91,13 +91,13 @@ class DisperseTrajectory final : public PhobosTrajectory
 public:
 	DisperseTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
 
-	DisperseTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Disperse)
-		, Type { static_cast<DisperseTrajectoryType*>(const_cast<PhobosTrajectoryType*>(pType)) }
-		, PreAimCoord { Type->PreAimCoord.Get() }
-		, UseDisperseBurst { Type->UseDisperseBurst }
-		, LaunchSpeed { Type->LaunchSpeed }
-		, SuicideAboveRange { Type->SuicideAboveRange * Unsorted::LeptonsPerCell }
-		, WeaponCount { Type->WeaponCount }
+	DisperseTrajectory(DisperseTrajectoryType const* trajType) : PhobosTrajectory(TrajectoryFlag::Disperse, trajType->Trajectory_Speed)
+		, Type { trajType }
+		, PreAimCoord { trajType->PreAimCoord.Get() }
+		, UseDisperseBurst { trajType->UseDisperseBurst }
+		, LaunchSpeed { trajType->LaunchSpeed }
+		, SuicideAboveRange { trajType->SuicideAboveRange * Unsorted::LeptonsPerCell }
+		, WeaponCount { trajType->WeaponCount }
 		, WeaponTimer {}
 		, InStraight { false }
 		, Accelerate { true }
@@ -122,7 +122,7 @@ public:
 	virtual TrajectoryCheckReturnType OnAITargetCoordCheck(BulletClass* pBullet) override;
 	virtual TrajectoryCheckReturnType OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno) override;
 
-	DisperseTrajectoryType* Type;
+	const DisperseTrajectoryType* Type;
 	CoordStruct PreAimCoord;
 	bool UseDisperseBurst;
 	double LaunchSpeed;

@@ -56,11 +56,11 @@ class EngraveTrajectory final : public PhobosTrajectory
 public:
 	EngraveTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
 
-	EngraveTrajectory(PhobosTrajectoryType const* pType) : PhobosTrajectory(TrajectoryFlag::Engrave)
-		, Type { static_cast<EngraveTrajectoryType*>(const_cast<PhobosTrajectoryType*>(pType)) }
-		, SourceCoord { Type->SourceCoord.Get() }
-		, TargetCoord { Type->TargetCoord.Get() }
-		, TheDuration { Type->TheDuration }
+	EngraveTrajectory(EngraveTrajectoryType const* trajType) : PhobosTrajectory(TrajectoryFlag::Engrave, trajType->Trajectory_Speed)
+		, Type { trajType }
+		, SourceCoord { trajType->SourceCoord.Get() }
+		, TargetCoord { trajType->TargetCoord.Get() }
+		, TheDuration { trajType->TheDuration }
 		, LaserTimer {}
 		, DamageTimer {}
 		, TechnoInLimbo { false }
@@ -79,7 +79,7 @@ public:
 	virtual TrajectoryCheckReturnType OnAITargetCoordCheck(BulletClass* pBullet) override;
 	virtual TrajectoryCheckReturnType OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno) override;
 
-	EngraveTrajectoryType* Type;
+	const EngraveTrajectoryType* Type;
 	Point2D SourceCoord;
 	Point2D TargetCoord;
 	int TheDuration;

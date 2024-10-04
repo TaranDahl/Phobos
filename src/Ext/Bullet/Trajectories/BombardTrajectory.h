@@ -43,17 +43,18 @@ public:
 	BombardTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
 
 	BombardTrajectory(BombardTrajectoryType const* trajType) : PhobosTrajectory(TrajectoryFlag::Bombard, trajType->Trajectory_Speed)
+		, Type { trajType }
 		, IsFalling { false }
 		, RemainingDistance { 1 }
 		, Height { trajType->Height }
-		, FallPercent { 1.0 }
-		, FallPercentShift { 0.0 }
-		, FallScatterRange { Leptons(0) }
-		, FallSpeed { 0.0 }
-		, TargetSnapDistance { Leptons(128) }
-		, FreeFallOnTarget { true }
-		, NoLaunch { false }
-		, TurningPointAnim {}
+		, FallPercent { trajType->FallPercent }
+		, FallPercentShift { trajType->FallPercentShift }
+		, FallScatterRange { trajType->FallScatterRange }
+		, FallSpeed { trajType->FallSpeed ? trajType->FallSpeed : trajType->Trajectory_Speed }
+		, TargetSnapDistance { trajType->TargetSnapDistance }
+		, FreeFallOnTarget { trajType->FreeFallOnTarget }
+		, NoLaunch { trajType->NoLaunch }
+		, TurningPointAnim { trajType->TurningPointAnim.Get(nullptr) }
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -66,6 +67,7 @@ public:
 	virtual TrajectoryCheckReturnType OnAITargetCoordCheck(BulletClass* pBullet) override;
 	virtual TrajectoryCheckReturnType OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno) override;
 
+	const BombardTrajectoryType* Type;
 	bool IsFalling;
 	int RemainingDistance;
 	double Height;
