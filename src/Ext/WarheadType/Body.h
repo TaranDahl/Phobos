@@ -149,6 +149,8 @@ public:
 		Valueable<bool> SuppressReflectDamage;
 		ValueableVector<AttachEffectTypeClass*> SuppressReflectDamage_Types;
 
+		Valueable<bool> ReduceTiberium;
+
 		// Ares tags
 		// http://ares-developers.github.io/Ares-docs/new/warheads/general.html
 		Valueable<bool> AffectsEnemies;
@@ -314,6 +316,8 @@ public:
 			, RemainingAnimCreationInterval { 0 }
 			, PossibleCellSpreadDetonate { false }
 			, DamageAreaTarget {}
+
+			, ReduceTiberium { false }
 		{ }
 
 		void ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget);

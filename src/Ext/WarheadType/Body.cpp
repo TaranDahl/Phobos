@@ -266,6 +266,8 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SuppressReflectDamage.Read(exINI, pSection, "SuppressReflectDamage");
 	this->SuppressReflectDamage_Types.Read(exINI, pSection, "SuppressReflectDamage.Types");
 
+	this->ReduceTiberium.Read(exINI, pSection, "ReduceTiberium");
+
 	// Convert.From & Convert.To
 	TypeConvertGroup::Parse(this->Convert_Pairs, exINI, pSection, AffectedHouse::All);
 
@@ -484,6 +486,8 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->RemoveInflictedLocomotor)
 
 		.Process(this->Nonprovocative)
+
+		.Process(this->ReduceTiberium)
 
 		// Ares tags
 		.Process(this->AffectsEnemies)

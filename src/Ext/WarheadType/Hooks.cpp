@@ -44,6 +44,17 @@ DEFINE_HOOK(0x489286, MapClass_DamageArea, 0x6)
 
 	return 0;
 }
+
+DEFINE_HOOK(0x48962A, MapClass_DamageArea_ReduceTiberium, 0x6)
+{
+	enum { ReduceTiberium = 0x48964F, VanillaCheck = 0 };
+
+	GET(WarheadTypeClass* const, pWH, ESI);
+
+	auto const pWHExt = WarheadTypeExt::ExtMap.Find(pWH);
+	return pWHExt->ReduceTiberium ? ReduceTiberium : VanillaCheck;
+}
+
 #pragma endregion
 
 DEFINE_HOOK(0x48A551, WarheadTypeClass_AnimList_SplashList, 0x6)
