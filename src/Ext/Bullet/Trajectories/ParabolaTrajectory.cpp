@@ -5,9 +5,9 @@
 #include <OverlayTypeClass.h>
 #include <ScenarioClass.h>
 
-PhobosTrajectory* ParabolaTrajectoryType::CreateInstance() const
+std::unique_ptr<PhobosTrajectory> ParabolaTrajectoryType::CreateInstance() const
 {
-	return new ParabolaTrajectory(this);
+	return std::make_unique<ParabolaTrajectory>(this);
 }
 
 template<typename T>

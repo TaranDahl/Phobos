@@ -133,6 +133,18 @@ bool TrajectoryPointer::Load(PhobosStreamReader& Stm, bool registerForChange)
 		case TrajectoryFlag::Bombard:
 			_ptr = std::make_unique<BombardTrajectory>(noinit_t {});
 			break;
+		case TrajectoryFlag::Disperse:
+			_ptr = std::make_unique<DisperseTrajectory>(noinit_t {});
+			break;
+		case TrajectoryFlag::Engrave:
+			_ptr = std::make_unique<EngraveTrajectory>(noinit_t {});
+			break;
+		case TrajectoryFlag::Parabola:
+			_ptr = std::make_unique<ParabolaTrajectory>(noinit_t {});
+			break;
+		case TrajectoryFlag::Tracing:
+			_ptr = std::make_unique<TracingTrajectory>(noinit_t {});
+			break;
 		default:
 			_ptr.reset();
 			break;

@@ -15,9 +15,9 @@
 #include <Utilities/Helpers.Alex.h>
 #include <AircraftTrackerClass.h>
 
-PhobosTrajectory* DisperseTrajectoryType::CreateInstance() const
+std::unique_ptr<PhobosTrajectory> DisperseTrajectoryType::CreateInstance() const
 {
-	return new DisperseTrajectory(this);
+	return std::make_unique<DisperseTrajectory>(this);
 }
 
 template<typename T>
@@ -1036,7 +1036,7 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 
 			if (flag == TrajectoryFlag::Disperse)
 			{
-				DisperseTrajectory* const pTrajectory = static_cast<DisperseTrajectory*>(pBulletExt->Trajectory);
+				DisperseTrajectory* const pTrajectory = static_cast<DisperseTrajectory*>(pBulletExt->Trajectory.get());
 				const DisperseTrajectoryType* const pTrajType = pTrajectory->Type;
 				pTrajectory->FirepowerMult = this->FirepowerMult;
 
@@ -1073,7 +1073,7 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 			}
 			else if (flag == TrajectoryFlag::Straight)
 			{
-				StraightTrajectory* const pTrajectory = static_cast<StraightTrajectory*>(pBulletExt->Trajectory);
+				StraightTrajectory* const pTrajectory = static_cast<StraightTrajectory*>(pBulletExt->Trajectory.get());
 				const StraightTrajectoryType* const pTrajType = pTrajectory->Type;
 				pTrajectory->FirepowerMult = this->FirepowerMult;
 
@@ -1116,7 +1116,7 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 			}
 			else if (flag == TrajectoryFlag::Parabola)
 			{
-				ParabolaTrajectory* const pTrajectory = static_cast<ParabolaTrajectory*>(pBulletExt->Trajectory);
+				ParabolaTrajectory* const pTrajectory = static_cast<ParabolaTrajectory*>(pBulletExt->Trajectory.get());
 				const ParabolaTrajectoryType* const pTrajType = pTrajectory->Type;
 
 				//The parabola trajectory bullets has LeadTimeCalculate=true are not calculate its velocity yet.

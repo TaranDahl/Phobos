@@ -6,9 +6,9 @@
 #include <TacticalClass.h>
 #include <LaserDrawClass.h>
 
-PhobosTrajectory* EngraveTrajectoryType::CreateInstance() const
+std::unique_ptr<PhobosTrajectory> EngraveTrajectoryType::CreateInstance() const
 {
-	return new EngraveTrajectory(this);
+	return std::make_unique<EngraveTrajectory>(this);
 }
 
 template<typename T>
