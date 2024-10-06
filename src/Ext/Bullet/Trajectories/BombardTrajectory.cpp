@@ -60,8 +60,6 @@ void BombardTrajectory::Serialize(T& Stm)
 {
 	Stm
 		.Process(this->Type)
-		.Process(this->IsFalling)
-		.Process(this->RemainingDistance)
 		.Process(this->Height)
 		.Process(this->FallPercent)
 		.Process(this->FallPercentShift)
@@ -71,19 +69,19 @@ void BombardTrajectory::Serialize(T& Stm)
 		.Process(this->FreeFallOnTarget)
 		.Process(this->NoLaunch)
 		.Process(this->TurningPointAnim)
+		.Process(this->IsFalling)
+		.Process(this->RemainingDistance)
 		;
 }
 
 bool BombardTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 {
-	this->PhobosTrajectory::Load(Stm, false);
 	this->Serialize(Stm);
 	return true;
 }
 
 bool BombardTrajectory::Save(PhobosStreamWriter& Stm) const
 {
-	this->PhobosTrajectory::Save(Stm);
 	const_cast<BombardTrajectory*>(this)->Serialize(Stm);
 	return true;
 }
@@ -120,7 +118,7 @@ void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 		pBullet->Velocity.X = static_cast<double>(pBullet->TargetCoords.X - pBullet->SourceCoords.X) * this->FallPercent;
 		pBullet->Velocity.Y = static_cast<double>(pBullet->TargetCoords.Y - pBullet->SourceCoords.Y) * this->FallPercent;
 		pBullet->Velocity.Z = static_cast<double>(this->Height - pBullet->SourceCoords.Z);
-		pBullet->Velocity *= this->Speed / pBullet->Velocity.Magnitude();
+		pBullet->Velocity *= this->Type->Trajectory_Speed / pBullet->Velocity.Magnitude();
 	}
 	else
 	{

@@ -7,13 +7,13 @@ class TracingTrajectoryType final : public PhobosTrajectoryType
 public:
 	TracingTrajectoryType() : PhobosTrajectoryType()
 		, TheDuration { 0 }
-	{}
+	{ }
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
 	virtual std::unique_ptr<PhobosTrajectory> CreateInstance() const override;
 	virtual void Read(CCINIClass* const pINI, const char* pSection) override;
-	virtual TrajectoryFlag Flag() const { return TrajectoryFlag::Tracing; }
+	virtual TrajectoryFlag Flag() const override { return TrajectoryFlag::Tracing; }
 
 	Valueable<int> TheDuration;
 
@@ -25,16 +25,15 @@ private:
 class TracingTrajectory final : public PhobosTrajectory
 {
 public:
-	TracingTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
+	TracingTrajectory(noinit_t) { }
 
-	TracingTrajectory(TracingTrajectoryType const* trajType) : PhobosTrajectory(trajType->Trajectory_Speed)
-		, Type { trajType }
+	TracingTrajectory(TracingTrajectoryType const* trajType) : Type { trajType }
 		, ExistTimer {}
-	{}
+	{ }
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
-	virtual TrajectoryFlag Flag() const { return TrajectoryFlag::Tracing; }
+	virtual TrajectoryFlag Flag() const override { return TrajectoryFlag::Tracing; }
 	virtual void OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity) override;
 	virtual bool OnAI(BulletClass* pBullet) override;
 	virtual void OnAIPreDetonate(BulletClass* pBullet) override;
