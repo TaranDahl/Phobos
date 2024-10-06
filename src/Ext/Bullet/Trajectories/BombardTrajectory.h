@@ -21,7 +21,7 @@ public:
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
 	virtual std::unique_ptr<PhobosTrajectory> CreateInstance() const override;
 	virtual void Read(CCINIClass* const pINI, const char* pSection) override;
-	virtual TrajectoryFlag Flag() const { return TrajectoryFlag::Bombard; }
+	virtual TrajectoryFlag Flag() const override { return TrajectoryFlag::Bombard; }
 
 	Valueable<double> Height;
 	Valueable<double> FallPercent;
@@ -41,12 +41,9 @@ private:
 class BombardTrajectory final : public PhobosTrajectory
 {
 public:
-	BombardTrajectory(noinit_t) :PhobosTrajectory { noinit_t{} } { }
+	BombardTrajectory(noinit_t) { }
 
-	BombardTrajectory(BombardTrajectoryType const* trajType) : PhobosTrajectory(trajType->Trajectory_Speed)
-		, Type { trajType }
-		, IsFalling { false }
-		, RemainingDistance { 1 }
+	BombardTrajectory(BombardTrajectoryType const* trajType) : Type { trajType }
 		, Height { trajType->Height }
 		, FallPercent { trajType->FallPercent }
 		, FallPercentShift { trajType->FallPercentShift }
@@ -56,11 +53,13 @@ public:
 		, FreeFallOnTarget { trajType->FreeFallOnTarget }
 		, NoLaunch { trajType->NoLaunch }
 		, TurningPointAnim { trajType->TurningPointAnim.Get(nullptr) }
+		, IsFalling { false }
+		, RemainingDistance { 1 }
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
-	virtual TrajectoryFlag Flag() const { return TrajectoryFlag::Bombard; }
+	virtual TrajectoryFlag Flag() const override { return TrajectoryFlag::Bombard; }
 	virtual void OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity) override;
 	virtual bool OnAI(BulletClass* pBullet) override;
 	virtual void OnAIPreDetonate(BulletClass* pBullet) override;
@@ -69,8 +68,6 @@ public:
 	virtual TrajectoryCheckReturnType OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno) override;
 
 	const BombardTrajectoryType* Type;
-	bool IsFalling;
-	int RemainingDistance;
 	double Height;
 	double FallPercent;
 	double FallPercentShift;
@@ -80,6 +77,8 @@ public:
 	bool FreeFallOnTarget;
 	bool NoLaunch;
 	AnimTypeClass* TurningPointAnim;
+	bool IsFalling;
+	int RemainingDistance;
 
 private:
 	template <typename T>
