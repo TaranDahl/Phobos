@@ -1007,7 +1007,7 @@ BulletVelocity ParabolaTrajectory::GetGroundNormalVector(BulletClass* pBullet, C
 		{
 			if (!this->CheckBulletHitCliff(cell.X, cell.Y + reverseSgnY, bulletHeight, lastCellHeight))
 			{
-				if (!this->CheckBulletHitCliff(cell.X - reverseSgnX, cell.Y, bulletHeight, lastCellHeight))
+				if (!this->CheckBulletHitCliff(cell.X - reverseSgnX, cell.Y + reverseSgnY, bulletHeight, lastCellHeight))
 					return BulletVelocity{ 0.0, static_cast<double>(reverseSgnY), 0.0 };
 
 				index = 2;
