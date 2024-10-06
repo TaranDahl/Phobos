@@ -45,14 +45,12 @@ void TracingTrajectory::Serialize(T& Stm)
 
 bool TracingTrajectory::Load(PhobosStreamReader& Stm, bool RegisterForChange)
 {
-	this->PhobosTrajectory::Load(Stm, false);
 	this->Serialize(Stm);
 	return true;
 }
 
 bool TracingTrajectory::Save(PhobosStreamWriter& Stm) const
 {
-	this->PhobosTrajectory::Save(Stm);
 	const_cast<TracingTrajectory*>(this)->Serialize(Stm);
 	return true;
 }
@@ -114,14 +112,14 @@ void TracingTrajectory::InitializeDuration(BulletClass* pBullet, int duration)
 
 void TracingTrajectory::ChangeVelocity(BulletClass* pBullet)
 {
+	const TracingTrajectoryType* const pType = this->Type;
 	const CoordStruct distanceCoords = pBullet->TargetCoords - pBullet->Location;
+	const double distance = distanceCoords.Magnitude();
 
 	pBullet->Velocity.X = static_cast<double>(distanceCoords.X);
 	pBullet->Velocity.Y = static_cast<double>(distanceCoords.Y);
 	pBullet->Velocity.Z = static_cast<double>(distanceCoords.Z);
 
-	const double distance = distanceCoords.Magnitude();
-
-	if (distance > this->Speed)
-		pBullet->Velocity *= this->Speed / distance;
+	if (distance > pType->Trajectory_Speed)
+		pBullet->Velocity *= pType->Trajectory_Speed / distance;
 }
