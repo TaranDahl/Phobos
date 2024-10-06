@@ -59,26 +59,8 @@ bool TracingTrajectory::Save(PhobosStreamWriter& Stm) const
 
 void TracingTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity)
 {
-	int duration = this->Type->TheDuration;
-
-	if (duration <= 0)
-	{
-		if (auto const pWeapon = pBullet->WeaponType)
-		{
-			const int weaponROF = pBullet->WeaponType->ROF;
-
-			if (weaponROF > 10)
-				duration = weaponROF - 10;
-			else
-				duration = 1;
-		}
-		else
-		{
-			duration = 120;
-		}
-	}
-
-	this->ExistTimer.Start(duration);
+	const TracingTrajectoryType* const pType = this->Type;
+	this->InitializeDuration(pBullet, pType->TheDuration);
 }
 
 bool TracingTrajectory::OnAI(BulletClass* pBullet)
@@ -89,15 +71,7 @@ bool TracingTrajectory::OnAI(BulletClass* pBullet)
 	if (auto const pTarget = pBullet->Target)
 		pBullet->TargetCoords = pTarget->GetCoords();
 
-	const CoordStruct distanceCoords = pBullet->TargetCoords - pBullet->Location; // TODO Need to calculate 1 frame ahead
-	const double distance = distanceCoords.Magnitude();
-
-	pBullet->Velocity.X = static_cast<double>(distanceCoords.X);
-	pBullet->Velocity.Y = static_cast<double>(distanceCoords.Y);
-	pBullet->Velocity.Z = static_cast<double>(distanceCoords.Z);
-
-	if (distance > this->Speed)
-		pBullet->Velocity *= this->Speed / distance;
+	this->ChangeVelocity(pBullet);
 
 	if (!this->ExistTimer.Completed())
 		return false;
@@ -123,4 +97,31 @@ TrajectoryCheckReturnType TracingTrajectory::OnAITargetCoordCheck(BulletClass* p
 TrajectoryCheckReturnType TracingTrajectory::OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno)
 {
 	return TrajectoryCheckReturnType::SkipGameCheck;
+}
+
+void TracingTrajectory::InitializeDuration(BulletClass* pBullet, int duration)
+{
+	if (duration <= 0)
+	{
+		if (const WeaponTypeClass* const pWeapon = pBullet->WeaponType)
+			duration = (pWeapon->ROF > 10) ? pWeapon->ROF - 10 : 1;
+		else
+			duration = 120;
+	}
+
+	this->ExistTimer.Start(duration);
+}
+
+void TracingTrajectory::ChangeVelocity(BulletClass* pBullet)
+{
+	const CoordStruct distanceCoords = pBullet->TargetCoords - pBullet->Location;
+
+	pBullet->Velocity.X = static_cast<double>(distanceCoords.X);
+	pBullet->Velocity.Y = static_cast<double>(distanceCoords.Y);
+	pBullet->Velocity.Z = static_cast<double>(distanceCoords.Z);
+
+	const double distance = distanceCoords.Magnitude();
+
+	if (distance > this->Speed)
+		pBullet->Velocity *= this->Speed / distance;
 }
