@@ -35,7 +35,7 @@ public:
 		, SubjectToGround { false }
 		, ConfineAtHeight { 0 }
 		, EdgeAttenuation { 1.0 }
-	{}
+	{ }
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
 	virtual bool Save(PhobosStreamWriter& Stm) const override;
