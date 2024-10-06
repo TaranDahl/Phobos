@@ -26,7 +26,7 @@ bool Phobos::IsLoadingSaveGame = false;
 #ifdef STR_GIT_COMMIT
 const wchar_t* Phobos::VersionDescription = L"Phobos nightly build (" STR_GIT_COMMIT L" @ " STR_GIT_BRANCH L"). DO NOT SHIP IN MODS!";
 #elif !defined(IS_RELEASE_VER)
-const wchar_t* Phobos::VersionDescription = L" Phobos special merge build #b" _STR(BUILD_NUMBER) L"+3_1. Please test the build before shipping.";
+const wchar_t* Phobos::VersionDescription = L" Phobos special merge build #b" _STR(BUILD_NUMBER) L"+3_2. Please test the build before shipping.";
 #else
 //const wchar_t* Phobos::VersionDescription = L"Phobos release build v" FILE_VERSION_STR L".";
 #endif
@@ -217,10 +217,10 @@ DEFINE_HOOK(0x4F4583, GScreenClass_DrawText, 0x6)
 		};
 
 		Point2D location { rect.X + 5,5 };
-
-		DSurface::Composite->FillRect(&rect, COLOR_BLACK);
-		DSurface::Composite->DrawRect(&rect, 0x0518);
-		DSurface::Composite->DrawText(Phobos::VersionDescription, &location, 0x0518);
+		ColorStruct color { 0, 0, 0 };
+		DSurface::Composite->FillRectTrans(&rect, &color, 50);
+		DSurface::Composite->DrawRect(&rect, 0x061C);
+		DSurface::Composite->DrawText(Phobos::VersionDescription, &location, 0x061C);
 	}
 	return 0;
 }
