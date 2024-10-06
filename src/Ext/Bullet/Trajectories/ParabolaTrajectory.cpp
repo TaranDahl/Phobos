@@ -992,15 +992,15 @@ BulletVelocity ParabolaTrajectory::GetGroundNormalVector(BulletClass* pBullet, C
 	const BulletVelocity velocity = horizontalVelocity > 362.1 ? pBullet->Velocity * (362.1 / horizontalVelocity) : pBullet->Velocity;
 	const CoordStruct velocityCoords { static_cast<int>(velocity.X), static_cast<int>(velocity.Y), static_cast<int>(velocity.Z) };
 
-	const int cellHeight = pCell->GetCoords().Z;
+	const int cellHeight = pCell->Level * Unsorted::LevelHeight;
 	const int bulletHeight = pBullet->Location.Z;
 	const int lastCellHeight = MapClass::Instance->GetCellFloorHeight(pBullet->Location - velocityCoords);
 
 	if (bulletHeight < cellHeight && (cellHeight - lastCellHeight) > 384)
 	{
 		CellStruct cell = pCell->MapCoords;
-		const short reverseSgnX = pBullet->Velocity.X > -(1e-10) ? -1 : 1;
-		const short reverseSgnY = pBullet->Velocity.Y > -(1e-10) ? -1 : 1;
+		const short reverseSgnX = pBullet->Velocity.X > 0.0 ? -1 : 1;
+		const short reverseSgnY = pBullet->Velocity.Y > 0.0 ? -1 : 1;
 		int index = 0;
 
 		if (this->CheckBulletHitCliff(cell.X + reverseSgnX, cell.Y, bulletHeight, lastCellHeight))
@@ -1049,7 +1049,7 @@ bool ParabolaTrajectory::CheckBulletHitCliff(short X, short Y, int bulletHeight,
 {
 	if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(CellStruct{ X, Y }))
 	{
-		const int cellHeight = pCell->GetCoords().Z;
+		const int cellHeight = pCell->Level * Unsorted::LevelHeight;
 
 		if (bulletHeight < cellHeight && (cellHeight - lastCellHeight) > 384)
 			return true;
