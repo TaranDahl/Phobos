@@ -48,4 +48,7 @@ public:
 private:
 	template <typename T>
 	void Serialize(T& Stm);
+
+	void InitializeDuration(BulletClass* pBullet, int duration);
+	void ChangeVelocity(BulletClass* pBullet);
 };
