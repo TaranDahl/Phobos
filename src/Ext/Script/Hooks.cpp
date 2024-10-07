@@ -139,11 +139,13 @@ DEFINE_HOOK(0x6ECCF3, TeamClass_UpdateScriptAction16_UsePhobosTargeting, 0x7)
 	int targetMask = -1;
 	int targetArg = scriptArg % 256;
 	scriptArg /= 256;
-	int calcThreatMode = scriptArg % 4;
-	scriptArg /= 4;
+	int calcThreatMode = scriptArg % 8;
+	scriptArg /= 8;
 	bool pickAllies = scriptArg % 2;
 	scriptArg /= 2;
 	bool useAITargetType = scriptArg % 2;
+	scriptArg /= 2;
+	bool needAttackableByLeader = scriptArg % 2;
 	scriptArg /= 2;
 
 	if (useAITargetType)
@@ -155,8 +157,8 @@ DEFINE_HOOK(0x6ECCF3, TeamClass_UpdateScriptAction16_UsePhobosTargeting, 0x7)
 		targetMask = targetArg;
 	}
 
-	auto const selectedTarget = ScriptExt::FindBestObject(pLeaderUnit, targetMask, calcThreatMode, pickAllies, TargetType, -1);
-	pCell = selectedTarget->GetCell();
+	auto selectedTarget = ScriptExt::FindBestObject(pLeaderUnit, targetMask, calcThreatMode, pickAllies, TargetType, -1, needAttackableByLeader);
+	pCell = selectedTarget ? selectedTarget->GetCell() : nullptr;
 
 	if (!pCell)
 	{
