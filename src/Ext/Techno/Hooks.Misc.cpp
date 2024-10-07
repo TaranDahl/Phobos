@@ -573,7 +573,7 @@ DEFINE_HOOK(0x740A11, UnitClass_Mission_Guard_AIDeployMCV, 0x6)
 
 	GET(UnitClass*, pMCV, ESI);
 
-	return (pMCV->Owner->NumConYards) ? SkipGameCode : 0;
+	return (pMCV->Owner->NumConYards > 0) ? SkipGameCode : 0;
 }
 
 DEFINE_HOOK(0x739889, UnitClass_TryToDeploy_AISetBaseCenter, 0x6)
@@ -582,7 +582,7 @@ DEFINE_HOOK(0x739889, UnitClass_TryToDeploy_AISetBaseCenter, 0x6)
 
 	GET(UnitClass*, pMCV, EBP);
 
-	return (pMCV->Owner->NumConYards) ? SkipGameCode : 0;
+	return (pMCV->Owner->NumConYards > 1) ? SkipGameCode : 0;
 }
 
 #pragma endregion
