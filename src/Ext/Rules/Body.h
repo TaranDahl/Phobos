@@ -134,6 +134,8 @@ public:
 		Valueable<Vector3D<int>> ExpandLandGridFrames;
 		Valueable<Vector3D<int>> ExpandWaterGridFrames;
 		Valueable<bool> SWSidebarBackground;
+		Valueable<bool> AIAutoDeployMCV;
+		Valueable<bool> AISetBaseCenter;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -343,6 +345,8 @@ public:
 			, ExpandLandGridFrames { { 1, 0, 0 } }
 			, ExpandWaterGridFrames { { 1, 0, 0 } }
 			, SWSidebarBackground { true }
+			, AIAutoDeployMCV { false }
+			, AISetBaseCenter { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
