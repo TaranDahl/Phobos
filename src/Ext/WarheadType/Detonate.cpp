@@ -240,7 +240,7 @@ void WarheadTypeExt::ExtData::ApplyBuildingUndeploy(TechnoClass* pTarget)
 
 	BuildingTypeClass* const pType = pBuilding->Type;
 
-	if (!pType->UndeploysInto)
+	if (!pType->UndeploysInto || (pType->ConstructionYard && !GameModeOptionsClass::Instance->MCVRedeploy))
 		return;
 
 	CellStruct cell = pBuilding->GetMapCoords();
