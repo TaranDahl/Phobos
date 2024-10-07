@@ -218,6 +218,9 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 	if (this->AttachEffect_AttachTypes.size() > 0 || this->AttachEffect_RemoveTypes.size() > 0 || this->AttachEffect_RemoveGroups.size() > 0)
 		this->ApplyAttachEffects(pTarget, pHouse, pOwner);
 
+	if (this->BuildingUndeploy)
+		this->ApplyBuildingUndeploy(pTarget);
+
 #ifdef LOCO_TEST_WARHEADS
 	if (this->InflictLocomotor)
 		this->ApplyLocomotorInfliction(pTarget);
@@ -226,6 +229,27 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 		this->ApplyLocomotorInflictionReset(pTarget);
 #endif
 
+}
+
+void WarheadTypeExt::ExtData::ApplyBuildingUndeploy(TechnoClass* pTarget)
+{
+	BuildingClass* const pBuilding = abstract_cast<BuildingClass*>(pTarget);
+
+	if (!pBuilding)
+		return;
+
+	BuildingTypeClass* const pType = pBuilding->Type;
+
+	if (!pType->UndeploysInto)
+		return;
+
+	CellStruct cell = pBuilding->GetMapCoords();
+
+	if (pType->GetFoundationWidth() > 2 || pType->GetFoundationHeight(false) > 2)
+		cell += CellStruct { 1, 1 };
+
+	pBuilding->SetFocus(MapClass::Instance->GetCellAt(cell));
+	pBuilding->Sell(0xFFFFFFFF);
 }
 
 void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget, TechnoExt::ExtData* pTargetExt = nullptr)
