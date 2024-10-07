@@ -1302,7 +1302,7 @@ void TacticalButtonsClass::SelectedDraw()
 
 						if (value >= 0 && maxValue > 0)
 						{
-							if (pTypeExt->UpperSelectedInfoColor == ColorStruct{ 0, 0, 0 })
+							if (pTypeExt->UpperSelectedInfoColor.Get() == ColorStruct{ 0, 0, 0 })
 							{
 								RulesClass* const pRules = RulesClass::Instance;
 								const double ratio = static_cast<double>(value) / maxValue;
@@ -1343,7 +1343,7 @@ void TacticalButtonsClass::SelectedDraw()
 
 						if (value >= 0 && maxValue > 0)
 						{
-							if (pTypeExt->BelowSelectedInfoColor == ColorStruct{ 0, 0, 0 })
+							if (pTypeExt->BelowSelectedInfoColor.Get() == ColorStruct{ 0, 0, 0 })
 							{
 								RulesClass* const pRules = RulesClass::Instance;
 								const double ratio = static_cast<double>(value) / maxValue;
