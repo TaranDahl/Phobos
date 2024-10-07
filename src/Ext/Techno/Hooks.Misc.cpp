@@ -564,3 +564,25 @@ DEFINE_HOOK(0x6B73EA, SpawnManagerClass_Update_MissileSpawnFLH, 0x5)
 }
 
 #pragma endregion
+
+#pragma region AIConstructionYard
+
+DEFINE_HOOK(0x740A11, UnitClass_Mission_Guard_AIDeployMCV, 0x6)
+{
+	enum { SkipGameCode = 0x740A50 };
+
+	GET(UnitClass*, pMCV, ESI);
+
+	return (pMCV->Owner->NumConYards) ? SkipGameCode : 0;
+}
+
+DEFINE_HOOK(0x739889, UnitClass_TryToDeploy_AISetBaseCenter, 0x6)
+{
+	enum { SkipGameCode = 0x73992B };
+
+	GET(UnitClass*, pMCV, EBP);
+
+	return (pMCV->Owner->NumConYards) ? SkipGameCode : 0;
+}
+
+#pragma endregion
