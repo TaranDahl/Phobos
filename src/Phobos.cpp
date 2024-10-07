@@ -211,7 +211,7 @@ DEFINE_HOOK(0x4F4583, GScreenClass_DrawText, 0x6)
 		RectangleStruct rect { (DSurface::Composite->GetWidth() - wanted.Width - 10), 0, (wanted.Width + 10), (wanted.Height + 10) };
 		Point2D location { rect.X + 5,5 };
 		ColorStruct color { 0, 0, 0 };
-		DSurface::Composite->FillRectTrans(&rect, &color, 40);
+		DSurface::Composite->FillRectTrans(&rect, &color, 30);
 		DSurface::Composite->DrawRect(&rect, 0x061C);
 		DSurface::Composite->DrawText(Phobos::VersionDescription, &location, 0x061C);
 	}
