@@ -177,6 +177,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->ExpandLandGridFrames.Read(exINI, GameStrings::AudioVisual, "ExpandLandGridFrames");
 	this->ExpandWaterGridFrames.Read(exINI, GameStrings::AudioVisual, "ExpandWaterGridFrames");
 	this->SWSidebarBackground.Read(exINI, GameStrings::AudioVisual, "SWSidebarBackground");
+	this->AIAutoDeployMCV.Read(exINI, GameStrings::AI, "AIAutoDeployMCV");
+	this->AISetBaseCenter.Read(exINI, GameStrings::AI, "AISetBaseCenter");
 
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
 	this->ForbidParallelAIQueues_Aircraft.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Aircraft");
@@ -449,6 +451,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->ExpandLandGridFrames)
 		.Process(this->ExpandWaterGridFrames)
 		.Process(this->SWSidebarBackground)
+		.Process(this->AIAutoDeployMCV)
+		.Process(this->AISetBaseCenter)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
 		.Process(this->ForbidParallelAIQueues_Building)
