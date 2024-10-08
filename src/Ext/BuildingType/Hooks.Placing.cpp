@@ -752,7 +752,7 @@ DEFINE_HOOK(0x588664, MapClass_BuildingToFirestormWall_DisableWhenHaveTechnos, 0
 // Buildable-upon TechnoTypes Hook #9-1 -> sub_7393C0 - Try to clean up the building space when is deploying
 DEFINE_HOOK(0x73946C, UnitClass_TryToDeploy_CleanUpDeploySpace, 0x6)
 {
-	enum { CanDeploy = 0x73958A, TemporarilyCanNotDeploy = 0x73950F, CanNotDeploy = 0x7394E0 };
+	enum { CanDeploy = 0x73958A, TemporarilyCanNotDeploy = 0x73953B, CanNotDeploy = 0x7394E0 };
 
 	GET(UnitClass* const, pUnit, EBP);
 
@@ -906,28 +906,25 @@ DEFINE_HOOK(0x4F8DB1, HouseClass_AI_CheckHangUpBuilding, 0x6)
 
 		if (pHouseExt->OwnedDeployingUnits.size() > 0)
 		{
-			std::vector<TechnoClass*> deleteTechnos;
 			auto& vec = pHouseExt->OwnedDeployingUnits;
 
-			for (auto const& pUnit : pHouseExt->OwnedDeployingUnits)
+			for (auto it = vec.begin(); it != vec.end(); )
 			{
-				if (pUnit && !pUnit->InLimbo && pUnit->IsAlive && pUnit->Health && !pUnit->IsSinking && !pUnit->Destination && pUnit->Owner == pHouse
-					&& pUnit->Type && pUnit->Type->DeploysInto && pUnit->CurrentMission == Mission::Guard)
-				{
-					TechnoExt::ExtData* const pTechnoExt = TechnoExt::ExtMap.Find(pUnit);
+				UnitClass* const pUnit = *it;
+				TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pUnit);
 
-					if (pTechnoExt && !(pTechnoExt->UnitAutoDeployTimer.GetTimeLeft() % 8))
+				if (pExt && !pUnit->InLimbo && pUnit->IsAlive && pUnit->Health && !pUnit->IsSinking && !pUnit->Destination && pUnit->Owner == pHouse
+					&& pUnit->Type && pUnit->Type->DeploysInto && pUnit->CurrentMission == Mission::Guard) // No need to invalidate pointer
+				{
+					if (!(pExt->UnitAutoDeployTimer.GetTimeLeft() % 8))
 						pUnit->QueueMission(Mission::Unload, true);
+
+					++it;
 				}
 				else
 				{
-					deleteTechnos.push_back(pUnit);
+					it = vec.erase(it);
 				}
-			}
-
-			for (auto const& pUnit : deleteTechnos)
-			{
-				vec.erase(std::remove(vec.begin(), vec.end(), pUnit), vec.end());
 			}
 		}
 	}
