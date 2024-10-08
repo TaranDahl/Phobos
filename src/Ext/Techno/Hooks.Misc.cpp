@@ -587,45 +587,57 @@ DEFINE_HOOK(0x739889, UnitClass_TryToDeploy_AISetBaseCenter, 0x6)
 
 DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
 {
-	GET(HouseClass*, pAI, EBX);
-
-	if (const int count = pAI->ConYards.Count)
+	if (RulesExt::Global()->AIBiasSpawnCell)
 	{
-		const int wayPoint = pAI->GetSpawnPosition();
+		GET(HouseClass*, pAI, EBX);
 
-		if (wayPoint != -1)
+		if (const int count = pAI->ConYards.Count)
 		{
-			const CellStruct center = ScenarioClass::Instance->GetWaypointCoords(wayPoint);
-			CellStruct newCenter = center;
-			double distanceSquared = 131072.0;
+			const int wayPoint = pAI->GetSpawnPosition();
 
-			for (int i = 0; i < count; ++i)
+			if (wayPoint != -1)
 			{
-				if (BuildingClass* const pBuilding = pAI->ConYards.GetItem(i))
-				{
-					if (pBuilding->IsAlive && pBuilding->Health && !pBuilding->InLimbo)
-					{
-						const double newDistanceSquared = pBuilding->GetMapCoords().DistanceFromSquared(center);
+				const CellStruct center = ScenarioClass::Instance->GetWaypointCoords(wayPoint);
+				CellStruct newCenter = center;
+				double distanceSquared = 131072.0;
 
-						if (newDistanceSquared > 128.0 && newDistanceSquared < distanceSquared)
+				for (int i = 0; i < count; ++i)
+				{
+					if (BuildingClass* const pBuilding = pAI->ConYards.GetItem(i))
+					{
+						if (pBuilding->IsAlive && pBuilding->Health && !pBuilding->InLimbo)
 						{
-							distanceSquared = newDistanceSquared;
-							newCenter = pBuilding->GetMapCoords();
+							const double newDistanceSquared = pBuilding->GetMapCoords().DistanceFromSquared(center);
+
+							if (newDistanceSquared < distanceSquared)
+							{
+								distanceSquared = newDistanceSquared;
+								newCenter = pBuilding->GetMapCoords();
+							}
 						}
 					}
 				}
-			}
 
-			if (newCenter != center)
-			{
-				pAI->BaseSpawnCell = newCenter;
-				pAI->Base.BaseNodes.Items->MapCoords = newCenter;
-				pAI->Base.Center = newCenter;
+				if (newCenter != center)
+				{
+					pAI->BaseSpawnCell = newCenter;
+					pAI->Base.BaseNodes.Items->MapCoords = newCenter;
+					pAI->Base.Center = newCenter;
+				}
 			}
 		}
 	}
 
 	return 0;
+}
+
+DEFINE_HOOK(0x4FE42F, HouseClass_AIBaseConstructionUpdate_SkipConYards, 0x6)
+{
+	enum { SkipGameCode = 0x4FE443 };
+
+	GET(BuildingTypeClass*, pType, EAX);
+
+	return (RulesExt::Global()->AIForbidConYard && pType->ConstructionYard) ? SkipGameCode : 0;
 }
 
 #pragma endregion

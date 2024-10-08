@@ -136,6 +136,8 @@ public:
 		Valueable<bool> SWSidebarBackground;
 		Valueable<bool> AIAutoDeployMCV;
 		Valueable<bool> AISetBaseCenter;
+		Valueable<bool> AIBiasSpawnCell;
+		Valueable<bool> AIForbidConYard;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -347,6 +349,8 @@ public:
 			, SWSidebarBackground { true }
 			, AIAutoDeployMCV { false }
 			, AISetBaseCenter { false }
+			, AIBiasSpawnCell { false }
+			, AIForbidConYard { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
