@@ -233,11 +233,16 @@ public:
 		Nullable<AnimTypeClass*> Wake_Grapple;
 		Nullable<AnimTypeClass*> Wake_Sinking;
 
-		Nullable<bool> GuardModePursuit;
-		Nullable<Leptons> GuardModeStray;
-		Nullable<double> GuardModeGuardRangeMultiplier;
-		Nullable<Leptons> GuardModeGuardRangeAddend;
-		Nullable<Leptons> GuardStationaryStray;
+		Nullable<bool> PlayerGuardModePursuit;
+		Nullable<Leptons> PlayerGuardModeStray;
+		Nullable<double> PlayerGuardModeGuardRangeMultiplier;
+		Nullable<Leptons> PlayerGuardModeGuardRangeAddend;
+		Nullable<Leptons> PlayerGuardStationaryStray;
+		Nullable<bool> AIGuardModePursuit;
+		Nullable<Leptons> AIGuardModeStray;
+		Nullable<double> AIGuardModeGuardRangeMultiplier;
+		Nullable<Leptons> AIGuardModeGuardRangeAddend;
+		Nullable<Leptons> AIGuardStationaryStray;
 
 		struct LaserTrailDataEntry
 		{
@@ -468,11 +473,16 @@ public:
 			, Wake_Grapple { }
 			, Wake_Sinking { }
 
-			, GuardModePursuit {}
-			, GuardModeStray {}
-			, GuardModeGuardRangeMultiplier {}
-			, GuardModeGuardRangeAddend {}
-			, GuardStationaryStray {}
+			, PlayerGuardModePursuit {}
+			, PlayerGuardModeStray {}
+			, PlayerGuardModeGuardRangeMultiplier {}
+			, PlayerGuardModeGuardRangeAddend {}
+			, PlayerGuardStationaryStray {}
+			, AIGuardModePursuit {}
+			, AIGuardModeStray {}
+			, AIGuardModeGuardRangeMultiplier {}
+			, AIGuardModeGuardRangeAddend {}
+			, AIGuardStationaryStray {}
 		{ }
 
 		virtual ~ExtData() = default;
