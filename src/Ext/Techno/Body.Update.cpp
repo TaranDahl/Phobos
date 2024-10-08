@@ -1169,6 +1169,7 @@ void TechnoExt::ExtData::RecalculateStatMultipliers()
 	bool hasRangeModifier = false;
 	bool hasTint = false;
 	bool reflectsDamage = false;
+	bool hasOnFireDiscardables = false;
 
 	for (const auto& attachEffect : this->AttachedEffects)
 	{
@@ -1186,6 +1187,7 @@ void TechnoExt::ExtData::RecalculateStatMultipliers()
 		hasRangeModifier |= (type->WeaponRange_ExtraRange != 0.0 || type->WeaponRange_Multiplier != 0.0);
 		hasTint |= type->HasTint();
 		reflectsDamage |= type->ReflectDamage;
+		hasOnFireDiscardables |= (type->DiscardOn & DiscardCondition::Firing) != DiscardCondition::None;
 	}
 
 	this->AE.FirepowerMultiplier = firepower;
@@ -1198,6 +1200,7 @@ void TechnoExt::ExtData::RecalculateStatMultipliers()
 	this->AE.HasRangeModifier = hasRangeModifier;
 	this->AE.HasTint = hasTint;
 	this->AE.ReflectDamage = reflectsDamage;
+	this->AE.HasOnFireDiscardables = hasOnFireDiscardables;
 
 	if (forceDecloak && pThis->CloakState == CloakState::Cloaked)
 		pThis->Uncloak(true);
