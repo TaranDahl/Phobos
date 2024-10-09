@@ -587,7 +587,7 @@ DEFINE_HOOK(0x739889, UnitClass_TryToDeploy_AISetBaseCenter, 0x6)
 
 DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
 {
-	if (RulesExt::Global()->AIBiasSpawnCell)
+	if (RulesExt::Global()->AIBiasSpawnCell && SessionClass::Instance->GameMode != GameMode::Campaign)
 	{
 		GET(HouseClass*, pAI, EBX);
 
@@ -630,7 +630,7 @@ DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
 
 	return 0;
 }
-
+/*
 DEFINE_HOOK(0x4FE42F, HouseClass_AIBaseConstructionUpdate_SkipConYards, 0x6)
 {
 	enum { SkipGameCode = 0x4FE443 };
@@ -640,4 +640,13 @@ DEFINE_HOOK(0x4FE42F, HouseClass_AIBaseConstructionUpdate_SkipConYards, 0x6)
 	return (RulesExt::Global()->AIForbidConYard && pType->ConstructionYard) ? SkipGameCode : 0;
 }
 
+DEFINE_HOOK(0x505550, HouseClass_AIBaseConstructionUpdate_SkipConYards, 0x6)
+{
+	enum { SkipGameCode = 0x5056C1 };
+
+	GET(BuildingTypeClass*, pType, ESI);
+
+	return (RulesExt::Global()->AIForbidConYard && pType->ConstructionYard) ? SkipGameCode : 0;
+}
+*/
 #pragma endregion
