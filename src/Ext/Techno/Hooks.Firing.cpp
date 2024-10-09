@@ -579,8 +579,12 @@ DEFINE_HOOK(0x6FF7EF, TechnoClass_Fire_LimboLaunchRecord, 0xA)
 	if (!pThis->InLimbo)
 	{
 		auto const pBulletExt = BulletExt::ExtMap.Find(pBullet);
-		pBulletExt->LimboedLauncher = pThis;
-		pBulletExt->LimboedDir = pThis->PrimaryFacing.Current().GetDir();
+		
+		if (pBulletExt)
+		{
+			pBulletExt->LimboedLauncher = pThis;
+			pBulletExt->LimboedDir = pThis->PrimaryFacing.Current().GetDir();
+		}
 	}
 
 	pThis->Limbo();
