@@ -335,6 +335,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 		|| this->AttachEffect_AttachTypes.size() > 0
 		|| this->AttachEffect_RemoveTypes.size() > 0
 		|| this->AttachEffect_RemoveGroups.size() > 0
+		|| this->BuildingUndeploy
 	);
 
 	char tempBuffer[32];
