@@ -633,7 +633,10 @@ DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)
 
 	BuildingTypeClass* const pBuildingType = pBuilding->Type;
 
-	if (topLeftCell != Make_Global<CellStruct>(0x89C8B0) && !pBuildingType->PlaceAnywhere)
+	if (RulesExt::Global()->AIForbidConYard && pBuildingType->ConstructionYard)
+		return CanNotBuild;
+
+	if (topLeftCell != CellStruct::Empty && !pBuildingType->PlaceAnywhere)
 	{
 		HouseClass* const pHouse = pFactory->Owner;
 
@@ -686,10 +689,6 @@ DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)
 						return TemporarilyCanNotBuild;
 					}
 					while (false);
-				}
-				else if (pHouseExt->CurrentBuildingTopLeft == CellStruct::Empty)
-				{
-					BuildOnOccupiersHelpers::Mouse = true;
 				}
 
 				pHouseExt->CurrentBuildingType = nullptr;
