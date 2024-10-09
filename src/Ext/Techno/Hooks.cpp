@@ -621,7 +621,7 @@ DEFINE_HOOK(0x4473F4, BuildingClass_MouseOverObject_JustHasRallyPoint, 0x6)
 DEFINE_HOOK(0x447413, BuildingClass_MouseOverObject_RallyPointForceMove, 0x5)
 {
 	enum { AlwaysAlt = 0x44744E, VanillaCheck = 0 };
-	
+
 	return RulesExt::Global()->RallyPointForceMove ? AlwaysAlt : VanillaCheck;
 }
 
@@ -667,7 +667,7 @@ DEFINE_HOOK(0x447674, BuildingClass_MouseOverCell_JustHasRallyPoint, 0x6)
 DEFINE_HOOK(0x447643, BuildingClass_MouseOverCell_RallyPointForceMove, 0x5)
 {
 	enum { AlwaysAlt = 0x447674, VanillaCheck = 0 };
-	
+
 	return RulesExt::Global()->RallyPointForceMove ? AlwaysAlt : VanillaCheck;
 }
 
@@ -731,7 +731,12 @@ DEFINE_HOOK(0x4448CE, BuildingClass_KickOutUnit_RallyPointAreaGuard2, 0x6)
 	auto const pUnit = abstract_cast<UnitClass*>(pProduct);
 	bool isHarvester = pUnit ? pUnit->Type->Harvester : false;
 
-	if (RulesExt::Global()->RallyPointAreaGuard && !isHarvester)
+	if (isHarvester)
+	{
+		pProduct->SetDestination(pFocus, true);
+		pProduct->QueueMission(Mission::Harvest, true);
+	}
+	else if (RulesExt::Global()->RallyPointAreaGuard)
 	{
 		pProduct->SetFocus(pFocus);
 		pProduct->QueueMission(Mission::Area_Guard, true);
@@ -755,6 +760,7 @@ DEFINE_HOOK(0x4448B0, BuildingClass_KickOutUnit_ExitCoords, 0x6)
 	GET(FootClass*, pProduct, EDI);
 	GET(BuildingClass*, pThis, ESI);
 	GET(CoordStruct*, pCrd, ECX);
+	REF_STACK(DirType, dir, STACK_OFFSET(0x144,-0x100));
 
 	auto const isJJ = pProduct->GetTechnoType()->Locomotor == LocomotionClass::CLSIDs::Jumpjet;
 	auto const pProductType = pProduct->GetTechnoType();
@@ -777,6 +783,7 @@ DEFINE_HOOK(0x4448B0, BuildingClass_KickOutUnit_ExitCoords, 0x6)
 		*pCrd = CellClass::Cell2Coord(nCell, pCrd->Z);
 	}
 
+	dir = DirType::East;
 	return 0;
 }
 
