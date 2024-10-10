@@ -707,7 +707,12 @@ DEFINE_HOOK(0x469EC0, BulletClass_Logics_AirburstWeapon, 0x6)
 					auto const cos_factor = -2.44921270764e-16; // cos(1.5 * Math::Pi * 1.00001)
 					auto const flatSpeed = cos_factor * pBullet->Speed;
 
-					pBullet->MoveTo(pThis->Location, BulletVelocity{ cos_rad * flatSpeed, sin_rad * flatSpeed, static_cast<double>(-pBullet->Speed) });
+					BulletVelocity velocity;
+					velocity.X = cos_rad * flatSpeed;
+					velocity.Y = sin_rad * flatSpeed;
+					velocity.Z = -pBullet->Speed;
+
+					pBullet->MoveTo(pThis->Location, velocity);
 				}
 			}
 		}

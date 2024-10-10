@@ -58,6 +58,7 @@ public:
 		CoordStruct LastWeaponFLH;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 		bool KeepTargetOnMove;
+		bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
 
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
 		// as neither is guaranteed to point to the house the TechnoClass had prior to entering transport and cannot be safely overridden.
@@ -102,6 +103,7 @@ public:
 			, LastWeaponFLH {}
 			, FiringObstacleCell {}
 			, KeepTargetOnMove { false }
+			, IsDetachingForCloak { false }
 			, OriginalPassengerOwner {}
 			, HasRemainingWarpInDelay { false }
 			, LastWarpInDelay { 0 }

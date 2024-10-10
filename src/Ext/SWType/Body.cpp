@@ -24,6 +24,7 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SW_NegBuildings)
 		.Process(this->SW_InitialReady)
 		.Process(this->SW_PostDependent)
+		.Process(this->SW_MaxCount)
 		.Process(this->SidebarPCX)
 		.Process(this->CameoPal)
 		.Process(this->UIDescription)
@@ -65,6 +66,10 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SW_GrantOneTime_RollChances)
 		.Process(this->Message_GrantOneTimeLaunched)
 		.Process(this->EVA_GrantOneTimeLaunched)
+		.Process(this->EMPulse_WeaponIndex)
+		.Process(this->EMPulse_SuspendOthers)
+		.Process(this->EMPulse_Cannons)
+		.Process(this->EMPulse_TargetSelf)
 		;
 }
 
@@ -94,6 +99,7 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SW_NegBuildings.Read(exINI, pSection, "SW.NegBuildings");
 	this->SW_InitialReady.Read(exINI, pSection, "SW.InitialReady");
 	this->SW_PostDependent.Read(exINI, pSection, "SW.PostDependent");
+	this->SW_MaxCount.Read(exINI, pSection, "SW.MaxCount");
 	this->SidebarPCX.Read(pINI, pSection, "SidebarPCX");
 	this->CameoPal.LoadFromINI(pINI, pSection, "SidebarPalette");
 
@@ -111,6 +117,11 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SW_Next_RollChances.Read(exINI, pSection, "SW.Next.RollChances");
 
 	this->ShowTimer_Priority.Read(exINI, pSection, "ShowTimer.Priority");
+
+	this->EMPulse_WeaponIndex.Read(exINI, pSection, "EMPulse.WeaponIndex");
+	this->EMPulse_SuspendOthers.Read(exINI, pSection, "EMPulse.SuspendOthers");
+	this->EMPulse_Cannons.Read(exINI, pSection, "EMPulse.Cannons");
+	this->EMPulse_TargetSelf.Read(exINI, pSection, "EMPulse.TargetSelf");
 
 	char tempBuffer[32];
 	// LimboDelivery.RandomWeights

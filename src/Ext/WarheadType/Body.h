@@ -131,6 +131,7 @@ public:
 		ValueableVector<TechnoTypeClass*> DetonateOnAllMapObjects_IgnoreTypes;
 
 		std::vector<TypeConvertGroup> Convert_Pairs;
+		AEAttachInfoTypeClass AttachEffects;
 
 		Valueable<bool> InflictLocomotor;
 		Valueable<bool> RemoveInflictedLocomotor;
@@ -156,12 +157,9 @@ public:
 
 		Valueable<bool> Nonprovocative;
 
-		ValueableVector<AttachEffectTypeClass*> AttachEffect_AttachTypes;
-		ValueableVector<AttachEffectTypeClass*> AttachEffect_RemoveTypes;
-		std::vector<std::string> AttachEffect_RemoveGroups;
-		ValueableVector<int> AttachEffect_CumulativeRemoveMinCounts;
-		ValueableVector<int> AttachEffect_CumulativeRemoveMaxCounts;
-		ValueableVector<int> AttachEffect_DurationOverrides;
+		Nullable<int> CombatLightDetailLevel;
+		Valueable<double> CombatLightChance;
+		Nullable<bool> Particle_AlphaImageIsLightFlash;
 
 		Valueable<bool> SuppressRevengeWeapons;
 		ValueableVector<WeaponTypeClass*> SuppressRevengeWeapons_Types;
@@ -302,6 +300,7 @@ public:
 			, DetonateOnAllMapObjects_IgnoreTypes {}
 
 			, Convert_Pairs {}
+			, AttachEffects {}
 
 			, InflictLocomotor { false }
 			, RemoveInflictedLocomotor { false }
@@ -327,12 +326,9 @@ public:
 
 			, Nonprovocative { false }
 
-			, AttachEffect_AttachTypes {}
-			, AttachEffect_RemoveTypes {}
-			, AttachEffect_RemoveGroups {}
-			, AttachEffect_CumulativeRemoveMinCounts {}
-			, AttachEffect_CumulativeRemoveMaxCounts {}
-			, AttachEffect_DurationOverrides {}
+			, CombatLightDetailLevel {}
+			, CombatLightChance { 1.0 }
+			, Particle_AlphaImageIsLightFlash {}
 
 			, SuppressRevengeWeapons { false }
 			, SuppressRevengeWeapons_Types {}
