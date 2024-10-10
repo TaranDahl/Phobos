@@ -614,3 +614,19 @@ DEFINE_HOOK(0x51B20E, InfantryClass_AssignTarget_FireOnce, 0x6)
 
 	return 0;
 }
+
+DEFINE_HOOK(0x4D9620, FootClass_SetDestination_FollowTargetSelf, 0x5)
+{
+	enum { SkipGameCode = 0x4D962B };
+
+	GET(AbstractClass*, pDestination, ECX);
+
+	if (RulesExt::Global()->FollowTargetSelf)
+	{
+		auto crd = pDestination->GetCoords();
+		R->EAX(&crd);
+		return SkipGameCode;
+	}
+
+	return 0;
+}

@@ -160,6 +160,8 @@ public:
 		Valueable<bool> AIAllToHunt;
 		Valueable<bool> RepairBaseNodes;
 
+		Valueable<bool> FollowTargetSelf;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -275,6 +277,7 @@ public:
 			, AIFireSaleDelay { 0 }
 			, AIAllToHunt { true }
 			, RepairBaseNodes { false }
+			, FollowTargetSelf { false }
 		{ }
 
 		virtual ~ExtData() = default;
