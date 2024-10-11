@@ -69,6 +69,7 @@ public:
 		, Height { trajType->Height }
 		, FallPercent { trajType->FallPercent - trajType->FallPercentShift }
 		, OffsetCoord { trajType->OffsetCoord.Get() }
+		, UseDisperseBurst { trajType->UseDisperseBurst }
 		, IsFalling { false }
 		, ToFalling { false }
 		, RemainingDistance { 1 }
@@ -94,6 +95,7 @@ public:
 	double Height;
 	double FallPercent;
 	CoordStruct OffsetCoord;
+	bool UseDisperseBurst;
 	bool IsFalling;
 	bool ToFalling;
 	int RemainingDistance;

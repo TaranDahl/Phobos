@@ -89,6 +89,7 @@ void BombardTrajectory::Serialize(T& Stm)
 		.Process(this->Height)
 		.Process(this->FallPercent)
 		.Process(this->OffsetCoord)
+		.Process(this->UseDisperseBurst)
 		.Process(this->IsFalling)
 		.Process(this->ToFalling)
 		.Process(this->RemainingDistance)
@@ -384,7 +385,7 @@ void BombardTrajectory::CalculateDisperseBurst(BulletClass* pBullet)
 {
 	const BombardTrajectoryType* const pType = this->Type;
 
-	if (!pType->UseDisperseBurst && abs(pType->RotateCoord) > 1e-10 && this->CountOfBurst > 1)
+	if (!this->UseDisperseBurst && abs(pType->RotateCoord) > 1e-10 && this->CountOfBurst > 1)
 	{
 		const CoordStruct axis = pType->AxisOfRotation;
 
