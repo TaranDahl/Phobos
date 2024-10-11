@@ -250,7 +250,7 @@ void BombardTrajectory::PrepareForOpenFire(BulletClass* pBullet)
 		}
 		else
 		{
-			middleLocation = CoordStruct { pBullet->TargetCoords.X, pBullet->TargetCoords.Y, static_cast<int>(this->Height - pBullet->SourceCoords.Z) };
+			middleLocation = CoordStruct { pBullet->TargetCoords.X, pBullet->TargetCoords.Y, static_cast<int>(this->Height) };
 		}
 
 		pBullet->SetLocation(middleLocation);
@@ -488,6 +488,7 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 						static_cast<int>(pBullet->Location.Y + pBullet->Velocity.Y),
 						static_cast<int>(pBullet->Location.Z + pBullet->Velocity.Z)
 					};
+					pExt->LaserTrails.clear();
 
 					pBullet->Velocity.X = static_cast<double>(pBullet->TargetCoords.X - middleLocation.X);
 					pBullet->Velocity.Y = static_cast<double>(pBullet->TargetCoords.Y - middleLocation.Y);
