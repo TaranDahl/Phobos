@@ -90,6 +90,9 @@ void BombardTrajectory::Serialize(T& Stm)
 		.Process(this->ToFalling)
 		.Process(this->RemainingDistance)
 		.Process(this->LastTargetCoord)
+		.Process(this->CountOfBurst)
+		.Process(this->CurrentBurst)
+		.Process(this->RotateAngle)
 		.Process(this->WaitOneFrame)
 		.Process(this->AscendTime)
 		;
@@ -113,8 +116,13 @@ void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 	this->LastTargetCoord = pBullet->TargetCoords;
 	pBullet->Velocity = BulletVelocity::Empty;
 
+	if (WeaponTypeClass* const pWeapon = pBullet->WeaponType)
+		this->CountOfBurst = pWeapon->Burst;
+
 	if (TechnoClass* const pOwner = pBullet->Owner)
 	{
+		this->CurrentBurst = pOwner->CurrentBurstIndex;
+
 		if (pType->MirrorCoord && pOwner->CurrentBurstIndex % 2 == 1)
 			this->OffsetCoord.Y = -(this->OffsetCoord.Y);
 	}
@@ -180,7 +188,7 @@ void BombardTrajectory::PrepareForOpenFire(BulletClass* pBullet)
 	// use scaling since RandomRanged only support int
 	this->FallPercent += ScenarioClass::Instance->Random.RandomRanged(0, static_cast<int>(200 * pType->FallPercentShift)) / 100.0;
 
-	const double rotateAngle = this->CalculateTargetCoords(pBullet);
+	this->CalculateTargetCoords(pBullet);
 
 	if (!pType->NoLaunch)
 	{
@@ -191,46 +199,7 @@ void BombardTrajectory::PrepareForOpenFire(BulletClass* pBullet)
 		pBullet->Velocity.Z = static_cast<double>(middleLocation.Z - pBullet->SourceCoords.Z);
 		pBullet->Velocity *= pType->Trajectory_Speed / pBullet->Velocity.Magnitude();
 
-		WeaponTypeClass* const pWeapon = pBullet->WeaponType;
-		const int countOfBurst = pWeapon ? pWeapon->Burst : 0;
-
-		if (!pType->UseDisperseBurst && abs(pType->RotateCoord) > 1e-10 && countOfBurst > 1)
-		{
-			const CoordStruct axis = pType->AxisOfRotation;
-
-			BulletVelocity rotationAxis
-			{
-				axis.X * Math::cos(rotateAngle) + axis.Y * Math::sin(rotateAngle),
-				axis.X * Math::sin(rotateAngle) - axis.Y * Math::cos(rotateAngle),
-				static_cast<double>(axis.Z)
-			};
-
-			const double rotationAxisLengthSquared = rotationAxis.MagnitudeSquared();
-
-			if (abs(rotationAxisLengthSquared) > 1e-10)
-			{
-				double extraRotate = 0.0;
-				rotationAxis *= 1 / sqrt(rotationAxisLengthSquared);
-
-				TechnoClass* const pFirer = pBullet->Owner;
-				const int currentBurst = pFirer ? pFirer->CurrentBurstIndex : 0;
-
-				if (pType->MirrorCoord)
-				{
-					if (currentBurst % 2 == 1)
-						rotationAxis *= -1;
-
-					extraRotate = Math::Pi * (pType->RotateCoord * ((currentBurst / 2) / (countOfBurst - 1.0) - 0.5)) / 180;
-				}
-				else
-				{
-					extraRotate = Math::Pi * (pType->RotateCoord * (currentBurst / (countOfBurst - 1.0) - 0.5)) / 180;
-				}
-
-				const double cosRotate = Math::cos(extraRotate);
-				pBullet->Velocity = (pBullet->Velocity * cosRotate) + (rotationAxis * ((1 - cosRotate) * (pBullet->Velocity * rotationAxis))) + (rotationAxis.CrossProduct(pBullet->Velocity) * Math::sin(extraRotate));
-			}
-		}
+		this->CalculateDisperseBurst(pBullet);
 	}
 	else
 	{
@@ -276,10 +245,9 @@ CoordStruct BombardTrajectory::CalculateMiddleCoords(BulletClass* pBullet)
 	};
 }
 
-double BombardTrajectory::CalculateTargetCoords(BulletClass* pBullet)
+void BombardTrajectory::CalculateTargetCoords(BulletClass* pBullet)
 {
 	const BombardTrajectoryType* const pType = this->Type;
-	double rotateAngle = 0.0;
 	const AbstractClass* const pTarget = pBullet->Target;
 	CoordStruct theTargetCoords = pBullet->TargetCoords;
 	CoordStruct theSourceCoords = pBullet->SourceCoords;
@@ -384,17 +352,17 @@ double BombardTrajectory::CalculateTargetCoords(BulletClass* pBullet)
 	if (!pType->LeadTimeCalculate && theTargetCoords == theSourceCoords && pBullet->Owner) //For disperse.
 	{
 		const CoordStruct theOwnerCoords = pBullet->Owner->GetCoords();
-		rotateAngle = Math::atan2(theTargetCoords.Y - theOwnerCoords.Y , theTargetCoords.X - theOwnerCoords.X);
+		this->RotateAngle = Math::atan2(theTargetCoords.Y - theOwnerCoords.Y , theTargetCoords.X - theOwnerCoords.X);
 	}
 	else
 	{
-		rotateAngle = Math::atan2(theTargetCoords.Y - theSourceCoords.Y , theTargetCoords.X - theSourceCoords.X);
+		this->RotateAngle = Math::atan2(theTargetCoords.Y - theSourceCoords.Y , theTargetCoords.X - theSourceCoords.X);
 	}
 
 	if (this->OffsetCoord != CoordStruct::Empty)
 	{
-		pBullet->TargetCoords.X += static_cast<int>(this->OffsetCoord.X * Math::cos(rotateAngle) + this->OffsetCoord.Y * Math::sin(rotateAngle));
-		pBullet->TargetCoords.Y += static_cast<int>(this->OffsetCoord.X * Math::sin(rotateAngle) - this->OffsetCoord.Y * Math::cos(rotateAngle));
+		pBullet->TargetCoords.X += static_cast<int>(this->OffsetCoord.X * Math::cos(this->RotateAngle) + this->OffsetCoord.Y * Math::sin(this->RotateAngle));
+		pBullet->TargetCoords.Y += static_cast<int>(this->OffsetCoord.X * Math::sin(this->RotateAngle) - this->OffsetCoord.Y * Math::cos(this->RotateAngle));
 		pBullet->TargetCoords.Z += this->OffsetCoord.Z;
 	}
 
@@ -407,8 +375,46 @@ double BombardTrajectory::CalculateTargetCoords(BulletClass* pBullet)
 		const int offsetDistance = ScenarioClass::Instance->Random.RandomRanged(offsetMin, offsetMax);
 		pBullet->TargetCoords = MapClass::GetRandomCoordsNear(pBullet->TargetCoords, offsetDistance, false);
 	}
+}
 
-	return rotateAngle;
+void BombardTrajectory::CalculateDisperseBurst(BulletClass* pBullet)
+{
+	const BombardTrajectoryType* const pType = this->Type;
+
+	if (!pType->UseDisperseBurst && abs(pType->RotateCoord) > 1e-10 && this->CountOfBurst > 1)
+	{
+		const CoordStruct axis = pType->AxisOfRotation;
+
+		BulletVelocity rotationAxis
+		{
+			axis.X * Math::cos(this->RotateAngle) + axis.Y * Math::sin(this->RotateAngle),
+			axis.X * Math::sin(this->RotateAngle) - axis.Y * Math::cos(this->RotateAngle),
+			static_cast<double>(axis.Z)
+		};
+
+		const double rotationAxisLengthSquared = rotationAxis.MagnitudeSquared();
+
+		if (abs(rotationAxisLengthSquared) > 1e-10)
+		{
+			double extraRotate = 0.0;
+			rotationAxis *= 1 / sqrt(rotationAxisLengthSquared);
+
+			if (pType->MirrorCoord)
+			{
+				if (this->CurrentBurst % 2 == 1)
+					rotationAxis *= -1;
+
+				extraRotate = Math::Pi * (pType->RotateCoord * ((this->CurrentBurst / 2) / (this->CountOfBurst - 1.0) - 0.5)) / 180;
+			}
+			else
+			{
+				extraRotate = Math::Pi * (pType->RotateCoord * (this->CurrentBurst / (this->CountOfBurst - 1.0) - 0.5)) / 180;
+			}
+
+			const double cosRotate = Math::cos(extraRotate);
+			pBullet->Velocity = (pBullet->Velocity * cosRotate) + (rotationAxis * ((1 - cosRotate) * (pBullet->Velocity * rotationAxis))) + (rotationAxis.CrossProduct(pBullet->Velocity) * Math::sin(extraRotate));
+		}
+	}
 }
 
 bool BombardTrajectory::BulletPrepareCheck(BulletClass* pBullet)
@@ -501,6 +507,7 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 					pBullet->Velocity *= this->FallSpeed / pBullet->Velocity.Magnitude();
 
 					this->RemainingDistance += static_cast<int>(pBullet->TargetCoords.DistanceFrom(middleLocation) + this->FallSpeed);
+					this->CalculateDisperseBurst(pBullet);
 				}
 				else
 				{
