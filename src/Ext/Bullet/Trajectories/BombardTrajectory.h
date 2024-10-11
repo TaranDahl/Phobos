@@ -49,7 +49,7 @@ public:
 	Valueable<bool> NoLaunch;
 	ValueableVector<AnimTypeClass*> TurningPointAnims;
 	Valueable<CoordStruct> OffsetCoord;
-	Valueable<int> RotateCoord;
+	Valueable<double> RotateCoord;
 	Valueable<bool> MirrorCoord;
 	Valueable<bool> UseDisperseBurst;
 	Valueable<CoordStruct> AxisOfRotation;
@@ -74,6 +74,9 @@ public:
 		, ToFalling { false }
 		, RemainingDistance { 1 }
 		, LastTargetCoord {}
+		, CountOfBurst { 0 }
+		, CurrentBurst { 0 }
+		, RotateAngle { 0 }
 		, WaitOneFrame {}
 		, AscendTime { 1 }
 	{}
@@ -97,6 +100,9 @@ public:
 	bool ToFalling;
 	int RemainingDistance;
 	CoordStruct LastTargetCoord;
+	int CountOfBurst;
+	int CurrentBurst;
+	double RotateAngle;
 	CDTimerClass WaitOneFrame;
 	int AscendTime;
 
@@ -106,7 +112,8 @@ private:
 
 	void PrepareForOpenFire(BulletClass* pBullet);
 	CoordStruct CalculateMiddleCoords(BulletClass* pBullet);
-	double CalculateTargetCoords(BulletClass* pBullet);
+	void CalculateTargetCoords(BulletClass* pBullet);
+	void CalculateDisperseBurst(BulletClass* pBullet);
 	bool BulletPrepareCheck(BulletClass* pBullet);
 	bool BulletDetonatePreCheck(BulletClass* pBullet);
 	bool BulletDetonateRemainCheck(BulletClass* pBullet, HouseClass* pOwner);
