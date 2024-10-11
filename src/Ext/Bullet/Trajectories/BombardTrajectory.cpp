@@ -98,7 +98,6 @@ void BombardTrajectory::Serialize(T& Stm)
 		.Process(this->CurrentBurst)
 		.Process(this->RotateAngle)
 		.Process(this->WaitOneFrame)
-		.Process(this->AscendTime)
 		;
 }
 
@@ -226,8 +225,15 @@ void BombardTrajectory::PrepareForOpenFire(BulletClass* pBullet)
 			middleLocation = CoordStruct { pBullet->TargetCoords.X, pBullet->TargetCoords.Y, static_cast<int>(this->Height) };
 		}
 
-		pBullet->SetLocation(middleLocation);
+		auto const pExt = BulletExt::ExtMap.Find(pBullet);
 
+		if (pExt->LaserTrails.size())
+		{
+			for (auto& trail : pExt->LaserTrails)
+				trail.LastLocation = middleLocation;
+		}
+
+		pBullet->SetLocation(middleLocation);
 		HouseClass* const pOwner = pBullet->Owner ? pBullet->Owner->Owner : BulletExt::ExtMap.Find(pBullet)->FirerHouse;
 		this->ApplyTurningPointAnim(pType->TurningPointAnims, middleLocation, pBullet->Owner, pOwner, true);
 	}
@@ -252,104 +258,11 @@ CoordStruct BombardTrajectory::CalculateMiddleCoords(BulletClass* pBullet)
 void BombardTrajectory::CalculateTargetCoords(BulletClass* pBullet)
 {
 	const BombardTrajectoryType* const pType = this->Type;
-	const AbstractClass* const pTarget = pBullet->Target;
 	CoordStruct theTargetCoords = pBullet->TargetCoords;
 	CoordStruct theSourceCoords = pBullet->SourceCoords;
 
-	if (pType->LeadTimeCalculate && pTarget)
-	{
-		theTargetCoords = pTarget->GetCoords();
-		theSourceCoords = pBullet->Location;
-
-		if (theTargetCoords != this->LastTargetCoord)
-		{
-			if (pType->NoLaunch && pType->FreeFallOnTarget)
-			{
-				const CoordStruct extraOffsetCoord = pTarget->GetCoords() - this->LastTargetCoord;
-				const int travelTime = static_cast<int>(sqrt(2 * (this->Height - pTarget->GetCoords().Z) / BulletTypeExt::GetAdjustedGravity(pBullet->Type)));
-				theTargetCoords += extraOffsetCoord * (travelTime + 1);
-			}
-			else
-			{
-				CoordStruct extraOffsetCoord = theTargetCoords - this->LastTargetCoord;
-				CoordStruct lastSourceCoord = theSourceCoords - this->LastTargetCoord;
-				CoordStruct targetSourceCoord = theSourceCoords - theTargetCoords;
-				const CoordStruct realExtraOffsetCoord = extraOffsetCoord;
-
-				if (pType->FreeFallOnTarget)
-				{
-					CoordStruct theTurningPointCoords = theTargetCoords;
-					CoordStruct theLastTurningPointCoords = this->LastTargetCoord;
-					theTurningPointCoords.Z += static_cast<int>(pType->Height); // Use original height here
-					theLastTurningPointCoords.Z += static_cast<int>(pType->Height);
-
-					if (this->FallPercent != 1.0)
-					{
-						theTurningPointCoords.X = theSourceCoords.X - static_cast<int>(targetSourceCoord.X * this->FallPercent);
-						theTurningPointCoords.Y = theSourceCoords.Y - static_cast<int>(targetSourceCoord.Y * this->FallPercent);
-
-						theLastTurningPointCoords.X = theSourceCoords.X - static_cast<int>(lastSourceCoord.X * this->FallPercent);
-						theLastTurningPointCoords.Y = theSourceCoords.Y - static_cast<int>(lastSourceCoord.Y * this->FallPercent);
-
-						extraOffsetCoord = theTurningPointCoords - theLastTurningPointCoords;
-					}
-
-					targetSourceCoord = theSourceCoords - theTurningPointCoords;
-					lastSourceCoord = theSourceCoords - theLastTurningPointCoords;
-				}
-
-				const double theDistanceSquared = targetSourceCoord.MagnitudeSquared();
-
-				const double targetSpeedSquared = extraOffsetCoord.MagnitudeSquared();
-				const double targetSpeed = sqrt(targetSpeedSquared);
-
-				const double crossFactor = lastSourceCoord.CrossProduct(targetSourceCoord).MagnitudeSquared();
-				const double verticalDistanceSquared = crossFactor / targetSpeedSquared;
-
-				const double horizonDistanceSquared = theDistanceSquared - verticalDistanceSquared;
-				const double horizonDistance = sqrt(horizonDistanceSquared);
-
-				const double straightSpeed = pType->FreeFallOnTarget ? pType->Trajectory_Speed : pType->FallSpeed;
-				const double straightSpeedSquared = straightSpeed * straightSpeed;
-
-				const double baseFactor = straightSpeedSquared - targetSpeedSquared;
-				const double squareFactor = baseFactor * verticalDistanceSquared + straightSpeedSquared * horizonDistanceSquared;
-
-				if (squareFactor > 1e-10)
-				{
-					const double minusFactor = -(horizonDistance * targetSpeed);
-					int travelTime = 0;
-
-					if (abs(baseFactor) < 1e-10)
-					{
-						travelTime = abs(horizonDistance) > 1e-10 ? (static_cast<int>(theDistanceSquared / (2 * horizonDistance * targetSpeed)) + 1) : 0;
-					}
-					else
-					{
-						const int travelTimeM = static_cast<int>((minusFactor - sqrt(squareFactor)) / baseFactor);
-						const int travelTimeP = static_cast<int>((minusFactor + sqrt(squareFactor)) / baseFactor);
-
-						if (travelTimeM > 0 && travelTimeP > 0)
-							travelTime = travelTimeM < travelTimeP ? travelTimeM : travelTimeP;
-						else if (travelTimeM > 0)
-							travelTime = travelTimeM;
-						else if (travelTimeP > 0)
-							travelTime = travelTimeP;
-
-						if (pType->FreeFallOnTarget)
-							travelTime += static_cast<int>(sqrt(2 * (this->Height - theTargetCoords.Z) / BulletTypeExt::GetAdjustedGravity(pBullet->Type)));
-
-						travelTime += this->AscendTime;
-
-						if (targetSourceCoord.MagnitudeSquared() >= lastSourceCoord.MagnitudeSquared())
-							travelTime += 1;
-					}
-
-					theTargetCoords += realExtraOffsetCoord * travelTime / this->AscendTime;
-				}
-			}
-		}
-	}
+	if (pType->NoLaunch)
+		theTargetCoords += this->CalculateBulletLeadTime(pBullet);
 
 	pBullet->TargetCoords = theTargetCoords;
 
@@ -379,6 +292,83 @@ void BombardTrajectory::CalculateTargetCoords(BulletClass* pBullet)
 		const int offsetDistance = ScenarioClass::Instance->Random.RandomRanged(offsetMin, offsetMax);
 		pBullet->TargetCoords = MapClass::GetRandomCoordsNear(pBullet->TargetCoords, offsetDistance, false);
 	}
+}
+
+CoordStruct BombardTrajectory::CalculateBulletLeadTime(BulletClass* pBullet)
+{
+	const BombardTrajectoryType* const pType = this->Type;
+	CoordStruct coords = CoordStruct::Empty;
+
+	if (pType->LeadTimeCalculate)
+	{
+		if (const AbstractClass* const pTarget = pBullet->Target)
+		{
+			const CoordStruct theTargetCoords = pTarget->GetCoords();
+			const CoordStruct theSourceCoords = pBullet->Location;
+
+			if (theTargetCoords != this->LastTargetCoord)
+			{
+				int travelTime = 0;
+
+				const CoordStruct extraOffsetCoord = theTargetCoords - this->LastTargetCoord;
+				const CoordStruct lastSourceCoord = theSourceCoords - this->LastTargetCoord;
+				const CoordStruct targetSourceCoord = theSourceCoords - theTargetCoords;
+
+				if (pType->FreeFallOnTarget)
+				{
+					travelTime += static_cast<int>(sqrt(2 * (this->Height - theTargetCoords.Z) / BulletTypeExt::GetAdjustedGravity(pBullet->Type)));
+					coords += extraOffsetCoord * (travelTime + 1);
+				}
+				else
+				{
+					const double theDistanceSquared = targetSourceCoord.MagnitudeSquared();
+					const double targetSpeedSquared = extraOffsetCoord.MagnitudeSquared();
+					const double targetSpeed = sqrt(targetSpeedSquared);
+
+					const double crossFactor = lastSourceCoord.CrossProduct(targetSourceCoord).MagnitudeSquared();
+					const double verticalDistanceSquared = crossFactor / targetSpeedSquared;
+
+					const double horizonDistanceSquared = theDistanceSquared - verticalDistanceSquared;
+					const double horizonDistance = sqrt(horizonDistanceSquared);
+
+					const double straightSpeed = pType->FreeFallOnTarget ? pType->Trajectory_Speed : pType->FallSpeed;
+					const double straightSpeedSquared = straightSpeed * straightSpeed;
+
+					const double baseFactor = straightSpeedSquared - targetSpeedSquared;
+					const double squareFactor = baseFactor * verticalDistanceSquared + straightSpeedSquared * horizonDistanceSquared;
+
+					if (squareFactor > 1e-10)
+					{
+						const double minusFactor = -(horizonDistance * targetSpeed);
+
+						if (abs(baseFactor) < 1e-10)
+						{
+							travelTime = abs(horizonDistance) > 1e-10 ? (static_cast<int>(theDistanceSquared / (2 * horizonDistance * targetSpeed)) + 1) : 0;
+						}
+						else
+						{
+							const int travelTimeM = static_cast<int>((minusFactor - sqrt(squareFactor)) / baseFactor);
+							const int travelTimeP = static_cast<int>((minusFactor + sqrt(squareFactor)) / baseFactor);
+
+							if (travelTimeM > 0 && travelTimeP > 0)
+								travelTime = travelTimeM < travelTimeP ? travelTimeM : travelTimeP;
+							else if (travelTimeM > 0)
+								travelTime = travelTimeM;
+							else if (travelTimeP > 0)
+								travelTime = travelTimeP;
+
+							if (targetSourceCoord.MagnitudeSquared() < lastSourceCoord.MagnitudeSquared())
+								travelTime -= 1;
+						}
+
+						coords += extraOffsetCoord * travelTime;
+					}
+				}
+			}
+		}
+	}
+
+	return coords;
 }
 
 void BombardTrajectory::CalculateDisperseBurst(BulletClass* pBullet)
@@ -487,8 +477,8 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 			if (this->ToFalling)
 			{
 				this->IsFalling = true;
-				TechnoClass* const pTechno = pBullet->Owner;
 				auto const pExt = BulletExt::ExtMap.Find(pBullet);
+				const AbstractClass* const pTarget = pBullet->Target;
 				CoordStruct middleLocation = CoordStruct::Empty;
 
 				if (!pType->FreeFallOnTarget)
@@ -506,6 +496,9 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 							trail.LastLocation = middleLocation;
 					}
 
+					if (pType->LeadTimeCalculate && pTarget)
+						pBullet->TargetCoords = pTarget->GetCoords() + this->CalculateBulletLeadTime(pBullet);
+
 					pBullet->Velocity.X = static_cast<double>(pBullet->TargetCoords.X - middleLocation.X);
 					pBullet->Velocity.Y = static_cast<double>(pBullet->TargetCoords.Y - middleLocation.Y);
 					pBullet->Velocity.Z = static_cast<double>(pBullet->TargetCoords.Z - middleLocation.Z);
@@ -516,17 +509,17 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 				}
 				else
 				{
-					middleLocation = pBullet->TargetCoords;
+					middleLocation = (pType->LeadTimeCalculate && pTarget) ? pTarget->GetCoords() + this->CalculateBulletLeadTime(pBullet) : pBullet->TargetCoords;
 
 					if (this->FallPercent != 1.0)
 					{
+						middleLocation.Z += static_cast<int>(pType->Height); // Use original height here
+
 						if (pExt->LaserTrails.size())
 						{
 							for (auto& trail : pExt->LaserTrails)
 								trail.LastLocation = middleLocation;
 						}
-
-						middleLocation.Z += static_cast<int>(pType->Height); // Use original height here
 					}
 					else
 					{
@@ -537,17 +530,19 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 				}
 
 				pBullet->SetLocation(middleLocation);
+				TechnoClass* const pTechno = pBullet->Owner;
 				this->ApplyTurningPointAnim(pType->TurningPointAnims, middleLocation, pTechno, pTechno ? pTechno->Owner : pExt->FirerHouse, true);
 			}
 			else
 			{
 				this->ToFalling = true;
+				const AbstractClass* const pTarget = pBullet->Target;
+
+				if (pType->LeadTimeCalculate && pTarget)
+					this->LastTargetCoord = pTarget->GetCoords();
+
 				pBullet->Velocity *= abs((this->Height - pBullet->Location.Z) / pBullet->Velocity.Z);
 			}
-		}
-		else
-		{
-			this->AscendTime += 1;
 		}
 	}
 	else if (pType->FreeFallOnTarget)

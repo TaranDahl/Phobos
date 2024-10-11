@@ -78,7 +78,6 @@ public:
 		, CurrentBurst { 0 }
 		, RotateAngle { 0 }
 		, WaitOneFrame {}
-		, AscendTime { 1 }
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -104,7 +103,6 @@ public:
 	int CurrentBurst;
 	double RotateAngle;
 	CDTimerClass WaitOneFrame;
-	int AscendTime;
 
 private:
 	template <typename T>
@@ -113,6 +111,7 @@ private:
 	void PrepareForOpenFire(BulletClass* pBullet);
 	CoordStruct CalculateMiddleCoords(BulletClass* pBullet);
 	void CalculateTargetCoords(BulletClass* pBullet);
+	CoordStruct CalculateBulletLeadTime(BulletClass* pBullet);
 	void CalculateDisperseBurst(BulletClass* pBullet);
 	bool BulletPrepareCheck(BulletClass* pBullet);
 	bool BulletDetonatePreCheck(BulletClass* pBullet);
