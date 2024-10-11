@@ -250,7 +250,7 @@ void BombardTrajectory::PrepareForOpenFire(BulletClass* pBullet)
 		}
 		else
 		{
-			middleLocation = CoordStruct { pBullet->TargetCoords.X, pBullet->TargetCoords.Y, static_cast<int>(this->Height - pBullet->SourceCoords.Z) };
+			middleLocation = CoordStruct { pBullet->TargetCoords.X, pBullet->TargetCoords.Y, static_cast<int>(this->Height) };
 		}
 
 		pBullet->SetLocation(middleLocation);
