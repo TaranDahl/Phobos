@@ -1197,7 +1197,7 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 		GameCreate<ParticleSystemClass>(pPSType, pBullet->Location, pTarget, pBullet->Owner, pTarget->GetCoords(), pOwner);
 }
 
-void DisperseTrajectory::DisperseBurstSubstitution(BulletClass* pBullet, CoordStruct axis, int rotateCoord, int curBurst, int maxBurst, bool mirror)
+void DisperseTrajectory::DisperseBurstSubstitution(BulletClass* pBullet, CoordStruct axis, double rotateCoord, int curBurst, int maxBurst, bool mirror)
 {
 	const CoordStruct createBulletTargetToSource = pBullet->TargetCoords - pBullet->SourceCoords;
 	const double rotateAngle = Math::atan2(createBulletTargetToSource.Y , createBulletTargetToSource.X);
