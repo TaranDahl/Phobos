@@ -71,11 +71,10 @@ public:
 		, FallSpeed { trajType->FallSpeed }
 		, OffsetCoord { trajType->OffsetCoord.Get() }
 		, IsFalling { false }
+		, ToFalling { false }
 		, RemainingDistance { 1 }
 		, LastTargetCoord {}
-		, CountOfBurst { 0 }
-		, CurrentBurst { 0 }
-		, RotateAngle { 0.0 }
+		, WaitOneFrame {}
 		, AscendTime { 1 }
 	{}
 
@@ -95,22 +94,22 @@ public:
 	double FallSpeed;
 	CoordStruct OffsetCoord;
 	bool IsFalling;
+	bool ToFalling;
 	int RemainingDistance;
 	CoordStruct LastTargetCoord;
-	int CountOfBurst;
-	int CurrentBurst;
-	double RotateAngle;
+	CDTimerClass WaitOneFrame;
 	int AscendTime;
 
 private:
 	template <typename T>
 	void Serialize(T& Stm);
 
+	void PrepareForOpenFire(BulletClass* pBullet);
+	CoordStruct CalculateMiddleCoords(BulletClass* pBullet);
+	double CalculateTargetCoords(BulletClass* pBullet);
+	bool BulletPrepareCheck(BulletClass* pBullet);
 	bool BulletDetonatePreCheck(BulletClass* pBullet);
 	bool BulletDetonateRemainCheck(BulletClass* pBullet, HouseClass* pOwner);
 	void BulletVelocityChange(BulletClass* pBullet);
-	void CalculateLeadTime(BulletClass* pBullet);
-	void CalculateDisperseBurst(BulletClass* pBullet, BulletVelocity& pVelocity);
-	void CalculateBulletVelocity(BulletVelocity& pVelocity);
 	void ApplyTurningPointAnim(const std::vector<AnimTypeClass*>& AnimList, CoordStruct coords, TechnoClass* pTechno = nullptr, HouseClass* pHouse = nullptr, bool invoker = false, bool ownedObject = false);;
 };
