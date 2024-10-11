@@ -157,9 +157,7 @@ void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 		{
 			SourceLocation.X = pBullet->SourceCoords.X + static_cast<int>((pBullet->TargetCoords.X - pBullet->SourceCoords.X) * this->FallPercent) + scatterX;
 			SourceLocation.Y = pBullet->SourceCoords.Y + static_cast<int>((pBullet->TargetCoords.Y - pBullet->SourceCoords.Y) * this->FallPercent) + scatterY;
-			pBullet->Limbo();
-			pBullet->Unlimbo(SourceLocation, DirType::North);
-
+			pBullet->SetLocation(SourceLocation);
 			this->CalculateLeadTime(pBullet);
 
 			pBullet->Velocity.X = static_cast<double>(pBullet->TargetCoords.X - SourceLocation.X);
@@ -183,8 +181,7 @@ void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 
 			SourceLocation.X = pBullet->TargetCoords.X + scatterX;
 			SourceLocation.Y = pBullet->TargetCoords.Y + scatterY;
-			pBullet->Limbo();
-			pBullet->Unlimbo(SourceLocation, DirType::North);
+			pBullet->SetLocation(SourceLocation);
 			pBullet->Velocity.X = 0.0;
 			pBullet->Velocity.Y = 0.0;
 			pBullet->Velocity.Z = 0.0;
@@ -196,33 +193,16 @@ void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 
 bool BombardTrajectory::OnAI(BulletClass* pBullet)
 {
-	const BombardTrajectoryType* const pType = this->Type;
-
-	// Close enough
-	if (pBullet->TargetCoords.DistanceFrom(pBullet->Location) < pType->DetonationDistance.Get())
+	if (this->BulletDetonatePreCheck(pBullet))
 		return true;
-
-	// Height
-	if (pType->DetonationHeight >= 0)
-	{
-		if (pType->EarlyDetonation && (pBullet->Location.Z - pBullet->SourceCoords.Z) > pType->DetonationHeight)
-			return true;
-		else if (this->IsFalling && (pBullet->Location.Z - pBullet->SourceCoords.Z) < pType->DetonationHeight)
-			return true;
-	}
-
-	// Ground, must be checked when free fall
-	if (pType->SubjectToGround || (this->IsFalling && pType->FreeFallOnTarget))
-	{
-		if (MapClass::Instance->GetCellFloorHeight(pBullet->Location) >= (pBullet->Location.Z + 15))
-			return true;
-	}
 
 	// Extra check for trajectory falling
 	auto const pOwner = pBullet->Owner ? pBullet->Owner->Owner : BulletExt::ExtMap.Find(pBullet)->FirerHouse;
 
-	if (this->IsFalling && !pType->FreeFallOnTarget && this->BulletDetonatePreCheck(pBullet, pOwner))
+	if (this->IsFalling && !this->Type->FreeFallOnTarget && this->BulletDetonateRemainCheck(pBullet, pOwner))
 		return true;
+
+	this->BulletVelocityChange(pBullet);
 
 	return false;
 }
@@ -244,89 +224,7 @@ void BombardTrajectory::OnAIPreDetonate(BulletClass* pBullet)
 
 void BombardTrajectory::OnAIVelocity(BulletClass* pBullet, BulletVelocity* pSpeed, BulletVelocity* pPosition)
 {
-	const BombardTrajectoryType* const pType = this->Type;
-
-	if (!this->IsFalling)
-	{
-		pSpeed->Z += BulletTypeExt::GetAdjustedGravity(pBullet->Type);
-
-		if (pBullet->Location.Z + pBullet->Velocity.Z >= this->Height)
-		{
-			this->IsFalling = true;
-			TechnoClass* const pTechno = pBullet->Owner;
-
-			if (!pType->FreeFallOnTarget)
-			{
-				this->CalculateLeadTime(pBullet);
-
-				pSpeed->X = static_cast<double>(pBullet->TargetCoords.X - pBullet->Location.X - pBullet->Velocity.X);
-				pSpeed->Y = static_cast<double>(pBullet->TargetCoords.Y - pBullet->Location.Y - pBullet->Velocity.Y);
-				pSpeed->Z = static_cast<double>(pBullet->TargetCoords.Z - pBullet->Location.Z - pBullet->Velocity.Z);
-
-				pPosition->X = pBullet->Location.X + pBullet->Velocity.X;
-				pPosition->Y = pBullet->Location.Y + pBullet->Velocity.Y;
-				pPosition->Z = pBullet->Location.Z + pBullet->Velocity.Z;
-
-				this->CalculateDisperseBurst(pBullet, *pSpeed);
-
-				CoordStruct BulletLocation { static_cast<int>(pPosition->X), static_cast<int>(pPosition->Y), static_cast<int>(pPosition->Z) };
-
-				this->RemainingDistance += static_cast<int>(pBullet->TargetCoords.DistanceFrom(BulletLocation) + this->FallSpeed);
-				this->CalculateBulletVelocity(*pSpeed);
-				this->ApplyTurningPointAnim(pType->TurningPointAnims, BulletLocation, pTechno, pTechno ? pTechno->Owner : BulletExt::ExtMap.Find(pBullet)->FirerHouse, true);
-			}
-			else
-			{
-				pSpeed->X = 0.0;
-				pSpeed->Y = 0.0;
-				pSpeed->Z = 0.0;
-
-				auto pExt = BulletExt::ExtMap.Find(pBullet);
-
-				if (this->FallPercent != 1.0)
-				{
-					pExt->LaserTrails.clear();
-
-					CoordStruct target = pBullet->TargetCoords;
-					target.Z += static_cast<int>(pType->Height); // Use original height here
-					pBullet->Limbo();
-					pBullet->Unlimbo(target, DirType::North);
-
-					pPosition->X = pBullet->TargetCoords.X;
-					pPosition->Y = pBullet->TargetCoords.Y;
-					pPosition->Z = pBullet->TargetCoords.Z + static_cast<int>(pType->Height);
-
-					if (auto pTypeExt = pExt->TypeExtData)
-					{
-						auto pThis = pExt->OwnerObject();
-						auto pOwner = pThis->Owner ? pThis->Owner->Owner : nullptr;
-
-						for (auto const& idxTrail : pTypeExt->LaserTrail_Types)
-						{
-							if (auto const pLaserType = LaserTrailTypeClass::Array[idxTrail].get())
-								pExt->LaserTrails.push_back(LaserTrailClass { pLaserType, pOwner });
-						}
-					}
-				}
-				else
-				{
-					pPosition->X = pBullet->TargetCoords.X;
-					pPosition->Y = pBullet->TargetCoords.Y;
-				}
-
-				CoordStruct BulletLocation { static_cast<int>(pPosition->X), static_cast<int>(pPosition->Y), static_cast<int>(pPosition->Z) };
-				this->ApplyTurningPointAnim(pType->TurningPointAnims, BulletLocation, pTechno, pTechno ? pTechno->Owner : pExt->FirerHouse, true);
-			}
-		}
-		else
-		{
-			this->AscendTime += 1;
-		}
-	}
-	else if (!pType->FreeFallOnTarget)
-	{
-		pSpeed->Z += BulletTypeExt::GetAdjustedGravity(pBullet->Type);
-	}
+	pSpeed->Z += BulletTypeExt::GetAdjustedGravity(pBullet->Type); // We don't want to take the gravity into account
 }
 
 TrajectoryCheckReturnType BombardTrajectory::OnAITargetCoordCheck(BulletClass* pBullet)
@@ -514,7 +412,34 @@ void BombardTrajectory::CalculateBulletVelocity(BulletVelocity& pVelocity)
 		this->RemainingDistance = 0;
 }
 
-bool BombardTrajectory::BulletDetonatePreCheck(BulletClass* pBullet, HouseClass* pOwner)
+bool BombardTrajectory::BulletDetonatePreCheck(BulletClass* pBullet)
+{
+	const BombardTrajectoryType* const pType = this->Type;
+
+	// Close enough
+	if (pBullet->TargetCoords.DistanceFrom(pBullet->Location) < pType->DetonationDistance.Get())
+		return true;
+
+	// Height
+	if (pType->DetonationHeight >= 0)
+	{
+		if (pType->EarlyDetonation && (pBullet->Location.Z - pBullet->SourceCoords.Z) > pType->DetonationHeight)
+			return true;
+		else if (this->IsFalling && (pBullet->Location.Z - pBullet->SourceCoords.Z) < pType->DetonationHeight)
+			return true;
+	}
+
+	// Ground, must be checked when free fall
+	if (pType->SubjectToGround || (this->IsFalling && pType->FreeFallOnTarget))
+	{
+		if (MapClass::Instance->GetCellFloorHeight(pBullet->Location) >= (pBullet->Location.Z + 15))
+			return true;
+	}
+
+	return false;
+}
+
+bool BombardTrajectory::BulletDetonateRemainCheck(BulletClass* pBullet, HouseClass* pOwner)
 {
 	this->RemainingDistance -= static_cast<int>(this->FallSpeed);
 
@@ -528,6 +453,68 @@ bool BombardTrajectory::BulletDetonatePreCheck(BulletClass* pBullet, HouseClass*
 	}
 
 	return false;
+}
+
+void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
+{
+	const BombardTrajectoryType* const pType = this->Type;
+
+	if (!this->IsFalling)
+	{
+		if (pBullet->Location.Z + pBullet->Velocity.Z >= this->Height)
+		{
+			this->IsFalling = true;
+			TechnoClass* const pTechno = pBullet->Owner;
+
+			if (!pType->FreeFallOnTarget)
+			{
+				this->CalculateLeadTime(pBullet);
+				CoordStruct nextLocation
+				{
+					static_cast<int>(pBullet->Location.X + pBullet->Velocity.X),
+					static_cast<int>(pBullet->Location.Y + pBullet->Velocity.Y),
+					static_cast<int>(pBullet->Location.Z + pBullet->Velocity.Z)
+				};
+
+				pBullet->Velocity.X = static_cast<double>(pBullet->TargetCoords.X - nextLocation.X);
+				pBullet->Velocity.Y = static_cast<double>(pBullet->TargetCoords.Y - nextLocation.Y);
+				pBullet->Velocity.Z = static_cast<double>(pBullet->TargetCoords.Z - nextLocation.Z);
+
+				pBullet->SetLocation(nextLocation);
+				this->CalculateDisperseBurst(pBullet, pBullet->Velocity);
+
+				this->RemainingDistance += static_cast<int>(pBullet->TargetCoords.DistanceFrom(nextLocation) + this->FallSpeed);
+				this->CalculateBulletVelocity(pBullet->Velocity);
+				this->ApplyTurningPointAnim(pType->TurningPointAnims, nextLocation, pTechno, pTechno ? pTechno->Owner : BulletExt::ExtMap.Find(pBullet)->FirerHouse, true);
+			}
+			else
+			{
+				pBullet->Velocity = BulletVelocity::Empty;
+				CoordStruct target = pBullet->TargetCoords;
+
+				if (this->FallPercent != 1.0)
+				{
+					target.Z += static_cast<int>(pType->Height); // Use original height here
+					pBullet->SetLocation(target);
+				}
+				else
+				{
+					target.Z = pBullet->Location.Z;
+					pBullet->SetLocation(target);
+				}
+
+				this->ApplyTurningPointAnim(pType->TurningPointAnims, target, pTechno, pTechno ? pTechno->Owner : BulletExt::ExtMap.Find(pBullet)->FirerHouse, true);
+			}
+		}
+		else
+		{
+			this->AscendTime += 1;
+		}
+	}
+	else if (pType->FreeFallOnTarget)
+	{
+		pBullet->Velocity.Z -= BulletTypeExt::GetAdjustedGravity(pBullet->Type);
+	}
 }
 
 void BombardTrajectory::ApplyTurningPointAnim(const std::vector<AnimTypeClass*>& AnimList, CoordStruct coords, TechnoClass* pTechno, HouseClass* pHouse, bool invoker, bool ownedObject)
