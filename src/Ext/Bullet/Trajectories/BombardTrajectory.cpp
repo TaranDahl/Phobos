@@ -113,9 +113,6 @@ void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 	this->LastTargetCoord = pBullet->TargetCoords;
 	pBullet->Velocity = BulletVelocity::Empty;
 
-	if (!this->FallSpeed)
-		this->FallSpeed = pType->Trajectory_Speed;
-
 	if (TechnoClass* const pOwner = pBullet->Owner)
 	{
 		if (pType->MirrorCoord && pOwner->CurrentBurstIndex % 2 == 1)
@@ -180,10 +177,8 @@ void BombardTrajectory::PrepareForOpenFire(BulletClass* pBullet)
 {
 	const BombardTrajectoryType* const pType = this->Type;
 	this->Height += pBullet->TargetCoords.Z;
-
 	// use scaling since RandomRanged only support int
-	const double fallPercentShift = ScenarioClass::Instance->Random.RandomRanged(0, static_cast<int>(200 * pType->FallPercentShift)) / 100.0;
-	this->FallPercent += fallPercentShift - pType->FallPercentShift;
+	this->FallPercent += ScenarioClass::Instance->Random.RandomRanged(0, static_cast<int>(200 * pType->FallPercentShift)) / 100.0;
 
 	const double rotateAngle = this->CalculateTargetCoords(pBullet);
 
@@ -277,7 +272,7 @@ CoordStruct BombardTrajectory::CalculateMiddleCoords(BulletClass* pBullet)
 	{
 		pBullet->SourceCoords.X + static_cast<int>((pBullet->TargetCoords.X - pBullet->SourceCoords.X) * this->FallPercent) + scatterX,
 		pBullet->SourceCoords.Y + static_cast<int>((pBullet->TargetCoords.Y - pBullet->SourceCoords.Y) * this->FallPercent) + scatterY,
-		static_cast<int>(this->Height - pBullet->SourceCoords.Z)
+		static_cast<int>(this->Height)
 	};
 }
 
