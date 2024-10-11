@@ -68,7 +68,7 @@ public:
 	BombardTrajectory(BombardTrajectoryType const* trajType) : Type { trajType }
 		, Height { trajType->Height }
 		, FallPercent { trajType->FallPercent - trajType->FallPercentShift }
-		, FallSpeed { trajType->FallSpeed ? trajType->FallSpeed : trajType->Trajectory_Speed }
+		, FallSpeed { abs(trajType->FallSpeed.Get()) > 1e-10 ? trajType->FallSpeed : trajType->Trajectory_Speed }
 		, OffsetCoord { trajType->OffsetCoord.Get() }
 		, IsFalling { false }
 		, ToFalling { false }
