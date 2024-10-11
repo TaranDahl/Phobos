@@ -341,8 +341,8 @@ void BombardTrajectory::CalculateTargetCoords(BulletClass* pBullet)
 
 						travelTime += this->AscendTime;
 
-						if (targetSourceCoord.MagnitudeSquared() >= lastSourceCoord.MagnitudeSquared())
-							travelTime += 1;
+						if (targetSourceCoord.MagnitudeSquared() < lastSourceCoord.MagnitudeSquared())
+							travelTime -= 1;
 					}
 
 					theTargetCoords += realExtraOffsetCoord * travelTime / this->AscendTime;
