@@ -9,12 +9,23 @@ public:
 		, Height { 0.0 }
 		, FallPercent { 1.0 }
 		, FallPercentShift { 0.0 }
-		, FallScatterRange { Leptons(0) }
+		, FallScatter_Max { Leptons(0) }
+		, FallScatter_Min { Leptons(0) }
 		, FallSpeed { 0.0 }
+		, DetonationDistance { Leptons(102) }
+		, DetonationHeight { -1 }
+		, EarlyDetonation { false }
 		, TargetSnapDistance { Leptons(128) }
 		, FreeFallOnTarget { true }
+		, LeadTimeCalculate { false }
 		, NoLaunch { false }
-		, TurningPointAnim {}
+		, TurningPointAnims {}
+		, OffsetCoord { { 0, 0, 0 } }
+		, RotateCoord { 0 }
+		, MirrorCoord { true }
+		, UseDisperseBurst { false }
+		, AxisOfRotation { { 0, 0, 1 } }
+		, SubjectToGround { false }
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -26,12 +37,23 @@ public:
 	Valueable<double> Height;
 	Valueable<double> FallPercent;
 	Valueable<double> FallPercentShift;
-	Valueable<Leptons> FallScatterRange;
+	Valueable<Leptons> FallScatter_Max;
+	Valueable<Leptons> FallScatter_Min;
 	Valueable<double> FallSpeed;
+	Valueable<Leptons> DetonationDistance;
+	Valueable<int> DetonationHeight;
+	Valueable<bool> EarlyDetonation;
 	Valueable<Leptons> TargetSnapDistance;
 	Valueable<bool> FreeFallOnTarget;
+	Valueable<bool> LeadTimeCalculate;
 	Valueable<bool> NoLaunch;
-	Nullable<AnimTypeClass*> TurningPointAnim;
+	ValueableVector<AnimTypeClass*> TurningPointAnims;
+	Valueable<CoordStruct> OffsetCoord;
+	Valueable<int> RotateCoord;
+	Valueable<bool> MirrorCoord;
+	Valueable<bool> UseDisperseBurst;
+	Valueable<CoordStruct> AxisOfRotation;
+	Valueable<bool> SubjectToGround;
 
 private:
 	template <typename T>
@@ -46,15 +68,15 @@ public:
 	BombardTrajectory(BombardTrajectoryType const* trajType) : Type { trajType }
 		, Height { trajType->Height }
 		, FallPercent { trajType->FallPercent }
-		, FallPercentShift { trajType->FallPercentShift }
-		, FallScatterRange { trajType->FallScatterRange }
-		, FallSpeed { trajType->FallSpeed ? trajType->FallSpeed : trajType->Trajectory_Speed }
-		, TargetSnapDistance { trajType->TargetSnapDistance }
-		, FreeFallOnTarget { trajType->FreeFallOnTarget }
-		, NoLaunch { trajType->NoLaunch }
-		, TurningPointAnim { trajType->TurningPointAnim.Get(nullptr) }
+		, FallSpeed { trajType->FallSpeed }
+		, OffsetCoord { trajType->OffsetCoord.Get() }
 		, IsFalling { false }
 		, RemainingDistance { 1 }
+		, LastTargetCoord {}
+		, CountOfBurst { 0 }
+		, CurrentBurst { 0 }
+		, RotateAngle { 0.0 }
+		, AscendTime { 1 }
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -70,20 +92,25 @@ public:
 	const BombardTrajectoryType* Type;
 	double Height;
 	double FallPercent;
-	double FallPercentShift;
-	Leptons FallScatterRange;
 	double FallSpeed;
-	Leptons TargetSnapDistance;
-	bool FreeFallOnTarget;
-	bool NoLaunch;
-	AnimTypeClass* TurningPointAnim;
+	CoordStruct OffsetCoord;
 	bool IsFalling;
 	int RemainingDistance;
+	CoordStruct LastTargetCoord;
+	int CountOfBurst;
+	int CurrentBurst;
+	double RotateAngle;
+	int AscendTime;
 
 private:
 	template <typename T>
 	void Serialize(T& Stm);
 
-	void ApplyTurningPointAnim(BulletClass* pBullet, CoordStruct Position);
-	bool BulletDetonatePreCheck(BulletClass* pBullet, HouseClass* pOwner, double StraightSpeed);
+	bool BulletDetonatePreCheck(BulletClass* pBullet);
+	bool BulletDetonateRemainCheck(BulletClass* pBullet, HouseClass* pOwner);
+	void BulletVelocityChange(BulletClass* pBullet);
+	void CalculateLeadTime(BulletClass* pBullet);
+	void CalculateDisperseBurst(BulletClass* pBullet, BulletVelocity& pVelocity);
+	void CalculateBulletVelocity(BulletVelocity& pVelocity);
+	void ApplyTurningPointAnim(const std::vector<AnimTypeClass*>& AnimList, CoordStruct coords, TechnoClass* pTechno = nullptr, HouseClass* pHouse = nullptr, bool invoker = false, bool ownedObject = false);;
 };
