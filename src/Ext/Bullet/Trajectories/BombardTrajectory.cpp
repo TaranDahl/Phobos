@@ -61,6 +61,10 @@ void BombardTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 	this->FallScatter_Max.Read(exINI, pSection, "Trajectory.Bombard.FallScatter.Max");
 	this->FallScatter_Min.Read(exINI, pSection, "Trajectory.Bombard.FallScatter.Min");
 	this->FallSpeed.Read(exINI, pSection, "Trajectory.Bombard.FallSpeed");
+
+	if (abs(this->FallSpeed.Get()) < 1e-10)
+		this->FallSpeed = this->Trajectory_Speed;
+
 	this->DetonationDistance.Read(exINI, pSection, "Trajectory.Bombard.DetonationDistance");
 	this->DetonationHeight.Read(exINI, pSection, "Trajectory.Bombard.DetonationHeight");
 	this->EarlyDetonation.Read(exINI, pSection, "Trajectory.Bombard.EarlyDetonation");
@@ -84,7 +88,6 @@ void BombardTrajectory::Serialize(T& Stm)
 		.Process(this->Type)
 		.Process(this->Height)
 		.Process(this->FallPercent)
-		.Process(this->FallSpeed)
 		.Process(this->OffsetCoord)
 		.Process(this->IsFalling)
 		.Process(this->ToFalling)
@@ -113,6 +116,9 @@ bool BombardTrajectory::Save(PhobosStreamWriter& Stm) const
 void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity)
 {
 	const BombardTrajectoryType* const pType = this->Type;
+	this->Height += pBullet->TargetCoords.Z;
+	// use scaling since RandomRanged only support int
+	this->FallPercent += ScenarioClass::Instance->Random.RandomRanged(0, static_cast<int>(200 * pType->FallPercentShift)) / 100.0;
 	this->LastTargetCoord = pBullet->TargetCoords;
 	pBullet->Velocity = BulletVelocity::Empty;
 
@@ -184,10 +190,6 @@ TrajectoryCheckReturnType BombardTrajectory::OnAITechnoCheck(BulletClass* pBulle
 void BombardTrajectory::PrepareForOpenFire(BulletClass* pBullet)
 {
 	const BombardTrajectoryType* const pType = this->Type;
-	this->Height += pBullet->TargetCoords.Z;
-	// use scaling since RandomRanged only support int
-	this->FallPercent += ScenarioClass::Instance->Random.RandomRanged(0, static_cast<int>(200 * pType->FallPercentShift)) / 100.0;
-
 	this->CalculateTargetCoords(pBullet);
 
 	if (!pType->NoLaunch)
@@ -213,9 +215,10 @@ void BombardTrajectory::PrepareForOpenFire(BulletClass* pBullet)
 			pBullet->Velocity.X = static_cast<double>(pBullet->TargetCoords.X - middleLocation.X);
 			pBullet->Velocity.Y = static_cast<double>(pBullet->TargetCoords.Y - middleLocation.Y);
 			pBullet->Velocity.Z = static_cast<double>(pBullet->TargetCoords.Z - middleLocation.Z);
-			pBullet->Velocity *= this->FallSpeed / pBullet->Velocity.Magnitude();
+			pBullet->Velocity *= pType->FallSpeed / pBullet->Velocity.Magnitude();
 
-			this->RemainingDistance += static_cast<int>(pBullet->TargetCoords.DistanceFrom(middleLocation) + this->FallSpeed);
+			this->CalculateDisperseBurst(pBullet);
+			this->RemainingDistance += static_cast<int>(pBullet->TargetCoords.DistanceFrom(middleLocation) + pType->FallSpeed);
 		}
 		else
 		{
@@ -305,7 +308,7 @@ void BombardTrajectory::CalculateTargetCoords(BulletClass* pBullet)
 				const double horizonDistanceSquared = theDistanceSquared - verticalDistanceSquared;
 				const double horizonDistance = sqrt(horizonDistanceSquared);
 
-				const double straightSpeed = pType->FreeFallOnTarget ? pType->Trajectory_Speed : this->FallSpeed;
+				const double straightSpeed = pType->FreeFallOnTarget ? pType->Trajectory_Speed : pType->FallSpeed;
 				const double straightSpeedSquared = straightSpeed * straightSpeed;
 
 				const double baseFactor = straightSpeedSquared - targetSpeedSquared;
@@ -404,11 +407,11 @@ void BombardTrajectory::CalculateDisperseBurst(BulletClass* pBullet)
 				if (this->CurrentBurst % 2 == 1)
 					rotationAxis *= -1;
 
-				extraRotate = Math::Pi * (pType->RotateCoord * ((this->CurrentBurst / 2) / (this->CountOfBurst - 1.0) - 0.5)) / 180;
+				extraRotate = Math::Pi * (pType->RotateCoord * ((this->CurrentBurst / 2) / (this->CountOfBurst - 1.0) - 0.5)) / (this->IsFalling ? 90 : 180);
 			}
 			else
 			{
-				extraRotate = Math::Pi * (pType->RotateCoord * (this->CurrentBurst / (this->CountOfBurst - 1.0) - 0.5)) / 180;
+				extraRotate = Math::Pi * (pType->RotateCoord * (this->CurrentBurst / (this->CountOfBurst - 1.0) - 0.5)) / (this->IsFalling ? 90 : 180);
 			}
 
 			const double cosRotate = Math::cos(extraRotate);
@@ -457,14 +460,15 @@ bool BombardTrajectory::BulletDetonatePreCheck(BulletClass* pBullet)
 
 bool BombardTrajectory::BulletDetonateRemainCheck(BulletClass* pBullet, HouseClass* pOwner)
 {
-	this->RemainingDistance -= static_cast<int>(this->FallSpeed);
+	const BombardTrajectoryType* const pType = this->Type;
+	this->RemainingDistance -= static_cast<int>(pType->FallSpeed);
 
 	if (this->RemainingDistance < 0)
 		return true;
 
-	if (this->RemainingDistance < this->FallSpeed)
+	if (this->RemainingDistance < pType->FallSpeed)
 	{
-		pBullet->Velocity *= this->RemainingDistance / this->FallSpeed;
+		pBullet->Velocity *= this->RemainingDistance / pType->FallSpeed;
 		this->RemainingDistance = 0;
 	}
 
@@ -504,10 +508,10 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 					pBullet->Velocity.X = static_cast<double>(pBullet->TargetCoords.X - middleLocation.X);
 					pBullet->Velocity.Y = static_cast<double>(pBullet->TargetCoords.Y - middleLocation.Y);
 					pBullet->Velocity.Z = static_cast<double>(pBullet->TargetCoords.Z - middleLocation.Z);
-					pBullet->Velocity *= this->FallSpeed / pBullet->Velocity.Magnitude();
+					pBullet->Velocity *= pType->FallSpeed / pBullet->Velocity.Magnitude();
 
-					this->RemainingDistance += static_cast<int>(pBullet->TargetCoords.DistanceFrom(middleLocation) + this->FallSpeed);
 					this->CalculateDisperseBurst(pBullet);
+					this->RemainingDistance += static_cast<int>(pBullet->TargetCoords.DistanceFrom(middleLocation) + pType->FallSpeed);
 				}
 				else
 				{
