@@ -113,6 +113,7 @@ private:
 	void PrepareForOpenFire(BulletClass* pBullet);
 	CoordStruct CalculateMiddleCoords(BulletClass* pBullet);
 	void CalculateTargetCoords(BulletClass* pBullet);
+	CoordStruct CalculateBulletLeadTime(BulletClass* pBullet);
 	void CalculateDisperseBurst(BulletClass* pBullet);
 	bool BulletPrepareCheck(BulletClass* pBullet);
 	bool BulletDetonatePreCheck(BulletClass* pBullet);
