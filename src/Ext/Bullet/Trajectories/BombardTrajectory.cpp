@@ -262,7 +262,7 @@ void BombardTrajectory::CalculateTargetCoords(BulletClass* pBullet)
 	CoordStruct theTargetCoords = pBullet->TargetCoords;
 	CoordStruct theSourceCoords = pBullet->SourceCoords;
 
-	if (pType->NoLaunch || pType->FreeFallOnTarget)
+	if (pType->NoLaunch || !pType->FreeFallOnTarget)
 		theTargetCoords += this->CalculateBulletLeadTime(pBullet);
 
 	pBullet->TargetCoords = theTargetCoords;
@@ -537,17 +537,18 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 				}
 				else
 				{
-					middleLocation = pBullet->TargetCoords;
+					const AbstractClass* const pTarget = pBullet->Target;
+					middleLocation = (pType->LeadTimeCalculate && pTarget) ? pTarget->GetCoords() : pBullet->TargetCoords;
 
 					if (this->FallPercent != 1.0)
 					{
+						middleLocation.Z += static_cast<int>(pType->Height); // Use original height here
+
 						if (pExt->LaserTrails.size())
 						{
 							for (auto& trail : pExt->LaserTrails)
 								trail.LastLocation = middleLocation;
 						}
-
-						middleLocation.Z += static_cast<int>(pType->Height); // Use original height here
 					}
 					else
 					{
