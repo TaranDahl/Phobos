@@ -106,7 +106,9 @@ private:
 	template <typename T>
 	void Serialize(T& Stm);
 
-	bool BulletDetonatePreCheck(BulletClass* pBullet, HouseClass* pOwner);
+	bool BulletDetonatePreCheck(BulletClass* pBullet);
+	bool BulletDetonateRemainCheck(BulletClass* pBullet, HouseClass* pOwner);
+	void BulletVelocityChange(BulletClass* pBullet);
 	void CalculateLeadTime(BulletClass* pBullet);
 	void CalculateDisperseBurst(BulletClass* pBullet, BulletVelocity& pVelocity);
 	void CalculateBulletVelocity(BulletVelocity& pVelocity);
