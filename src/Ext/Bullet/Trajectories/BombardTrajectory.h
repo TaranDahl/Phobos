@@ -117,5 +117,6 @@ private:
 	bool BulletDetonatePreCheck(BulletClass* pBullet);
 	bool BulletDetonateRemainCheck(BulletClass* pBullet, HouseClass* pOwner);
 	void BulletVelocityChange(BulletClass* pBullet);
+	void RefreshBulletLineTrail(BulletClass* pBullet);
 	void ApplyTurningPointAnim(const std::vector<AnimTypeClass*>& AnimList, CoordStruct coords, TechnoClass* pTechno = nullptr, HouseClass* pHouse = nullptr, bool invoker = false, bool ownedObject = false);;
 };
