@@ -74,6 +74,7 @@ public:
 		, ToFalling { false }
 		, RemainingDistance { 1 }
 		, LastTargetCoord {}
+		, InitialTargetCoord {}
 		, CountOfBurst { 0 }
 		, CurrentBurst { 0 }
 		, RotateAngle { 0 }
@@ -99,6 +100,7 @@ public:
 	bool ToFalling;
 	int RemainingDistance;
 	CoordStruct LastTargetCoord;
+	CoordStruct InitialTargetCoord;
 	int CountOfBurst;
 	int CurrentBurst;
 	double RotateAngle;
