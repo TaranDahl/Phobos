@@ -359,7 +359,9 @@ CoordStruct BombardTrajectory::CalculateBulletLeadTime(BulletClass* pBullet)
 								travelTime = travelTimeP;
 
 							if (targetSourceCoord.MagnitudeSquared() < lastSourceCoord.MagnitudeSquared())
-								travelTime -= 1;
+								travelTime += 1;
+							else
+								travelTime += 2;
 						}
 
 						coords += extraOffsetCoord * travelTime;
