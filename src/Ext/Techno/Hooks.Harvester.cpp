@@ -48,8 +48,6 @@ DEFINE_HOOK(0x, UnitClass_MissionHarvest_Status2, 0x)
 
 }
 
-*/
-
 DEFINE_HOOK(0x73E755, TEST, 0x6)
 {
 	GET(UnitClass*, pThis, EBP);
@@ -86,19 +84,20 @@ DEFINE_HOOK(0x73E755, TEST, 0x6)
 	}
 	pThis->UpdatePosition(PCPType::End);
 	pThis->SetDestination(0, 1);
-	/*
-	(pThis->LocomotionClassOffset::IPersistStream::IPersist::IUnknown::__vftable[1].Save)(pThis);
+	pThis->Locomotor->Stop_Moving();
 	CellClass::CollectCrate(CellAt, pThis);
 	v33 = operator new(0x1C8u);
 	if (v33)
 	{
 		pCoord = pThis->Location;
 		AnimClass::CTOR(v33, RulesClass::Instance->WarpOut, &pCoord, 0, 1, 1536, 0, 0);
-	}*/
+	}
 	pThis->unknown_280 = 0;
 
 	return 0;
 }
+
+*/
 
 #pragma endregion
 
