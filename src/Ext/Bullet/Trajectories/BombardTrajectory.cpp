@@ -493,7 +493,6 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 			if (this->ToFalling)
 			{
 				this->IsFalling = true;
-				auto const pExt = BulletExt::ExtMap.Find(pBullet);
 				const AbstractClass* const pTarget = pBullet->Target;
 				CoordStruct middleLocation = CoordStruct::Empty;
 
@@ -505,13 +504,6 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 						static_cast<int>(pBullet->Location.Y + pBullet->Velocity.Y),
 						static_cast<int>(pBullet->Location.Z + pBullet->Velocity.Z)
 					};
-
-					if (pExt->LaserTrails.size())
-					{
-						for (auto& trail : pExt->LaserTrails)
-							trail.LastLocation = middleLocation;
-					}
-					this->RefreshBulletLineTrail(pBullet);
 
 					if (pType->LeadTimeCalculate && pTarget)
 						pBullet->TargetCoords += pTarget->GetCoords() - this->InitialTargetCoord + this->CalculateBulletLeadTime(pBullet);
@@ -532,15 +524,17 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 					middleLocation = pBullet->TargetCoords;
 					middleLocation.Z = pBullet->Location.Z;
 
-					if (pExt->LaserTrails.size())
-					{
-						for (auto& trail : pExt->LaserTrails)
-							trail.LastLocation = middleLocation;
-					}
-					this->RefreshBulletLineTrail(pBullet);
-
 					pBullet->Velocity = BulletVelocity::Empty;
 				}
+
+				auto const pExt = BulletExt::ExtMap.Find(pBullet);
+
+				if (pExt->LaserTrails.size())
+				{
+					for (auto& trail : pExt->LaserTrails)
+						trail.LastLocation = middleLocation;
+				}
+				this->RefreshBulletLineTrail(pBullet);
 
 				pBullet->SetLocation(middleLocation);
 				TechnoClass* const pTechno = pBullet->Owner;
