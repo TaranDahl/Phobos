@@ -77,7 +77,7 @@ public:
 		, CountOfBurst { 0 }
 		, CurrentBurst { 0 }
 		, RotateAngle { 0 }
-		, WaitOneFrame {}
+		, WaitOneFrame { 0 }
 	{}
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -102,7 +102,7 @@ public:
 	int CountOfBurst;
 	int CurrentBurst;
 	double RotateAngle;
-	CDTimerClass WaitOneFrame;
+	int WaitOneFrame;
 
 private:
 	template <typename T>
