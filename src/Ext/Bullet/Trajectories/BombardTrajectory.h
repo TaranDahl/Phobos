@@ -74,6 +74,7 @@ public:
 		, ToFalling { false }
 		, RemainingDistance { 1 }
 		, LastTargetCoord {}
+		, InitialTargetCoord {}
 		, CountOfBurst { 0 }
 		, CurrentBurst { 0 }
 		, RotateAngle { 0 }
@@ -99,6 +100,7 @@ public:
 	bool ToFalling;
 	int RemainingDistance;
 	CoordStruct LastTargetCoord;
+	CoordStruct InitialTargetCoord;
 	int CountOfBurst;
 	int CurrentBurst;
 	double RotateAngle;
@@ -117,5 +119,6 @@ private:
 	bool BulletDetonatePreCheck(BulletClass* pBullet);
 	bool BulletDetonateRemainCheck(BulletClass* pBullet, HouseClass* pOwner);
 	void BulletVelocityChange(BulletClass* pBullet);
+	void RefreshBulletLineTrail(BulletClass* pBullet);
 	void ApplyTurningPointAnim(const std::vector<AnimTypeClass*>& AnimList, CoordStruct coords, TechnoClass* pTechno = nullptr, HouseClass* pHouse = nullptr, bool invoker = false, bool ownedObject = false);;
 };

@@ -1,6 +1,7 @@
 #include "BombardTrajectory.h"
 #include "Memory.h"
 
+#include <LineTrail.h>
 #include <AnimClass.h>
 #include <Ext/Anim/Body.h>
 #include <Ext/Bullet/Body.h>
@@ -94,6 +95,7 @@ void BombardTrajectory::Serialize(T& Stm)
 		.Process(this->ToFalling)
 		.Process(this->RemainingDistance)
 		.Process(this->LastTargetCoord)
+		.Process(this->InitialTargetCoord)
 		.Process(this->CountOfBurst)
 		.Process(this->CurrentBurst)
 		.Process(this->RotateAngle)
@@ -119,6 +121,7 @@ void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 	this->Height += pBullet->TargetCoords.Z;
 	// use scaling since RandomRanged only support int
 	this->FallPercent += ScenarioClass::Instance->Random.RandomRanged(0, static_cast<int>(200 * pType->FallPercentShift)) / 100.0;
+	this->InitialTargetCoord = pBullet->TargetCoords;
 	this->LastTargetCoord = pBullet->TargetCoords;
 	pBullet->Velocity = BulletVelocity::Empty;
 
@@ -232,6 +235,7 @@ void BombardTrajectory::PrepareForOpenFire(BulletClass* pBullet)
 			for (auto& trail : pExt->LaserTrails)
 				trail.LastLocation = middleLocation;
 		}
+		this->RefreshBulletLineTrail(pBullet);
 
 		pBullet->SetLocation(middleLocation);
 		HouseClass* const pOwner = pBullet->Owner ? pBullet->Owner->Owner : BulletExt::ExtMap.Find(pBullet)->FirerHouse;
@@ -357,7 +361,9 @@ CoordStruct BombardTrajectory::CalculateBulletLeadTime(BulletClass* pBullet)
 								travelTime = travelTimeP;
 
 							if (targetSourceCoord.MagnitudeSquared() < lastSourceCoord.MagnitudeSquared())
-								travelTime -= 1;
+								travelTime += 1;
+							else
+								travelTime += 2;
 						}
 
 						coords += extraOffsetCoord * travelTime;
@@ -487,7 +493,6 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 			if (this->ToFalling)
 			{
 				this->IsFalling = true;
-				auto const pExt = BulletExt::ExtMap.Find(pBullet);
 				const AbstractClass* const pTarget = pBullet->Target;
 				CoordStruct middleLocation = CoordStruct::Empty;
 
@@ -500,14 +505,8 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 						static_cast<int>(pBullet->Location.Z + pBullet->Velocity.Z)
 					};
 
-					if (pExt->LaserTrails.size())
-					{
-						for (auto& trail : pExt->LaserTrails)
-							trail.LastLocation = middleLocation;
-					}
-
 					if (pType->LeadTimeCalculate && pTarget)
-						pBullet->TargetCoords = pTarget->GetCoords() + this->CalculateBulletLeadTime(pBullet);
+						pBullet->TargetCoords += pTarget->GetCoords() - this->InitialTargetCoord + this->CalculateBulletLeadTime(pBullet);
 
 					pBullet->Velocity.X = static_cast<double>(pBullet->TargetCoords.X - middleLocation.X);
 					pBullet->Velocity.Y = static_cast<double>(pBullet->TargetCoords.Y - middleLocation.Y);
@@ -519,17 +518,23 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 				}
 				else
 				{
-					middleLocation = (pType->LeadTimeCalculate && pTarget) ? pTarget->GetCoords() + this->CalculateBulletLeadTime(pBullet) : pBullet->TargetCoords;
-					middleLocation.Z = pBullet->Location.Z;
+					if (pType->LeadTimeCalculate && pTarget)
+						pBullet->TargetCoords += pTarget->GetCoords() - this->InitialTargetCoord + this->CalculateBulletLeadTime(pBullet);
 
-					if (pExt->LaserTrails.size())
-					{
-						for (auto& trail : pExt->LaserTrails)
-							trail.LastLocation = middleLocation;
-					}
+					middleLocation = pBullet->TargetCoords;
+					middleLocation.Z = pBullet->Location.Z;
 
 					pBullet->Velocity = BulletVelocity::Empty;
 				}
+
+				auto const pExt = BulletExt::ExtMap.Find(pBullet);
+
+				if (pExt->LaserTrails.size())
+				{
+					for (auto& trail : pExt->LaserTrails)
+						trail.LastLocation = middleLocation;
+				}
+				this->RefreshBulletLineTrail(pBullet);
 
 				pBullet->SetLocation(middleLocation);
 				TechnoClass* const pTechno = pBullet->Owner;
@@ -550,6 +555,33 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 	else if (pType->FreeFallOnTarget)
 	{
 		pBullet->Velocity.Z -= BulletTypeExt::GetAdjustedGravity(pBullet->Type);
+	}
+}
+
+void BombardTrajectory::RefreshBulletLineTrail(BulletClass* pBullet)
+{
+	if (LineTrail* const pLineTrailer = pBullet->LineTrailer)
+	{
+		pLineTrailer->~LineTrail();
+		pBullet->LineTrailer = nullptr;
+	}
+
+	BulletTypeClass* const pType = pBullet->Type;
+
+	if (pType->UseLineTrail)
+	{
+		if (LineTrail* const pLineTrailer = GameCreate<LineTrail>())
+		{
+			pBullet->LineTrailer = pLineTrailer;
+
+			if (RulesClass::Instance->LineTrailColorOverride != ColorStruct { 0, 0, 0 })
+				pLineTrailer->Color = RulesClass::Instance->LineTrailColorOverride;
+			else
+				pLineTrailer->Color = pType->LineTrailColor;
+
+			pLineTrailer->SetDecrement(pType->LineTrailColorDecrement);
+			pLineTrailer->Owner = pBullet;
+		}
 	}
 }
 
