@@ -218,11 +218,16 @@ public:
 		Valueable<bool> PlayerReturnFire_Smarter;
 		NullableIdx<VoxClass> EVA_WeCaptureABuilding;
 		NullableIdx<VoxClass> EVA_OurBuildingIsCaptured;
-		Valueable<bool> GuardModePursuit;
-		Valueable<double> GuardModeGuardRangeMultiplier;
-		Valueable<Leptons> GuardModeGuardRangeAddend;
-		Valueable<Leptons> GuardModeGuardRangeMax;
-		Valueable<Leptons> GuardStationaryStray;
+		Valueable<bool> PlayerGuardModePursuit;
+		Valueable<double> PlayerGuardModeGuardRangeMultiplier;
+		Valueable<Leptons> PlayerGuardModeGuardRangeAddend;
+		Valueable<Leptons> PlayerGuardModeGuardRangeMax;
+		Valueable<Leptons> PlayerGuardStationaryStray;
+		Valueable<bool> AIGuardModePursuit;
+		Valueable<double> AIGuardModeGuardRangeMultiplier;
+		Valueable<Leptons> AIGuardModeGuardRangeAddend;
+		Valueable<Leptons> AIGuardModeGuardRangeMax;
+		Valueable<Leptons> AIGuardStationaryStray;
 		Valueable<bool> UseGlobalDeathWeaponDamage;
 		Valueable<bool> NonVehExplodeOnDestroy;
 		Valueable<bool> FireDeathWeaponOnCrushed;
@@ -234,6 +239,8 @@ public:
 		Valueable<bool> PlayerDestroyWalls;
 		Valueable<bool> DestroyOwnerlessWalls;
 		Valueable<bool> AIAngerOnAlly;
+		Valueable<bool> FollowTargetSelf;
+		Valueable<bool> HarvesterScanAfterUnload;
 
 		Valueable<double> AircraftLevelLightMultiplier;
 		Valueable<double> JumpjetLevelLightMultiplier;
@@ -428,11 +435,16 @@ public:
 			, PlayerReturnFire_Smarter { false }
 			, EVA_WeCaptureABuilding {}
 			, EVA_OurBuildingIsCaptured {}
-			, GuardModePursuit { true }
-			, GuardModeGuardRangeMultiplier { 2.0 }
-			, GuardModeGuardRangeAddend { Leptons(0) }
-			, GuardModeGuardRangeMax { Leptons(4096) }
-			, GuardStationaryStray { Leptons(-256) }
+			, PlayerGuardModePursuit { true }
+			, PlayerGuardModeGuardRangeMultiplier { 2.0 }
+			, PlayerGuardModeGuardRangeAddend { Leptons(0) }
+			, PlayerGuardModeGuardRangeMax { Leptons(4096) }
+			, PlayerGuardStationaryStray { Leptons(-256) }
+			, AIGuardModePursuit { true }
+			, AIGuardModeGuardRangeMultiplier { 2.0 }
+			, AIGuardModeGuardRangeAddend { Leptons(0) }
+			, AIGuardModeGuardRangeMax { Leptons(4096) }
+			, AIGuardStationaryStray { Leptons(-256) }
 			, UseGlobalDeathWeaponDamage { false }
 			, NonVehExplodeOnDestroy { false }
 			, FireDeathWeaponOnCrushed { false }
@@ -444,6 +456,8 @@ public:
 			, PlayerDestroyWalls { false }
 			, DestroyOwnerlessWalls { false }
 			, AIAngerOnAlly { true }
+			, FollowTargetSelf { false }
+			, HarvesterScanAfterUnload { false }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
 			, VoxelLightSource { }
