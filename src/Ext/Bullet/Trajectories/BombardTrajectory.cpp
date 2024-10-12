@@ -136,12 +136,12 @@ void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 	if (!pType->NoLaunch || !pType->LeadTimeCalculate || !abstract_cast<FootClass*>(pBullet->Target))
 		this->PrepareForOpenFire(pBullet);
 	else
-		this->WaitOneFrame.Start(1);
+		this->WaitOneFrame = 2;
 }
 
 bool BombardTrajectory::OnAI(BulletClass* pBullet)
 {
-	if (this->WaitOneFrame.IsTicking() && this->BulletPrepareCheck(pBullet))
+	if (this->WaitOneFrame && this->BulletPrepareCheck(pBullet))
 		return false;
 
 	if (this->BulletDetonatePreCheck(pBullet))
@@ -309,10 +309,9 @@ CoordStruct BombardTrajectory::CalculateBulletLeadTime(BulletClass* pBullet)
 			if (theTargetCoords != this->LastTargetCoord)
 			{
 				int travelTime = 0;
-
 				const CoordStruct extraOffsetCoord = theTargetCoords - this->LastTargetCoord;
-				const CoordStruct lastSourceCoord = theSourceCoords - this->LastTargetCoord;
 				const CoordStruct targetSourceCoord = theSourceCoords - theTargetCoords;
+				const CoordStruct lastSourceCoord = theSourceCoords - this->LastTargetCoord;
 
 				if (pType->FreeFallOnTarget)
 				{
@@ -413,11 +412,22 @@ void BombardTrajectory::CalculateDisperseBurst(BulletClass* pBullet)
 
 bool BombardTrajectory::BulletPrepareCheck(BulletClass* pBullet)
 {
-	if (this->WaitOneFrame.HasTimeLeft())
-		return true;
+	// The time between bullets' Unlimbo() and Update() is completely uncertain.
+	// Technos will update its location after firing, which may result in inaccurate
+	// target position recorded by the LastTargetCoord in Unlimbo(). Therefore, it's
+	// necessary to record the position during the first Update(). - CrimRecya
+	if (this->WaitOneFrame == 2)
+	{
+		if (const AbstractClass* const pTarget = pBullet->Target)
+		{
+			this->LastTargetCoord = pTarget->GetCoords();
+			this->WaitOneFrame = 1;
+			return true;
+		}
+	}
 
+	this->WaitOneFrame = 0;
 	this->PrepareForOpenFire(pBullet);
-	this->WaitOneFrame.Stop();
 
 	return false;
 }
@@ -510,20 +520,12 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 				else
 				{
 					middleLocation = (pType->LeadTimeCalculate && pTarget) ? pTarget->GetCoords() + this->CalculateBulletLeadTime(pBullet) : pBullet->TargetCoords;
+					middleLocation.Z = pBullet->Location.Z;
 
-					if (this->FallPercent != 1.0)
+					if (pExt->LaserTrails.size())
 					{
-						middleLocation.Z += static_cast<int>(pType->Height); // Use original height here
-
-						if (pExt->LaserTrails.size())
-						{
-							for (auto& trail : pExt->LaserTrails)
-								trail.LastLocation = middleLocation;
-						}
-					}
-					else
-					{
-						middleLocation.Z = pBullet->Location.Z;
+						for (auto& trail : pExt->LaserTrails)
+							trail.LastLocation = middleLocation;
 					}
 
 					pBullet->Velocity = BulletVelocity::Empty;
