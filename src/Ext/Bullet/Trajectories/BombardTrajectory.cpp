@@ -95,6 +95,7 @@ void BombardTrajectory::Serialize(T& Stm)
 		.Process(this->ToFalling)
 		.Process(this->RemainingDistance)
 		.Process(this->LastTargetCoord)
+		.Process(this->InitialTargetCoord)
 		.Process(this->CountOfBurst)
 		.Process(this->CurrentBurst)
 		.Process(this->RotateAngle)
@@ -120,6 +121,7 @@ void BombardTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 	this->Height += pBullet->TargetCoords.Z;
 	// use scaling since RandomRanged only support int
 	this->FallPercent += ScenarioClass::Instance->Random.RandomRanged(0, static_cast<int>(200 * pType->FallPercentShift)) / 100.0;
+	this->InitialTargetCoord = pBullet->TargetCoords;
 	this->LastTargetCoord = pBullet->TargetCoords;
 	pBullet->Velocity = BulletVelocity::Empty;
 
@@ -512,7 +514,7 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 					this->RefreshBulletLineTrail(pBullet);
 
 					if (pType->LeadTimeCalculate && pTarget)
-						pBullet->TargetCoords = pTarget->GetCoords() + this->CalculateBulletLeadTime(pBullet);
+						pBullet->TargetCoords += pTarget->GetCoords() - this->InitialTargetCoord + this->CalculateBulletLeadTime(pBullet);
 
 					pBullet->Velocity.X = static_cast<double>(pBullet->TargetCoords.X - middleLocation.X);
 					pBullet->Velocity.Y = static_cast<double>(pBullet->TargetCoords.Y - middleLocation.Y);
@@ -524,7 +526,10 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 				}
 				else
 				{
-					middleLocation = (pType->LeadTimeCalculate && pTarget) ? pTarget->GetCoords() + this->CalculateBulletLeadTime(pBullet) : pBullet->TargetCoords;
+					if (pType->LeadTimeCalculate && pTarget)
+						pBullet->TargetCoords += pTarget->GetCoords() - this->InitialTargetCoord + this->CalculateBulletLeadTime(pBullet);
+
+					middleLocation = pBullet->TargetCoords;
 					middleLocation.Z = pBullet->Location.Z;
 
 					if (pExt->LaserTrails.size())
