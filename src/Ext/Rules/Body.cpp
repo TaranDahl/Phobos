@@ -256,11 +256,16 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->PlayerReturnFire_Smarter.Read(exINI, GameStrings::CombatDamage, "PlayerReturnFire.Smarter");
 	this->EVA_WeCaptureABuilding.Read(exINI, GameStrings::AudioVisual, "EVA.WeCaptureABuilding");
 	this->EVA_OurBuildingIsCaptured.Read(exINI, GameStrings::AudioVisual, "EVA.OurBuildingIsCaptured");
-	this->GuardModePursuit.Read(exINI, GameStrings::General, "GuardModePursuit");
-	this->GuardModeGuardRangeMultiplier.Read(exINI, GameStrings::General, "GuardModeGuardRangeMultiplier");
-	this->GuardModeGuardRangeAddend.Read(exINI, GameStrings::General, "GuardModeGuardRangeAddend");
-	this->GuardModeGuardRangeMax.Read(exINI, GameStrings::General, "GuardModeGuardRangeMax");
-	this->GuardStationaryStray.Read(exINI, GameStrings::General, "GuardStationaryStray");
+	this->PlayerGuardModePursuit.Read(exINI, GameStrings::General, "PlayerGuardModePursuit");
+	this->PlayerGuardModeGuardRangeMultiplier.Read(exINI, GameStrings::General, "PlayerGuardModeGuardRangeMultiplier");
+	this->PlayerGuardModeGuardRangeAddend.Read(exINI, GameStrings::General, "PlayerGuardModeGuardRangeAddend");
+	this->PlayerGuardModeGuardRangeMax.Read(exINI, GameStrings::General, "PlayerGuardModeGuardRangeMax");
+	this->PlayerGuardStationaryStray.Read(exINI, GameStrings::General, "PlayerGuardStationaryStray");
+	this->AIGuardModePursuit.Read(exINI, GameStrings::General, "AIGuardModePursuit");
+	this->AIGuardModeGuardRangeMultiplier.Read(exINI, GameStrings::General, "AIGuardModeGuardRangeMultiplier");
+	this->AIGuardModeGuardRangeAddend.Read(exINI, GameStrings::General, "AIGuardModeGuardRangeAddend");
+	this->AIGuardModeGuardRangeMax.Read(exINI, GameStrings::General, "AIGuardModeGuardRangeMax");
+	this->AIGuardStationaryStray.Read(exINI, GameStrings::General, "AIGuardStationaryStray");
 	this->UseGlobalDeathWeaponDamage.Read(exINI, GameStrings::CombatDamage, "UseGlobalDeathWeaponDamage");
 	this->NonVehExplodeOnDestroy.Read(exINI, GameStrings::AudioVisual, "NonVehExplodeOnDestroy");
 	this->FireDeathWeaponOnCrushed.Read(exINI, GameStrings::CombatDamage, "FireDeathWeaponOnCrushed");
@@ -272,6 +277,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->PlayerDestroyWalls.Read(exINI, GameStrings::General, "PlayerDestroyWalls");
 	this->DestroyOwnerlessWalls.Read(exINI, GameStrings::General, "DestroyOwnerlessWalls");
 	this->AIAngerOnAlly.Read(exINI, GameStrings::General, "AIAngerOnAlly");
+	this->FollowTargetSelf.Read(exINI, GameStrings::General, "FollowTargetSelf");
+	this->HarvesterScanAfterUnload.Read(exINI, GameStrings::General, "HarvesterScanAfterUnload");
 
 	this->AircraftLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "AircraftLevelLightMultiplier");
 	this->JumpjetLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "JumpjetLevelLightMultiplier");
@@ -531,11 +538,16 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->PlayerReturnFire_Smarter)
 		.Process(this->EVA_WeCaptureABuilding)
 		.Process(this->EVA_OurBuildingIsCaptured)
-		.Process(this->GuardModePursuit)
-		.Process(this->GuardModeGuardRangeMultiplier)
-		.Process(this->GuardModeGuardRangeAddend)
-		.Process(this->GuardModeGuardRangeMax)
-		.Process(this->GuardStationaryStray)
+		.Process(this->PlayerGuardModePursuit)
+		.Process(this->PlayerGuardModeGuardRangeMultiplier)
+		.Process(this->PlayerGuardModeGuardRangeAddend)
+		.Process(this->PlayerGuardModeGuardRangeMax)
+		.Process(this->PlayerGuardStationaryStray)
+		.Process(this->AIGuardModePursuit)
+		.Process(this->AIGuardModeGuardRangeMultiplier)
+		.Process(this->AIGuardModeGuardRangeAddend)
+		.Process(this->AIGuardModeGuardRangeMax)
+		.Process(this->AIGuardStationaryStray)
 		.Process(this->UseGlobalDeathWeaponDamage)
 		.Process(this->NonVehExplodeOnDestroy)
 		.Process(this->FireDeathWeaponOnCrushed)
@@ -547,6 +559,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->PlayerDestroyWalls)
 		.Process(this->DestroyOwnerlessWalls)
 		.Process(this->AIAngerOnAlly)
+		.Process(this->FollowTargetSelf)
+		.Process(this->HarvesterScanAfterUnload)
 		.Process(this->AircraftLevelLightMultiplier)
 		.Process(this->JumpjetLevelLightMultiplier)
 		.Process(this->VoxelLightSource)

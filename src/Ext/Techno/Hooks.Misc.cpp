@@ -453,9 +453,12 @@ DEFINE_HOOK(0x4D6E83, FootClass_MissionAreaGuard_FollowStray, 0x6)
 
 	GET(FootClass* const, pThis, ESI);
 
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	int range = RulesClass::Instance()->GuardModeStray;
 
-	R->EDI(pTypeExt ? pTypeExt->GuardModeStray.Get(Leptons(RulesClass::Instance()->GuardModeStray)) : RulesClass::Instance()->GuardModeStray);
+	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType()))
+		range = pThis->Owner->IsControlledByHuman() ? pTypeExt->PlayerGuardModeStray.Get(Leptons(range)) : pTypeExt->AIGuardModeStray.Get(Leptons(range));
+
+	R->EDI(range);
 	return SkipGameCode;
 }
 
@@ -468,11 +471,16 @@ DEFINE_HOOK(0x4D6E97, FootClass_MissionAreaGuard_Pursuit, 0x6)
 	GET(AbstractClass* const, pFocus, EAX);
 
 	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
-	const bool pursuit = pTypeExt ? pTypeExt->GuardModePursuit.Get(RulesExt::Global()->GuardModePursuit) : true;
+
+	bool isPlayer = pThis->Owner->IsControlledByHuman();
+	bool pursuit = true;
+
+	if (pTypeExt)
+		pursuit = isPlayer ? pTypeExt->PlayerGuardModePursuit.Get(RulesExt::Global()->PlayerGuardModePursuit) : pTypeExt->AIGuardModePursuit.Get(RulesExt::Global()->AIGuardModePursuit);
 
 	if ((pFocus->AbstractFlags & AbstractFlags::Foot) == AbstractFlags::None && pTypeExt)
 	{
-		const Leptons stationaryStray = pTypeExt->GuardStationaryStray.Get(RulesExt::Global()->GuardStationaryStray);
+		Leptons stationaryStray = isPlayer ? pTypeExt->PlayerGuardStationaryStray.Get(RulesExt::Global()->PlayerGuardStationaryStray) : pTypeExt->AIGuardStationaryStray.Get(RulesExt::Global()->AIGuardStationaryStray);
 
 		if (stationaryStray != Leptons(-256))
 			range = stationaryStray;
@@ -499,16 +507,24 @@ DEFINE_HOOK(0x707F08, TechnoClass_GetGuardRange_AreaGuardRange, 0x5)
 	GET(int, mode, EDI);
 	GET(TechnoClass* const, pThis, ESI);
 
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	const bool isPlayer = pThis->Owner->IsControlledByHuman();
 	auto const pRulesExt = RulesExt::Global();
 
-	const double multiplier = pTypeExt ? pTypeExt->GuardModeGuardRangeMultiplier.Get(pRulesExt->GuardModeGuardRangeMultiplier) : pRulesExt->GuardModeGuardRangeMultiplier;
-	const Leptons addend = pTypeExt ? pTypeExt->GuardModeGuardRangeAddend.Get(pRulesExt->GuardModeGuardRangeAddend) : pRulesExt->GuardModeGuardRangeAddend;
-	const Leptons areaGuardRange = Leptons(static_cast<int>((int)guardRange * multiplier) + (int)addend);
-	const Leptons minGuardRange = Leptons((mode == 2) ? 1792 : 0);
-	const Leptons maxGuardRange = RulesExt::Global()->GuardModeGuardRangeMax;
+	double multiplier = pRulesExt->PlayerGuardModeGuardRangeMultiplier;
+	Leptons addend = pRulesExt->PlayerGuardModeGuardRangeAddend;
 
-	R->EAX(Math::clamp(areaGuardRange, minGuardRange, maxGuardRange));
+	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType()))
+	{
+		multiplier = isPlayer ? pTypeExt->PlayerGuardModeGuardRangeMultiplier.Get(pRulesExt->PlayerGuardModeGuardRangeMultiplier) : pTypeExt->AIGuardModeGuardRangeMultiplier.Get(pRulesExt->AIGuardModeGuardRangeMultiplier);
+		addend = isPlayer ? pTypeExt->PlayerGuardModeGuardRangeAddend.Get(pRulesExt->PlayerGuardModeGuardRangeAddend) : pTypeExt->AIGuardModeGuardRangeAddend.Get(pRulesExt->AIGuardModeGuardRangeAddend);
+	}
+
+	const Leptons areaGuardRange = Leptons((int)guardRange * multiplier + (int)addend);
+	const Leptons min = Leptons((mode == 2) ? 1792 : 0);
+	const Leptons max = isPlayer ? pRulesExt->PlayerGuardModeGuardRangeMax : pRulesExt->AIGuardModeGuardRangeMax;
+
+	R->EAX(Math::clamp(areaGuardRange, min, max));
+
 	return SkipGameCode;
 }
 

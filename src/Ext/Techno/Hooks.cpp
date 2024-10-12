@@ -1032,8 +1032,15 @@ DEFINE_HOOK(0x4448CE, BuildingClass_KickOutUnit_RallyPointAreaGuard2, 0x6)
 	GET(BuildingClass*, pThis, ESI);
 
 	auto const pFocus = pThis->Focus;
+	auto const pUnit = abstract_cast<UnitClass*>(pProduct);
+	bool isHarvester = pUnit ? pUnit->Type->Harvester : false;
 
-	if (RulesExt::Global()->RallyPointAreaGuard)
+	if (isHarvester)
+	{
+		pProduct->SetDestination(pFocus, true);
+		pProduct->QueueMission(Mission::Harvest, true);
+	}
+	else if (RulesExt::Global()->RallyPointAreaGuard)
 	{
 		pProduct->SetFocus(pFocus);
 		pProduct->QueueMission(Mission::Area_Guard, true);
@@ -1060,6 +1067,7 @@ DEFINE_HOOK(0x4448B0, BuildingClass_KickOutUnit_ExitCoords, 0x6)
 	GET(FootClass*, pProduct, EDI);
 	GET(BuildingClass*, pThis, ESI);
 	GET(CoordStruct*, pCrd, ECX);
+	REF_STACK(DirType, dir, STACK_OFFSET(0x144,-0x100));
 
 	auto const isJJ = pProduct->GetTechnoType()->Locomotor == LocomotionClass::CLSIDs::Jumpjet;
 	auto const pProductType = pProduct->GetTechnoType();
@@ -1082,6 +1090,7 @@ DEFINE_HOOK(0x4448B0, BuildingClass_KickOutUnit_ExitCoords, 0x6)
 		*pCrd = CellClass::Cell2Coord(nCell, pCrd->Z);
 	}
 
+	dir = DirType::East;
 	return 0;
 }
 
@@ -1093,7 +1102,10 @@ DEFINE_HOOK(0x444424, BuildingClass_KickOutUnit_RallyPointAreaGuard3, 0x5)
 	GET(FootClass*, pProduct, EDI);
 	GET(AbstractClass*, pFocus, ESI);
 
-	if (RulesExt::Global()->RallyPointAreaGuard)
+	auto const pUnit = abstract_cast<UnitClass*>(pProduct);
+	bool isHarvester = pUnit ? pUnit->Type->Harvester : false;
+
+	if (RulesExt::Global()->RallyPointAreaGuard && !isHarvester)
 	{
 		pProduct->SetFocus(pFocus);
 		pProduct->QueueMission(Mission::Area_Guard, true);
@@ -1141,6 +1153,25 @@ DEFINE_HOOK(0x443EB8, BuildingClass_KickOutUnit_RallyPointAreaGuard5, 0x5)
 	return 0;
 }
 
+// For unloaded units.
+DEFINE_HOOK(0x73AAB3, UnitClass_UpdateMoving_RallyPointAreaGuard, 0x5)
+{
+	enum { SkipQueueMove = 0x73AAC1 };
+
+	GET(UnitClass*, pThis, EBP);
+	GET(AbstractClass*, pFocus, EAX);
+
+	bool isHarvester = pThis->Type->Harvester;
+	if (RulesExt::Global()->RallyPointAreaGuard && !isHarvester)
+	{
+		pThis->SetFocus(pFocus);
+		pThis->QueueMission(Mission::Area_Guard, true);
+		return SkipQueueMove;
+	}
+
+	return 0;
+}
+
 #pragma endregion
 
 #pragma region CrushBuildingOnAnyCell
@@ -1179,6 +1210,26 @@ DEFINE_HOOK(0x741925, UnitClass_CrushCell_CrushBuilding, 0x5)
 				R->AL(true);
 			}
 		}
+	}
+
+	return 0;
+}
+
+#pragma endregion
+
+#pragma region FollowTargetSelf
+
+DEFINE_HOOK(0x4D9620, FootClass_SetDestination_FollowTargetSelf, 0x5)
+{
+	enum { SkipGameCode = 0x4D962B };
+
+	GET(AbstractClass*, pDestination, ECX);
+
+	if (RulesExt::Global()->FollowTargetSelf)
+	{
+		auto crd = pDestination->GetCoords();
+		R->EAX(&crd);
+		return SkipGameCode;
 	}
 
 	return 0;

@@ -262,11 +262,16 @@ public:
 		Nullable<int> KeepWarping_Distance;
 		Valueable<bool> FiringByPassMovingCheck;
 		Valueable<bool> SkipCrushSlowdown;
-		Nullable<bool> GuardModePursuit;
-		Nullable<Leptons> GuardModeStray;
-		Nullable<double> GuardModeGuardRangeMultiplier;
-		Nullable<Leptons> GuardModeGuardRangeAddend;
-		Nullable<Leptons> GuardStationaryStray;
+		Nullable<bool> PlayerGuardModePursuit;
+		Nullable<Leptons> PlayerGuardModeStray;
+		Nullable<double> PlayerGuardModeGuardRangeMultiplier;
+		Nullable<Leptons> PlayerGuardModeGuardRangeAddend;
+		Nullable<Leptons> PlayerGuardStationaryStray;
+		Nullable<bool> AIGuardModePursuit;
+		Nullable<Leptons> AIGuardModeStray;
+		Nullable<double> AIGuardModeGuardRangeMultiplier;
+		Nullable<Leptons> AIGuardModeGuardRangeAddend;
+		Nullable<Leptons> AIGuardStationaryStray;
 		Valueable<bool> Engineer_CanAutoFire;
 		Valueable<bool> BunkerableAnyWay;
 		Valueable<bool> Harvester_CanGuardArea;
@@ -281,6 +286,7 @@ public:
 		Nullable<bool> FireDeathWeaponOnCrushed;
 		Nullable<CoordStruct> ExitCoord;
 		Valueable<bool> MissileSpawnUseOtherFLHs;
+		Nullable<bool> KeepAlive;
 
 		ValueableVector<TechnoTypeClass*> InitialPayload_Types;
 		ValueableVector<int> InitialPayload_Nums;
@@ -548,11 +554,16 @@ public:
 			, KeepWarping_Distance {}
 			, FiringByPassMovingCheck { false }
 			, SkipCrushSlowdown { false }
-			, GuardModePursuit {}
-			, GuardModeStray {}
-			, GuardModeGuardRangeMultiplier {}
-			, GuardModeGuardRangeAddend {}
-			, GuardStationaryStray {}
+			, PlayerGuardModePursuit {}
+			, PlayerGuardModeStray {}
+			, PlayerGuardModeGuardRangeMultiplier {}
+			, PlayerGuardModeGuardRangeAddend {}
+			, PlayerGuardStationaryStray {}
+			, AIGuardModePursuit {}
+			, AIGuardModeStray {}
+			, AIGuardModeGuardRangeMultiplier {}
+			, AIGuardModeGuardRangeAddend {}
+			, AIGuardStationaryStray {}
 			, Engineer_CanAutoFire { false }
 			, BunkerableAnyWay { false }
 			, Harvester_CanGuardArea { false }
@@ -567,6 +578,7 @@ public:
 			, FireDeathWeaponOnCrushed { }
 			, ExitCoord { }
 			, MissileSpawnUseOtherFLHs { false }
+			, KeepAlive { }
 
 			, InitialPayload_Types {}
 			, InitialPayload_Nums {}
