@@ -687,15 +687,7 @@ DEFINE_HOOK(0x469EC0, BulletClass_Logics_AirburstWeapon, 0x6)
 				if (auto const pBullet = pTypeSplits->CreateBullet(pTarget, pSource, damage, pWeapon->Warhead, pWeapon->Speed, pWeapon->Bright))
 				{
 					pBullet->WeaponType = pWeapon;
-					auto const pBulletExt = BulletExt::ExtMap.Find(pBullet);
-					pBulletExt->FirerHouse = pOwner;
-
-					if (pBulletExt->Trajectory)
-					{
-						pBullet->MoveTo(pThis->Location, BulletVelocity::Empty);
-						continue;
-					}
-
+					BulletExt::ExtMap.Find(pBullet)->FirerHouse = pOwner;
 					pBullet->Range = projectileRange;
 
 					DirStruct dir;
