@@ -2,6 +2,7 @@
 #include <UnitClass.h>
 #include <BuildingClass.h>
 #include <Utilities/Macro.h>
+#include <Ext/Techno/Body.h>
 #include <Ext/TechnoType/Body.h>
 #include <Ext/WeaponType/Body.h>
 
@@ -118,6 +119,19 @@ DEFINE_HOOK(0x736990, UnitClass_UpdateRotation_TurretFacing_EMP, 0x6)
 		return SkipAll;
 
 	return 0;
+}
+
+DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_TurretFacing_Idle, 0x6)
+{
+	GET(UnitClass* const, pThis, ESI);
+	enum { SkipFacingForward = 0x736BE2 };
+
+	if (!pThis->Type->TurretSpins)
+		pThis->unknown_bool_6AF = pThis->SecondaryFacing.IsRotating();
+
+	TechnoExt::ExtMap.Find(pThis)->ApplyUnitIdleAction();
+
+	return SkipFacingForward;
 }
 
 // Bugfix: Align jumpjet turret's facing with body's

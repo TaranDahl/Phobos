@@ -172,6 +172,12 @@ public:
 		Valueable<int> TemporalLifeDisplay_Buildings_Pips;
 		Valueable<SHPStruct*> ProgressDisplay_Others_PipsShape;
 		Valueable<SHPStruct*> ProgressDisplay_Buildings_PipsShape;
+		Valueable<bool> UnitIdleRotateTurret;
+		Valueable<bool> UnitIdlePointToMouse;
+		Valueable<int> UnitIdleActionRestartMin;
+		Valueable<int> UnitIdleActionRestartMax;
+		Valueable<int> UnitIdleActionIntervalMin;
+		Valueable<int> UnitIdleActionIntervalMax;
 
 		Valueable<double> AircraftLevelLightMultiplier;
 		Valueable<double> JumpjetLevelLightMultiplier;
@@ -320,6 +326,12 @@ public:
 			, TemporalLifeDisplay_Buildings_Pips { 5 }
 			, ProgressDisplay_Others_PipsShape { FileSystem::PIPS_SHP }
 			, ProgressDisplay_Buildings_PipsShape { FileSystem::PIPS_SHP }
+			, UnitIdleRotateTurret { false }
+			, UnitIdlePointToMouse { false }
+			, UnitIdleActionRestartMin { 150 }
+			, UnitIdleActionRestartMax { 300 }
+			, UnitIdleActionIntervalMin { 150 }
+			, UnitIdleActionIntervalMax { 450 }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
 			, VoxelLightSource { }

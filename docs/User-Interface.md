@@ -140,7 +140,7 @@ HealthBar.Hide=false  ; boolean
   - Combat light effects (`Bright=true`) and everything that uses same functionality e.g Iron Curtain / Force Field impact flashes.
   - Alpha images attached to ParticleSystems or Particles that are generated through a Warhead's `Particle` if `[AudioVisual]` -> `WarheadParticleAlphaImageIsLightFlash` or on Warhead `Particle.AlphaImageIsLightFlash` is set to true, latter defaults to former.
     - Additionally these alpha images are not created if `[AudioVisual]`->`LightFlashAlphaImageDetailLevel` is higher than current detail level, regardless of the `HideLightFlashEffects` setting.
-  
+
 In `rulesmd.ini`:
 ```ini
 [AudioVisual]
@@ -149,7 +149,7 @@ LightFlashAlphaImageDetailLevel=0            ; integer
 
 [SOMEWARHEAD]                                ; WarheadType
 Particle.AlphaImageIsLightFlash=             ; boolean
-```                                          
+```
 
 In `RA2MD.ini`:
 ```ini
@@ -304,6 +304,29 @@ TemporalLifeDisplay.Others.Pips=17            ; integer, zero-based frame index
 TemporalLifeDisplay.Buildings.Pips=5          ; integer, zero-based frame index
 ProgressDisplay.Others.PipsShape=PIPS.shp     ; filename - including the .shp extension
 ProgressDisplay.Buildings.PipsShape=PIPS.shp  ; filename - including the .shp extension
+```
+
+### Units Rotate Turret When in Idle Action
+
+- Now unit with turret without `TurretSpins=true` can looks more vivid when it is in idle.
+  - `UnitIdleRotateTurret` controls whether units can rotate their turrets when in idle. Defaults to `[AudioVisual]` -> `UnitIdleRotateTurret`.
+  - `UnitIdlePointToMouse` controls whether units will turn their turrets to your mouse when in idle. Defaults to `[AudioVisual]` -> `UnitIdlePointToMouse`.
+  - `UnitIdleActionRestartMin` and `UnitIdleActionRestartMax` control the delay from idle to action occurrence together.
+  - `UnitIdleActionIntervalMin` and `UnitIdleActionIntervalMax` control the delay between every idle actions together.
+
+In `rulesmd.ini`:
+```ini
+[AudioVisual]
+UnitIdleRotateTurret=false      ; boolean
+UnitIdlePointToMouse=false      ; boolean
+UnitIdleActionRestartMin=150    ; integer, number of frames
+UnitIdleActionRestartMax=300    ; integer, number of frames
+UnitIdleActionIntervalMin=150   ; integer, number of frames
+UnitIdleActionIntervalMax=450   ; integer, number of frames
+
+[SOMETECHNO]                    ; TechnoType
+UnitIdleRotateTurret=           ; boolean
+UnitIdlePointToMouse=           ; boolean
 ```
 
 ## Hotkey Commands
