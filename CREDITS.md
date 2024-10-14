@@ -377,6 +377,9 @@ This page lists all the individual contributions to the project by their author.
   - Technos recount current burst index when change the firing weapon
   - Technos will maintain a suitable distance after firing
   - Damage multiplier for different houses
+  - Units will not always stuck in the factory
+- **TaranDahl**
+  - Units are now unable to kick out from a factory that is in construction process
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
