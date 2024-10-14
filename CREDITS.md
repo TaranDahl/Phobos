@@ -385,6 +385,7 @@ This page lists all the individual contributions to the project by their author.
   - Display factories, superweapons, iron curtain and temporal progress on specific technos
   - Units Rotate Turret When in Idle Action
   - Observer sidebar in skirmish game mode
+  - Optimize aircrafts stop action and allow they using area guard and attack moving
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
