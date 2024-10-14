@@ -384,6 +384,7 @@ This page lists all the individual contributions to the project by their author.
   - Several new Infotypes, no display in specific status and a new single frame display method
   - Display factories, superweapons, iron curtain and temporal progress on specific technos
   - Units Rotate Turret When in Idle Action
+  - Observer sidebar in skirmish game mode
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
