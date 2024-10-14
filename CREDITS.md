@@ -376,6 +376,7 @@ This page lists all the individual contributions to the project by their author.
   - New Tracing trajectory
   - Technos recount current burst index when change the firing weapon
   - Technos will maintain a suitable distance after firing
+  - Damage multiplier for different houses
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
