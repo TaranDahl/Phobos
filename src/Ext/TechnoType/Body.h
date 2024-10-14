@@ -286,6 +286,7 @@ public:
 		Nullable<bool> FireDeathWeaponOnCrushed;
 		Nullable<CoordStruct> ExitCoord;
 		Valueable<bool> MissileSpawnUseOtherFLHs;
+		Valueable<bool> HarvesterQuickUnloader;
 		Nullable<bool> KeepAlive;
 
 		ValueableVector<TechnoTypeClass*> InitialPayload_Types;
@@ -578,6 +579,7 @@ public:
 			, FireDeathWeaponOnCrushed { }
 			, ExitCoord { }
 			, MissileSpawnUseOtherFLHs { false }
+			, HarvesterQuickUnloader { false }
 			, KeepAlive { }
 
 			, InitialPayload_Types {}
