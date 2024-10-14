@@ -58,6 +58,7 @@ public:
 		int UnitIdleTurretROT; // If TypeExt get the Ares TurretROT, this can be replaced
 		CDTimerClass UnitIdleActionTimer;
 		CDTimerClass UnitIdleActionGapTimer;
+		CDTimerClass UnitAutoDeployTimer;
 
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
 		// as neither is guaranteed to point to the house the TechnoClass had prior to entering transport and cannot be safely overridden.
@@ -100,6 +101,7 @@ public:
 			, UnitIdleIsSelected { 0 }
 			, UnitIdleActionTimer {}
 			, UnitIdleActionGapTimer {}
+			, UnitAutoDeployTimer {}
 			, IsDetachingForCloak { false }
 			, OriginalPassengerOwner {}
 			, HasRemainingWarpInDelay { false }

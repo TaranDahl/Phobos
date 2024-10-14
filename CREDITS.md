@@ -386,6 +386,9 @@ This page lists all the individual contributions to the project by their author.
   - Units Rotate Turret When in Idle Action
   - Observer sidebar in skirmish game mode
   - Optimize aircrafts stop action and allow they using area guard and attack moving
+  - Building placing and deploying logic enhancement
+  - Unit base normal and new placing grids
+  - Grey cameo preview and cameo overlays
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
