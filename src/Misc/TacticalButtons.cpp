@@ -714,7 +714,12 @@ void TacticalButtonsClass::SWSidebarTrigger(int buttonIndex)
 	if (ScenarioClass::Instance->UserInputLocked || !this->SuperVisible)
 		return;
 
-	HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer);
+	HouseClass* const pHouse = HouseClass::CurrentPlayer;
+
+	if (pHouse->IsObserver())
+		return;
+
+	HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pHouse);
 
 	if (static_cast<size_t>(buttonIndex) > pHouseExt->SWButtonData.size())
 		return;
@@ -768,6 +773,9 @@ inline bool TacticalButtonsClass::IndexIsSWSwitch()
 
 void TacticalButtonsClass::SWSidebarSwitch()
 {
+	if (ScenarioClass::Instance->UserInputLocked || HouseClass::CurrentPlayer->IsObserver())
+		return;
+
 	this->SuperVisible = !this->SuperVisible;
 
 	MessageListClass::Instance->PrintMessage
