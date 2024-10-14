@@ -6,6 +6,7 @@
 
 #include <Ext/Anim/Body.h>
 #include <Ext/Scenario/Body.h>
+#include <Ext/WeaponType/Body.h>
 
 #include <Utilities/AresFunctions.h>
 
@@ -496,6 +497,7 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->FiringObstacleCell)
 		.Process(this->LastWeaponType)
 		.Process(this->LastWeaponFLH)
+		.Process(this->IsDetachingForCloak)
 		.Process(this->OriginalPassengerOwner)
 		.Process(this->HasRemainingWarpInDelay)
 		.Process(this->LastWarpInDelay)
