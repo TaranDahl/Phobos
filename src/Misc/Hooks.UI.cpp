@@ -244,6 +244,9 @@ DEFINE_HOOK(0x456776, BuildingClass_DrawRadialIndicator_Visibility, 0x6)
 
 DEFINE_HOOK(0x4A8B9B, DisplayClass_Set_View_Dimensions, 0x6)
 {
+	if (!Phobos::Config::MessageDisplayInCenter)
+		return 0;
+
 	enum { SkipGameCode = 0x4A8BBD };
 
 	const RectangleStruct* const pRect = &DSurface::ViewBounds;
@@ -257,6 +260,9 @@ DEFINE_HOOK(0x4A8B9B, DisplayClass_Set_View_Dimensions, 0x6)
 
 DEFINE_HOOK(0x684A9A, UnknownClass_sub_684620_InitMessageList, 0x6)
 {
+	if (!Phobos::Config::MessageDisplayInCenter)
+		return 0;
+
 	enum { SkipGameCode = 0x684ACE };
 
 	const RectangleStruct* const pRect = &DSurface::ViewBounds;
@@ -270,6 +276,9 @@ DEFINE_HOOK(0x684A9A, UnknownClass_sub_684620_InitMessageList, 0x6)
 
 DEFINE_HOOK(0x623A9F, DSurface_sub_623880_DrawBitFontStrings, 0x5)
 {
+	if (!Phobos::Config::MessageDisplayInCenter)
+		return 0;
+
 	enum { SkipGameCode = 0x623AAB };
 
 	GET(RectangleStruct* const, pRect, EAX);
