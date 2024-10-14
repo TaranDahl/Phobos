@@ -103,33 +103,6 @@ DEFINE_HOOK(0x72FCB5, InitSideRectangles_CenterBackground, 0x5)
 	return 0;
 }
 
-DEFINE_HOOK(0x6A557A, SidebarClass_Init_IO_RecordDiplomacyHouses1, 0x5)
-{
-	enum { SkipGameCode = 0x6A5830, ContinueGameCode = 0x6A558D };
-
-	const GameMode mode = SessionClass::Instance->GameMode;
-
-	return (mode == GameMode::Skirmish || mode == GameMode::LAN || mode == GameMode::Internet) ? ContinueGameCode : SkipGameCode;
-}
-
-DEFINE_HOOK(0x6A55BF, SidebarClass_Init_IO_RecordDiplomacyHouses2, 0x7)
-{
-	enum { ContinueLoop = 0x6A55CF, BreakLoop = 0x6A55C8 };
-
-	GET(HouseClass*, pHouse, EAX);
-
-	return (pHouse->IsHumanPlayer || HouseClass::CurrentPlayer == HouseClass::Observer) ? BreakLoop : ContinueLoop;
-}
-
-DEFINE_HOOK(0x6A57F6, SidebarClass_Init_IO_RecordDiplomacyHouses3, 0x7)
-{
-	enum { ContinueLoop = 0x6A580E, MeetCondition = 0x6A57FF };
-
-	GET(HouseClass*, pHouse, EAX);
-
-	return (pHouse->IsHumanPlayer || HouseClass::CurrentPlayer == HouseClass::Observer) ? MeetCondition : ContinueLoop;
-}
-
 DEFINE_HOOK(0x6A9BC5, StripClass_Draw_DrawGreyCameoExtraCover, 0x6)
 {
 	GET(const bool, greyCameo, EBX);
@@ -153,7 +126,15 @@ DEFINE_HOOK(0x6A9BC5, StripClass_Draw_DrawGreyCameoExtraCover, 0x6)
 			auto& vec = HouseExt::ExtMap.Find(pHouse)->OwnedExistCameoTechnoTypes;
 
 			if (std::find(vec.begin(), vec.end(), pTypeExt) != vec.end())
+			{
+				if (BSurface* const CameoPCX = pTypeExt->GreyCameoPCX.GetSurface())
+				{
+					RectangleStruct drawRect { destX, destY, 60, 48 };
+					PCX::Instance->BlitToSurface(&drawRect, DSurface::Sidebar, CameoPCX);
+				}
+
 				frame = frames.Z;
+			}
 		}
 
 		if (frame >= 0)
@@ -213,4 +194,31 @@ DEFINE_HOOK(0x6A9BC5, StripClass_Draw_DrawGreyCameoExtraCover, 0x6)
 	}
 
 	return 0;
+}
+
+DEFINE_HOOK(0x6A557A, SidebarClass_Init_IO_RecordDiplomacyHouses1, 0x5)
+{
+	enum { SkipGameCode = 0x6A5830, ContinueGameCode = 0x6A558D };
+
+	const GameMode mode = SessionClass::Instance->GameMode;
+
+	return (mode == GameMode::Skirmish || mode == GameMode::LAN || mode == GameMode::Internet) ? ContinueGameCode : SkipGameCode;
+}
+
+DEFINE_HOOK(0x6A55BF, SidebarClass_Init_IO_RecordDiplomacyHouses2, 0x7)
+{
+	enum { ContinueLoop = 0x6A55CF, BreakLoop = 0x6A55C8 };
+
+	GET(HouseClass*, pHouse, EAX);
+
+	return (pHouse->IsHumanPlayer || HouseClass::CurrentPlayer == HouseClass::Observer) ? BreakLoop : ContinueLoop;
+}
+
+DEFINE_HOOK(0x6A57F6, SidebarClass_Init_IO_RecordDiplomacyHouses3, 0x7)
+{
+	enum { ContinueLoop = 0x6A580E, MeetCondition = 0x6A57FF };
+
+	GET(HouseClass*, pHouse, EAX);
+
+	return (pHouse->IsHumanPlayer || HouseClass::CurrentPlayer == HouseClass::Observer) ? MeetCondition : ContinueLoop;
 }

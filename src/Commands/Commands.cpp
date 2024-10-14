@@ -10,7 +10,6 @@
 #include "ToggleDigitalDisplay.h"
 #include "ToggleDesignatorRange.h"
 #include "SaveVariablesToFile.h"
-#include "SelectCaptured.h"
 #include "SWShortcuts.h"
 #include "SelectedInfo.h"
 
@@ -22,7 +21,6 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<QuickSaveCommandClass>();
 	MakeCommand<ToggleDigitalDisplayCommandClass>();
 	MakeCommand<ToggleDesignatorRangeCommandClass>();
-	MakeCommand<SelectCapturedCommandClass>();
 	MakeCommand<SWShortcutsCommandClass<0>>();
 	MakeCommand<SWShortcutsCommandClass<1>>();
 	MakeCommand<SWShortcutsCommandClass<2>>();
