@@ -322,7 +322,7 @@ int JumpjetRushHelpers::GetJumpjetHeightWithOccupyTechno(Point2D location)
 	if (pCell->FindTechnoNearestTo(Point2D::Empty, false))
 		height += 85; // Vanilla
 
-	if (pCell->Flags & CellFlags::BridgeHead)
+	if (pCell->ContainsBridge())
 		height += CellClass::BridgeHeight;
 
 	return height;
