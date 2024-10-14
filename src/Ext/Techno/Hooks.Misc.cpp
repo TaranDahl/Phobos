@@ -108,3 +108,71 @@ DEFINE_HOOK(0x739920, UnitClass_TryToDeploy_DisableRegroupAtNewConYard, 0x6)
 
 	return pRules->GatherWhenMCVDeploy ? DoNotSkipRegroup : SkipRegroup;
 }
+
+#pragma region AIConstructionYard
+
+DEFINE_HOOK(0x740A11, UnitClass_Mission_Guard_AIAutoDeployMCV, 0x6)
+{
+	enum { SkipGameCode = 0x740A50 };
+
+	GET(UnitClass*, pMCV, ESI);
+
+	return (RulesExt::Global()->AIAutoDeployMCV && pMCV->Owner->NumConYards > 0) ? SkipGameCode : 0;
+}
+
+DEFINE_HOOK(0x739889, UnitClass_TryToDeploy_AISetBaseCenter, 0x6)
+{
+	enum { SkipGameCode = 0x73992B };
+
+	GET(UnitClass*, pMCV, EBP);
+
+	return (RulesExt::Global()->AISetBaseCenter && pMCV->Owner->NumConYards > 1) ? SkipGameCode : 0;
+}
+
+DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
+{
+	if (RulesExt::Global()->AIBiasSpawnCell && SessionClass::Instance->GameMode != GameMode::Campaign)
+	{
+		GET(HouseClass*, pAI, EBX);
+
+		if (const int count = pAI->ConYards.Count)
+		{
+			const int wayPoint = pAI->GetSpawnPosition();
+
+			if (wayPoint != -1)
+			{
+				const CellStruct center = ScenarioClass::Instance->GetWaypointCoords(wayPoint);
+				CellStruct newCenter = center;
+				double distanceSquared = 131072.0;
+
+				for (int i = 0; i < count; ++i)
+				{
+					if (BuildingClass* const pBuilding = pAI->ConYards.GetItem(i))
+					{
+						if (pBuilding->IsAlive && pBuilding->Health && !pBuilding->InLimbo)
+						{
+							const double newDistanceSquared = pBuilding->GetMapCoords().DistanceFromSquared(center);
+
+							if (newDistanceSquared < distanceSquared)
+							{
+								distanceSquared = newDistanceSquared;
+								newCenter = pBuilding->GetMapCoords();
+							}
+						}
+					}
+				}
+
+				if (newCenter != center)
+				{
+					pAI->BaseSpawnCell = newCenter;
+					pAI->Base.BaseNodes.Items->MapCoords = newCenter;
+					pAI->Base.Center = newCenter;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+#pragma endregion

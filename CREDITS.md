@@ -378,8 +378,6 @@ This page lists all the individual contributions to the project by their author.
   - Technos will maintain a suitable distance after firing
   - Damage multiplier for different houses
   - Units will not always stuck in the factory
-- **TaranDahl**
-  - Units are now unable to kick out from a factory that is in construction process
   - Jumpjet Climbing Logic Enhancement
   - Several new Infotypes, no display in specific status and a new single frame display method
   - Display factories, superweapons, iron curtain and temporal progress on specific technos
@@ -397,6 +395,7 @@ This page lists all the individual contributions to the project by their author.
   - Skirmish AI "sell all buildings and set all technos to hunt" behavior dehardcode
   - Skirmish AI "gather when MCV deploy" behavior dehardcode
   - Global value of `RepairBaseNodes`
+  - Units are now unable to kick out from a factory that is in construction process
 - **Ares developers**
   - YRpp and Syringe which are used, save/load, project foundation and generally useful code from Ares
   - unfinished RadTypes code

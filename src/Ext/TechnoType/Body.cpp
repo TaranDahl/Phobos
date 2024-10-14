@@ -449,8 +449,6 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->RevengeWeapon.Read<true>(exINI, pSection, "RevengeWeapon");
 	this->RevengeWeapon_AffectsHouses.Read(exINI, pSection, "RevengeWeapon.AffectsHouses");
 
-	this->RecountBurst.Read(exINI, pSection, "RecountBurst");
-
 	this->BuildLimitGroup_Types.Read(exINI, pSection, "BuildLimitGroup.Types");
 	this->BuildLimitGroup_Nums.Read(exINI, pSection, "BuildLimitGroup.Nums");
 	this->BuildLimitGroup_Factor.Read(exINI, pSection, "BuildLimitGroup.Factor");
@@ -461,19 +459,25 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildLimitGroup_ExtraLimit_MaxCount.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxCount");
 	this->BuildLimitGroup_ExtraLimit_MaxNum.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxNum");
 
+	this->LeaveTransportKill.Read(exINI, pSection, "LeaveTransportKill");
+	this->UnitIdleRotateTurret.Read(exINI, pSection, "UnitIdleRotateTurret");
+	this->UnitIdlePointToMouse.Read(exINI, pSection, "UnitIdlePointToMouse");
+	this->RecountBurst.Read(exINI, pSection, "RecountBurst");
 	this->CanBeBuiltOn.Read(exINI, pSection, "CanBeBuiltOn");
 	this->UnitBaseNormal.Read(exINI, pSection, "UnitBaseNormal");
 	this->AlwaysExistTheCameo.Read(exINI, pSection, "AlwaysExistTheCameo");
 	this->PrerequisiteForCameo.Read(exINI, pSection, "PrerequisiteForCameo");
 	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
 	this->UIExtraDescription.Read(exINI, pSection, "UIExtraDescription");
+	this->UpperSelectedInfoType.Read(exINI, pSection, "UpperSelectedInfoType");
+	this->UpperSelectedInfoColor.Read(exINI, pSection, "UpperSelectedInfoColor");
+	this->BelowSelectedInfoType.Read(exINI, pSection, "BelowSelectedInfoType");
+	this->BelowSelectedInfoColor.Read(exINI, pSection, "BelowSelectedInfoColor");
+	this->FakeOf.Read(exINI, pSection, "FakeOf");
 
 	this->Wake.Read(exINI, pSection, "Wake");
 	this->Wake_Grapple.Read(exINI, pSection, "Wake.Grapple");
 	this->Wake_Sinking.Read(exINI, pSection, "Wake.Sinking");
-
-	this->UnitIdleRotateTurret.Read(exINI, pSection, "UnitIdleRotateTurret");
-	this->UnitIdlePointToMouse.Read(exINI, pSection, "UnitIdlePointToMouse");
 
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
@@ -521,6 +525,10 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	// Art tags
 	INI_EX exArtINI(CCINIClass::INI_Art);
 	auto pArtSection = pThis->ImageFile;
+
+	this->CameoPCX.Read(&CCINIClass::INI_Art, pArtSection, "CameoPCX");
+	this->GreyCameoPCX.Read(&CCINIClass::INI_Art, pArtSection, "GreyCameoPCX");
+	this->CameoPal.LoadFromINI(&CCINIClass::INI_Art, pArtSection, "CameoPalette");
 
 	this->TurretOffset.Read(exArtINI, pArtSection, "TurretOffset");
 	this->TurretShadow.Read(exArtINI, pArtSection, "TurretShadow");
@@ -828,8 +836,6 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 
 		.Process(this->AttachEffects)
 
-		.Process(this->RecountBurst)
-
 		.Process(this->BuildLimitGroup_Types)
 		.Process(this->BuildLimitGroup_Nums)
 		.Process(this->BuildLimitGroup_Factor)
@@ -840,19 +846,28 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxCount)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxNum)
 
+		.Process(this->LeaveTransportKill)
+		.Process(this->UnitIdleRotateTurret)
+		.Process(this->UnitIdlePointToMouse)
+		.Process(this->RecountBurst)
 		.Process(this->CanBeBuiltOn)
 		.Process(this->UnitBaseNormal)
 		.Process(this->UnitBaseForAllyBuilding)
 		.Process(this->AlwaysExistTheCameo)
 		.Process(this->PrerequisiteForCameo)
 		.Process(this->UIExtraDescription)
+		.Process(this->CameoPCX)
+		.Process(this->GreyCameoPCX)
+		.Process(this->UpperSelectedInfoType)
+		.Process(this->UpperSelectedInfoColor)
+		.Process(this->BelowSelectedInfoType)
+		.Process(this->BelowSelectedInfoColor)
+		.Process(this->FakeOf)
+		.Process(this->CameoPal)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)
 		.Process(this->Wake_Sinking)
-
-		.Process(this->UnitIdleRotateTurret)
-		.Process(this->UnitIdlePointToMouse)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

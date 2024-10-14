@@ -215,8 +215,6 @@ public:
 
 		AEAttachInfoTypeClass AttachEffects;
 
-		Nullable<bool> RecountBurst;
-
 		ValueableVector<TechnoTypeClass*> BuildLimitGroup_Types;
 		ValueableVector<int> BuildLimitGroup_Nums;
 		Valueable<int> BuildLimitGroup_Factor;
@@ -227,19 +225,28 @@ public:
 		ValueableVector<int> BuildLimitGroup_ExtraLimit_MaxCount;
 		Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
+		Valueable<bool> LeaveTransportKill;
+		Nullable<bool> UnitIdleRotateTurret;
+		Nullable<bool> UnitIdlePointToMouse;
+		Nullable<bool> RecountBurst;
 		Valueable<bool> CanBeBuiltOn;
 		Valueable<bool> UnitBaseNormal;
 		Valueable<bool> UnitBaseForAllyBuilding;
 		Nullable<bool> AlwaysExistTheCameo;
 		Valueable<TechnoTypeClass*> PrerequisiteForCameo;
 		Valueable<CSFText> UIExtraDescription;
+		PhobosPCXFile CameoPCX;
+		PhobosPCXFile GreyCameoPCX;
+		Valueable<DisplayInfoType> UpperSelectedInfoType;
+		Valueable<ColorStruct> UpperSelectedInfoColor;
+		Valueable<DisplayInfoType> BelowSelectedInfoType;
+		Valueable<ColorStruct> BelowSelectedInfoColor;
+		Valueable<TechnoTypeClass*> FakeOf;
+		CustomPalette CameoPal;
 
 		Nullable<AnimTypeClass*> Wake;
 		Nullable<AnimTypeClass*> Wake_Grapple;
 		Nullable<AnimTypeClass*> Wake_Sinking;
-
-		Nullable<bool> UnitIdleRotateTurret;
-		Nullable<bool> UnitIdlePointToMouse;
 
 		struct LaserTrailDataEntry
 		{
@@ -452,8 +459,6 @@ public:
 
 			, AttachEffects {}
 
-			, RecountBurst {}
-
 			, BuildLimitGroup_Types {}
 			, BuildLimitGroup_Nums {}
 			, BuildLimitGroup_Factor { 1 }
@@ -464,19 +469,26 @@ public:
 			, BuildLimitGroup_ExtraLimit_MaxCount {}
 			, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
 
+			, LeaveTransportKill { false }
+			, UnitIdleRotateTurret {}
+			, UnitIdlePointToMouse {}
+			, RecountBurst {}
 			, CanBeBuiltOn { false }
 			, UnitBaseNormal { false }
 			, UnitBaseForAllyBuilding { false }
 			, AlwaysExistTheCameo {}
 			, PrerequisiteForCameo {}
 			, UIExtraDescription {}
+			, UpperSelectedInfoType { DisplayInfoType::Shield }
+			, UpperSelectedInfoColor { { 153, 153, 255 } }
+			, BelowSelectedInfoType { DisplayInfoType::Health }
+			, BelowSelectedInfoColor { { 0, 0, 0 } }
+			, FakeOf {}
+			, CameoPal {}
 
 			, Wake { }
 			, Wake_Grapple { }
 			, Wake_Sinking { }
-
-			, UnitIdleRotateTurret {}
-			, UnitIdlePointToMouse {}
 		{ }
 
 		virtual ~ExtData() = default;

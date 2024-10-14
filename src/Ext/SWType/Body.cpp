@@ -25,6 +25,8 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SW_InitialReady)
 		.Process(this->SW_PostDependent)
 		.Process(this->SW_MaxCount)
+		.Process(this->SidebarPCX)
+		.Process(this->CameoPal)
 		.Process(this->UIDescription)
 		.Process(this->CameoPriority)
 		.Process(this->LimboDelivery_Types)
@@ -48,6 +50,11 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ShowTimer_Priority)
 		.Process(this->Convert_Pairs)
 		.Process(this->ShowDesignatorRange)
+		.Process(this->SW_QuickFireAtMouse)
+		.Process(this->SW_QuickFireInScreen)
+		.Process(this->SW_InScreen_Show)
+		.Process(this->SW_InScreen_PriorityHouses)
+		.Process(this->SW_InScreen_RequiredHouses)
 		.Process(this->TabIndex)
 		.Process(this->UseWeeds)
 		.Process(this->UseWeeds_Amount)
@@ -87,6 +94,8 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SW_InitialReady.Read(exINI, pSection, "SW.InitialReady");
 	this->SW_PostDependent.Read(exINI, pSection, "SW.PostDependent");
 	this->SW_MaxCount.Read(exINI, pSection, "SW.MaxCount");
+	this->SidebarPCX.Read(pINI, pSection, "SidebarPCX");
+	this->CameoPal.LoadFromINI(pINI, pSection, "SidebarPalette");
 
 	this->UIDescription.Read(exINI, pSection, "UIDescription");
 	this->CameoPriority.Read(exINI, pSection, "CameoPriority");
@@ -171,6 +180,12 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	TypeConvertGroup::Parse(this->Convert_Pairs, exINI, pSection, AffectedHouse::Owner);
 
 	this->ShowDesignatorRange.Read(exINI, pSection, "ShowDesignatorRange");
+
+	this->SW_QuickFireAtMouse.Read(exINI, pSection, "SW.QuickFireAtMouse");
+	this->SW_QuickFireInScreen.Read(exINI, pSection, "SW.QuickFireInScreen");
+	this->SW_InScreen_Show.Read(exINI, pSection, "SW.InScreen.Show");
+	this->SW_InScreen_PriorityHouses = pINI->ReadHouseTypesList(pSection, "SW.InScreen.PriorityHouses", this->SW_InScreen_PriorityHouses);
+	this->SW_InScreen_RequiredHouses = pINI->ReadHouseTypesList(pSection, "SW.InScreen.RequiredHouses", this->SW_InScreen_RequiredHouses);
 
 	this->TabIndex.Read(exINI, pSection, "TabIndex");
 	GeneralUtils::IntValidCheck(&this->TabIndex, pSection, "TabIndex", 1, 0, 3);

@@ -31,6 +31,7 @@ public:
 		CellStruct CurrentBuildingTopLeft;
 		CDTimerClass CurrentBuildingTimer;
 		int CurrentBuildingTimes;
+		std::vector<int> SWButtonData;
 
 		CounterClass LimboAircraft;  // Currently owned aircraft in limbo
 		CounterClass LimboBuildings; // Currently owned buildings in limbo
@@ -74,6 +75,7 @@ public:
 			, CurrentBuildingTopLeft {}
 			, CurrentBuildingTimer {}
 			, CurrentBuildingTimes { 0 }
+			, SWButtonData {}
 			, LimboAircraft {}
 			, LimboBuildings {}
 			, LimboInfantry {}

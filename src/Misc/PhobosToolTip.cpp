@@ -1,6 +1,7 @@
 #include <Helpers/Macro.h>
 
 #include "PhobosToolTip.h"
+#include "TacticalButtons.h"
 
 #include <AircraftClass.h>
 #include <BuildingClass.h>
@@ -217,6 +218,29 @@ DEFINE_HOOK(0x6A9316, SidebarClass_StripClass_HelpText, 0x6)
 	PhobosToolTip::Instance.HelpText(pThis->Cameos[0]); // pStrip->Cameos[nID] in fact
 	R->EAX(L"X");
 	return 0x6A93DE;
+}
+
+DEFINE_HOOK(0x4AE511, DisplayClass_GetToolTip_SkipTacticalTip, 0x5)
+{
+	enum { UseButtonTip = 0x4AE5F8, SkipGameCode = 0x4AE69B };
+
+	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
+	const int buttonIndex = pButtons->GetButtonIndex();
+
+	if (buttonIndex < 0)
+		return 0;
+
+	if (!buttonIndex)
+		return SkipGameCode;
+
+	if (buttonIndex <= 10) // Button index 1-10 : Super weapons buttons
+		R->EAX(PhobosToolTip::Instance.GetBuffer());
+	else if (buttonIndex > 70 && buttonIndex <= 100) // Button index 71-100 : Select buttons
+		R->EAX(pButtons->HoveredSelected);
+	else
+		R->EAX(0);
+
+	return UseButtonTip;
 }
 
 // TODO: reimplement CCToolTip::Draw2 completely

@@ -142,6 +142,7 @@ public:
 		Valueable<double> CombatLightChance;
 		Nullable<bool> Particle_AlphaImageIsLightFlash;
 
+		Valueable<bool> BuildingUndeploy;
 		Nullable<double> DamageOwnerMultiplier;
 		Nullable<double> DamageAlliesMultiplier;
 		Nullable<double> DamageEnemiesMultiplier;
@@ -295,6 +296,7 @@ public:
 			, CombatLightChance { 1.0 }
 			, Particle_AlphaImageIsLightFlash {}
 
+			, BuildingUndeploy { false }
 			, DamageOwnerMultiplier {}
 			, DamageAlliesMultiplier {}
 			, DamageEnemiesMultiplier {}
@@ -351,6 +353,7 @@ public:
 		void ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* Owner, TechnoExt::ExtData* pTargetExt);
 		void ApplyShieldModifiers(TechnoClass* pTarget, TechnoExt::ExtData* pTargetExt);
 		void ApplyAttachEffects(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker);
+		void ApplyBuildingUndeploy(TechnoClass* pTarget);
 		double GetCritChance(TechnoClass* pFirer) const;
 	};
 

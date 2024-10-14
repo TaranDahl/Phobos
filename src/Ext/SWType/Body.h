@@ -37,6 +37,8 @@ public:
 		Valueable<bool> SW_InitialReady;
 		ValueableIdx<SuperWeaponTypeClass> SW_PostDependent;
 		Valueable<int> SW_MaxCount;
+		PhobosPCXFile SidebarPCX;
+		CustomPalette CameoPal;
 
 		Valueable<CSFText> UIDescription;
 		Valueable<int> CameoPriority;
@@ -60,6 +62,12 @@ public:
 		Valueable<bool> Detonate_Warhead_Full;
 		Valueable<bool> Detonate_AtFirer;
 		Valueable<bool> ShowDesignatorRange;
+
+		Valueable<bool> SW_QuickFireAtMouse;
+		Valueable<bool> SW_QuickFireInScreen;
+		Valueable<bool> SW_InScreen_Show;
+		DWORD SW_InScreen_PriorityHouses;
+		DWORD SW_InScreen_RequiredHouses;
 
 		Valueable<int> TabIndex;
 
@@ -93,6 +101,8 @@ public:
 			, SW_InitialReady { false }
 			, SW_PostDependent {}
 			, SW_MaxCount { -1 }
+			, CameoPal {}
+
 			, UIDescription {}
 			, CameoPriority { 0 }
 			, LimboDelivery_Types {}
@@ -116,11 +126,17 @@ public:
 			, ShowTimer_Priority { 0 }
 			, Convert_Pairs {}
 			, ShowDesignatorRange { true }
+			, SW_QuickFireAtMouse { false }
+			, SW_QuickFireInScreen { false }
+			, SW_InScreen_Show { false }
+			, SW_InScreen_PriorityHouses { 0u }
+			, SW_InScreen_RequiredHouses { 0xFFFFFFFFu }
 			, TabIndex { 1 }
 			, UseWeeds { false }
 			, UseWeeds_Amount { RulesClass::Instance->WeedCapacity }
 			, UseWeeds_StorageTimer { false }
 			, UseWeeds_ReadinessAnimationPercentage { 0.9 }
+
 			, EMPulse_WeaponIndex { 0 }
 			, EMPulse_SuspendOthers { false }
 			, EMPulse_Cannons {}
