@@ -61,6 +61,7 @@ public:
 		Valueable<Leptons> KeepRange;
 		Valueable<bool> KeepRange_AllowAI;
 		Valueable<bool> KeepRange_AllowPlayer;
+		Valueable<bool> Burst_NoDelay;
 		Valueable<bool> KickOutPassengers;
 
 		ExtData(WeaponTypeClass* OwnerObject) : Extension<WeaponTypeClass>(OwnerObject)
@@ -104,6 +105,7 @@ public:
 			, KeepRange { Leptons(0) }
 			, KeepRange_AllowAI { false }
 			, KeepRange_AllowPlayer { false }
+			, Burst_NoDelay { false }
 			, KickOutPassengers { true }
 		{ }
 
