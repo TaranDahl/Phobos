@@ -443,6 +443,7 @@ New:
 - Waypoint path is drawn for all units under player control or if `[GlobalControls]->DebugPlanningPaths=yes` (by Trsdy)
 - `RemoveDisguise` now works on vehicle disguises (by Trsdy)
 - Damage multiplier for different houses (by CrimRecya)
+- Display factories, superweapons, iron curtain and temporal progress on specific technos (by CrimRecya)
 - Allow anchoring extended tooltips to the left side of the sidebar (by Trsdy)
 - Toggle to allow spawned aircraft to attack immediately after being spawned (by Starkku)
 - `ZAdjust` for OverlayTypes (by Starkku)

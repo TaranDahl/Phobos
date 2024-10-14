@@ -149,18 +149,36 @@ public:
 		Valueable<AnimTypeClass*> Promote_VeteranAnimation;
 		Valueable<AnimTypeClass*> Promote_EliteAnimation;
 
+		Valueable<double> DamageOwnerMultiplier;
+		Valueable<double> DamageAlliesMultiplier;
+		Valueable<double> DamageEnemiesMultiplier;
+		Valueable<bool> JumpjetClimbPredictHeight;
+		Valueable<bool> JumpjetClimbWithoutCutOut;
+		Valueable<bool> FactoryProgressDisplay;
+		Valueable<bool> MainSWProgressDisplay;
+		Valueable<bool> InvulnerableDisplay;
+		Valueable<bool> TemporalLifeDisplay;
+		Valueable<Point2D> FactoryProgressDisplay_Offset;
+		Valueable<Point2D> MainSWProgressDisplay_Offset;
+		Valueable<Point2D> InvulnerableDisplay_Others_Offset;
+		Valueable<Point2D> InvulnerableDisplay_Buildings_Offset;
+		Valueable<Point2D> TemporalLifeDisplay_Others_Offset;
+		Valueable<Point2D> TemporalLifeDisplay_Buildings_Offset;
+		Valueable<int> FactoryProgressDisplay_Pips;
+		Valueable<int> MainSWProgressDisplay_Pips;
+		Valueable<Point2D> InvulnerableDisplay_Others_Pips;
+		Valueable<Point2D> InvulnerableDisplay_Buildings_Pips;
+		Valueable<int> TemporalLifeDisplay_Others_Pips;
+		Valueable<int> TemporalLifeDisplay_Buildings_Pips;
+		Valueable<SHPStruct*> ProgressDisplay_Others_PipsShape;
+		Valueable<SHPStruct*> ProgressDisplay_Buildings_PipsShape;
+
 		Valueable<double> AircraftLevelLightMultiplier;
 		Valueable<double> JumpjetLevelLightMultiplier;
 
 		Nullable<Vector3D<float>> VoxelLightSource;
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
 		Valueable<bool> UseFixedVoxelLighting;
-
-		Valueable<bool> JumpjetClimbPredictHeight;
-		Valueable<bool> JumpjetClimbWithoutCutOut;
-		Valueable<double> DamageOwnerMultiplier;
-		Valueable<double> DamageAlliesMultiplier;
-		Valueable<double> DamageEnemiesMultiplier;
 
 		Valueable<bool> GatherWhenMCVDeploy;
 		Valueable<bool> AIFireSale;
@@ -284,6 +302,24 @@ public:
 			, DamageEnemiesMultiplier { 1.0 }
 			, JumpjetClimbPredictHeight { false }
 			, JumpjetClimbWithoutCutOut { false }
+			, FactoryProgressDisplay { false }
+			, MainSWProgressDisplay { false }
+			, InvulnerableDisplay { false }
+			, TemporalLifeDisplay { false }
+			, FactoryProgressDisplay_Offset { { 0, 0 } }
+			, MainSWProgressDisplay_Offset { { 0, 0 } }
+			, InvulnerableDisplay_Others_Offset { { 0, 0 } }
+			, InvulnerableDisplay_Buildings_Offset { { 0, 0 } }
+			, TemporalLifeDisplay_Others_Offset { { 0, 0 } }
+			, TemporalLifeDisplay_Buildings_Offset { { 0, 0 } }
+			, FactoryProgressDisplay_Pips { 3 }
+			, MainSWProgressDisplay_Pips { 5 }
+			, InvulnerableDisplay_Others_Pips { { 17, 18 } }
+			, InvulnerableDisplay_Buildings_Pips { { 5, 4 } }
+			, TemporalLifeDisplay_Others_Pips { 17 }
+			, TemporalLifeDisplay_Buildings_Pips { 5 }
+			, ProgressDisplay_Others_PipsShape { FileSystem::PIPS_SHP }
+			, ProgressDisplay_Buildings_PipsShape { FileSystem::PIPS_SHP }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
 			, VoxelLightSource { }

@@ -382,6 +382,7 @@ This page lists all the individual contributions to the project by their author.
   - Units are now unable to kick out from a factory that is in construction process
   - Jumpjet Climbing Logic Enhancement
   - Several new Infotypes, no display in specific status and a new single frame display method
+  - Display factories, superweapons, iron curtain and temporal progress on specific technos
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
