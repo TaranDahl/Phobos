@@ -422,6 +422,7 @@ New:
 - New Tracing trajectory (by CrimRecya)
 - Force shield effect sync on deploy & vs. organic targets effect customization to complement the Iron Curtain ones (by Starkku)
 - Map trigger action 41 (Play animation at waypoint) now uses additional parameter to determine if animation can play sound, deal damage etc. (by Starkku)
+- Technos will maintain a suitable distance after firing (by CrimRecya)
 - Allow restricting how many times per frame a single radiation site can damage a building (by Starkku)
 - Allow explicitly setting the superweapons AI uses for Chronoshift script actions (by Starkku)
 - Allow customizing Aircraft weapon strafing regardless of `ROT` and `Strafing.Shots` values beyond 5 (by Trsdy)
