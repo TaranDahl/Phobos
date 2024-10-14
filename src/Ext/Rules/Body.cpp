@@ -190,6 +190,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->DamageOwnerMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageOwnerMultiplier");
 	this->DamageAlliesMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageAlliesMultiplier");
 	this->DamageEnemiesMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageEnemiesMultiplier");
+	this->JumpjetClimbPredictHeight.Read(exINI, GameStrings::General, "JumpjetClimbPredictHeight");
+	this->JumpjetClimbWithoutCutOut.Read(exINI, GameStrings::General, "JumpjetClimbWithoutCutOut");
 
 	this->AircraftLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "AircraftLevelLightMultiplier");
 	this->JumpjetLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "JumpjetLevelLightMultiplier");
@@ -383,6 +385,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->DamageOwnerMultiplier)
 		.Process(this->DamageAlliesMultiplier)
 		.Process(this->DamageEnemiesMultiplier)
+		.Process(this->JumpjetClimbPredictHeight)
+		.Process(this->JumpjetClimbWithoutCutOut)
 		.Process(this->AircraftLevelLightMultiplier)
 		.Process(this->JumpjetLevelLightMultiplier)
 		.Process(this->VoxelLightSource)

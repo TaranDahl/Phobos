@@ -380,6 +380,7 @@ This page lists all the individual contributions to the project by their author.
   - Units will not always stuck in the factory
 - **TaranDahl**
   - Units are now unable to kick out from a factory that is in construction process
+  - Jumpjet Climbing Logic Enhancement
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude

@@ -156,6 +156,8 @@ public:
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
 		Valueable<bool> UseFixedVoxelLighting;
 
+		Valueable<bool> JumpjetClimbPredictHeight;
+		Valueable<bool> JumpjetClimbWithoutCutOut;
 		Valueable<double> DamageOwnerMultiplier;
 		Valueable<double> DamageAlliesMultiplier;
 		Valueable<double> DamageEnemiesMultiplier;
@@ -280,6 +282,8 @@ public:
 			, DamageOwnerMultiplier { 1.0 }
 			, DamageAlliesMultiplier { 1.0 }
 			, DamageEnemiesMultiplier { 1.0 }
+			, JumpjetClimbPredictHeight { false }
+			, JumpjetClimbWithoutCutOut { false }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
 			, VoxelLightSource { }
