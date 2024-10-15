@@ -68,7 +68,7 @@ public:
 		Nullable<CoordStruct> JumpjetExitCoord;
 		Valueable<bool> AnimDontDelayBurst;
 
-		std::vector<OptionalStruct<DirType, true>> AircraftDockingDirs;
+		std::vector<std::optional<DirType>> AircraftDockingDirs;
 
 		ValueableVector<TechnoTypeClass*> FactoryPlant_AllowTypes;
 		ValueableVector<TechnoTypeClass*> FactoryPlant_DisallowTypes;
