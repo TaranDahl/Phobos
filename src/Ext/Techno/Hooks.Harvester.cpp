@@ -70,14 +70,17 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	auto pThisCell = MapClass::Instance->GetCellAt(thisCell);
 	bool isDockNearBy = pThisCell ? pThisCell->GetBuilding() == pDock : false;
 
-	for (auto pFoundation = pDockType->FoundationOutside; !isDockNearBy && *pFoundation != CellStruct { 0x7FFF, 0x7FFF }; pFoundation++)
+	if (!isDockNearBy)
 	{
-		CellStruct searchCell = dockCell + *pFoundation;
-
-		if (searchCell == thisCell)
+		for (auto pFoundation = pDockType->FoundationOutside; *pFoundation != CellStruct { 0x7FFF, 0x7FFF }; pFoundation++)
 		{
-			isDockNearBy = true;
-			break;
+			CellStruct searchCell = dockCell + *pFoundation;
+
+			if (searchCell == thisCell)
+			{
+				isDockNearBy = true;
+				break;
+			}
 		}
 	}
 
