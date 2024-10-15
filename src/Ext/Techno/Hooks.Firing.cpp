@@ -1279,32 +1279,18 @@ DEFINE_HOOK(0x6F8D32, TechnoClass_ScanToAttackWall_DestroyOwnerlessWalls, 0x9)
 
 #pragma region DoTurnOnRearm
 
-namespace DoTurnOnRearm
+DEFINE_HOOK(0x7410BB, UnitClass_GetFireError_CheckFacingError, 0x8)
 {
-	bool hasTurned = false; // Prevent dead loop
-}
+	enum { NoNeedToCheck = 0x74132B, ContinueCheck = 0x7410C3 };
 
-DEFINE_HOOK(0x737063, UnitClass_UpdateFiring_DoTurnOnRearm, 0x6)
-{
-	enum { DoTurn = 0x736F78 };
+	GET(FireError, fireError, EAX);
 
-	GET(FireError, err, EBP);
+	if (fireError == FireError::OK)
+		return ContinueCheck;
 
-	if (err == FireError::REARM)
-	{
-		if (!DoTurnOnRearm::hasTurned)
-		{
-			DoTurnOnRearm::hasTurned = true;
-			return DoTurn;
-		}
-		else
-		{
-			DoTurnOnRearm::hasTurned = false;
-			return 0;
-		}
-	}
+	GET(UnitClass*, pThis, ESI);
 
-	return 0;
+	return (fireError == FireError::REARM && !pThis->Type->Turret) ? ContinueCheck : NoNeedToCheck;
 }
 
 #pragma endregion
