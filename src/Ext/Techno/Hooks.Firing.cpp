@@ -1234,13 +1234,13 @@ DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 
 DEFINE_HOOK(0x44B630, BuildingClass_MissionAttack_AnimDelayedFire, 0x6)
 {
-	enum { JustFire = 0x44B6C4, VanillaCheck = 0 };
+	enum { JustFire = 0x44B6C4 };
 
 	GET(BuildingClass* const, pThis, ESI);
 
 	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
 
-	return (pTypeExt && pTypeExt->AnimDontDelayBurst && pThis->CurrentBurstIndex != 0) ? JustFire : VanillaCheck;
+	return (pTypeExt && pTypeExt->AnimDontDelayBurst && pThis->CurrentBurstIndex != 0) ? JustFire : 0;
 }
 
 #pragma endregion
@@ -1277,7 +1277,7 @@ DEFINE_HOOK(0x6F8D32, TechnoClass_ScanToAttackWall_DestroyOwnerlessWalls, 0x9)
 
 #pragma endregion
 
-#pragma region DoTurnOnRearm
+#pragma region CheckFacingWhenRearming
 
 DEFINE_HOOK(0x7410BB, UnitClass_GetFireError_CheckFacingError, 0x8)
 {
