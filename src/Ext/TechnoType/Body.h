@@ -234,6 +234,7 @@ public:
 		Valueable<bool> UnitBaseForAllyBuilding;
 		Nullable<bool> AlwaysExistTheCameo;
 		Valueable<TechnoTypeClass*> PrerequisiteForCameo;
+		bool CameoCheckMutex; // Not read from ini
 		Valueable<CSFText> UIExtraDescription;
 		PhobosPCXFile CameoPCX;
 		PhobosPCXFile GreyCameoPCX;
@@ -529,6 +530,7 @@ public:
 			, UnitBaseForAllyBuilding { false }
 			, AlwaysExistTheCameo {}
 			, PrerequisiteForCameo {}
+			, CameoCheckMutex { false }
 			, UIExtraDescription {}
 			, UpperSelectedInfoType { DisplayInfoType::Shield }
 			, UpperSelectedInfoColor { { 153, 153, 255 } }
