@@ -372,6 +372,12 @@ DEFINE_HOOK(0x41A96C, AircraftClass_Mission_AreaGuard, 0x6)
 }
 
 // AttackMove: return when no ammo or arrived destination
+bool __fastcall AircraftTypeClass_CanUseWaypoint(AircraftTypeClass* pThis)
+{
+	return true;
+}
+DEFINE_JUMP(VTABLE, 0x7E2908, GET_OFFSET(AircraftTypeClass_CanUseWaypoint))
+
 bool __fastcall AircraftTypeClass_CanAttackMove(AircraftTypeClass* pThis)
 {
 	return true;
