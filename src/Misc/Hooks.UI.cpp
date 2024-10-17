@@ -13,6 +13,7 @@
 #include <Ext/SWType/Body.h>
 #include <Misc/FlyingStrings.h>
 #include <Utilities/Debug.h>
+#include "TacticalButtons.h"
 
 DEFINE_HOOK(0x777C41, UI_ApplyAppIcon, 0x9)
 {
@@ -287,7 +288,8 @@ DEFINE_HOOK(0x623A9F, DSurface_sub_623880_DrawBitFontStrings, 0x5)
 
 	pRect->Height = height;
 	ColorStruct black { 0, 0, 0 };
-	pSurface->FillRectTrans(pRect, &black, 40);
+	int trans = (TacticalButtonsClass::Instance.OnMessages || ScenarioClass::Instance->UserInputLocked) ? 80 : 40;
+	pSurface->FillRectTrans(pRect, &black, trans);
 
 	return SkipGameCode;
 }
