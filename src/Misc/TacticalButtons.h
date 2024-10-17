@@ -19,6 +19,8 @@ public:
 	void SetMouseButtonIndex(const Point2D* pMousePosition);
 	void PressDesignatedButton(int triggerIndex);
 
+	// Button index N/A : Message Lists
+
 	// Button index 1-10 : Super weapons buttons
 	inline bool IndexInSWButtons();
 	void SWSidebarDraw();
@@ -63,6 +65,9 @@ public:
 public:
 	bool PressedInButtonsLayer { false }; // Check press
 
+	// Button index N/A : Message Lists
+	bool OnMessages { false };
+
 	// Button index 1-10 : Super weapons buttons
 	bool DummyAction { false };
 	bool KeyboardCall { false };
@@ -78,6 +83,8 @@ public:
 
 private:
 	int ButtonIndex { -1 }; // -1 -> above no buttons, 0 -> above buttons background, POSITIVE -> above button who have this index
+
+	// Button index N/A : Message Lists
 
 	// Button index 1-10 : Super weapons buttons
 	SuperClass* RecordSuper { nullptr }; // Cannot be used, only for comparison purposes
