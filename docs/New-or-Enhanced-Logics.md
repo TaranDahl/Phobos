@@ -125,7 +125,7 @@ ReflectDamage.Multiplier=1.0                       ; floating point value, perce
 ReflectDamage.AffectsHouses=all                    ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
 DisableWeapons=false                               ; boolean
 Groups=                                            ; comma-separated list of strings (group IDs)
-                                                   
+
 [SOMETECHNO]                                       ; TechnoType
 AttachEffect.AttachTypes=                          ; List of AttachEffectTypes
 AttachEffect.DurationOverrides=                    ; integer - duration overrides (comma-separated) for AttachTypes in order from first to last.
@@ -134,7 +134,7 @@ AttachEffect.InitialDelays=                        ; integer - initial delays (c
 AttachEffect.RecreationDelays=                     ; integer - recreation delays (comma-separated) for AttachTypes in order from first to last.
 OpenTopped.UseTransportRangeModifiers=false        ; boolean
 OpenTopped.CheckTransportDisableWeapons=false      ; boolean
-                                                   
+
 [SOMEWEAPON]                                       ; WeaponType
 AttachEffect.RequiredTypes=                        ; List of AttachEffectTypes
 AttachEffect.DisallowedTypes=                      ; List of AttachEffectTypes
@@ -146,8 +146,8 @@ AttachEffect.DisallowedMinCounts=                  ; integer - minimum disallowe
 AttachEffect.DisallowedMaxCounts=                  ; integer - maximum disallowed instance count (comma-separated) for cumulative types in order from first to last.
 AttachEffect.IgnoreFromSameSource=false            ; boolean
 AttachEffect.CheckOnFirer=false                    ; boolean
-                                                   
-[SOMEWARHEAD]                                      
+
+[SOMEWARHEAD]
 AttachEffect.AttachTypes=                          ; List of AttachEffectTypes
 AttachEffect.CumulativeRefreshAll=false            ; boolean
 AttachEffect.CumulativeRefreshAll.OnAttach=false   ; boolean
@@ -511,7 +511,7 @@ DetachedReport=  ; sound entry
   - `Adjacent.Allowed` lists BuildingTypes this BuildingType can be placed off (within distance defined by `Adjacent`). If empty, any BuildingType not listed in `Adjacent.Disallowed` is okay.
   - `Adjacent.Disallowed` lists BuildingTypes this BuildingType cannot be placed next to. If empty, any BuildingTypes are okay as long as `Adjacent.Allowed` is empty or they are listed on it.
   - If `NoBuildAreaOnBuildup` is set to true, no building can be built next to this building regardless of any other settings if it is currently displaying its buildup animation.
-  
+
 In `rulesmd.ini`:
 ```ini
 [SOMEBUILDING]              ; BuildingType
@@ -544,7 +544,7 @@ PowersUp.Buildings= ; list of BuildingTypes
 
 - It is possible to make buildings be considered pathfinding obstacles that can be destroyed by setting `IsDestroyableBlockage` to true. What this does is make the building be considered impassable and impenetrable pathfinding obstacle to every unit that is not flying or have appropriate `MovementZone` (ones that allow destroyable obstacles to be overcome, e.g `(Infantry|Amphibious)Destroyer`) akin to wall overlays and TerrainTypes.
   - Keep in mind that if an unit has appropriate `MovementZone` but no means to actually destroy an obstacle (such as a weapon that can fire and deal damage at them), they will get stuck trying to go through them instead of pathing around.
-  
+
 In `rulesmd.ini`:
 ```ini
 [SOMEBUILDING]               ; BuildingType
@@ -756,9 +756,10 @@ Trajectory.Speed=100.0  ; floating point value
     - `Trajectory.Straight.ProximityFlight` controls whether to count units in the air.
   - `Trajectory.Straight.ThroughVehicles` controls whether the projectile will not be obstructed by vehicles or aircrafts on the ground. When it is obstructed, it will be directly detonated at its location. If it still have `Trajectory.Straight.ProximityImpact` times, it will also detonate a `Trajectory.Straight.ProximityImpact` at the location of the obstacle.
   - `Trajectory.Straight.ThroughBuilding` controls whether the projectile will not be obstructed by buildings. When it is obstructed, it will be directly detonated at its location. If it still have `Trajectory.Straight.ProximityImpact` times, it will also detonate a `Trajectory.Straight.ProximityImpact` at the location of the obstacle.
-  - `Trajectory.Straight.EdgeAttenuation` controls the edge attenuation ratio of projectile damage, includes `Trajectory.Straight.Damage`. Can NOT be set to a negative integer.
   - `Trajectory.Straight.SubjectToGround` controls whether the projectile should explode when it hits the ground. Note that this will not make AI search for suitable attack locations.
   - `Trajectory.Straight.ConfineAtHeight` controls the height above ground that projectile will try to travel as it can. It can not move down from the cliff by setting `SubjectToCliffs=yes`. It can be cancelled by setting as a non positive integer. It will be forcibly cancelled by setting `Trajectory.Speed` above 256.
+  - `Trajectory.Straight.EdgeAttenuation` controls the edge attenuation ratio of projectile damage (includes all types of the trajectory's damage), that is, the actual damage caused will be this value multiplied by the ratio of the current distance to the weapon's range. Can NOT be set to a negative integer.
+  - `Trajectory.Straight.CountAttenuation` controls the attenuation coefficient of projectile damage (includes all types of the trajectory's damage), that is, how many times the next damage after each bounce is the damage just caused. Can NOT be set to a negative integer.
 
 In `rulesmd.ini`:
 ```ini
@@ -790,9 +791,10 @@ Trajectory.Straight.ProximityAllies=false       ; boolean
 Trajectory.Straight.ProximityFlight=false       ; boolean
 Trajectory.Straight.ThroughVehicles=true        ; boolean
 Trajectory.Straight.ThroughBuilding=true        ; boolean
-Trajectory.Straight.EdgeAttenuation=1.0         ; floating point value
 Trajectory.Straight.SubjectToGround=false       ; boolean
 Trajectory.Straight.ConfineAtHeight=0           ; integer
+Trajectory.Straight.EdgeAttenuation=1.0         ; floating point value
+Trajectory.Straight.CountAttenuation=1.0        ; floating point value
 ```
 
 ```{note}
