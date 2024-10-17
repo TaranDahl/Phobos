@@ -287,7 +287,7 @@ DEFINE_HOOK(0x623A9F, DSurface_sub_623880_DrawBitFontStrings, 0x5)
 
 	pRect->Height = height;
 	ColorStruct black { 0, 0, 0 };
-	pSurface->FillRectTrans(pRect, &black, 30);
+	pSurface->FillRectTrans(pRect, &black, 40);
 
 	return SkipGameCode;
 }
