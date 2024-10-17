@@ -669,20 +669,29 @@ void StraightTrajectory::CalculateNewDamage(BulletClass* pBullet)
 	{
 		if (ratio)
 		{
-			if (const int newDamage = static_cast<int>(pBullet->Health * ratio))
-				pBullet->Health = newDamage;
-			else
-				pBullet->Health = Math::sgn(pBullet->Health);
+			if (pBullet->Health)
+			{
+				if (const int newDamage = static_cast<int>(pBullet->Health * ratio))
+					pBullet->Health = newDamage;
+				else
+					pBullet->Health = Math::sgn(pBullet->Health);
+			}
 
-			if (const int newDamage = static_cast<int>(this->ProximityDamage * ratio))
-				this->ProximityDamage = newDamage;
-			else
-				this->ProximityDamage = Math::sgn(this->ProximityDamage);
+			if (this->ProximityDamage)
+			{
+				if (const int newDamage = static_cast<int>(this->ProximityDamage * ratio))
+					this->ProximityDamage = newDamage;
+				else
+					this->ProximityDamage = Math::sgn(this->ProximityDamage);
+			}
 
-			if (const int newDamage = static_cast<int>(this->PassDetonateDamage * ratio))
-				this->PassDetonateDamage = newDamage;
-			else
-				this->PassDetonateDamage = Math::sgn(this->PassDetonateDamage);
+			if (this->PassDetonateDamage)
+			{
+				if (const int newDamage = static_cast<int>(this->PassDetonateDamage * ratio))
+					this->PassDetonateDamage = newDamage;
+				else
+					this->PassDetonateDamage = Math::sgn(this->PassDetonateDamage);
+			}
 		}
 		else
 		{
