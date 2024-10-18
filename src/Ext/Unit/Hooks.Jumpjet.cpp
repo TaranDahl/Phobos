@@ -14,9 +14,15 @@ DEFINE_HOOK(0x736F78, UnitClass_UpdateFiring_FireErrorIsFACING, 0x6)
 	GET(UnitClass* const, pThis, ESI);
 
 	auto pType = pThis->Type;
-	CoordStruct& source = pThis->Location;
-	CoordStruct target = pThis->Target->GetCoords(); // Target checked so it's not null here
-	DirStruct tgtDir { Math::atan2(source.Y - target.Y, target.X - source.X) };
+
+	const CoordStruct source = pThis->Location;
+	const CoordStruct target = pThis->Target->GetCoords(); // Target checked so it's not null here
+	double radian = Math::atan2(source.Y - target.Y, target.X - source.X);
+
+	if (TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(pType))
+		radian += pTypeExt->FacingDeflection * (Math::Pi / 180.0);
+
+	const DirStruct tgtDir { radian };
 
 	if (pType->Turret && !pType->HasTurret) // 0x736F92
 	{
@@ -30,8 +36,10 @@ DEFINE_HOOK(0x736F78, UnitClass_UpdateFiring_FireErrorIsFACING, 0x6)
 			if (jjLoco->State != JumpjetLocomotionClass::State::Cruising)
 			{
 				jjLoco->LocomotionFacing.SetDesired(tgtDir);
+
 				if (jjLoco->State == JumpjetLocomotionClass::State::Grounded)
 					pThis->PrimaryFacing.SetDesired(tgtDir);
+
 				pThis->SecondaryFacing.SetDesired(tgtDir);
 			}
 		}
@@ -59,14 +67,21 @@ DEFINE_HOOK(0x736EE9, UnitClass_UpdateFiring_FireErrorIsOK, 0x6)
 		return 0;
 
 	auto const pWpn = pThis->GetWeapon(wpIdx)->WeaponType;
+
 	if (pWpn->OmniFire)
 	{
 		const auto pTypeExt = WeaponTypeExt::ExtMap.Find(pWpn);
+
 		if (pTypeExt->OmniFire_TurnToTarget.Get() && !pThis->Locomotor->Is_Moving_Now())
 		{
-			CoordStruct& source = pThis->Location;
-			CoordStruct target = pThis->Target->GetCoords();
-			DirStruct tgtDir { Math::atan2(source.Y - target.Y, target.X - source.X) };
+			const CoordStruct source = pThis->Location;
+			const CoordStruct target = pThis->Target->GetCoords();
+			double radian = Math::atan2(source.Y - target.Y, target.X - source.X);
+
+			if (TechnoTypeExt::ExtData* const pTechnoTypeExt = TechnoTypeExt::ExtMap.Find(pType))
+				radian += pTechnoTypeExt->FacingDeflection * (Math::Pi / 180.0);
+
+			const DirStruct tgtDir { radian };
 
 			if (pThis->GetRealFacing() != tgtDir)
 			{
