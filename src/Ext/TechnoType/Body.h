@@ -226,9 +226,10 @@ public:
 		Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
 		Valueable<bool> LeaveTransportKill;
+		Nullable<bool> RecountBurst;
 		Nullable<bool> UnitIdleRotateTurret;
 		Nullable<bool> UnitIdlePointToMouse;
-		Nullable<bool> RecountBurst;
+		Nullable<int> TurretROT;
 		Valueable<bool> CanBeBuiltOn;
 		Valueable<bool> UnitBaseNormal;
 		Valueable<bool> UnitBaseForAllyBuilding;
@@ -471,9 +472,10 @@ public:
 			, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
 
 			, LeaveTransportKill { false }
+			, RecountBurst {}
 			, UnitIdleRotateTurret {}
 			, UnitIdlePointToMouse {}
-			, RecountBurst {}
+			, TurretROT {}
 			, CanBeBuiltOn { false }
 			, UnitBaseNormal { false }
 			, UnitBaseForAllyBuilding { false }
