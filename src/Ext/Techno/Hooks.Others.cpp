@@ -1,5 +1,6 @@
 #include "Body.h"
 
+#include <Ext/Building/Body.h>
 #include <Ext/WeaponType/Body.h>
 
 #pragma region NoBurstDelay
@@ -84,20 +85,39 @@ DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 
 #pragma endregion
 
-#pragma region CheckFacingWhenRearming
+#pragma region KickOutStuckUnits
 
-DEFINE_HOOK(0x7410BB, UnitClass_GetFireError_CheckFacingError, 0x8)
+// Kick out stuck units when the factory building is not busy
+DEFINE_HOOK(0x450248, BuildingClass_UpdateFactory_KickOutStuckUnits, 0x6)
 {
-	enum { NoNeedToCheck = 0x74132B, ContinueCheck = 0x7410C3 };
+	GET(BuildingClass*, pThis, ESI);
 
-	GET(FireError, fireError, EAX);
+	if (!(Unsorted::CurrentFrame % 15))
+	{
+		BuildingTypeClass* const pType = pThis->Type;
 
-	if (fireError == FireError::OK)
-		return ContinueCheck;
+		if (pType->Factory == AbstractType::UnitType && pType->WeaponsFactory && !pType->Naval && pThis->QueuedMission != Mission::Unload)
+		{
+			const Mission mission = pThis->CurrentMission;
 
-	GET(UnitClass*, pThis, ESI);
+			if (mission == Mission::Guard || (mission == Mission::Unload && pThis->MissionStatus == 1))
+				BuildingExt::KickOutStuckUnits(pThis);
+		}
+	}
 
-	return (fireError == FireError::REARM && !pThis->Type->Turret) ? ContinueCheck : NoNeedToCheck;
+	return 0;
+}
+
+// Should not kick out units if the factory building is in construction process
+DEFINE_HOOK(0x4444A0, BuildingClass_KickOutUnit_NoKickOutInConstruction, 0xA)
+{
+	enum { ThisIsOK = 0x444565, ThisIsNotOK = 0x4444B3};
+
+	GET(BuildingClass* const, pThis, ESI);
+
+	const Mission mission = pThis->GetCurrentMission();
+
+	return (mission == Mission::Unload || mission == Mission::Construction) ? ThisIsNotOK : ThisIsOK;
 }
 
 #pragma endregion
@@ -166,6 +186,24 @@ DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
 	}
 
 	return 0;
+}
+
+#pragma endregion
+
+#pragma region CheckFacingWhenRearming
+
+DEFINE_HOOK(0x7410BB, UnitClass_GetFireError_CheckFacingError, 0x8)
+{
+	enum { NoNeedToCheck = 0x74132B, ContinueCheck = 0x7410C3 };
+
+	GET(FireError, fireError, EAX);
+
+	if (fireError == FireError::OK)
+		return ContinueCheck;
+
+	GET(UnitClass*, pThis, ESI);
+
+	return (fireError == FireError::REARM && !pThis->Type->Turret) ? ContinueCheck : NoNeedToCheck;
 }
 
 #pragma endregion
