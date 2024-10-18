@@ -460,9 +460,10 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildLimitGroup_ExtraLimit_MaxNum.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxNum");
 
 	this->LeaveTransportKill.Read(exINI, pSection, "LeaveTransportKill");
+	this->RecountBurst.Read(exINI, pSection, "RecountBurst");
 	this->UnitIdleRotateTurret.Read(exINI, pSection, "UnitIdleRotateTurret");
 	this->UnitIdlePointToMouse.Read(exINI, pSection, "UnitIdlePointToMouse");
-	this->RecountBurst.Read(exINI, pSection, "RecountBurst");
+	this->TurretROT.Read(exINI, pSection, "TurretROT");
 	this->CanBeBuiltOn.Read(exINI, pSection, "CanBeBuiltOn");
 	this->UnitBaseNormal.Read(exINI, pSection, "UnitBaseNormal");
 	this->AlwaysExistTheCameo.Read(exINI, pSection, "AlwaysExistTheCameo");
@@ -900,9 +901,10 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxNum)
 
 		.Process(this->LeaveTransportKill)
+		.Process(this->RecountBurst)
 		.Process(this->UnitIdleRotateTurret)
 		.Process(this->UnitIdlePointToMouse)
-		.Process(this->RecountBurst)
+		.Process(this->TurretROT)
 		.Process(this->CanBeBuiltOn)
 		.Process(this->UnitBaseNormal)
 		.Process(this->UnitBaseForAllyBuilding)

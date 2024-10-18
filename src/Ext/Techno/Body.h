@@ -50,7 +50,6 @@ public:
 		bool UnitIdleAction;
 		bool UnitIdleActionSelected;
 		bool UnitIdleIsSelected;
-		int UnitIdleTurretROT; // If TypeExt get the Ares TurretROT, this can be replaced
 		CDTimerClass UnitIdleActionTimer;
 		CDTimerClass UnitIdleActionGapTimer;
 		CDTimerClass UnitAutoDeployTimer;
@@ -94,7 +93,6 @@ public:
 			, CanCurrentlyDeployIntoBuilding { false }
 			, UnitIdleAction { false }
 			, UnitIdleActionSelected { false }
-			, UnitIdleTurretROT { 0 }
 			, UnitIdleIsSelected { 0 }
 			, UnitIdleActionTimer {}
 			, UnitIdleActionGapTimer {}
@@ -133,7 +131,9 @@ public:
 		int GetAttachedEffectCumulativeCount(AttachEffectTypeClass* pAttachEffectType, bool ignoreSameSource = false, TechnoClass* pInvoker = nullptr, AbstractClass* pSource = nullptr) const;
 		void InitializeDisplayInfo();
 		void InitializeUnitIdleAction();
-		void ApplyUnitIdleAction();
+		void StopIdleAction();
+		void ApplyIdleAction();
+		void ManualIdleAction();
 		void StopRotateWithNewROT(int ROT = -1);
 
 		virtual ~ExtData() override;
