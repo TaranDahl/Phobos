@@ -100,6 +100,129 @@ DEFINE_HOOK(0x44B630, BuildingClass_MissionAttack_AnimDelayedFire, 0x6)
 
 #pragma endregion
 
+#pragma region AIConstructionYard
+
+DEFINE_HOOK(0x740A11, UnitClass_Mission_Guard_AIAutoDeployMCV, 0x6)
+{
+	enum { SkipGameCode = 0x740A50 };
+
+	GET(UnitClass*, pMCV, ESI);
+
+	return (RulesExt::Global()->AIAutoDeployMCV && pMCV->Owner->NumConYards > 0) ? SkipGameCode : 0;
+}
+
+DEFINE_HOOK(0x739889, UnitClass_TryToDeploy_AISetBaseCenter, 0x6)
+{
+	enum { SkipGameCode = 0x73992B };
+
+	GET(UnitClass*, pMCV, EBP);
+
+	return (RulesExt::Global()->AISetBaseCenter && pMCV->Owner->NumConYards > 1) ? SkipGameCode : 0;
+}
+
+DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
+{
+	if (RulesExt::Global()->AIBiasSpawnCell && SessionClass::Instance->GameMode != GameMode::Campaign)
+	{
+		GET(HouseClass*, pAI, EBX);
+
+		if (const int count = pAI->ConYards.Count)
+		{
+			const int wayPoint = pAI->GetSpawnPosition();
+
+			if (wayPoint != -1)
+			{
+				const CellStruct center = ScenarioClass::Instance->GetWaypointCoords(wayPoint);
+				CellStruct newCenter = center;
+				double distanceSquared = 131072.0;
+
+				for (int i = 0; i < count; ++i)
+				{
+					if (BuildingClass* const pBuilding = pAI->ConYards.GetItem(i))
+					{
+						if (pBuilding->IsAlive && pBuilding->Health && !pBuilding->InLimbo)
+						{
+							const double newDistanceSquared = pBuilding->GetMapCoords().DistanceFromSquared(center);
+
+							if (newDistanceSquared < distanceSquared)
+							{
+								distanceSquared = newDistanceSquared;
+								newCenter = pBuilding->GetMapCoords();
+							}
+						}
+					}
+				}
+
+				if (newCenter != center)
+				{
+					pAI->BaseSpawnCell = newCenter;
+					pAI->Base.BaseNodes.Items->MapCoords = newCenter;
+					pAI->Base.Center = newCenter;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+/*
+DEFINE_HOOK(0x4FE42F, HouseClass_AIBaseConstructionUpdate_SkipConYards, 0x6)
+{
+	enum { SkipGameCode = 0x4FE443 };
+
+	GET(BuildingTypeClass*, pType, EAX);
+
+	return (RulesExt::Global()->AIForbidConYard && pType->ConstructionYard) ? SkipGameCode : 0;
+}
+
+DEFINE_HOOK(0x505550, HouseClass_AIBaseConstructionUpdate_SkipConYards, 0x6)
+{
+	enum { SkipGameCode = 0x5056C1 };
+
+	GET(BuildingTypeClass*, pType, ESI);
+
+	return (RulesExt::Global()->AIForbidConYard && pType->ConstructionYard) ? SkipGameCode : 0;
+}
+*/
+#pragma endregion
+
+#pragma region KickOutStuckUnits
+
+// Kick out stuck units when the factory building is not busy
+DEFINE_HOOK(0x450248, BuildingClass_UpdateFactory_KickOutStuckUnits, 0x6)
+{
+	GET(BuildingClass*, pThis, ESI);
+
+	if (!(Unsorted::CurrentFrame % 15))
+	{
+		BuildingTypeClass* const pType = pThis->Type;
+
+		if (pType->Factory == AbstractType::UnitType && pType->WeaponsFactory && !pType->Naval && pThis->QueuedMission != Mission::Unload)
+		{
+			const Mission mission = pThis->CurrentMission;
+
+			if (mission == Mission::Guard || (mission == Mission::Unload && pThis->MissionStatus == 1))
+				BuildingExt::KickOutStuckUnits(pThis);
+		}
+	}
+
+	return 0;
+}
+
+// Should not kick out units if the factory building is in construction process
+DEFINE_HOOK(0x4444A0, BuildingClass_KickOutUnit_NoKickOutInConstruction, 0xA)
+{
+	enum { ThisIsOK = 0x444565, ThisIsNotOK = 0x4444B3};
+
+	GET(BuildingClass* const, pThis, ESI);
+
+	const Mission mission = pThis->GetCurrentMission();
+
+	return (mission == Mission::Unload || mission == Mission::Construction) ? ThisIsNotOK : ThisIsOK;
+}
+
+#pragma endregion
+
 #pragma region NewWaypoints
 
 bool __fastcall BuildingTypeClass_CanUseWaypoint(BuildingTypeClass* pThis)
@@ -633,92 +756,6 @@ DEFINE_HOOK(0x6B73EA, SpawnManagerClass_Update_MissileSpawnFLH, 0x5)
 	return 0;
 }
 
-#pragma endregion
-
-#pragma region AIConstructionYard
-
-DEFINE_HOOK(0x740A11, UnitClass_Mission_Guard_AIAutoDeployMCV, 0x6)
-{
-	enum { SkipGameCode = 0x740A50 };
-
-	GET(UnitClass*, pMCV, ESI);
-
-	return (RulesExt::Global()->AIAutoDeployMCV && pMCV->Owner->NumConYards > 0) ? SkipGameCode : 0;
-}
-
-DEFINE_HOOK(0x739889, UnitClass_TryToDeploy_AISetBaseCenter, 0x6)
-{
-	enum { SkipGameCode = 0x73992B };
-
-	GET(UnitClass*, pMCV, EBP);
-
-	return (RulesExt::Global()->AISetBaseCenter && pMCV->Owner->NumConYards > 1) ? SkipGameCode : 0;
-}
-
-DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
-{
-	if (RulesExt::Global()->AIBiasSpawnCell && SessionClass::Instance->GameMode != GameMode::Campaign)
-	{
-		GET(HouseClass*, pAI, EBX);
-
-		if (const int count = pAI->ConYards.Count)
-		{
-			const int wayPoint = pAI->GetSpawnPosition();
-
-			if (wayPoint != -1)
-			{
-				const CellStruct center = ScenarioClass::Instance->GetWaypointCoords(wayPoint);
-				CellStruct newCenter = center;
-				double distanceSquared = 131072.0;
-
-				for (int i = 0; i < count; ++i)
-				{
-					if (BuildingClass* const pBuilding = pAI->ConYards.GetItem(i))
-					{
-						if (pBuilding->IsAlive && pBuilding->Health && !pBuilding->InLimbo)
-						{
-							const double newDistanceSquared = pBuilding->GetMapCoords().DistanceFromSquared(center);
-
-							if (newDistanceSquared < distanceSquared)
-							{
-								distanceSquared = newDistanceSquared;
-								newCenter = pBuilding->GetMapCoords();
-							}
-						}
-					}
-				}
-
-				if (newCenter != center)
-				{
-					pAI->BaseSpawnCell = newCenter;
-					pAI->Base.BaseNodes.Items->MapCoords = newCenter;
-					pAI->Base.Center = newCenter;
-				}
-			}
-		}
-	}
-
-	return 0;
-}
-/*
-DEFINE_HOOK(0x4FE42F, HouseClass_AIBaseConstructionUpdate_SkipConYards, 0x6)
-{
-	enum { SkipGameCode = 0x4FE443 };
-
-	GET(BuildingTypeClass*, pType, EAX);
-
-	return (RulesExt::Global()->AIForbidConYard && pType->ConstructionYard) ? SkipGameCode : 0;
-}
-
-DEFINE_HOOK(0x505550, HouseClass_AIBaseConstructionUpdate_SkipConYards, 0x6)
-{
-	enum { SkipGameCode = 0x5056C1 };
-
-	GET(BuildingTypeClass*, pType, ESI);
-
-	return (RulesExt::Global()->AIForbidConYard && pType->ConstructionYard) ? SkipGameCode : 0;
-}
-*/
 #pragma endregion
 
 #pragma region KeepTargetOnMove
