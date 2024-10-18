@@ -189,21 +189,3 @@ DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
 }
 
 #pragma endregion
-
-#pragma region CheckFacingWhenRearming
-
-DEFINE_HOOK(0x7410BB, UnitClass_GetFireError_CheckFacingError, 0x8)
-{
-	enum { NoNeedToCheck = 0x74132B, ContinueCheck = 0x7410C3 };
-
-	GET(FireError, fireError, EAX);
-
-	if (fireError == FireError::OK)
-		return ContinueCheck;
-
-	GET(UnitClass*, pThis, ESI);
-
-	return (fireError == FireError::REARM && !pThis->Type->Turret) ? ContinueCheck : NoNeedToCheck;
-}
-
-#pragma endregion
