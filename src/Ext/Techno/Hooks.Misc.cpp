@@ -1,6 +1,23 @@
 #include "Body.h"
 
 #include <SpawnManagerClass.h>
+#include <TunnelLocomotionClass.h>
+
+#pragma region SlaveManagerClass
+
+// Issue #601
+// Author : TwinkleStar
+DEFINE_HOOK(0x6B0C2C, SlaveManagerClass_FreeSlaves_SlavesFreeSound, 0x5)
+{
+	GET(TechnoClass*, pSlave, EDI);
+
+	auto pTypeExt = TechnoTypeExt::ExtMap.Find(pSlave->GetTechnoType());
+	int sound = pTypeExt->SlavesFreeSound.Get(RulesClass::Instance()->SlavesFreeSound);
+	if (sound != -1)
+		VocClass::PlayAt(sound, pSlave->Location);
+
+	return 0x6B0C65;
+}
 
 DEFINE_HOOK(0x6B0B9C, SlaveManagerClass_Killed_DecideOwner, 0x6)
 {
@@ -38,6 +55,10 @@ DEFINE_HOOK(0x6B0B9C, SlaveManagerClass_Killed_DecideOwner, 0x6)
 DEFINE_PATCH(0x6B0BF7,
 	0x6A, 0x01  // push 1       // ignoreDefense=false->true
 );
+
+#pragma endregion
+
+#pragma region SpawnManagerClass
 
 DEFINE_HOOK(0x6B7265, SpawnManagerClass_AI_UpdateTimer, 0x6)
 {
@@ -99,6 +120,214 @@ DEFINE_HOOK(0x6B7600, SpawnManagerClass_AI_InitDestination, 0x6)
 	return R->Origin() == 0x6B7600 ? SkipGameCode1 : SkipGameCode2;
 }
 
+DEFINE_HOOK(0x6B7282, SpawnManagerClass_AI_PromoteSpawns, 0x5)
+{
+	GET(SpawnManagerClass*, pThis, ESI);
+
+	auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Owner->GetTechnoType());
+	if (pTypeExt->Promote_IncludeSpawns)
+	{
+		for (auto i : pThis->SpawnedNodes)
+		{
+			if (i->Unit && i->Unit->Veterancy.Veterancy < pThis->Owner->Veterancy.Veterancy)
+				i->Unit->Veterancy.Add(pThis->Owner->Veterancy.Veterancy - i->Unit->Veterancy.Veterancy);
+		}
+	}
+
+	return 0;
+}
+
+#pragma endregion
+
+#pragma region WakeAnims
+
+namespace GrappleUpdateTemp
+{
+	TechnoClass* pThis;
+}
+
+DEFINE_HOOK(0x629E9B, ParasiteClass_GrappleUpdate_MakeWake_SetContext, 0x5)
+{
+	GET(TechnoClass*, pThis, ECX);
+	GrappleUpdateTemp::pThis = pThis;
+
+	return 0;
+}
+
+DEFINE_HOOK(0x629FA3, ParasiteClass_GrappleUpdate_MakeWake, 0x6)
+{
+	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(GrappleUpdateTemp::pThis->GetTechnoType());
+	R->EDX(pTypeExt->Wake_Grapple.Get(pTypeExt->Wake.Get(RulesClass::Instance->Wake)));
+
+	return 0x629FA9;
+}
+
+DEFINE_HOOK(0x7365AD, UnitClass_Update_SinkingWake, 0x6)
+{
+	GET(UnitClass* const, pThis, ESI);
+
+	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type);
+	R->ECX(pTypeExt->Wake_Sinking.Get(pTypeExt->Wake.Get(RulesClass::Instance->Wake)));
+
+	return 0x7365B3;
+}
+
+DEFINE_HOOK(0x737F05, UnitClass_ReceiveDamage_SinkingWake, 0x6)
+{
+	GET(UnitClass* const, pThis, ESI);
+
+	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type);
+	R->ECX(pTypeExt->Wake_Sinking.Get(pTypeExt->Wake.Get(RulesClass::Instance->Wake)));
+
+	return 0x737F0B;
+}
+
+#pragma endregion
+
+#pragma region TunnelLocomotionClass
+
+DEFINE_HOOK(0x728F74, TunnelLocomotionClass_Process_KillAnims, 0x5)
+{
+	GET(ILocomotion*, pThis, ESI);
+
+	const auto pLoco = static_cast<TunnelLocomotionClass*>(pThis);
+	const auto pExt = TechnoExt::ExtMap.Find(pLoco->LinkedTo);
+	pExt->IsBurrowed = true;
+
+	if (const auto pShieldData = pExt->Shield.get())
+		pShieldData->SetAnimationVisibility(false);
+
+	for (auto const& attachEffect : pExt->AttachedEffects)
+	{
+		attachEffect->SetAnimationTunnelState(false);
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x728E5F, TunnelLocomotionClass_Process_RestoreAnims, 0x7)
+{
+	GET(ILocomotion*, pThis, ESI);
+
+	const auto pLoco = static_cast<TunnelLocomotionClass*>(pThis);
+
+	if (pLoco->State == TunnelLocomotionClass::State::PreDigOut)
+	{
+		const auto pExt = TechnoExt::ExtMap.Find(pLoco->LinkedTo);
+		pExt->IsBurrowed = false;
+
+		if (const auto pShieldData = pExt->Shield.get())
+			pShieldData->SetAnimationVisibility(true);
+
+		for (auto const& attachEffect : pExt->AttachedEffects)
+		{
+			attachEffect->SetAnimationTunnelState(true);
+		}
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x728F89, TunnelLocomotionClass_Process_SubterraneanHeight1, 0x5)
+{
+	enum { Skip = 0x728FA6, Continue = 0x728F90 };
+
+	GET(TechnoClass*, pLinkedTo, ECX);
+	GET(int, height, EAX);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pLinkedTo->GetTechnoType());
+
+	if (height == pTypeExt->SubterraneanHeight.Get(RulesExt::Global()->SubterraneanHeight))
+		return Continue;
+
+	return Skip;
+}
+
+DEFINE_HOOK(0x728FC6, TunnelLocomotionClass_Process_SubterraneanHeight2, 0x5)
+{
+	enum { Skip = 0x728FCD, Continue = 0x729021 };
+
+	GET(TechnoClass*, pLinkedTo, ECX);
+	GET(int, height, EAX);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pLinkedTo->GetTechnoType());
+
+	if (height <= pTypeExt->SubterraneanHeight.Get(RulesExt::Global()->SubterraneanHeight))
+		return Continue;
+
+	return Skip;
+}
+
+DEFINE_HOOK(0x728FF2, TunnelLocomotionClass_Process_SubterraneanHeight3, 0x6)
+{
+	enum { SkipGameCode = 0x72900C };
+
+	GET(TechnoClass*, pLinkedTo, ECX);
+	GET(int, heightOffset, EAX);
+	REF_STACK(int, height, 0x14);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pLinkedTo->GetTechnoType());
+	int subtHeight = pTypeExt->SubterraneanHeight.Get(RulesExt::Global()->SubterraneanHeight);
+	height -= heightOffset;
+
+	if (height < subtHeight)
+		height = subtHeight;
+
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x7295E2, TunnelLocomotionClass_ProcessStateDigging_SubterraneanHeight, 0xC)
+{
+	enum { SkipGameCode = 0x7295EE };
+
+	GET(TechnoClass*, pLinkedTo, EAX);
+	REF_STACK(int, height, STACK_OFFSET(0x44, -0x8));
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pLinkedTo->GetTechnoType());
+	height = pTypeExt->SubterraneanHeight.Get(RulesExt::Global()->SubterraneanHeight);
+
+	return SkipGameCode;
+}
+
+#pragma endregion
+
+#pragma region Disguise
+
+DEFINE_HOOK(0x522790, InfantryClass_ClearDisguise_DefaultDisguise, 0x6)
+{
+	GET(InfantryClass*, pThis, ECX);
+	auto const pExt = TechnoTypeExt::ExtMap.Find(pThis->Type);
+
+	if (pExt->DefaultDisguise)
+	{
+		pThis->Disguise = pExt->DefaultDisguise;
+		pThis->Disguised = true;
+		return 0x5227BF;
+	}
+
+	pThis->Disguised = false;
+
+	return 0;
+}
+
+DEFINE_HOOK(0x74691D, UnitClass_UpdateDisguise_EMP, 0x6)
+{
+	GET(UnitClass*, pThis, ESI);
+	// Remove mirage disguise if under emp or being flipped, approximately 15 deg
+	if (pThis->IsUnderEMP() || std::abs(pThis->AngleRotatedForwards) > 0.25 || std::abs(pThis->AngleRotatedSideways) > 0.25)
+	{
+		pThis->ClearDisguise();
+		R->EAX(pThis->MindControlRingAnim);
+		return 0x746AA5;
+	}
+
+	return 0x746931;
+}
+
+#pragma endregion
+
+#pragma region Misc
+
 // I must not regroup my forces.
 DEFINE_HOOK(0x739920, UnitClass_TryToDeploy_DisableRegroupAtNewConYard, 0x6)
 {
@@ -109,70 +338,60 @@ DEFINE_HOOK(0x739920, UnitClass_TryToDeploy_DisableRegroupAtNewConYard, 0x6)
 	return pRules->GatherWhenMCVDeploy ? DoNotSkipRegroup : SkipRegroup;
 }
 
-#pragma region AIConstructionYard
-
-DEFINE_HOOK(0x740A11, UnitClass_Mission_Guard_AIAutoDeployMCV, 0x6)
+DEFINE_HOOK(0x736234, UnitClass_ChronoSparkleDelay, 0x5)
 {
-	enum { SkipGameCode = 0x740A50 };
-
-	GET(UnitClass*, pMCV, ESI);
-
-	return (RulesExt::Global()->AIAutoDeployMCV && pMCV->Owner->NumConYards > 0) ? SkipGameCode : 0;
+	R->ECX(RulesExt::Global()->ChronoSparkleDisplayDelay);
+	return 0x736239;
 }
 
-DEFINE_HOOK(0x739889, UnitClass_TryToDeploy_AISetBaseCenter, 0x6)
+DEFINE_HOOK(0x51BAFB, InfantryClass_ChronoSparkleDelay, 0x5)
 {
-	enum { SkipGameCode = 0x73992B };
-
-	GET(UnitClass*, pMCV, EBP);
-
-	return (RulesExt::Global()->AISetBaseCenter && pMCV->Owner->NumConYards > 1) ? SkipGameCode : 0;
+	R->ECX(RulesExt::Global()->ChronoSparkleDisplayDelay);
+	return 0x51BB00;
 }
 
-DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
+DEFINE_HOOK_AGAIN(0x5F4718, ObjectClass_Select, 0x7)
+DEFINE_HOOK(0x5F46AE, ObjectClass_Select, 0x7)
 {
-	if (RulesExt::Global()->AIBiasSpawnCell && SessionClass::Instance->GameMode != GameMode::Campaign)
+	GET(ObjectClass*, pThis, ESI);
+
+	pThis->IsSelected = true;
+
+	if (RulesExt::Global()->SelectionFlashDuration > 0 && pThis->GetOwningHouse()->IsControlledByCurrentPlayer())
+		pThis->Flash(RulesExt::Global()->SelectionFlashDuration);
+
+	return 0;
+}
+
+DEFINE_HOOK(0x51B20E, InfantryClass_AssignTarget_FireOnce, 0x6)
+{
+	enum { SkipGameCode = 0x51B255 };
+
+	GET(InfantryClass*, pThis, ESI);
+	GET(AbstractClass*, pTarget, EBX);
+
+	auto const pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (!pTarget && pExt->SkipTargetChangeResetSequence)
 	{
-		GET(HouseClass*, pAI, EBX);
-
-		if (const int count = pAI->ConYards.Count)
-		{
-			const int wayPoint = pAI->GetSpawnPosition();
-
-			if (wayPoint != -1)
-			{
-				const CellStruct center = ScenarioClass::Instance->GetWaypointCoords(wayPoint);
-				CellStruct newCenter = center;
-				double distanceSquared = 131072.0;
-
-				for (int i = 0; i < count; ++i)
-				{
-					if (BuildingClass* const pBuilding = pAI->ConYards.GetItem(i))
-					{
-						if (pBuilding->IsAlive && pBuilding->Health && !pBuilding->InLimbo)
-						{
-							const double newDistanceSquared = pBuilding->GetMapCoords().DistanceFromSquared(center);
-
-							if (newDistanceSquared < distanceSquared)
-							{
-								distanceSquared = newDistanceSquared;
-								newCenter = pBuilding->GetMapCoords();
-							}
-						}
-					}
-				}
-
-				if (newCenter != center)
-				{
-					pAI->BaseSpawnCell = newCenter;
-					pAI->Base.BaseNodes.Items->MapCoords = newCenter;
-					pAI->Base.Center = newCenter;
-				}
-			}
-		}
+		pThis->IsFiring = false;
+		pExt->SkipTargetChangeResetSequence = false;
+		return SkipGameCode;
 	}
 
 	return 0;
 }
+
+// Update attached anim layers after parent unit changes layer.
+void __fastcall DisplayClass_Submit_Wrapper(DisplayClass* pThis, void* _, ObjectClass* pObject)
+{
+	pThis->Submit(pObject);
+
+	if (auto const pTechno = abstract_cast<TechnoClass*>(pObject))
+		TechnoExt::UpdateAttachedAnimLayers(pTechno);
+}
+
+DEFINE_JUMP(CALL, 0x54B18E, GET_OFFSET(DisplayClass_Submit_Wrapper));  // JumpjetLocomotionClass_Process
+DEFINE_JUMP(CALL, 0x4CD4E7, GET_OFFSET(DisplayClass_Submit_Wrapper));  // FlyLocomotionClass_Update
 
 #pragma endregion
