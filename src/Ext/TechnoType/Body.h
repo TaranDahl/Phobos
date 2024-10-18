@@ -230,6 +230,9 @@ public:
 		Nullable<bool> UnitIdleRotateTurret;
 		Nullable<bool> UnitIdlePointToMouse;
 		Nullable<int> TurretROT;
+		Valueable<double> FacingDeflection;
+		Valueable<bool> StraightenBody;
+		Valueable<double> OrientDeflection;
 		Valueable<bool> CanBeBuiltOn;
 		Valueable<bool> UnitBaseNormal;
 		Valueable<bool> UnitBaseForAllyBuilding;
@@ -527,6 +530,9 @@ public:
 			, UnitIdleRotateTurret {}
 			, UnitIdlePointToMouse {}
 			, TurretROT {}
+			, FacingDeflection { 0.0 }
+			, StraightenBody { false }
+			, OrientDeflection { 0.0 }
 			, CanBeBuiltOn { false }
 			, UnitBaseNormal { false }
 			, UnitBaseForAllyBuilding { false }

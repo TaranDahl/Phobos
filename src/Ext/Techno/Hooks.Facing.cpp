@@ -1,5 +1,7 @@
 #include "Body.h"
 
+#include <BulletTypeClass.h>
+
 #pragma region UnitsFacing
 
 // Would it be better to rewrite the entire UpdateRotation() ?
@@ -26,7 +28,8 @@ DEFINE_HOOK(0x7369D6, UnitClass_UpdateRotation_StopUnitIdleAction, 0xA)
 	enum { SkipGameCode = 0x736A8E };
 
 	GET(UnitClass* const, pThis, ESI);
-	GET_STACK(DirStruct, dir, STACK_OFFSET(0x10, -0x8));
+
+	TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type);
 
 	if (WeaponStruct* const pWeaponStruct = pThis->GetTurretWeapon())
 	{
@@ -38,11 +41,31 @@ DEFINE_HOOK(0x7369D6, UnitClass_UpdateRotation_StopUnitIdleAction, 0xA)
 			if (!pWeapon->OmniFire)
 			{
 				if (pWeaponStruct->TurretLocked)
+				{
 					pThis->SecondaryFacing.SetDesired(pThis->PrimaryFacing.Current());
+				}
 				else
-					pThis->SecondaryFacing.SetDesired(dir);
+				{
+					const CoordStruct source = pThis->Location;
+					const CoordStruct target = pThis->Target->GetCoords(); // Checked
+					double radian = Math::atan2(source.Y - target.Y, target.X - source.X);
+
+					if (pTypeExt)
+						radian += pTypeExt->FacingDeflection * (Math::Pi / 180.0);
+
+					const DirStruct tgtDir { radian };
+					pThis->SecondaryFacing.SetDesired(tgtDir);
+				}
 			}
 		}
+	}
+
+	if (pTypeExt && pTypeExt->StraightenBody)
+	{
+		const CoordStruct source = pThis->Location;
+		const CoordStruct target = pThis->Target->GetCoords();
+		const DirStruct tgtDir { Math::atan2(source.Y - target.Y, target.X - source.X) + (pTypeExt->OrientDeflection * (Math::Pi / 180.0)) };
+		pThis->PrimaryFacing.SetDesired(tgtDir);
 	}
 
 	return SkipGameCode;
@@ -106,6 +129,14 @@ DEFINE_HOOK(0x736B7E, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0xA)
 				if (pExt)
 					pExt->StopIdleAction();
 
+				const CoordStruct source = pThis->Location;
+				const CoordStruct target = pThis->Destination->GetCoords();
+				double radian = Math::atan2(source.Y - target.Y, target.X - source.X);
+
+				if (TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type))
+					radian += pTypeExt->FacingDeflection * (Math::Pi / 180.0);
+
+				const DirStruct tgtDir { radian };
 				pThis->SecondaryFacing.SetDesired(pThis->GetTargetDirection(pThis->Destination));
 			}
 		}
@@ -116,7 +147,7 @@ DEFINE_HOOK(0x736B7E, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0xA)
 
 #pragma endregion
 
-#pragma region CheckFacingWhenRearming
+#pragma region CheckFacing
 
 DEFINE_HOOK(0x7410BB, UnitClass_GetFireError_CheckFacingError, 0x8)
 {
@@ -130,6 +161,29 @@ DEFINE_HOOK(0x7410BB, UnitClass_GetFireError_CheckFacingError, 0x8)
 	GET(UnitClass*, pThis, ESI);
 
 	return (fireError == FireError::REARM && !pThis->Type->Turret) ? ContinueCheck : NoNeedToCheck;
+}
+
+DEFINE_HOOK(0x7412BB, UnitClass_GetFireError_CheckFacingDeviation, 0x7)
+{
+	enum { SkipGameCode = 0x7412D4 };
+
+	GET(UnitClass* const, pThis, ESI);
+	GET(AbstractClass* const, pTarget, EBP);
+	GET(BulletTypeClass* const, pBulletType, EDX);
+	GET(DirStruct*, tgtDir, EAX);
+
+	const CoordStruct source = pThis->Location;
+	const CoordStruct target = pTarget->GetCoords();
+	double radian = Math::atan2(source.Y - target.Y, target.X - source.X);
+
+	if (TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type))
+		radian += pTypeExt->FacingDeflection * (Math::Pi / 180.0);
+
+	*tgtDir = DirStruct { radian };
+
+	R->EBX(pBulletType->ROT ? 16 : 8);
+	R->EAX(tgtDir);
+	return SkipGameCode;
 }
 
 #pragma endregion
