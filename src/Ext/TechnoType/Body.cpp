@@ -464,9 +464,11 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->UnitIdleRotateTurret.Read(exINI, pSection, "UnitIdleRotateTurret");
 	this->UnitIdlePointToMouse.Read(exINI, pSection, "UnitIdlePointToMouse");
 	this->TurretROT.Read(exINI, pSection, "TurretROT");
-	this->FacingDeflection.Read(exINI, pSection, "FacingDeflection");
-	this->StraightenBody.Read(exINI, pSection, "StraightenBody");
-	this->OrientDeflection.Read(exINI, pSection, "OrientDeflection");
+	this->Turret_SelfRotation_Angle.Read(exINI, pSection, "Turret.SelfRotation.Angle");
+	this->Turret_SelfRotation_Symmetric.Read(exINI, pSection, "Turret.SelfRotation.Symmetric");
+	this->Turret_BodyRotation_Enable.Read(exINI, pSection, "Turret.BodyRotation.Enable");
+	this->Turret_BodyRotation_Angle.Read(exINI, pSection, "Turret.BodyRotation.Angle");
+	this->Turret_BodyRotation_Symmetric.Read(exINI, pSection, "Turret.BodyRotation.Symmetric");
 	this->CanBeBuiltOn.Read(exINI, pSection, "CanBeBuiltOn");
 	this->UnitBaseNormal.Read(exINI, pSection, "UnitBaseNormal");
 	this->AlwaysExistTheCameo.Read(exINI, pSection, "AlwaysExistTheCameo");
@@ -908,9 +910,11 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->UnitIdleRotateTurret)
 		.Process(this->UnitIdlePointToMouse)
 		.Process(this->TurretROT)
-		.Process(this->FacingDeflection)
-		.Process(this->StraightenBody)
-		.Process(this->OrientDeflection)
+		.Process(this->Turret_SelfRotation_Angle)
+		.Process(this->Turret_SelfRotation_Symmetric)
+		.Process(this->Turret_BodyRotation_Enable)
+		.Process(this->Turret_BodyRotation_Angle)
+		.Process(this->Turret_BodyRotation_Symmetric)
 		.Process(this->CanBeBuiltOn)
 		.Process(this->UnitBaseNormal)
 		.Process(this->UnitBaseForAllyBuilding)
