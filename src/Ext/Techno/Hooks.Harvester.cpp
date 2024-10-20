@@ -128,9 +128,9 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 
 	CellClass* const pThisCell = pThis->GetCell();
 
-	for (int i = 0; i < 8; ++i)
+	for (int i = 0; i < 4; ++i)
 	{
-		if (pThisCell->GetNeighbourCell(static_cast<FacingType>(i))->GetBuilding() == pDock)
+		if (pThisCell->GetNeighbourCell(static_cast<FacingType>(i << 1))->GetBuilding() == pDock)
 		{
 			ArrivingRefineryNearBy(pThis, pDock);
 			return SkipGameCode;
