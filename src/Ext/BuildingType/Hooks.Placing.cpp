@@ -343,7 +343,7 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 			pObject = pObject->NextObject;
 		}
 
-		if (pCell->OccupationFlags & 0x3F)
+		if (!landFootOnly && (pCell->OccupationFlags & 0xFE))
 			landFootOnly = true;
 	}
 	else if (pBuildingType->ToTile)
@@ -427,7 +427,7 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 			pObject = pObject->NextObject;
 		}
 
-		if (pCell->OccupationFlags & 0x3F)
+		if (!landFootOnly && (pCell->OccupationFlags & 0xFE))
 			landFootOnly = true;
 	}
 
