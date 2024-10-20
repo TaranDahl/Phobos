@@ -230,6 +230,11 @@ public:
 		Nullable<bool> UnitIdleRotateTurret;
 		Nullable<bool> UnitIdlePointToMouse;
 		Nullable<int> TurretROT;
+		Valueable<double> Turret_SelfRotation_Angle;
+		Valueable<bool> Turret_SelfRotation_Symmetric;
+		Valueable<bool> Turret_BodyRotation_Enable;
+		Valueable<double> Turret_BodyRotation_Angle;
+		Valueable<bool> Turret_BodyRotation_Symmetric;
 		Valueable<bool> CanBeBuiltOn;
 		Valueable<bool> UnitBaseNormal;
 		Valueable<bool> UnitBaseForAllyBuilding;
@@ -476,6 +481,11 @@ public:
 			, UnitIdleRotateTurret {}
 			, UnitIdlePointToMouse {}
 			, TurretROT {}
+			, Turret_SelfRotation_Angle { 0.0 }
+			, Turret_SelfRotation_Symmetric { true }
+			, Turret_BodyRotation_Enable { false }
+			, Turret_BodyRotation_Angle { 0.0 }
+			, Turret_BodyRotation_Symmetric { true }
 			, CanBeBuiltOn { false }
 			, UnitBaseNormal { false }
 			, UnitBaseForAllyBuilding { false }

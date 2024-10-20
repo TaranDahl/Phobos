@@ -1,5 +1,7 @@
 #include "Body.h"
 
+#include <BulletTypeClass.h>
+
 #pragma region UnitsFacing
 
 // Would it be better to rewrite the entire UpdateRotation() ?
@@ -26,9 +28,12 @@ DEFINE_HOOK(0x7369D6, UnitClass_UpdateRotation_StopUnitIdleAction, 0xA)
 	enum { SkipGameCode = 0x736A8E };
 
 	GET(UnitClass* const, pThis, ESI);
-	GET_STACK(DirStruct, dir, STACK_OFFSET(0x10, -0x8));
 
-	if (WeaponStruct* const pWeaponStruct = pThis->GetTurretWeapon())
+	TechnoTypeExt::ExtData* pTypeExt = nullptr;
+	AbstractClass* const pTarget = pThis->Target; // pThis->Target have been checked
+	const int weaponIndex = pThis->SelectWeapon(pTarget);
+
+	if (WeaponStruct* const pWeaponStruct = pThis->GetWeapon(weaponIndex)) // Vanilla is pThis->GetTurretWeapon()
 	{
 		if (WeaponTypeClass* const pWeapon = pWeaponStruct->WeaponType)
 		{
@@ -38,10 +43,72 @@ DEFINE_HOOK(0x7369D6, UnitClass_UpdateRotation_StopUnitIdleAction, 0xA)
 			if (!pWeapon->OmniFire)
 			{
 				if (pWeaponStruct->TurretLocked)
+				{
 					pThis->SecondaryFacing.SetDesired(pThis->PrimaryFacing.Current());
+				}
 				else
-					pThis->SecondaryFacing.SetDesired(dir);
+				{
+					const CoordStruct source = pThis->Location;
+					const CoordStruct target = pTarget->GetCoords();
+					double radian = Math::atan2(source.Y - target.Y, target.X - source.X);
+					DirStruct tgtDir;
+
+					if (pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type), pTypeExt)
+					{
+						const double rotate = pTypeExt->Turret_SelfRotation_Angle * (Math::Pi / 180.0);
+
+						if (pTypeExt->Turret_SelfRotation_Symmetric)
+						{
+							const DirStruct curDir = pThis->SecondaryFacing.Current();
+							const DirStruct rightDir = DirStruct { radian + rotate };
+							const DirStruct leftDir = DirStruct { radian - rotate };
+
+							if (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw)))
+								tgtDir = rightDir;
+							else
+								tgtDir = leftDir;
+						}
+						else
+						{
+							tgtDir = DirStruct { radian + rotate };
+						}
+					}
+
+					pThis->SecondaryFacing.SetDesired(tgtDir);
+				}
 			}
+		}
+	}
+
+	if (!pThis->Destination && weaponIndex != -1 && pThis->IsCloseEnough(pTarget, weaponIndex))
+	{
+		if ((pTypeExt || (pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type), pTypeExt)) && pTypeExt->Turret_BodyRotation_Enable)
+		{
+			const double rotate = pTypeExt->Turret_BodyRotation_Angle * (Math::Pi / 180.0);
+			const DirStruct curDir = pThis->PrimaryFacing.Current();
+
+			const CoordStruct source = pThis->Location;
+			const CoordStruct target = pTarget->GetCoords();
+			double radian = Math::atan2(source.Y - target.Y, target.X - source.X);
+			DirStruct tgtDir;
+
+			if (pTypeExt->Turret_BodyRotation_Symmetric)
+			{
+				const DirStruct rightDir = DirStruct { radian + rotate };
+				const DirStruct leftDir = DirStruct { radian - rotate };
+
+				if (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw)))
+					tgtDir = rightDir;
+				else
+					tgtDir = leftDir;
+			}
+			else
+			{
+				tgtDir = DirStruct { radian + rotate };
+			}
+
+			if (abs(static_cast<short>(tgtDir.Raw) - static_cast<short>(curDir.Raw)) >= 8192)
+				pThis->PrimaryFacing.SetDesired(tgtDir);
 		}
 	}
 
@@ -106,6 +173,9 @@ DEFINE_HOOK(0x736B7E, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0xA)
 				if (pExt)
 					pExt->StopIdleAction();
 
+				const CoordStruct source = pThis->Location;
+				const CoordStruct target = pThis->Destination->GetCoords();
+				const DirStruct tgtDir { Math::atan2(source.Y - target.Y, target.X - source.X) };
 				pThis->SecondaryFacing.SetDesired(pThis->GetTargetDirection(pThis->Destination));
 			}
 		}
@@ -116,7 +186,7 @@ DEFINE_HOOK(0x736B7E, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0xA)
 
 #pragma endregion
 
-#pragma region CheckFacingWhenRearming
+#pragma region CheckFacing
 
 DEFINE_HOOK(0x7410BB, UnitClass_GetFireError_CheckFacingError, 0x8)
 {
@@ -130,6 +200,56 @@ DEFINE_HOOK(0x7410BB, UnitClass_GetFireError_CheckFacingError, 0x8)
 	GET(UnitClass*, pThis, ESI);
 
 	return (fireError == FireError::REARM && !pThis->Type->Turret) ? ContinueCheck : NoNeedToCheck;
+}
+
+DEFINE_HOOK(0x7412BB, UnitClass_GetFireError_CheckFacingDeviation, 0x7)
+{
+	enum { SkipGameCode = 0x7412D4 };
+
+	GET(UnitClass* const, pThis, ESI);
+	GET(AbstractClass* const, pTarget, EBP);
+	GET(BulletTypeClass* const, pBulletType, EDX);
+	GET(DirStruct, curDir, EDI);
+	GET(DirStruct*, pTargetDir, EAX);
+
+	const CoordStruct source = pThis->Location;
+	const CoordStruct target = pTarget->GetCoords();
+	double radian = Math::atan2(source.Y - target.Y, target.X - source.X);
+
+	if (pThis->Type->Turret)
+	{
+		if (TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type))
+		{
+			const double rotate = pTypeExt->Turret_SelfRotation_Angle * (Math::Pi / 180.0);
+
+			if (pTypeExt->Turret_SelfRotation_Symmetric)
+			{
+				const DirStruct rightDir = DirStruct { radian + rotate };
+				const DirStruct leftDir = DirStruct { radian - rotate };
+
+				if (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw)))
+					*pTargetDir = rightDir;
+				else
+					*pTargetDir = leftDir;
+			}
+			else
+			{
+				*pTargetDir = DirStruct { radian + rotate };
+			}
+		}
+		else
+		{
+			*pTargetDir = DirStruct { radian };
+		}
+	}
+	else
+	{
+		*pTargetDir = DirStruct { radian };
+	}
+
+	R->EBX(pBulletType->ROT ? 16 : 8);
+	R->EAX(pTargetDir);
+	return SkipGameCode;
 }
 
 #pragma endregion
