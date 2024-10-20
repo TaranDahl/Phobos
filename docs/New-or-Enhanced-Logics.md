@@ -1620,7 +1620,8 @@ Convert.ComputerToHuman =   ; TechnoType
 ```
 
 ### Recount burst index
-- You can now make technos recount their current burst index when change the firing weapon. Defaults to `[General]` -> `RecountBurst`, which defaults to false.
+
+- You can now make technos recount their current burst index when they have changed the firing weapon or have maintained for a period of time without any targets. Defaults to `[General]` -> `RecountBurst`, which defaults to false.
 
 In `rulesmd.ini`:
 ```ini
@@ -2004,7 +2005,7 @@ FeedbackWeapon=  ; WeaponType
   - `Strafing.Shots` controls the number of times the weapon is fired during a single strafe run, defaults to 5 if not set. `Ammo` is only deducted at the end of the strafe run, regardless of the number of shots fired.
   - `Strafing.SimulateBurst` controls whether or not the shots fired during strafing simulate behavior of `Burst`, allowing for alternating firing offset. Only takes effect if weapon has `Burst` set to 1 or undefined.
   - `Strafing.UseAmmoPerShot`, if set to `true` overrides the usual behaviour of only deducting ammo after a strafing run and instead doing it after each individual shot.
-- There is a special case for aircraft spawned by `Type=SpyPlane` superweapons on `SpyPlane Approach` or `SpyPlane Overfly` mission where `Strafing.Shots` only if explicitly set on its primary weapon, determines the maximum number of times the map revealing effect can activate irregardless of other factors. 
+- There is a special case for aircraft spawned by `Type=SpyPlane` superweapons on `SpyPlane Approach` or `SpyPlane Overfly` mission where `Strafing.Shots` only if explicitly set on its primary weapon, determines the maximum number of times the map revealing effect can activate irregardless of other factors.
 
 In `rulesmd.ini`:
 ```ini
