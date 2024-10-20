@@ -999,6 +999,11 @@ DEFINE_HOOK(0x5B11DD, MechLocomotionClass_ProcessMoving_SlowdownDistance, 0x9)
 // Why did you do this, WW?
 DEFINE_JUMP(LJMP, 0x6FF78F, 0x6FF79C) // TechnoClass_Fire_ReselectIfLimboedCheck
 
+// Skip the Disappear func calling in cloak process.
+// Disappear announces the techno's pointer invalid and make the references in bullet or missile spawns null.
+DEFINE_JUMP(LJMP, 0x703789, 0x703795);
+DEFINE_JUMP(LJMP, 0x6FBBC3, 0x6FBBCE);
+
 // Jumpjet infantry will no longer acts stupid when assigned a attack mission.
 DEFINE_HOOK(0x51AB5C, InfantryClass_SetDestination_JJInfFix, 0x6)
 {
