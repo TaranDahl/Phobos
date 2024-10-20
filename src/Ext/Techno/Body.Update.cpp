@@ -606,7 +606,7 @@ void TechnoExt::ExtData::UpdateRecountBurst()
 		if (pWeapon && pThis->unknown_int_120 + std::max(pWeapon->ROF, 30) <= Unsorted::CurrentFrame)
 		{
 			const double ratio = static_cast<double>(pThis->CurrentBurstIndex) / pWeapon->Burst;
-			const int rof = static_cast<int>(ratio * pWeapon->ROF * this->AE.ROFMultiplier) - pWeapon->ROF;
+			const int rof = static_cast<int>(ratio * pWeapon->ROF * this->AE.ROFMultiplier) - std::max(pWeapon->ROF, 30);
 
 			if (rof > 0)
 			{
