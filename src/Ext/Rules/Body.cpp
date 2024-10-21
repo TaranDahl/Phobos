@@ -177,6 +177,10 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->ExpandLandGridFrames.Read(exINI, GameStrings::AudioVisual, "ExpandLandGridFrames");
 	this->ExpandWaterGridFrames.Read(exINI, GameStrings::AudioVisual, "ExpandWaterGridFrames");
 	this->SWSidebarBackground.Read(exINI, GameStrings::AudioVisual, "SWSidebarBackground");
+	this->SelectedInfantryMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedInfantryMissingPCX");
+	this->SelectedVehicleMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedVehicleMissingPCX");
+	this->SelectedAircraftMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedAircraftMissingPCX");
+	this->SelectedBuildingMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedBuildingMissingPCX");
 	this->AIAutoDeployMCV.Read(exINI, GameStrings::AI, "AIAutoDeployMCV");
 	this->AISetBaseCenter.Read(exINI, GameStrings::AI, "AISetBaseCenter");
 	this->AIBiasSpawnCell.Read(exINI, GameStrings::AI, "AIBiasSpawnCell");
@@ -464,6 +468,10 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->ExpandLandGridFrames)
 		.Process(this->ExpandWaterGridFrames)
 		.Process(this->SWSidebarBackground)
+		.Process(this->SelectedInfantryMissingPCX)
+		.Process(this->SelectedVehicleMissingPCX)
+		.Process(this->SelectedAircraftMissingPCX)
+		.Process(this->SelectedBuildingMissingPCX)
 		.Process(this->AIAutoDeployMCV)
 		.Process(this->AISetBaseCenter)
 		.Process(this->AIBiasSpawnCell)
