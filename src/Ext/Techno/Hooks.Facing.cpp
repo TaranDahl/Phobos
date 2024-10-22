@@ -31,9 +31,8 @@ DEFINE_HOOK(0x7369D6, UnitClass_UpdateRotation_StopUnitIdleAction, 0xA)
 
 	TechnoTypeExt::ExtData* pTypeExt = nullptr;
 	AbstractClass* const pTarget = pThis->Target; // pThis->Target have been checked
-	const int weaponIndex = pThis->SelectWeapon(pTarget);
 
-	if (WeaponStruct* const pWeaponStruct = pThis->GetWeapon(weaponIndex)) // Vanilla is pThis->GetTurretWeapon()
+	if (WeaponStruct* const pWeaponStruct = pThis->GetWeapon(pThis->SelectWeapon(pTarget))) // Vanilla is pThis->GetTurretWeapon()
 	{
 		if (WeaponTypeClass* const pWeapon = pWeaponStruct->WeaponType)
 		{
@@ -80,7 +79,7 @@ DEFINE_HOOK(0x7369D6, UnitClass_UpdateRotation_StopUnitIdleAction, 0xA)
 		}
 	}
 
-	if (!pThis->Destination && weaponIndex != -1 && pThis->IsCloseEnough(pTarget, weaponIndex))
+	if (!pThis->Locomotor->Is_Moving_Now())
 	{
 		if ((pTypeExt || (pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type), pTypeExt)) && pTypeExt->Turret_BodyRotation_Enable)
 		{
