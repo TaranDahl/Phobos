@@ -407,9 +407,11 @@ bool DisperseTrajectory::BulletRetargetTechno(BulletClass* pBullet, HouseClass* 
 
 	if (!this->TargetInTheAir) // Only get same type (on ground / in air)
 	{
+		const CellStruct retargetCell = CellClass::Coord2Cell(retargetCoords);
+
 		for (CellSpreadEnumerator thisCell(static_cast<size_t>(pType->RetargetRadius + 0.99)); thisCell; ++thisCell)
 		{
-			if (const CellClass* const pCell = MapClass::Instance->TryGetCellAt(*thisCell + CellClass::Coord2Cell(retargetCoords)))
+			if (const CellClass* const pCell = MapClass::Instance->TryGetCellAt(*thisCell + retargetCell))
 			{
 				ObjectClass* pObject = pCell->GetContent();
 
@@ -872,6 +874,7 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 			}
 
 			const CoordStruct centerCoords = pType->WeaponLocation ? pBullet->Location : pBullet->TargetCoords;
+			const CellStruct centerCell = CellClass::Coord2Cell(centerCoords);
 
 			std::vector<TechnoClass*> validTechnos;
 			std::vector<CellClass*> validCells;
@@ -892,9 +895,11 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 			{
 				if (checkTechnos)
 				{
+					const TechnoClass* const pTargetTechno = abstract_cast<TechnoClass*>(pTarget);
+
 					for (CellSpreadEnumerator thisCell(static_cast<size_t>((static_cast<double>(pWeapon->Range) / Unsorted::LeptonsPerCell) + 0.99)); thisCell; ++thisCell)
 					{
-						if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(*thisCell + CellClass::Coord2Cell(centerCoords)))
+						if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(*thisCell + centerCell))
 						{
 							bool getCell = true;
 							ObjectClass* pObject = pCell->GetContent();
@@ -910,6 +915,9 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 								TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
 
 								if (!pTechnoType->LegalTarget)
+									continue;
+
+								if (pType->WeaponTendency && pTargetTechno && pTechno == pTargetTechno)
 									continue;
 
 								const AbstractType absType = pTechno->WhatAmI();
@@ -939,15 +947,7 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 								if (MapClass::GetTotalDamage(100, pBullet->WH, pTechnoType->Armor, 0) == 0)
 									continue;
 
-								if (pTechno->GetCoords().DistanceFrom(centerCoords) > pWeapon->Range)
-									continue;
-
-								TechnoClass* const pFirer = pBullet->Owner;
-
-								if (pTechno->GetCoords().DistanceFrom(pFirer ? pFirer->GetCoords() : pBullet->SourceCoords) > pWeapon->Range)
-									continue;
-
-								if (!this->CheckWeaponCanTarget(pWeaponExt, pFirer, pTechno))
+								if (!this->CheckWeaponCanTarget(pWeaponExt, pBullet->Owner, pTechno))
 									continue;
 
 								validTechnos.push_back(pTechno);
@@ -963,7 +963,7 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 				{
 					for (CellSpreadEnumerator thisCell(static_cast<size_t>((static_cast<double>(pWeapon->Range) / Unsorted::LeptonsPerCell) + 0.99)); thisCell; ++thisCell)
 					{
-						if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(*thisCell + CellClass::Coord2Cell(centerCoords)))
+						if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(*thisCell + centerCell))
 						{
 							if (EnumFunctions::IsCellEligible(pCell, pWeaponExt->CanTarget, true, true))
 								validCells.push_back(pCell);
@@ -975,6 +975,7 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 			{
 				if (checkTechnos)
 				{
+					const TechnoClass* const pTargetTechno = abstract_cast<TechnoClass*>(pTarget);
 					AircraftTrackerClass* const airTracker = &AircraftTrackerClass::Instance.get();
 					airTracker->FillCurrentVector(MapClass::Instance->GetCellAt(centerCoords), Game::F2I(static_cast<double>(pWeapon->Range) / Unsorted::LeptonsPerCell));
 
@@ -986,6 +987,9 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 						TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
 
 						if (!pTechnoType->LegalTarget)
+							continue;
+
+						if (pType->WeaponTendency && pTargetTechno && pTechno == pTargetTechno)
 							continue;
 
 						HouseClass* const pHouse = pTechno->Owner;
@@ -1004,15 +1008,7 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 						if (MapClass::GetTotalDamage(100, pBullet->WH, pTechnoType->Armor, 0) == 0)
 							continue;
 
-						if (pTechno->GetCoords().DistanceFrom(centerCoords) > pWeapon->Range)
-							continue;
-
-						TechnoClass* const pFirer = pBullet->Owner;
-
-						if (pTechno->GetCoords().DistanceFrom(pFirer ? pFirer->GetCoords() : pBullet->SourceCoords) > pWeapon->Range)
-							continue;
-
-						if (!this->CheckWeaponCanTarget(pWeaponExt, pFirer, pTechno))
+						if (!this->CheckWeaponCanTarget(pWeaponExt, pBullet->Owner, pTechno))
 							continue;
 
 						validTechnos.push_back(pTechno);
@@ -1023,7 +1019,7 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 				{
 					for (CellSpreadEnumerator thisCell(static_cast<size_t>((static_cast<double>(pWeapon->Range) / Unsorted::LeptonsPerCell) + 0.99)); thisCell; ++thisCell)
 					{
-						if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(*thisCell + CellClass::Coord2Cell(centerCoords)))
+						if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(*thisCell + centerCell))
 						{
 							if (EnumFunctions::IsCellEligible(pCell, pWeaponExt->CanTarget, true, true))
 								validCells.push_back(pCell);
