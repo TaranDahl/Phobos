@@ -57,7 +57,7 @@ void DisperseTrajectoryType::Serialize(T& Stm)
 		.Process(this->WeaponLocation)
 		.Process(this->WeaponTendency)
 		.Process(this->WeaponToAllies)
-		.Process(this->WeaponToGround)
+		.Process(this->WeaponDoRepeat)
 		;
 }
 
@@ -122,7 +122,7 @@ void DisperseTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 	this->WeaponLocation.Read(exINI, pSection, "Trajectory.Disperse.WeaponLocation");
 	this->WeaponTendency.Read(exINI, pSection, "Trajectory.Disperse.WeaponTendency");
 	this->WeaponToAllies.Read(exINI, pSection, "Trajectory.Disperse.WeaponToAllies");
-	this->WeaponToGround.Read(exINI, pSection, "Trajectory.Disperse.WeaponToGround");
+	this->WeaponDoRepeat.Read(exINI, pSection, "Trajectory.Disperse.WeaponDoRepeat");
 }
 
 template<typename T>
@@ -409,7 +409,7 @@ bool DisperseTrajectory::BulletRetargetTechno(BulletClass* pBullet, HouseClass* 
 	{
 		for (CellSpreadEnumerator thisCell(static_cast<size_t>(pType->RetargetRadius + 0.99)); thisCell; ++thisCell)
 		{
-			if (const CellClass* const pCell = MapClass::Instance->GetCellAt(*thisCell + CellClass::Coord2Cell(retargetCoords)))
+			if (const CellClass* const pCell = MapClass::Instance->TryGetCellAt(*thisCell + CellClass::Coord2Cell(retargetCoords)))
 			{
 				ObjectClass* pObject = pCell->GetContent();
 
@@ -465,7 +465,7 @@ bool DisperseTrajectory::BulletRetargetTechno(BulletClass* pBullet, HouseClass* 
 						if (pTechno->GetCoords().DistanceFrom(pFirer ? pFirer->GetCoords() : pBullet->SourceCoords) > pWeapon->Range)
 							continue;
 
-						if (!this->CheckWeaponCanTarget(WeaponTypeExt::ExtMap.Find(pWeapon), pFirer, pTechno, pOwner, pHouse))
+						if (!this->CheckWeaponCanTarget(WeaponTypeExt::ExtMap.Find(pWeapon), pFirer, pTechno))
 							continue;
 					}
 
@@ -521,7 +521,7 @@ bool DisperseTrajectory::BulletRetargetTechno(BulletClass* pBullet, HouseClass* 
 				if (pTechno->GetCoords().DistanceFrom(pFirer ? pFirer->GetCoords() : pBullet->SourceCoords) > pWeapon->Range)
 					continue;
 
-				if (!this->CheckWeaponCanTarget(WeaponTypeExt::ExtMap.Find(pWeapon), pFirer, pTechno, pOwner, pHouse))
+				if (!this->CheckWeaponCanTarget(WeaponTypeExt::ExtMap.Find(pWeapon), pFirer, pTechno))
 					continue;
 			}
 
@@ -545,9 +545,9 @@ bool DisperseTrajectory::CheckTechnoIsInvalid(TechnoClass* pTechno)
 	return (!pTechno->IsAlive || !pTechno->IsOnMap || pTechno->InLimbo || pTechno->IsSinking || pTechno->Health <= 0);
 }
 
-bool DisperseTrajectory::CheckWeaponCanTarget(WeaponTypeExt::ExtData* pWeaponExt, TechnoClass* pFirer, TechnoClass* pTarget, HouseClass* pFirerHouse, HouseClass* pTargetHouse)
+bool DisperseTrajectory::CheckWeaponCanTarget(WeaponTypeExt::ExtData* pWeaponExt, TechnoClass* pFirer, TechnoClass* pTarget)
 {
-	return EnumFunctions::CanTargetHouse(pWeaponExt->CanTargetHouses, pFirerHouse, pTargetHouse) && EnumFunctions::IsTechnoEligible(pTarget, pWeaponExt->CanTarget) && pWeaponExt->HasRequiredAttachedEffects(pTarget, pFirer);
+	return !pWeaponExt || (EnumFunctions::IsTechnoEligible(pTarget, pWeaponExt->CanTarget) && pWeaponExt->HasRequiredAttachedEffects(pTarget, pFirer));
 }
 
 bool DisperseTrajectory::CurveVelocityChange(BulletClass* pBullet)
@@ -845,6 +845,7 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 			}
 
 			WeaponTypeClass* const pWeapon = pType->Weapons[curIndex];
+			WeaponTypeExt::ExtData* const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
 
 			if (!pType->WeaponRetarget)
 			{
@@ -864,89 +865,262 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 			if (pType->WeaponTendency && burstCount > 0 && pTarget)
 			{
 				this->CreateDisperseBullets(pBullet, pWeapon, pTarget, pOwner, burstNow, burstCount);
-				burstNow++;
+				++burstNow;
 
 				if (burstCount <= 1)
 					continue;
 			}
 
-			const double spread = static_cast<double>(pWeapon->Range) / Unsorted::LeptonsPerCell;
-			const bool includeInAir = (this->TargetInTheAir && pWeapon->Projectile->AA);
 			const CoordStruct centerCoords = pType->WeaponLocation ? pBullet->Location : pBullet->TargetCoords;
-			std::vector<TechnoClass*> technos = Helpers::Alex::getCellSpreadItems(centerCoords, spread, includeInAir);
-			std::vector<TechnoClass*> validTechnos = this->GetValidTechnosInSame(technos, pBullet->Owner, pOwner, pWeapon, pTarget);
-			size_t validTechnoNums = validTechnos.size();
-			std::vector<AbstractClass*> validTargets;
-			validTargets.reserve(burstCount);
 
-			if (pType->WeaponToGround)
-				validTechnoNums = 0;
+			std::vector<TechnoClass*> validTechnos;
+			std::vector<CellClass*> validCells;
 
-			if (static_cast<int>(validTechnoNums) <= burstCount - burstNow)
+			const bool checkTechnos = (pWeaponExt->CanTarget & AffectedTarget::AllContents) != AffectedTarget::None;
+			const bool checkCells = (pWeaponExt->CanTarget & AffectedTarget::AllCells) != AffectedTarget::None;
+
+			const int rangeSide = pWeapon->Range >> 7;
+			const size_t initialSize = rangeSide * rangeSide;
+
+			if (checkTechnos)
+				validTechnos.reserve(initialSize << 1);
+
+			if (checkCells)
+				validCells.reserve(initialSize);
+
+			if (!this->TargetInTheAir) // Only get same type (on ground / in air)
 			{
-				for (int burstNum = burstNow; burstNum < burstCount; burstNum++)
+				if (checkTechnos)
 				{
-					if (static_cast<int>(validTechnoNums) > burstNum)
+					for (CellSpreadEnumerator thisCell(static_cast<size_t>((static_cast<double>(pWeapon->Range) / Unsorted::LeptonsPerCell) + 0.99)); thisCell; ++thisCell)
 					{
-						validTargets.push_back(validTechnos[burstNum]);
-					}
-					else
-					{
-						CellClass* randomCell = nullptr;
-						int randomRange = ScenarioClass::Instance->Random.RandomRanged(0, pWeapon->Range);
-						CoordStruct randomCoords = MapClass::GetRandomCoordsNear(centerCoords, randomRange, false);
-
-						do
+						if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(*thisCell + CellClass::Coord2Cell(centerCoords)))
 						{
-							randomCell = MapClass::Instance->TryGetCellAt(randomCoords);
+							bool getCell = true;
+							ObjectClass* pObject = pCell->GetContent();
 
-							if (randomCell)
+							while (pObject)
 							{
-								if (EnumFunctions::IsCellEligible(randomCell, WeaponTypeExt::ExtMap.Find(pWeapon)->CanTarget, true, true))
+								TechnoClass* const pTechno = abstract_cast<TechnoClass*>(pObject);
+								pObject = pObject->NextObject;
+
+								if (!pTechno || this->CheckTechnoIsInvalid(pTechno))
+									continue;
+
+								TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
+
+								if (!pTechnoType->LegalTarget)
+									continue;
+
+								const AbstractType absType = pTechno->WhatAmI();
+
+								if (absType == AbstractType::Building && static_cast<BuildingClass*>(pTechno)->Type->InvisibleInGame)
+									continue;
+
+								HouseClass* const pHouse = pTechno->Owner;
+
+								if (pOwner->IsAlliedWith(pHouse))
 								{
-									validTargets.push_back(randomCell);
-									break;
+									if (!pType->WeaponToAllies)
+										continue;
 								}
-							}
-							else
-							{
-								if (randomRange > Unsorted::LeptonsPerCell)
-									randomRange = randomRange / 2;
-								else if (randomRange > 1)
-									randomRange = 1;
 								else
-									break;
+								{
+									if (!pType->WeaponToAllies && absType == AbstractType::Infantry && pTechno->IsDisguisedAs(pOwner) && !pCell->DisguiseSensors_InclHouse(pOwner->ArrayIndex))
+										continue;
+
+									if (absType == AbstractType::Unit && pTechno->IsDisguised() && !pCell->DisguiseSensors_InclHouse(pOwner->ArrayIndex))
+										continue;
+
+									if (pTechno->CloakState == CloakState::Cloaked && !pCell->Sensors_InclHouse(pOwner->ArrayIndex))
+										continue;
+								}
+
+								if (MapClass::GetTotalDamage(100, pBullet->WH, pTechnoType->Armor, 0) == 0)
+									continue;
+
+								if (pTechno->GetCoords().DistanceFrom(centerCoords) > pWeapon->Range)
+									continue;
+
+								TechnoClass* const pFirer = pBullet->Owner;
+
+								if (pTechno->GetCoords().DistanceFrom(pFirer ? pFirer->GetCoords() : pBullet->SourceCoords) > pWeapon->Range)
+									continue;
+
+								if (!this->CheckWeaponCanTarget(pWeaponExt, pFirer, pTechno))
+									continue;
+
+								validTechnos.push_back(pTechno);
+								getCell = false; // Prevent fire at same cell
 							}
 
-							randomCoords = MapClass::GetRandomCoordsNear(centerCoords, randomRange, false);
+							if (getCell && EnumFunctions::IsCellEligible(pCell, pWeaponExt->CanTarget, true, true))
+								validCells.push_back(pCell);
 						}
-						while (true);
+					}
+				}
+				else if (checkCells)
+				{
+					for (CellSpreadEnumerator thisCell(static_cast<size_t>((static_cast<double>(pWeapon->Range) / Unsorted::LeptonsPerCell) + 0.99)); thisCell; ++thisCell)
+					{
+						if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(*thisCell + CellClass::Coord2Cell(centerCoords)))
+						{
+							if (EnumFunctions::IsCellEligible(pCell, pWeaponExt->CanTarget, true, true))
+								validCells.push_back(pCell);
+						}
 					}
 				}
 			}
-			else // TODO Looking forward to better solution
+			else
 			{
-				int technoNum = ScenarioClass::Instance->Random.RandomRanged(0, validTechnoNums - 1);
-				int offsetNum = static_cast<int>(validTechnoNums) - burstCount;
-				const double offsetChance = static_cast<double>(offsetNum) / static_cast<double>(validTechnoNums);
-				double offsetRandom = 0.0;
-
-				for (int burstNum = burstNow; burstNum < burstCount; burstNum++)
+				if (checkTechnos)
 				{
-					validTargets.push_back(validTechnos[technoNum]);
+					AircraftTrackerClass* const airTracker = &AircraftTrackerClass::Instance.get();
+					airTracker->FillCurrentVector(MapClass::Instance->GetCellAt(centerCoords), Game::F2I(static_cast<double>(pWeapon->Range) / Unsorted::LeptonsPerCell));
 
-					technoNum++;
-					technoNum %= validTechnoNums;
-
-					offsetRandom = ScenarioClass::Instance->Random.RandomDouble();
-
-					while (offsetNum > 0 && offsetRandom < offsetChance)
+					for (TechnoClass* pTechno = airTracker->Get(); pTechno; pTechno = airTracker->Get())
 					{
-						technoNum++;
-						technoNum %= validTechnoNums;
+						if (this->CheckTechnoIsInvalid(pTechno))
+							continue;
 
-						offsetNum--;
-						offsetRandom = ScenarioClass::Instance->Random.RandomDouble();
+						TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
+
+						if (!pTechnoType->LegalTarget)
+							continue;
+
+						HouseClass* const pHouse = pTechno->Owner;
+
+						if (pOwner->IsAlliedWith(pHouse))
+						{
+							if (!pType->WeaponToAllies)
+								continue;
+						}
+						else if (CellClass* const pCell = pTechno->GetCell())
+						{
+							if (pTechno->CloakState == CloakState::Cloaked && !pCell->Sensors_InclHouse(pOwner->ArrayIndex))
+								continue;
+						}
+
+						if (MapClass::GetTotalDamage(100, pBullet->WH, pTechnoType->Armor, 0) == 0)
+							continue;
+
+						if (pTechno->GetCoords().DistanceFrom(centerCoords) > pWeapon->Range)
+							continue;
+
+						TechnoClass* const pFirer = pBullet->Owner;
+
+						if (pTechno->GetCoords().DistanceFrom(pFirer ? pFirer->GetCoords() : pBullet->SourceCoords) > pWeapon->Range)
+							continue;
+
+						if (!this->CheckWeaponCanTarget(pWeaponExt, pFirer, pTechno))
+							continue;
+
+						validTechnos.push_back(pTechno);
+					}
+				}
+
+				if (checkCells)
+				{
+					for (CellSpreadEnumerator thisCell(static_cast<size_t>((static_cast<double>(pWeapon->Range) / Unsorted::LeptonsPerCell) + 0.99)); thisCell; ++thisCell)
+					{
+						if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(*thisCell + CellClass::Coord2Cell(centerCoords)))
+						{
+							if (EnumFunctions::IsCellEligible(pCell, pWeaponExt->CanTarget, true, true))
+								validCells.push_back(pCell);
+						}
+					}
+				}
+			}
+
+			int validTechnoNums = validTechnos.size();
+			int validCellNums = validCells.size();
+			std::vector<AbstractClass*> validTargets;
+			validTargets.reserve(burstCount);
+
+			if (pType->WeaponDoRepeat)
+			{
+				if (validTechnoNums)
+				{
+					int currentCount = burstNow + validTechnoNums;
+
+					for (; currentCount <= burstCount; currentCount += validTechnoNums)
+					{
+						for (int burstNum = 0; burstNum < validTechnoNums; ++burstNum)
+						{
+							TechnoClass* const pNewTarget = validTechnos[burstNum];
+							validTargets.push_back(pNewTarget);
+						}
+					}
+
+					for (int burstNum = currentCount - validTechnoNums; burstNum < burstCount; ++burstNum)
+					{
+						const int randomIndex = ScenarioClass::Instance->Random.RandomRanged(0, validTechnoNums - 1);
+						TechnoClass* const pNewTarget = validTechnos[randomIndex];
+						validTargets.push_back(pNewTarget);
+						std::swap(validTechnos[randomIndex], validTechnos[--validTechnoNums]);
+					}
+				}
+				else if (validCellNums)
+				{
+					int currentCount = burstNow + validCellNums;
+
+					for (; currentCount <= burstCount; currentCount += validCellNums)
+					{
+						for (int burstNum = 0; burstNum < validCellNums; ++burstNum)
+						{
+							CellClass* const pNewTarget = validCells[burstNum];
+							validTargets.push_back(pNewTarget);
+						}
+					}
+
+					for (int burstNum = currentCount - validCellNums; burstNum < burstCount; ++burstNum)
+					{
+						const int randomIndex = ScenarioClass::Instance->Random.RandomRanged(0, validCellNums - 1);
+						CellClass* const pNewTarget = validCells[randomIndex];
+						validTargets.push_back(pNewTarget);
+						std::swap(validCells[randomIndex], validCells[--validCellNums]);
+					}
+				}
+			}
+			else
+			{
+				if (burstCount - burstNow >= validTechnoNums)
+				{
+					for (int burstNum = 0; burstNum < validTechnoNums; ++burstNum)
+					{
+						TechnoClass* const pNewTarget = validTechnos[burstNum];
+						validTargets.push_back(pNewTarget);
+					}
+
+					const int currentCount = burstNow + validTechnoNums;
+
+					if (burstCount - currentCount >= validCellNums)
+					{
+						for (int burstNum = 0; burstNum < validCellNums; ++burstNum)
+						{
+							CellClass* const pNewTarget = validCells[burstNum];
+							validTargets.push_back(pNewTarget);
+						}
+					}
+					else
+					{
+						for (int burstNum = currentCount; burstNum < burstCount; ++burstNum)
+						{
+							const int randomIndex = ScenarioClass::Instance->Random.RandomRanged(0, validCellNums - 1);
+							CellClass* const pNewTarget = validCells[randomIndex];
+							validTargets.push_back(pNewTarget);
+							std::swap(validCells[randomIndex], validCells[--validCellNums]);
+						}
+					}
+				}
+				else
+				{
+					for (int burstNum = burstNow; burstNum < burstCount; ++burstNum)
+					{
+						const int randomIndex = ScenarioClass::Instance->Random.RandomRanged(0, validTechnoNums - 1);
+						TechnoClass* const pNewTarget = validTechnos[randomIndex];
+						validTargets.push_back(pNewTarget);
+						std::swap(validTechnos[randomIndex], validTechnos[--validTechnoNums]);
 					}
 				}
 			}
@@ -963,59 +1137,6 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 		return true;
 
 	return false;
-}
-
-std::vector<TechnoClass*> DisperseTrajectory::GetValidTechnosInSame(std::vector<TechnoClass*> technos, TechnoClass* pFirer, HouseClass* pOwner, WeaponTypeClass* pWeapon, AbstractClass* pTarget)
-{
-	const DisperseTrajectoryType* const pType = this->Type;
-	std::vector<TechnoClass*> validTechnos;
-	validTechnos.reserve(technos.size());
-	const TechnoClass* const pTargetTechno = abstract_cast<TechnoClass*>(pTarget);
-
-	for (auto const& pTechno : technos)
-	{
-		if (this->TargetInTheAir != pTechno->GetHeight() > Unsorted::CellHeight || this->CheckTechnoIsInvalid(pTechno))
-			continue;
-
-		TechnoTypeClass* const pTechnoType = pTechno->GetTechnoType();
-
-		if (!pTechnoType->LegalTarget)
-			continue;
-
-		if (pType->WeaponTendency && pTargetTechno && pTechno == pTargetTechno)
-			continue;
-
-		HouseClass* const pHouse = pTechno->Owner;
-
-		if (pOwner->IsAlliedWith(pHouse))
-		{
-			if (!pType->WeaponToAllies)
-				continue;
-		}
-		else if (CellClass* const pCell = pTechno->GetCell())
-		{
-			const AbstractType absType = pTechno->WhatAmI();
-
-			if (!pType->WeaponToAllies && absType == AbstractType::Infantry && pTechno->IsDisguisedAs(pOwner) && !pCell->DisguiseSensors_InclHouse(pOwner->ArrayIndex))
-				continue;
-
-			if (absType == AbstractType::Unit && pTechno->IsDisguised() && !pCell->DisguiseSensors_InclHouse(pOwner->ArrayIndex))
-				continue;
-
-			if (pTechno->CloakState == CloakState::Cloaked && !pCell->Sensors_InclHouse(pOwner->ArrayIndex))
-				continue;
-		}
-
-		if (MapClass::GetTotalDamage(100, pWeapon->Warhead, pTechnoType->Armor, 0) == 0)
-			continue;
-
-		if (!this->CheckWeaponCanTarget(WeaponTypeExt::ExtMap.Find(pWeapon), pFirer, pTechno, pOwner, pHouse))
-			continue;
-
-		validTechnos.push_back(pTechno);
-	}
-
-	return validTechnos;
 }
 
 void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeClass* pWeapon, AbstractClass* pTarget, HouseClass* pOwner, int curBurst, int maxBurst)
