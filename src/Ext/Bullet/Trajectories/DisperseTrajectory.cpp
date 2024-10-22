@@ -115,6 +115,10 @@ void DisperseTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 	this->WeaponBurst.Read(exINI, pSection, "Trajectory.Disperse.WeaponBurst");
 	this->WeaponCount.Read(exINI, pSection, "Trajectory.Disperse.WeaponCount");
 	this->WeaponDelay.Read(exINI, pSection, "Trajectory.Disperse.WeaponDelay");
+
+	if (this->WeaponDelay <= 0)
+		this->WeaponDelay = 1;
+
 	this->WeaponTimer.Read(exINI, pSection, "Trajectory.Disperse.WeaponTimer");
 	this->WeaponScope.Read(exINI, pSection, "Trajectory.Disperse.WeaponScope");
 	this->WeaponSeparate.Read(exINI, pSection, "Trajectory.Disperse.WeaponSeparate");
@@ -232,7 +236,7 @@ bool DisperseTrajectory::OnAI(BulletClass* pBullet)
 
 	HouseClass* const pOwner = pBullet->Owner ? pBullet->Owner->Owner : BulletExt::ExtMap.Find(pBullet)->FirerHouse;
 
-	if (this->WeaponCount != 0 && (!pType->WeaponScope.Get() || pBullet->TargetCoords.DistanceFrom(pBullet->Location) <= pType->WeaponScope.Get()) && (!pOwner || this->PrepareDisperseWeapon(pBullet, pOwner)))
+	if (this->WeaponCount && (!pType->WeaponScope.Get() || pBullet->TargetCoords.DistanceFrom(pBullet->Location) <= pType->WeaponScope.Get()) && (!pOwner || this->PrepareDisperseWeapon(pBullet, pOwner)))
 		return true;
 
 	if (pType->UniqueCurve ? this->CurveVelocityChange(pBullet) : this->NotCurveVelocityChange(pBullet, pOwner))
@@ -254,7 +258,7 @@ void DisperseTrajectory::OnAIPreDetonate(BulletClass* pBullet)
 		pBullet->SetLocation(coords);
 	}
 
-	if (pType->WeaponScope.Get() < 0 && pType->WeaponCount != 0)
+	if (pType->WeaponScope.Get() < 0 && this->WeaponCount)
 	{
 		HouseClass* const pOwner = pBullet->Owner ? pBullet->Owner->Owner : BulletExt::ExtMap.Find(pBullet)->FirerHouse;
 		this->WeaponTimer.StartTime = 0;
@@ -809,18 +813,18 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 
 	if (this->WeaponTimer.Completed())
 	{
-		this->WeaponTimer.Start(pType->WeaponDelay > 0 ? pType->WeaponDelay : 1);
+		this->WeaponTimer.Start(pType->WeaponDelay);
 		size_t validWeapons = 0;
-		const size_t burstSize = pType->WeaponBurst.size();\
+		const size_t burstSize = pType->WeaponBurst.size();
 
-		if (burstSize > 0)
+		if (burstSize)
 			validWeapons = pType->Weapons.size();
 
-		if (validWeapons == 0)
+		if (!validWeapons)
 			return pType->SuicideIfNoWeapon;
 
 		if (this->WeaponCount > 0)
-			this->WeaponCount--;
+			--this->WeaponCount;
 
 		AbstractClass* const pTarget = pBullet->Target ? pBullet->Target : MapClass::Instance->TryGetCellAt(pBullet->TargetCoords);
 
@@ -901,7 +905,6 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 					{
 						if (CellClass* const pCell = MapClass::Instance->TryGetCellAt(*thisCell + centerCell))
 						{
-							bool getCell = true;
 							ObjectClass* pObject = pCell->GetContent();
 
 							while (pObject)
@@ -922,8 +925,14 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 
 								const AbstractType absType = pTechno->WhatAmI();
 
-								if (absType == AbstractType::Building && static_cast<BuildingClass*>(pTechno)->Type->InvisibleInGame)
-									continue;
+								if (absType == AbstractType::Building)
+								{
+									if (static_cast<BuildingClass*>(pTechno)->Type->InvisibleInGame)
+										continue;
+
+									if (std::find(validTechnos.begin(), validTechnos.end(), pTechno) != validTechnos.end())
+										continue;
+								}
 
 								HouseClass* const pHouse = pTechno->Owner;
 
@@ -951,10 +960,9 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 									continue;
 
 								validTechnos.push_back(pTechno);
-								getCell = false; // Prevent fire at same cell
 							}
 
-							if (getCell && EnumFunctions::IsCellEligible(pCell, pWeaponExt->CanTarget, true, true))
+							if (EnumFunctions::IsCellEligible(pCell, pWeaponExt->CanTarget, true, true))
 								validCells.push_back(pCell);
 						}
 					}
@@ -1129,7 +1137,7 @@ bool DisperseTrajectory::PrepareDisperseWeapon(BulletClass* pBullet, HouseClass*
 		}
 	}
 
-	if(pType->SuicideIfNoWeapon && this->WeaponCount == 0)
+	if(pType->SuicideIfNoWeapon && !this->WeaponCount)
 		return true;
 
 	return false;
