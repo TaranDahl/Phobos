@@ -250,6 +250,8 @@ public:
 		Valueable<ColorStruct> BelowSelectedInfoColor;
 		Valueable<TechnoTypeClass*> FakeOf;
 		CustomPalette CameoPal;
+		Nullable<bool> NoRearmInEMPState;
+		Nullable<bool> NoRearmInTemporal;
 
 		Nullable<bool> CombatAlert;
 		Nullable<bool> CombatAlert_NotBuilding;
@@ -550,6 +552,8 @@ public:
 			, BelowSelectedInfoColor { { 0, 0, 0 } }
 			, FakeOf {}
 			, CameoPal {}
+			, NoRearmInEMPState { false }
+			, NoRearmInTemporal { false }
 
 			, CombatAlert {}
 			, CombatAlert_NotBuilding {}

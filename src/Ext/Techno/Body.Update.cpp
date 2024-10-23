@@ -46,6 +46,7 @@ void TechnoExt::ExtData::OnEarlyUpdate()
 	this->DepletedAmmoActions();
 	this->UpdateAttachEffects();
 	this->UpdateRecountBurst();
+	this->UpdateDeactivatedRearm();
 }
 
 void TechnoExt::ExtData::ApplyInterceptor()
@@ -592,6 +593,21 @@ void TechnoExt::ExtData::UpdateMindControlAnim()
 	else if (this->MindControlRingAnimType)
 	{
 		this->MindControlRingAnimType = nullptr;
+	}
+}
+
+void TechnoExt::ExtData::UpdateDeactivatedRearm()
+{
+	TechnoClass* const pThis = this->OwnerObject();
+
+	if ((pThis->IsUnderEMP() && this->TypeExtData->NoRearmInEMPState.Get(RulesExt::Global()->NoRearmInEMPState))
+		|| (pThis->TemporalTargetingMe && this->TypeExtData->NoRearmInTemporal.Get(RulesExt::Global()->NoRearmInTemporal)))
+	{
+		if (pThis->RearmTimer.InProgress())
+			pThis->RearmTimer.TimeLeft++;
+
+		if (pThis->ReloadTimer.InProgress())
+			pThis->ReloadTimer.TimeLeft++;
 	}
 }
 
