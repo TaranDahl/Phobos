@@ -268,48 +268,30 @@ DEFINE_HOOK(0x469C46, BulletClass_Logics_DamageAnimSelected, 0x8)
 
 			for (auto const& pType : types)
 			{
-				*remainingInterval = creationInterval;
+				if (!pType)
+					continue;
 
-				HouseClass* pInvoker = pThis->Owner ? pThis->Owner->Owner : BulletExt::ExtMap.Find(pThis)->FirerHouse;
-				HouseClass* pVictim = nullptr;
+				auto animCoords = newCrds;
 
-				if (TechnoClass* Target = generic_cast<TechnoClass*>(pThis->Target))
-					pVictim = Target->Owner;
-
-				auto types = make_iterator_single(pAnimType);
-
-				if (pWHExt->SplashList_CreateAll && pWHExt->Splashed)
-					types = pWHExt->SplashList.GetElements(RulesClass::Instance->SplashList);
-				else if (pWHExt->AnimList_CreateAll && !pWHExt->Splashed)
-					types = pWHExt->OwnerObject()->AnimList;
-
-				for (auto const& pType : types)
+				if (allowScatter)
 				{
-					if (!pType)
-						continue;
+					int distance = ScenarioClass::Instance->Random.RandomRanged(scatterMin, scatterMax);
+					animCoords = MapClass::GetRandomCoordsNear(animCoords, distance, false);
+				}
 
-					auto animCoords = newCrds;
+				if (auto const pAnim = GameCreate<AnimClass>(pType, animCoords, 0, 1, 0x2600, -15, false))
+				{
+					createdAnim = true;
 
-					if (allowScatter)
+					AnimExt::SetAnimOwnerHouseKind(pAnim, pInvoker, pVictim, pInvoker);
+
+					if (!pAnim->Owner)
+						pAnim->Owner = pInvoker;
+
+					if (pThis->Owner)
 					{
-						int distance = ScenarioClass::Instance->Random.RandomRanged(scatterMin, scatterMax);
-						animCoords = MapClass::GetRandomCoordsNear(animCoords, distance, false);
-					}
-
-					if (auto const pAnim = GameCreate<AnimClass>(pType, animCoords, 0, 1, 0x2600, -15, false))
-					{
-						createdAnim = true;
-
-						AnimExt::SetAnimOwnerHouseKind(pAnim, pInvoker, pVictim, pInvoker);
-
-						if (!pAnim->Owner)
-							pAnim->Owner = pInvoker;
-
-						if (pThis->Owner)
-						{
-							auto pExt = AnimExt::ExtMap.Find(pAnim);
-							pExt->SetInvoker(pThis->Owner);
-						}
+						auto pExt = AnimExt::ExtMap.Find(pAnim);
+						pExt->SetInvoker(pThis->Owner);
 					}
 				}
 			}
