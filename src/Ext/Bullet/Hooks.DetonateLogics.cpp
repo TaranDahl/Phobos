@@ -217,21 +217,56 @@ DEFINE_HOOK(0x469C46, BulletClass_Logics_DamageAnimSelected, 0x8)
 		auto const pWHExt = WarheadTypeExt::ExtMap.Find(pThis->WH);
 		int cellHeight = MapClass::Instance()->GetCellFloorHeight(*coords);
 		auto newCrds = pWHExt->PlayAnimAboveSurface ? CoordStruct { coords->X, coords->Y, Math::max(cellHeight, coords->Z) } : *coords;
-		bool isUnderground = cellHeight > newCrds.Z;
-		bool notSkip = !isUnderground || pWHExt->PlayAnimUnderground;
 
-		if (notSkip)
+		if (cellHeight > newCrds.Z && !pWHExt->PlayAnimUnderground)
 		{
-			int creationInterval = pWHExt->Splashed ? pWHExt->SplashList_CreationInterval : pWHExt->AnimList_CreationInterval;
-			int* remainingInterval = &pWHExt->RemainingAnimCreationInterval;
-			int scatterMin = pWHExt->Splashed ? pWHExt->SplashList_ScatterMin.Get() : pWHExt->AnimList_ScatterMin.Get();
-			int scatterMax = pWHExt->Splashed ? pWHExt->SplashList_ScatterMax.Get() : pWHExt->AnimList_ScatterMax.Get();
-			bool allowScatter = scatterMax != 0 || scatterMin != 0;
+			R->EAX(createdAnim);
+			return SkipGameCode;
+		}
 
-			if (creationInterval > 0 && pThis->Owner)
-				remainingInterval = &TechnoExt::ExtMap.Find(pThis->Owner)->WHAnimRemainingCreationInterval;
+		int creationInterval = pWHExt->Splashed ? pWHExt->SplashList_CreationInterval : pWHExt->AnimList_CreationInterval;
+		int* remainingInterval = &pWHExt->RemainingAnimCreationInterval;
+		int scatterMin = pWHExt->Splashed ? pWHExt->SplashList_ScatterMin.Get() : pWHExt->AnimList_ScatterMin.Get();
+		int scatterMax = pWHExt->Splashed ? pWHExt->SplashList_ScatterMax.Get() : pWHExt->AnimList_ScatterMax.Get();
+		bool allowScatter = scatterMax != 0 || scatterMin != 0;
 
-			if (creationInterval < 1 || *remainingInterval <= 0)
+		if (creationInterval > 0 && pThis->Owner)
+			remainingInterval = &TechnoExt::ExtMap.Find(pThis->Owner)->WHAnimRemainingCreationInterval;
+
+		if (creationInterval < 1 || *remainingInterval <= 0)
+		{
+			*remainingInterval = creationInterval;
+
+			HouseClass* pInvoker = pThis->Owner ? pThis->Owner->Owner : BulletExt::ExtMap.Find(pThis)->FirerHouse;
+			HouseClass* pVictim = nullptr;
+
+			if (TechnoClass* Target = generic_cast<TechnoClass*>(pThis->Target))
+				pVictim = Target->Owner;
+
+			auto types = make_iterator_single(pAnimType);
+
+			if (pWHExt->SplashList_CreateAll && pWHExt->Splashed)
+			{
+				types = pWHExt->SplashList.GetElements(RulesClass::Instance->SplashList);
+			}
+			else if (!pWHExt->Splashed)
+			{
+				bool createAll = pWHExt->AnimList_CreateAll;
+
+				if (pWHExt->Crit_Active && !pWHExt->Crit_AnimOnAffectedTargets)
+				{
+					createAll = pWHExt->Crit_AnimList_CreateAll.Get(createAll);
+
+					if (createAll)
+						types = pWHExt->Crit_AnimList;
+				}
+				else if (createAll)
+				{
+					types = pWHExt->OwnerObject()->AnimList;
+				}
+			}
+
+			for (auto const& pType : types)
 			{
 				*remainingInterval = creationInterval;
 
@@ -278,10 +313,10 @@ DEFINE_HOOK(0x469C46, BulletClass_Logics_DamageAnimSelected, 0x8)
 					}
 				}
 			}
-			else
-			{
-				(*remainingInterval)--;
-			}
+		}
+		else
+		{
+			(*remainingInterval)--;
 		}
 	}
 
