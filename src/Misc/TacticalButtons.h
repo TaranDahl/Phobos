@@ -20,6 +20,7 @@ public:
 	void PressDesignatedButton(int triggerIndex);
 
 	// Button index N/A : Message Lists
+	bool MouseIsOverMessageLists(const Point2D* pMousePosition);
 
 	// Button index 1-10 : Super weapons buttons
 	inline bool IndexInSWButtons();

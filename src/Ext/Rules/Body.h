@@ -134,6 +134,10 @@ public:
 		Valueable<Vector3D<int>> ExpandLandGridFrames;
 		Valueable<Vector3D<int>> ExpandWaterGridFrames;
 		Valueable<bool> SWSidebarBackground;
+		PhobosPCXFile SelectedInfantryMissingPCX;
+		PhobosPCXFile SelectedVehicleMissingPCX;
+		PhobosPCXFile SelectedAircraftMissingPCX;
+		PhobosPCXFile SelectedBuildingMissingPCX;
 		Valueable<bool> AIAutoDeployMCV;
 		Valueable<bool> AISetBaseCenter;
 		Valueable<bool> AIBiasSpawnCell;

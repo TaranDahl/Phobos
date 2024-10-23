@@ -162,24 +162,19 @@ PhobosMap<int , const wchar_t*> TacticalButtonsClass::KeyboardCodeTextMap = Crea
 // Private functions
 int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 {
-	this->OnMessages = false;
+	if (this->MouseIsOverMessageLists(pMousePosition))
 	{
-		const MessageListClass* pMessages = &MessageListClass::Instance;
-
-		if (TextLabelClass* pText = pMessages->MessageList)
+		if (!Make_Global<int>(0xABCD40)) // Frame index in this frame
 		{
-			if (pMousePosition->Y >= pMessages->MessagePos.Y && pMousePosition->X >= pMessages->MessagePos.X && pMousePosition->X <= pMessages->MessagePos.X + pMessages->Width)
-			{
-				const int textHeight = pMessages->Height;
-				int height = pMessages->MessagePos.Y;
-
-				for (; pText; pText = static_cast<TextLabelClass*>(pText->GetNext()))
-					height += textHeight;
-
-				if (pMousePosition->Y < height)
-					this->OnMessages = true;
-			}
+			for (TextLabelClass* pText = MessageListClass::Instance->MessageList; pText; pText = static_cast<TextLabelClass*>(pText->GetNext()))
+				pText->UserData1 = reinterpret_cast<void*>(reinterpret_cast<int>(pText->UserData1) + 60);
 		}
+
+		this->OnMessages = true;
+	}
+	else
+	{
+		this->OnMessages = false;
 	}
 
 	if (const int currentCounts = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->SWButtonData.size()) // Button index 1-11
@@ -370,9 +365,9 @@ void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 
 		if (currentCounts > 1 || (currentCounts && this->CurrentSelectCameo[0].Count > 1))
 		{
-			if (TechnoTypeClass* const pObj = this->CurrentSelectCameo[this->ButtonIndex - 71].TypeExt->OwnerObject())
+			if (TechnoTypeClass* const pType = this->CurrentSelectCameo[this->ButtonIndex - 71].TypeExt->OwnerObject())
 			{
-				const wchar_t* name = pObj->UIName;
+				const wchar_t* name = pType->UIName;
 
 				if (name && name != this->HoveredSelected)
 					this->HoveredSelected = name;
@@ -421,6 +416,29 @@ void TacticalButtonsClass::PressDesignatedButton(int triggerIndex)
 		else if (triggerIndex == 2)
 			this->SelectedTrigger(this->ButtonIndex, false);
 	}
+}
+
+// Button index N/A : Message Lists
+bool TacticalButtonsClass::MouseIsOverMessageLists(const Point2D* pMousePosition)
+{
+	const MessageListClass* pMessages = &MessageListClass::Instance;
+
+	if (TextLabelClass* pText = pMessages->MessageList)
+	{
+		if (pMousePosition->Y >= pMessages->MessagePos.Y && pMousePosition->X >= pMessages->MessagePos.X && pMousePosition->X <= pMessages->MessagePos.X + pMessages->Width)
+		{
+			const int textHeight = pMessages->Height;
+			int height = pMessages->MessagePos.Y;
+
+			for (; pText; pText = static_cast<TextLabelClass*>(pText->GetNext()))
+				height += textHeight;
+
+			if (pMousePosition->Y < (height + 5))
+				return true;
+		}
+	}
+
+	return false;
 }
 
 // Button index 1-10 : Super weapons buttons
@@ -1088,6 +1106,7 @@ void TacticalButtonsClass::SelectedDraw()
 		return;
 
 	const int currentCounts = Math::min(30, static_cast<int>(this->CurrentSelectCameo.size()));
+	RulesExt::ExtData* const pRulesExt = RulesExt::Global();
 
 	if (currentCounts > 1 || (currentCounts && this->CurrentSelectCameo[0].Count > 1)) // Mass
 	{
@@ -1104,32 +1123,63 @@ void TacticalButtonsClass::SelectedDraw()
 
 		for (int i = 71; i < this->RecordIndex && i <= maxIndex; ++i, position.X += gap, drawRect.X = position.X, textPosition.X += gap)
 		{
-			SelectRecordStruct pSelect = this->CurrentSelectCameo[i - 71];
+			const SelectRecordStruct pSelect = this->CurrentSelectCameo[i - 71];
+			const TechnoTypeExt::ExtData* const pTypeExt = pSelect.TypeExt;
 
-			if (BSurface* const CameoPCX = pSelect.TypeExt->CameoPCX.GetSurface())
+			if (BSurface* const CameoPCX = pTypeExt->CameoPCX.GetSurface())
 			{
 				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
 			}
-			else if (SHPStruct* const pSHP = pSelect.TypeExt->OwnerObject()->GetCameo())
+			else if (SHPStruct* const pSHP = pTypeExt->OwnerObject()->GetCameo())
 			{
-				SHPReference* const pCameoRef = pSHP->AsReference();
-				char pFilename[0x20];
-				strcpy_s(pFilename, RulesExt::Global()->MissingCameo.data());
-				_strlwr_s(pFilename);
-
-				if (!_stricmp(pCameoRef->Filename, GameStrings::XXICON_SHP) && strstr(pFilename, ".pcx"))
+				do
 				{
-					PCX::Instance->LoadFile(pFilename);
+					SHPReference* const pCameoRef = pSHP->AsReference();
+					char pFilename[0x20];
+					strcpy_s(pFilename, pRulesExt->MissingCameo.data());
+					_strlwr_s(pFilename);
 
-					if (BSurface* const MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
-						PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
-				}
-				else
-				{
+					if (!_stricmp(pCameoRef->Filename, GameStrings::XXICON_SHP))
+					{
+						const AbstractType absType = pTypeExt->OwnerObject()->WhatAmI();
+						BSurface* MissingCameoPCX = nullptr;
+
+						if (absType == AbstractType::InfantryType && (MissingCameoPCX = pRulesExt->SelectedInfantryMissingPCX.GetSurface(), MissingCameoPCX))
+						{
+							PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+							break;
+						}
+						else if (absType == AbstractType::UnitType && (MissingCameoPCX = pRulesExt->SelectedVehicleMissingPCX.GetSurface(), MissingCameoPCX))
+						{
+							PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+							break;
+						}
+						else if (absType == AbstractType::AircraftType && (MissingCameoPCX = pRulesExt->SelectedAircraftMissingPCX.GetSurface(), MissingCameoPCX))
+						{
+							PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+							break;
+						}
+						else if (absType == AbstractType::BuildingType && (MissingCameoPCX = pRulesExt->SelectedBuildingMissingPCX.GetSurface(), MissingCameoPCX))
+						{
+							PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+							break;
+						}
+						else if (strstr(pFilename, ".pcx"))
+						{
+							PCX::Instance->LoadFile(pFilename);
+
+							if (MissingCameoPCX = PCX::Instance->GetSurface(pFilename), MissingCameoPCX)
+								PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+
+							break;
+						}
+					}
+
 					RectangleStruct rect { 0, 0, (position.X + 60), surfaceRect.Height };
-					DSurface::Composite->DrawSHP(pSelect.TypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &rect,
+					DSurface::Composite->DrawSHP(pTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &rect,
 						BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 				}
+				while (false);
 			}
 
 			const int count = pSelect.Count;
@@ -1150,32 +1200,63 @@ void TacticalButtonsClass::SelectedDraw()
 
 		for (int i = maxIndex; i > this->RecordIndex; --i, position.X -= gap, drawRect.X = position.X, textPosition.X -= gap)
 		{
-			SelectRecordStruct pSelect = this->CurrentSelectCameo[i - 71];
+			const SelectRecordStruct pSelect = this->CurrentSelectCameo[i - 71];
+			const TechnoTypeExt::ExtData* const pTypeExt = pSelect.TypeExt;
 
-			if (BSurface* const CameoPCX = pSelect.TypeExt->CameoPCX.GetSurface())
+			if (BSurface* const CameoPCX = pTypeExt->CameoPCX.GetSurface())
 			{
 				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
 			}
-			else if (SHPStruct* const pSHP = pSelect.TypeExt->OwnerObject()->GetCameo())
+			else if (SHPStruct* const pSHP = pTypeExt->OwnerObject()->GetCameo())
 			{
-				SHPReference* const pCameoRef = pSHP->AsReference();
-				char pFilename[0x20];
-				strcpy_s(pFilename, RulesExt::Global()->MissingCameo.data());
-				_strlwr_s(pFilename);
-
-				if (!_stricmp(pCameoRef->Filename, GameStrings::XXICON_SHP) && strstr(pFilename, ".pcx"))
+				do
 				{
-					PCX::Instance->LoadFile(pFilename);
+					SHPReference* const pCameoRef = pSHP->AsReference();
+					char pFilename[0x20];
+					strcpy_s(pFilename, pRulesExt->MissingCameo.data());
+					_strlwr_s(pFilename);
 
-					if (BSurface* const MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
-						PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
-				}
-				else
-				{
+					if (!_stricmp(pCameoRef->Filename, GameStrings::XXICON_SHP))
+					{
+						const AbstractType absType = pTypeExt->OwnerObject()->WhatAmI();
+						BSurface* MissingCameoPCX = nullptr;
+
+						if (absType == AbstractType::InfantryType && (MissingCameoPCX = pRulesExt->SelectedInfantryMissingPCX.GetSurface(), MissingCameoPCX))
+						{
+							PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+							break;
+						}
+						else if (absType == AbstractType::UnitType && (MissingCameoPCX = pRulesExt->SelectedVehicleMissingPCX.GetSurface(), MissingCameoPCX))
+						{
+							PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+							break;
+						}
+						else if (absType == AbstractType::AircraftType && (MissingCameoPCX = pRulesExt->SelectedAircraftMissingPCX.GetSurface(), MissingCameoPCX))
+						{
+							PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+							break;
+						}
+						else if (absType == AbstractType::BuildingType && (MissingCameoPCX = pRulesExt->SelectedBuildingMissingPCX.GetSurface(), MissingCameoPCX))
+						{
+							PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+							break;
+						}
+						else if (strstr(pFilename, ".pcx"))
+						{
+							PCX::Instance->LoadFile(pFilename);
+
+							if (MissingCameoPCX = PCX::Instance->GetSurface(pFilename), MissingCameoPCX)
+								PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+
+							break;
+						}
+					}
+
 					RectangleStruct rect { 0, 0, (position.X + 60), surfaceRect.Height };
-					DSurface::Composite->DrawSHP(pSelect.TypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &rect,
+					DSurface::Composite->DrawSHP(pTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &rect,
 						BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 				}
+				while (false);
 			}
 
 			const int count = pSelect.Count;
@@ -1195,36 +1276,71 @@ void TacticalButtonsClass::SelectedDraw()
 			position.Y -= 10;
 			drawRect.Y -= 10;
 			textPosition.Y -= 10;
+
+			ColorStruct fillColor { 0, 0, 0 };
+			RectangleStruct fillRect { position.X, position.Y + 48, 60, 10 };
+			DSurface::Composite->FillRectTrans(&fillRect, &fillColor, 60);
 		}
 
 		if (this->RecordIndex <= maxIndex)
 		{
-			SelectRecordStruct pSelect = this->CurrentSelectCameo[this->RecordIndex - 71];
+			const SelectRecordStruct pSelect = this->CurrentSelectCameo[this->RecordIndex - 71];
+			const TechnoTypeExt::ExtData* const pTypeExt = pSelect.TypeExt;
 
-			if (BSurface* const CameoPCX = pSelect.TypeExt->CameoPCX.GetSurface())
+			if (BSurface* const CameoPCX = pTypeExt->CameoPCX.GetSurface())
 			{
 				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
 			}
-			else if (SHPStruct* const pSHP = pSelect.TypeExt->OwnerObject()->GetCameo())
+			else if (SHPStruct* const pSHP = pTypeExt->OwnerObject()->GetCameo())
 			{
-				SHPReference* const pCameoRef = pSHP->AsReference();
-				char pFilename[0x20];
-				strcpy_s(pFilename, RulesExt::Global()->MissingCameo.data());
-				_strlwr_s(pFilename);
-
-				if (!_stricmp(pCameoRef->Filename, GameStrings::XXICON_SHP) && strstr(pFilename, ".pcx"))
+				do
 				{
-					PCX::Instance->LoadFile(pFilename);
+					SHPReference* const pCameoRef = pSHP->AsReference();
+					char pFilename[0x20];
+					strcpy_s(pFilename, pRulesExt->MissingCameo.data());
+					_strlwr_s(pFilename);
 
-					if (BSurface* const MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
-						PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
-				}
-				else
-				{
-					RectangleStruct rect { 0, 0, (position.X + 60), (hovered ? (surfaceRect.Height - 10) : surfaceRect.Height) };
-					DSurface::Composite->DrawSHP(pSelect.TypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &rect,
+					if (!_stricmp(pCameoRef->Filename, GameStrings::XXICON_SHP))
+					{
+						const AbstractType absType = pTypeExt->OwnerObject()->WhatAmI();
+						BSurface* MissingCameoPCX = nullptr;
+
+						if (absType == AbstractType::InfantryType && (MissingCameoPCX = pRulesExt->SelectedInfantryMissingPCX.GetSurface(), MissingCameoPCX))
+						{
+							PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+							break;
+						}
+						else if (absType == AbstractType::UnitType && (MissingCameoPCX = pRulesExt->SelectedVehicleMissingPCX.GetSurface(), MissingCameoPCX))
+						{
+							PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+							break;
+						}
+						else if (absType == AbstractType::AircraftType && (MissingCameoPCX = pRulesExt->SelectedAircraftMissingPCX.GetSurface(), MissingCameoPCX))
+						{
+							PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+							break;
+						}
+						else if (absType == AbstractType::BuildingType && (MissingCameoPCX = pRulesExt->SelectedBuildingMissingPCX.GetSurface(), MissingCameoPCX))
+						{
+							PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+							break;
+						}
+						else if (strstr(pFilename, ".pcx"))
+						{
+							PCX::Instance->LoadFile(pFilename);
+
+							if (MissingCameoPCX = PCX::Instance->GetSurface(pFilename), MissingCameoPCX)
+								PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+
+							break;
+						}
+					}
+
+					RectangleStruct rect { 0, 0, (position.X + 60), (position.Y + 48) };
+					DSurface::Composite->DrawSHP(pTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &rect,
 						BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 				}
+				while (false);
 			}
 
 			const int count = pSelect.Count;
@@ -1243,8 +1359,8 @@ void TacticalButtonsClass::SelectedDraw()
 		{
 			if (TechnoClass* const pThis = abstract_cast<TechnoClass*>(pCurrent))
 			{
-				TechnoTypeClass* const pType = pThis->GetTechnoType();
-				TechnoTypeExt::ExtData* const pTypeExt = this->CurrentSelectCameo[0].TypeExt;
+				const TechnoTypeClass* const pType = pThis->GetTechnoType();
+				const TechnoTypeExt::ExtData* const pTypeExt = this->CurrentSelectCameo[0].TypeExt;
 
 				if (pTypeExt->OwnerObject() == pType)
 				{
@@ -1412,25 +1528,50 @@ void TacticalButtonsClass::SelectedDraw()
 					else if (pSHP)
 					{
 						SHPReference* const pCameoRef = pSHP->AsReference();
-
 						char pFilename[0x20];
-						strcpy_s(pFilename, RulesExt::Global()->MissingCameo.data());
+						strcpy_s(pFilename, pRulesExt->MissingCameo.data());
 						_strlwr_s(pFilename);
 
-						if (!_stricmp(pCameoRef->Filename, GameStrings::XXICON_SHP) && strstr(pFilename, ".pcx"))
+						if (!_stricmp(pCameoRef->Filename, GameStrings::XXICON_SHP))
 						{
-							PCX::Instance->LoadFile(pFilename);
+							const AbstractType absType = pTypeExt->FakeOf ? pTypeExt->FakeOf->WhatAmI() : pType->WhatAmI();
+							BSurface* MissingCameoPCX = nullptr;
 
-							if (BSurface* const MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
+							if (absType == AbstractType::InfantryType && (MissingCameoPCX = pRulesExt->SelectedInfantryMissingPCX.GetSurface(), MissingCameoPCX))
+							{
 								PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
-						}
-						else
-						{
-							position -= Point2D { 120, 31 };
-							surfaceRect.Width = 60;
+								return;
+							}
+							else if (absType == AbstractType::UnitType && (MissingCameoPCX = pRulesExt->SelectedVehicleMissingPCX.GetSurface(), MissingCameoPCX))
+							{
+								PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+								return;
+							}
+							else if (absType == AbstractType::AircraftType && (MissingCameoPCX = pRulesExt->SelectedAircraftMissingPCX.GetSurface(), MissingCameoPCX))
+							{
+								PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+								return;
+							}
+							else if (absType == AbstractType::BuildingType && (MissingCameoPCX = pRulesExt->SelectedBuildingMissingPCX.GetSurface(), MissingCameoPCX))
+							{
+								PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+								return;
+							}
+							else if (strstr(pFilename, ".pcx"))
+							{
+								PCX::Instance->LoadFile(pFilename);
 
-							DSurface::Composite->DrawSHP(pPal, pSHP, 0, &position, &surfaceRect, BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
+								if (MissingCameoPCX = PCX::Instance->GetSurface(pFilename), MissingCameoPCX)
+									PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+
+								return;
+							}
 						}
+
+						position -= Point2D { 120, 31 };
+						surfaceRect.Width = 60;
+
+						DSurface::Composite->DrawSHP(pPal, pSHP, 0, &position, &surfaceRect, BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 					}
 
 					return;
