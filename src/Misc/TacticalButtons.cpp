@@ -162,24 +162,19 @@ PhobosMap<int , const wchar_t*> TacticalButtonsClass::KeyboardCodeTextMap = Crea
 // Private functions
 int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 {
-	this->OnMessages = false;
+	if (this->MouseIsOverMessageLists(pMousePosition))
 	{
-		const MessageListClass* pMessages = &MessageListClass::Instance;
-
-		if (TextLabelClass* pText = pMessages->MessageList)
+		if (!Make_Global<int>(0xABCD40)) // Frame index in this frame
 		{
-			if (pMousePosition->Y >= pMessages->MessagePos.Y && pMousePosition->X >= pMessages->MessagePos.X && pMousePosition->X <= pMessages->MessagePos.X + pMessages->Width)
-			{
-				const int textHeight = pMessages->Height;
-				int height = pMessages->MessagePos.Y;
-
-				for (; pText; pText = static_cast<TextLabelClass*>(pText->GetNext()))
-					height += textHeight;
-
-				if (pMousePosition->Y < height)
-					this->OnMessages = true;
-			}
+			for (TextLabelClass* pText = MessageListClass::Instance->MessageList; pText; pText = static_cast<TextLabelClass*>(pText->GetNext()))
+				pText->UserData1 = reinterpret_cast<void*>(reinterpret_cast<int>(pText->UserData1) + 60);
 		}
+
+		this->OnMessages = true;
+	}
+	else
+	{
+		this->OnMessages = false;
 	}
 
 	if (const int currentCounts = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->SWButtonData.size()) // Button index 1-11
@@ -421,6 +416,29 @@ void TacticalButtonsClass::PressDesignatedButton(int triggerIndex)
 		else if (triggerIndex == 2)
 			this->SelectedTrigger(this->ButtonIndex, false);
 	}
+}
+
+// Button index N/A : Message Lists
+bool TacticalButtonsClass::MouseIsOverMessageLists(const Point2D* pMousePosition)
+{
+	const MessageListClass* pMessages = &MessageListClass::Instance;
+
+	if (TextLabelClass* pText = pMessages->MessageList)
+	{
+		if (pMousePosition->Y >= pMessages->MessagePos.Y && pMousePosition->X >= pMessages->MessagePos.X && pMousePosition->X <= pMessages->MessagePos.X + pMessages->Width)
+		{
+			const int textHeight = pMessages->Height;
+			int height = pMessages->MessagePos.Y;
+
+			for (; pText; pText = static_cast<TextLabelClass*>(pText->GetNext()))
+				height += textHeight;
+
+			if (pMousePosition->Y < (height + 5))
+				return true;
+		}
+	}
+
+	return false;
 }
 
 // Button index 1-10 : Super weapons buttons
