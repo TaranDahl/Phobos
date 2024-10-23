@@ -125,7 +125,8 @@ public:
 		void UpdateTemporal();
 		void UpdateMindControlAnim();
 		void UpdateRecountBurst();
-		void UpdateDeactivatedRearm();
+		void UpdateRearmInEMPState();
+		void UpdateRearmInTemporal();
 		void InitializeLaserTrails();
 		void InitializeAttachEffects();
 		void UpdateSelfOwnedAttachEffects();

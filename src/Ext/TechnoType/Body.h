@@ -552,8 +552,8 @@ public:
 			, BelowSelectedInfoColor { { 0, 0, 0 } }
 			, FakeOf {}
 			, CameoPal {}
-			, NoRearmInEMPState { false }
-			, NoRearmInTemporal { false }
+			, NoRearmInEMPState {}
+			, NoRearmInTemporal {}
 
 			, CombatAlert {}
 			, CombatAlert_NotBuilding {}
