@@ -166,7 +166,7 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 	{
 		if (this->MouseIsOverMessageLists(pMousePosition))
 		{
-			if (!Make_Global<int>(0xABCD40)) // Frame index in this frame
+			if (!Make_Global<int>(0xABCD40)) // Frame index in this second
 			{
 				for (TextLabelClass* pText = MessageListClass::Instance->MessageList; pText; pText = static_cast<TextLabelClass*>(pText->GetNext()))
 					pText->UserData1 = reinterpret_cast<void*>(reinterpret_cast<int>(pText->UserData1) + 60);
