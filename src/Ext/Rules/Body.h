@@ -142,6 +142,8 @@ public:
 		Valueable<bool> AISetBaseCenter;
 		Valueable<bool> AIBiasSpawnCell;
 		Valueable<bool> AIForbidConYard;
+		Valueable<bool> NoRearmInEMPState;
+		Valueable<bool> NoRearmInTemporal;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -366,6 +368,8 @@ public:
 			, AISetBaseCenter { false }
 			, AIBiasSpawnCell { false }
 			, AIForbidConYard { false }
+			, NoRearmInEMPState { false }
+			, NoRearmInTemporal { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
