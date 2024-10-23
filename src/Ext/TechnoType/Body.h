@@ -250,6 +250,8 @@ public:
 		Valueable<ColorStruct> BelowSelectedInfoColor;
 		Valueable<TechnoTypeClass*> FakeOf;
 		CustomPalette CameoPal;
+		Nullable<bool> NoRearmInEMPState;
+		Nullable<bool> NoRearmInTemporal;
 		Valueable<bool> HarvesterQuickUnloader;
 
 		Nullable<AnimTypeClass*> Wake;
@@ -500,6 +502,8 @@ public:
 			, BelowSelectedInfoColor { { 0, 0, 0 } }
 			, FakeOf {}
 			, CameoPal {}
+			, NoRearmInEMPState {}
+			, NoRearmInTemporal {}
 			, HarvesterQuickUnloader { false }
 
 			, Wake { }

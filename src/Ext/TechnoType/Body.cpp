@@ -480,6 +480,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->BelowSelectedInfoType.Read(exINI, pSection, "BelowSelectedInfoType");
 	this->BelowSelectedInfoColor.Read(exINI, pSection, "BelowSelectedInfoColor");
 	this->FakeOf.Read(exINI, pSection, "FakeOf");
+	this->NoRearmInEMPState.Read(exINI, pSection, "NoRearmInEMPState");
+	this->NoRearmInTemporal.Read(exINI, pSection, "NoRearmInTemporal");
 	this->HarvesterQuickUnloader.Read(exINI, pSection, "HarvesterQuickUnloader");
 
 	this->Wake.Read(exINI, pSection, "Wake");
@@ -878,6 +880,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->BelowSelectedInfoColor)
 		.Process(this->FakeOf)
 		.Process(this->CameoPal)
+		.Process(this->NoRearmInEMPState)
+		.Process(this->NoRearmInTemporal)
 		.Process(this->HarvesterQuickUnloader)
 
 		.Process(this->Wake)
