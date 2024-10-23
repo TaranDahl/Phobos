@@ -162,19 +162,22 @@ PhobosMap<int , const wchar_t*> TacticalButtonsClass::KeyboardCodeTextMap = Crea
 // Private functions
 int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 {
-	if (this->MouseIsOverMessageLists(pMousePosition))
+	if (Phobos::Config::MessageDisplayInCenter)
 	{
-		if (!Make_Global<int>(0xABCD40)) // Frame index in this frame
+		if (this->MouseIsOverMessageLists(pMousePosition))
 		{
-			for (TextLabelClass* pText = MessageListClass::Instance->MessageList; pText; pText = static_cast<TextLabelClass*>(pText->GetNext()))
-				pText->UserData1 = reinterpret_cast<void*>(reinterpret_cast<int>(pText->UserData1) + 60);
-		}
+			if (!Make_Global<int>(0xABCD40)) // Frame index in this frame
+			{
+				for (TextLabelClass* pText = MessageListClass::Instance->MessageList; pText; pText = static_cast<TextLabelClass*>(pText->GetNext()))
+					pText->UserData1 = reinterpret_cast<void*>(reinterpret_cast<int>(pText->UserData1) + 60);
+			}
 
-		this->OnMessages = true;
-	}
-	else
-	{
-		this->OnMessages = false;
+			this->OnMessages = true;
+		}
+		else
+		{
+			this->OnMessages = false;
+		}
 	}
 
 	if (const int currentCounts = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->SWButtonData.size()) // Button index 1-11
