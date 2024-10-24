@@ -101,6 +101,7 @@ public:
 			, SW_InitialReady { false }
 			, SW_PostDependent {}
 			, SW_MaxCount { -1 }
+			, SidebarPCX {}
 			, CameoPal {}
 
 			, UIDescription {}

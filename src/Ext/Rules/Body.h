@@ -316,6 +316,10 @@ public:
 			, ExpandLandGridFrames { { 1, 0, 0 } }
 			, ExpandWaterGridFrames { { 1, 0, 0 } }
 			, SWSidebarBackground { true }
+			, SelectedInfantryMissingPCX {}
+			, SelectedVehicleMissingPCX {}
+			, SelectedAircraftMissingPCX {}
+			, SelectedBuildingMissingPCX {}
 			, AIAutoDeployMCV { false }
 			, AISetBaseCenter { false }
 			, AIBiasSpawnCell { false }
