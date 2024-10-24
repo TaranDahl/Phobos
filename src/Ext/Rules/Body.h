@@ -368,6 +368,10 @@ public:
 			, AISetBaseCenter { false }
 			, AIBiasSpawnCell { false }
 			, AIForbidConYard { false }
+			, SelectedInfantryMissingPCX {}
+			, SelectedVehicleMissingPCX {}
+			, SelectedAircraftMissingPCX {}
+			, SelectedBuildingMissingPCX {}
 			, NoRearmInEMPState { false }
 			, NoRearmInTemporal { false }
 
