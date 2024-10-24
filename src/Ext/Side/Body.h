@@ -63,6 +63,11 @@ public:
 			, ToolTip_Background_Opacity { }
 			, ToolTip_Background_BlurSize { }
 			, BriefingTheme { -1 }
+			, SWSidebarBackground_OnPCX {}
+			, SWSidebarBackground_OffPCX {}
+			, SWSidebarBackground_TopPCX {}
+			, SWSidebarBackground_CenterPCX {}
+			, SWSidebarBackground_BottomPCX {}
 		{ }
 
 		virtual ~ExtData() = default;

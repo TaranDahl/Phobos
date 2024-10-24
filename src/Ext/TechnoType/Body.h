@@ -546,6 +546,8 @@ public:
 			, PrerequisiteForCameo {}
 			, CameoCheckMutex { false }
 			, UIExtraDescription {}
+			, CameoPCX {}
+			, GreyCameoPCX {}
 			, UpperSelectedInfoType { DisplayInfoType::Shield }
 			, UpperSelectedInfoColor { { 153, 153, 255 } }
 			, BelowSelectedInfoType { DisplayInfoType::Health }
