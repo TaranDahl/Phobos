@@ -1392,7 +1392,64 @@ void TacticalButtonsClass::SelectedDraw()
 
 						if (!pHouse->IsAlliedWith(pThis) && !pHouse->IsObserver())
 						{
-							if (TechnoTypeClass* const pFakeType = pTypeExt->FakeOf)
+							if (pThis->IsDisguised() && !pThis->GetCell()->DisguiseSensors_InclHouse(pHouse->ArrayIndex))
+							{
+								TechnoTypeClass* const pDisguiseType = TechnoTypeExt::GetTechnoType(pThis->Disguise);
+
+								if (TechnoTypeExt::ExtData* const pDisguiseTypeExt = TechnoTypeExt::ExtMap.Find(pDisguiseType))
+								{
+									if (TechnoTypeClass* const pFakeType = pDisguiseTypeExt->FakeOf)
+									{
+										if (TechnoTypeExt::ExtData* const pFakeTypeExt = TechnoTypeExt::ExtMap.Find(pFakeType))
+										{
+											if (const wchar_t* fakeName = pFakeTypeExt->EnemyUIName.Get().Text)
+												name = fakeName;
+											else
+												name = pFakeType->UIName;
+
+											if (BSurface* const FakeCameoPCX = pFakeTypeExt->CameoPCX.GetSurface())
+											{
+												CameoPCX = FakeCameoPCX;
+											}
+											else if (SHPStruct* const pFakeSHP = pFakeType->GetCameo())
+											{
+												pSHP = pFakeSHP;
+												pPal = pFakeTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL);
+											}
+										}
+										else
+										{
+											name = pFakeType->UIName;
+											pSHP = pFakeType->GetCameo();
+											pPal = FileSystem::CAMEO_PAL;
+										}
+									}
+									else
+									{
+										if (const wchar_t* fakeName = pDisguiseTypeExt->EnemyUIName.Get().Text)
+											name = fakeName;
+										else
+											name = pDisguiseType->UIName;
+
+										if (BSurface* const disguiseCameoPCX = pDisguiseTypeExt->CameoPCX.GetSurface())
+										{
+											CameoPCX = disguiseCameoPCX;
+										}
+										else if (SHPStruct* const pDisguiseSHP = pDisguiseType->GetCameo())
+										{
+											pSHP = pDisguiseSHP;
+											pPal = pDisguiseTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL);
+										}
+									}
+								}
+								else
+								{
+									name = pDisguiseType->UIName;
+									pSHP = pDisguiseType->GetCameo();
+									pPal = FileSystem::CAMEO_PAL;
+								}
+							}
+							else if (TechnoTypeClass* const pFakeType = pTypeExt->FakeOf)
 							{
 								if (TechnoTypeExt::ExtData* const pFakeTypeExt = TechnoTypeExt::ExtMap.Find(pFakeType))
 								{
@@ -1414,6 +1471,8 @@ void TacticalButtonsClass::SelectedDraw()
 								else
 								{
 									name = pFakeType->UIName;
+									pSHP = pFakeType->GetCameo();
+									pPal = FileSystem::CAMEO_PAL;
 								}
 							}
 							else if (const wchar_t* enemyName = pTypeExt->EnemyUIName.Get().Text)
