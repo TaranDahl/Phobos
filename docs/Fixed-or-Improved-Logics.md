@@ -452,7 +452,12 @@ SellBuildupLength=23  ; integer, number of buildup frames to play
 In `rulesmd.ini`:
 ```ini
 [General]
-ExpandBuildingPlace=false      ; boolean
+ExpandBuildingPlace=false   ; boolean
+
+[SOMEBUILDING]              ; BuildingType
+AutoUpgrade=false           ; boolean
+LimboBuild=false            ; boolean
+LimboBuildID=-1             ; boolean
 ```
 
 ### Exclude Factory from providing multiple factory bonus
@@ -1462,7 +1467,7 @@ In `rulesmd.ini`:
 ```ini
 [AudioVisual]
 CombatLightDetailLevel=0  ; integer
-                          
+
 [SOMEWARHEAD]             ; WarheadType
 CombatLightDetailLevel=   ; integer
 CombatLightChance=1.0     ; floating point value, percents or absolute (0.0-1.0)
