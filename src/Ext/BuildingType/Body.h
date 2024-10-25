@@ -68,6 +68,10 @@ public:
 		Nullable<CoordStruct> JumpjetExitCoord;
 		Valueable<bool> AnimDontDelayBurst;
 
+		Valueable<bool> AutoUpgrade;
+		Valueable<bool> LimboBuild;
+		Valueable<int> LimboBuildID;
+
 		std::vector<std::optional<DirType>> AircraftDockingDirs;
 
 		ValueableVector<TechnoTypeClass*> FactoryPlant_AllowTypes;
@@ -122,6 +126,9 @@ public:
 			, JustHasRallyPoint { false }
 			, JumpjetExitCoord { }
 			, AnimDontDelayBurst { false }
+			, AutoUpgrade { false }
+			, LimboBuild { false }
+			, LimboBuildID { -1 }
 			, AircraftDockingDirs {}
 			, FactoryPlant_AllowTypes {}
 			, FactoryPlant_DisallowTypes {}
@@ -177,4 +184,7 @@ public:
 	static bool CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseClass* pOccupierHouse);
 	static bool CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, CellStruct topLeftCell, HouseClass* pHouse, TechnoClass* pExceptTechno = nullptr);
 	static void DrawAdjacentLines();
+	static bool AutoUpgradeBuilding(BuildingClass* pBuilding);
+	static bool BuildLimboBuilding(BuildingClass* pBuilding);
+	static void CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID);
 };
