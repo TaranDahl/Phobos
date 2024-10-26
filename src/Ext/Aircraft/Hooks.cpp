@@ -384,7 +384,7 @@ DEFINE_HOOK(0x6FA68B, TechnoClass_Update_AttackMovePaused, 0xA) // To make aircr
 
 	GET(TechnoClass* const, pThis, ESI);
 
-	return (pThis->WhatAmI() == AbstractType::Aircraft && (!pThis->Ammo || pThis->CurrentMission == Mission::Sleep)) ? SkipGameCode : 0;
+	return (pThis->WhatAmI() == AbstractType::Aircraft && (!pThis->Ammo || pThis->GetHeight() < Unsorted::CellHeight)) ? SkipGameCode : 0;
 }
 
 DEFINE_HOOK(0x4DF3BA, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget, 0x6)
@@ -427,7 +427,15 @@ DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 
 	GET(AircraftClass* const, pThis, ESI);
 
-	return (!pThis->Ammo || pThis->CurrentMission == Mission::Sleep) ? ClearTarget : 0;
+	if (!pThis->Ammo && !SessionClass::IsCampaign())
+	{
+		if (TeamClass* const pTeam = pThis->Team)
+			pTeam->LiberateMember(pThis);
+
+		return ClearTarget;
+	}
+
+	return 0;
 }
 
 // Stop: clear the mega mission and return to airbase immediately
@@ -440,7 +448,7 @@ DEFINE_HOOK(0x4C762A, EventClass_RespondToEvent_StopAircraftAction, 0x6)
 		if (pTechno->vt_entry_4C4()) // pTechno->MegaMissionIsAttackMove()
 			pTechno->vt_entry_4A8(); // pTechno->ClearMegaMissionData()
 
-		if (pTechno->GetHeight() == static_cast<AircraftClass*>(pTechno)->Type->GetFlightLevel())
+		if (pTechno->GetHeight() > Unsorted::CellHeight)
 			pTechno->EnterIdleMode(false, true);
 	}
 
@@ -461,6 +469,8 @@ AbstractClass* __fastcall AircraftClass_GreatestThreat(AircraftClass* pThis, voi
 DEFINE_JUMP(VTABLE, 0x7E2668, GET_OFFSET(AircraftClass_GreatestThreat))
 
 #pragma endregion
+
+#pragma region AircraftScatterCell
 
 DEFINE_HOOK(0x41847E, AircraftClass_MissionAttack_ScatterCell1, 0x6)
 {
@@ -497,6 +507,10 @@ DEFINE_HOOK(0x418B46, AircraftClass_MissionAttack_ScatterCell6, 0x6)
 	enum { SkipScatter = 0x418B8A, Scatter = 0 };
 	return RulesExt::Global()->StrafingTargetScatter ? Scatter : SkipScatter;
 }
+
+#pragma endregion
+
+#pragma region AircraftFlight
 
 DEFINE_HOOK(0x4CDF84, FlyLocomotionClass_UpdateLoaction_FlightCrash, 0x5)
 {
@@ -540,6 +554,8 @@ DEFINE_HOOK(0x4CDE96, FlyLocomotionClass_UpdateLoaction_FlightClimb, 0x6)
 	R->EAX(deltaZ);
 	return 0;
 }
+
+#pragma endregion
 
 static __forceinline bool CheckSpyPlaneCameraCount(AircraftClass* pThis)
 {
