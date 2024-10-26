@@ -1247,5 +1247,13 @@ DEFINE_HOOK(0x42EB8B, BaseClass_GetBaseNodeIndex_CheckValidBaseNode, 0x9)
 
 	GET(BaseNodeClass* const, pBaseNode, EAX);
 
-	return (pBaseNode->Placed && BuildingTypeExt::ExtMap.Find(BuildingTypeClass::Array->Items[pBaseNode->BuildingTypeIndex])->LimboBuild) ? Invalid : 0;
+	if (pBaseNode->Placed)
+	{
+		const int index = pBaseNode->BuildingTypeIndex;
+
+		if (index >= 0 && index < BuildingTypeClass::Array->Count && BuildingTypeExt::ExtMap.Find(BuildingTypeClass::Array->Items[index])->LimboBuild)
+			return Invalid;
+	}
+
+	return 0;
 }
