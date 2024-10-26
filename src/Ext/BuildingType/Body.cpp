@@ -777,6 +777,28 @@ void BuildingTypeExt::CreateLimboBuilding(BuildingClass* pBuilding, BuildingType
 	}
 }
 
+bool BuildingTypeExt::DeleteLimboBuilding(BuildingClass* pBuilding, int ID)
+{
+	BuildingExt::ExtData* const pBuildingExt = BuildingExt::ExtMap.Find(pBuilding);
+
+	if (pBuildingExt->LimboID != ID)
+		return false;
+
+	if (pBuildingExt->TypeExtData->LimboBuildID == ID)
+	{
+		HouseClass* const pHouse = pBuilding->Owner;
+		const int index = pBuilding->Type->ArrayIndex;
+
+		for (auto& pBaseNode : pHouse->Base.BaseNodes)
+		{
+			if (pBaseNode.BuildingTypeIndex == index)
+				pBaseNode.Placed = false;
+		}
+	}
+
+	return true;
+}
+
 void BuildingTypeExt::ExtData::Initialize()
 { }
 

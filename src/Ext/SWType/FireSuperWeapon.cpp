@@ -108,9 +108,8 @@ void SWTypeExt::ExtData::ApplyLimboKill(HouseClass* pHouse)
 				for (auto it = vec.begin(); it != vec.end(); )
 				{
 					BuildingClass* const pBuilding = *it;
-					auto const pBuildingExt = BuildingExt::ExtMap.Find(pBuilding);
 
-					if (pBuildingExt->LimboID == limboKillID)
+					if (BuildingTypeExt::DeleteLimboBuilding(pBuilding, limboKillID))
 					{
 						it = vec.erase(it);
 						pBuilding->Stun();
