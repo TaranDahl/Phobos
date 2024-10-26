@@ -1241,19 +1241,15 @@ DEFINE_HOOK(0x6A8E34, StripClass_Update_AutoBuildBuildings, 0x7)
 }
 
 // Limbo Build Hook -> sub_42EB50 - Check Base Node
-DEFINE_HOOK(0x42EB8B, BaseClass_GetBaseNodeIndex_CheckValidBaseNode, 0x9)
+DEFINE_HOOK(0x42EB8E, BaseClass_GetBaseNodeIndex_CheckValidBaseNode, 0x6)
 {
-	enum { Invalid = 0x42EBAE };
+	enum { Valid = 0x42EBC3, Invalid = 0x42EBAE };
 
+	GET(BaseClass* const, pBase, ESI);
 	GET(BaseNodeClass* const, pBaseNode, EAX);
 
-	if (pBaseNode->Placed)
-	{
-		const int index = pBaseNode->BuildingTypeIndex;
+	if (pBaseNode->Placed && pBaseNode->BuildingTypeIndex >= 0 && pBaseNode->BuildingTypeIndex < BuildingTypeClass::Array->Count && BuildingTypeExt::ExtMap.Find(BuildingTypeClass::Array->Items[pBaseNode->BuildingTypeIndex])->LimboBuild)
+		return Invalid;
 
-		if (index >= 0 && index < BuildingTypeClass::Array->Count && BuildingTypeExt::ExtMap.Find(BuildingTypeClass::Array->Items[index])->LimboBuild)
-			return Invalid;
-	}
-
-	return 0;
+	return reinterpret_cast<bool(__thiscall*)(HouseClass*, BaseNodeClass*)>(0x50CAD0)(pBase->Owner, pBaseNode) ? Valid : Invalid;
 }
