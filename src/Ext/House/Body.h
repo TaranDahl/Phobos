@@ -23,15 +23,9 @@ public:
 	public:
 		std::map<BuildingTypeExt::ExtData*, int> PowerPlantEnhancers;
 		std::vector<BuildingClass*> OwnedLimboDeliveredBuildings;
-
 		std::vector<TechnoTypeExt::ExtData*> OwnedExistCameoTechnoTypes;
 		std::vector<UnitClass*> OwnedDeployingUnits;
 		std::vector<CellStruct> BaseNormalCells;
-		BuildingTypeClass* CurrentBuildingType;
-		CellStruct CurrentBuildingTopLeft;
-		CDTimerClass CurrentBuildingTimer;
-		int CurrentBuildingTimes;
-		std::vector<int> SWButtonData;
 
 		CounterClass LimboAircraft;  // Currently owned aircraft in limbo
 		CounterClass LimboBuildings; // Currently owned buildings in limbo
@@ -46,6 +40,13 @@ public:
 
 		CDTimerClass AISuperWeaponDelayTimer;
 		CDTimerClass AIFireSaleDelayTimer;
+
+		std::vector<int> SWButtonData;
+		BuildingTypeClass* CurrentBuildingType;
+		CellStruct CurrentBuildingTopLeft;
+		CDTimerClass CurrentBuildingTimer;
+		int CurrentBuildingTimes;
+		int LastRecheckTechTreeFrame;
 
 		//Read from INI
 		Nullable<bool> RepairBaseNodes[3];
@@ -77,11 +78,6 @@ public:
 			, OwnedExistCameoTechnoTypes {}
 			, OwnedDeployingUnits {}
 			, BaseNormalCells {}
-			, CurrentBuildingType { nullptr }
-			, CurrentBuildingTopLeft {}
-			, CurrentBuildingTimer {}
-			, CurrentBuildingTimes { 0 }
-			, SWButtonData {}
 			, LimboAircraft {}
 			, LimboBuildings {}
 			, LimboInfantry {}
@@ -91,6 +87,12 @@ public:
 			, Factory_VehicleType { nullptr }
 			, Factory_NavyType { nullptr }
 			, Factory_AircraftType { nullptr }
+			, SWButtonData {}
+			, CurrentBuildingType { nullptr }
+			, CurrentBuildingTopLeft {}
+			, CurrentBuildingTimer {}
+			, CurrentBuildingTimes { 0 }
+			, LastRecheckTechTreeFrame { 0 }
 			, AISuperWeaponDelayTimer {}
 			, RepairBaseNodes { }
 			, RestrictedFactoryPlants {}

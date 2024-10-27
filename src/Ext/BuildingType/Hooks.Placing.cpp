@@ -748,8 +748,14 @@ DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)
 		{
 			BuildingTypeExt::CreateLimboBuilding(pBuilding, pBuildingType, pHouse, pTypeExt->LimboBuildID);
 
-			if (pBaseNode && pHouse->ProducingBuildingTypeIndex == pBuildingType->ArrayIndex)
-				pHouse->ProducingBuildingTypeIndex = -1;
+			if (pBaseNode)
+			{
+				pBaseNode->Placed = true;
+				pBaseNode->Attempts = 0;
+
+				if (pHouse->ProducingBuildingTypeIndex == pBuildingType->ArrayIndex)
+					pHouse->ProducingBuildingTypeIndex = -1;
+			}
 
 			BuildingTypeClass* const pFactoryType = pFactory->Type;
 
@@ -1232,4 +1238,23 @@ DEFINE_HOOK(0x6A8E34, StripClass_Update_AutoBuildBuildings, 0x7)
 	GET(BuildingClass* const, pBuilding, ESI);
 
 	return (RulesExt::Global()->ExpandBuildingPlace && (BuildingTypeExt::BuildLimboBuilding(pBuilding) || (pBuilding->Type->PowersUpBuilding[0] && BuildingTypeExt::AutoUpgradeBuilding(pBuilding)))) ? SkipSetStripShortCut : 0;
+}
+
+// Limbo Build Hook -> sub_42EB50 - Check Base Node
+DEFINE_HOOK(0x42EB8E, BaseClass_GetBaseNodeIndex_CheckValidBaseNode, 0x6)
+{
+	enum { Valid = 0x42EBC3, Invalid = 0x42EBAE };
+
+	GET(BaseClass* const, pBase, ESI);
+	GET(BaseNodeClass* const, pBaseNode, EAX);
+
+	if (pBaseNode->Placed)
+	{
+		const int index = pBaseNode->BuildingTypeIndex;
+
+		if (index >= 0 && index < BuildingTypeClass::Array->Count && BuildingTypeExt::ExtMap.Find(BuildingTypeClass::Array->Items[index])->LimboBuild)
+			return Invalid;
+	}
+
+	return reinterpret_cast<bool(__thiscall*)(HouseClass*, BaseNodeClass*)>(0x50CAD0)(pBase->Owner, pBaseNode) ? Valid : Invalid;
 }

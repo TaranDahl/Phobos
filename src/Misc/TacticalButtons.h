@@ -88,7 +88,7 @@ private:
 	// Button index N/A : Message Lists
 
 	// Button index 1-10 : Super weapons buttons
-	SuperClass* RecordSuper { nullptr }; // Cannot be used, only for comparison purposes
+	int RecordSuperIndex { -1 }; // Cannot be used, only for comparison purposes
 
 	// Button index 11 : SW sidebar switch
 	bool SuperVisible { true };

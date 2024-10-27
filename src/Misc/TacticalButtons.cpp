@@ -339,12 +339,12 @@ void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 	if (this->IndexInSWButtons()) // Button index 1-10 : Super weapons buttons
 	{
 		HouseClass* const pHouse = HouseClass::CurrentPlayer;
-		SuperClass* const pSuper = pHouse->Supers.Items[HouseExt::ExtMap.Find(pHouse)->SWButtonData[this->ButtonIndex - 1]];
+		const int superIndex = HouseExt::ExtMap.Find(pHouse)->SWButtonData[this->ButtonIndex - 1];
 
-		if (pSuper && pSuper != this->RecordSuper)
+		if (superIndex != -1 && superIndex != this->RecordSuperIndex)
 		{
-			PhobosToolTip::Instance.HelpText(pSuper);
-			this->RecordSuper = pSuper;
+			PhobosToolTip::Instance.HelpText_Super(superIndex);
+			this->RecordSuperIndex = superIndex;
 
 			if (toolTips->ToolTipDelay)
 				toolTips->LastToolTipDelay = toolTips->ToolTipDelay;
@@ -352,9 +352,9 @@ void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 			toolTips->ToolTipDelay = 0;
 		}
 	}
-	else if (this->RecordSuper)
+	else if (this->RecordSuperIndex != -1)
 	{
-		this->RecordSuper = nullptr;
+		this->RecordSuperIndex = -1;
 		toolTips->ToolTipDelay = toolTips->LastToolTipDelay;
 	}
 
@@ -400,7 +400,7 @@ void TacticalButtonsClass::PressDesignatedButton(int triggerIndex)
 			DisplayClass::Instance->CurrentSWTypeIndex = -1;
 
 		CCToolTip* const toolTips = CCToolTip::Instance;
-		this->RecordSuper = nullptr;
+		this->RecordSuperIndex = -1;
 		toolTips->ToolTipDelay = toolTips->LastToolTipDelay;
 	}
 	else if (this->IndexIsSWSwitch())
@@ -1777,7 +1777,11 @@ DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 // SW buttons update hooks
 DEFINE_HOOK(0x4F9283, HouseClass_Update_RecheckTechTree, 0x5)
 {
+	GET(HouseClass*, pHouse, ESI);
+
 	TacticalButtonsClass::Instance.SWSidebarRecheck();
+
+	HouseExt::ExtMap.Find(pHouse)->LastRecheckTechTreeFrame = Unsorted::CurrentFrame;
 
 	return 0;
 }

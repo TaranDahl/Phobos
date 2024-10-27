@@ -119,32 +119,123 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	if (!pTypeExt || !pTypeExt->HarvesterQuickUnloader)
 		return 0;
 
-	++Unsorted::IKnowWhatImDoing;
-	auto const pDock = (BuildingClass*)pThis->vt_entry_528(&pType->Dock, 0, 1); // FindDockInList
-	--Unsorted::IKnowWhatImDoing;
+	std::vector<BuildingTypeClass*> docks;
 
-	if (!pDock)
+	if (const int dockCount = pType->Dock.Count)
+	{
+		docks.reserve(dockCount);
+
+		for (auto const& pBuildingType : pType->Dock)
+		{
+			if (pBuildingType)
+				docks.push_back(pBuildingType);
+		}
+	}
+
+	if (!docks.size())
 		return SkipGameCode;
 
+	// Check arrived
 	CellClass* const pThisCell = pThis->GetCell();
 
 	for (int i = 0; i < 4; ++i)
 	{
-		if (pThisCell->GetNeighbourCell(static_cast<FacingType>(i << 1))->GetBuilding() == pDock)
+		if (BuildingClass* const pBuilding = pThisCell->GetNeighbourCell(static_cast<FacingType>(i << 1))->GetBuilding())
 		{
-			ArrivingRefineryNearBy(pThis, pDock);
-			return SkipGameCode;
+			BuildingTypeClass* const pCellBuildingType = pBuilding->Type;
+
+			for (auto const& pBuildingType : docks)
+			{
+				if (pCellBuildingType == pBuildingType)
+				{
+					ArrivingRefineryNearBy(pThis, pBuilding);
+					return SkipGameCode;
+				}
+			}
 		}
 	}
 
-	const CoordStruct dockLocation = pDock->GetCoords();
+	HouseClass* const pHouse = pThis->Owner;
+
+	// Check destination
+	if (AbstractClass* const pDestination = pThis->Destination)
+	{
+		if (!pHouse->RecheckTechTree && Unsorted::CurrentFrame - HouseExt::ExtMap.Find(pHouse)->LastRecheckTechTreeFrame > pThis->UpdateTimer.TimeLeft)
+		{
+			CellClass* const pDestinationCell = (pDestination->WhatAmI() == AbstractType::Cell) ?
+				static_cast<CellClass*>(pDestination) : MapClass::Instance->GetCellAt(pDestination->GetCoords());
+
+			for (int i = 0; i < 4; ++i)
+			{
+				if (BuildingClass* const pBuilding = pDestinationCell->GetNeighbourCell(static_cast<FacingType>(i << 1))->GetBuilding())
+				{
+					BuildingTypeClass* const pCellBuildingType = pBuilding->Type;
+
+					for (auto const& pBuildingType : docks)
+					{
+						if (pCellBuildingType == pBuildingType)
+							return SkipGameCode;
+					}
+				}
+			}
+		}
+	}
+
+	// Find nearest dock
 	const CoordStruct thisLocation = pThis->GetCoords();
+	const Point2D thisPosition { (thisLocation.X >> 4), (thisLocation.Y >> 4) };
 
-	if (pThis->Destination || (!pType->Teleporter && thisLocation.DistanceFrom(dockLocation) < 768))
+	const CoordStruct destLocation = pThis->GetDestination();
+	CellStruct destCell { static_cast<short>(destLocation.X >> 8), static_cast<short>(destLocation.Y >> 8) };
+
+	int distanceSquared = INT_MAX;
+	BuildingClass* pDock = nullptr;
+
+	for (auto const& pBuildingType : docks)
+	{
+		for (auto const& pBuilding : pHouse->Buildings)
+		{
+			if (pBuilding && pBuilding->Type == pBuildingType && !pBuilding->InLimbo) // Prevent check radio links
+			{
+				const CoordStruct dockLocation = pBuilding->GetCoords();
+				CellStruct dockCell { static_cast<short>(dockLocation.X >> 8), static_cast<short>(dockLocation.Y >> 8) };
+
+				if (reinterpret_cast<bool(__thiscall*)(DisplayClass*, CellStruct*, CellStruct*, MovementZone, bool, bool, bool)>(0x56D100)
+					(DisplayClass::Instance, &destCell, &dockCell, pType->MovementZone, pThis->IsOnBridge(), false ,false)) // Prevent send command
+				{
+					const Point2D difference { (thisPosition.X - (dockLocation.X >> 4)), (thisPosition.Y - (dockLocation.Y >> 4)) };
+					const int newDistanceSquared = (difference.X * difference.X) + (difference.Y * difference.Y);
+
+					if (newDistanceSquared < distanceSquared) // No check for primary building
+					{
+						distanceSquared = newDistanceSquared;
+						pDock = pBuilding;
+					}
+				}
+			}
+		}
+	}
+
+	if (!pDock)
+	{
+		pThis->SetDestination(nullptr, true);
 		return SkipGameCode;
+	}
 
-	const CellStruct destCell = MapClass::Instance->NearByLocation(CellClass::Coord2Cell(dockLocation), // select a nearby cell
-		pType->SpeedType, -1, pType->MovementZone, false, 1, 1, false, false, false, false, CellStruct::Empty, false, false);
+	// Find a final destination
+	const CoordStruct dockLocation = pDock->GetCoords();
+	destCell = CellClass::Coord2Cell(dockLocation);
+	CellStruct closeTo = CellStruct::Empty;
+
+	if (distanceSquared > 6400)
+	{
+		const CellStruct difference = CellClass::Coord2Cell(thisLocation) - destCell;
+		const bool bias = abs(difference.X) >= abs(difference.Y);
+		closeTo.X = bias ? static_cast<short>(Math::sgn(difference.X)) : 0;
+		closeTo.Y = bias ? 0 : static_cast<short>(Math::sgn(difference.Y));
+	}
+
+	destCell = MapClass::Instance->NearByLocation(destCell, pType->SpeedType, -1, pType->MovementZone, false, 1, 1, false, false, false, true, closeTo, false, false);
 
 	if (destCell == CellStruct::Empty)
 	{
@@ -152,25 +243,26 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 		return SkipGameCode;
 	}
 
-	CellClass* const pDestCell = MapClass::Instance->GetCellAt(destCell);
+	CellClass* const pDestCell = MapClass::Instance->TryGetCellAt(destCell);
 
-	if (!pType->Teleporter)
+	if (!pDestCell || !pType->Teleporter)
 	{
 		pThis->SetDestination(pDestCell, true);
 		return SkipGameCode;
 	}
 
+	// Teleporters
 	if (FootClass* const ParasiteEatingMe = pThis->ParasiteEatingMe)
 		ParasiteEatingMe->ParasiteImUsing->ExitUnit();
 
 	pThis->Mark(MarkType::Up);
-	int ChronoOutSound = pType->ChronoOutSound;
+	int sound = pType->ChronoOutSound;
 
-	if (ChronoOutSound != -1 || (ChronoOutSound = RulesClass::Instance->ChronoOutSound, ChronoOutSound != -1))
-		VocClass::PlayAt(ChronoOutSound, thisLocation, 0);
+	if (sound != -1 || (sound = RulesClass::Instance->ChronoOutSound, sound != -1))
+		VocClass::PlayAt(sound, thisLocation, 0);
 
 	if (AnimTypeClass* const pWarpIn = pTypeExt->WarpIn.Get(RulesClass::Instance->WarpIn))
-		GameCreate<AnimClass>(pWarpIn, pThis->Location, 0, 1)->Owner = pThis->Owner;
+		GameCreate<AnimClass>(pWarpIn, pThis->Location, 0, 1)->Owner = pHouse;
 
 	pThis->SetLocation(pDestCell->GetCoords());
 	pThis->OnBridge = pDestCell->ContainsBridge();
@@ -182,13 +274,11 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	pDestCell->CollectCrate(pThis);
 	pThis->unknown_280 = 0;
 
-	int ChronoInSound = pType->ChronoInSound;
-
-	if (ChronoInSound != -1 || (ChronoInSound = RulesClass::Instance->ChronoInSound, ChronoInSound != -1))
-		VocClass::PlayAt(ChronoInSound, pThis->Location, 0);
+	if ((sound = pType->ChronoInSound, sound != -1) || (sound = RulesClass::Instance->ChronoInSound, sound != -1))
+		VocClass::PlayAt(sound, pThis->Location, 0);
 
 	if (AnimTypeClass* const pWarpOut = pTypeExt->WarpOut.Get(RulesClass::Instance->WarpOut))
-		GameCreate<AnimClass>(pWarpOut, pThis->Location, 0, 1)->Owner = pThis->Owner;
+		GameCreate<AnimClass>(pWarpOut, pThis->Location, 0, 1)->Owner = pHouse;
 
 	return SkipGameCode;
 }

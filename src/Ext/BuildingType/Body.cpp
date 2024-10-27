@@ -633,15 +633,22 @@ bool BuildingTypeExt::AutoUpgradeBuilding(BuildingClass* pBuilding)
 		{
 			HouseClass* const pHouse = pBuilding->Owner;
 			HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pHouse);
+			const int size = pTypeExt->PowersUp_Buildings.size();
 
 			std::vector<BuildingTypeClass*> upgradeBuildings;
-			upgradeBuildings.reserve(pTypeExt->PowersUp_Buildings.size() + 1);
+			upgradeBuildings.reserve(size + 1);
 
 			if (BuildingTypeClass* const pUpgrade = BuildingTypeClass::Find(pBuildingType->PowersUpBuilding))
 				upgradeBuildings.push_back(pUpgrade);
 
-			for (auto const& pUpgrade : pTypeExt->PowersUp_Buildings)
-				upgradeBuildings.push_back(pUpgrade);
+			if (size)
+			{
+				for (auto const& pUpgrade : pTypeExt->PowersUp_Buildings)
+				{
+					if (pUpgrade)
+						upgradeBuildings.push_back(pUpgrade);
+				}
+			}
 
 			for (auto const& pOwned : pHouse->Buildings)
 			{
@@ -775,6 +782,28 @@ void BuildingTypeExt::CreateLimboBuilding(BuildingClass* pBuilding, BuildingType
 				pTechnoExt->AutoDeathTimer.Start(pTechnoTypeExt->AutoDeath_AfterDelay);
 		}
 	}
+}
+
+bool BuildingTypeExt::DeleteLimboBuilding(BuildingClass* pBuilding, int ID)
+{
+	BuildingExt::ExtData* const pBuildingExt = BuildingExt::ExtMap.Find(pBuilding);
+
+	if (pBuildingExt->LimboID != ID)
+		return false;
+
+	if (pBuildingExt->TypeExtData->LimboBuildID == ID)
+	{
+		HouseClass* const pHouse = pBuilding->Owner;
+		const int index = pBuilding->Type->ArrayIndex;
+
+		for (auto& pBaseNode : pHouse->Base.BaseNodes)
+		{
+			if (pBaseNode.BuildingTypeIndex == index)
+				pBaseNode.Placed = false;
+		}
+	}
+
+	return true;
 }
 
 void BuildingTypeExt::ExtData::Initialize()

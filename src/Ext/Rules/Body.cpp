@@ -181,7 +181,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->SelectedVehicleMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedVehicleMissingPCX");
 	this->SelectedAircraftMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedAircraftMissingPCX");
 	this->SelectedBuildingMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedBuildingMissingPCX");
-	this->AIAutoDeployMCV.Read(exINI, GameStrings::AI, "AIAutoDeployMCV");
+	this->AINonAutoDeploy.Read(exINI, GameStrings::AI, "AINonAutoDeploy");
 	this->AISetBaseCenter.Read(exINI, GameStrings::AI, "AISetBaseCenter");
 	this->AIBiasSpawnCell.Read(exINI, GameStrings::AI, "AIBiasSpawnCell");
 	this->AIForbidConYard.Read(exINI, GameStrings::AI, "AIForbidConYard");
@@ -426,7 +426,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->SelectedVehicleMissingPCX)
 		.Process(this->SelectedAircraftMissingPCX)
 		.Process(this->SelectedBuildingMissingPCX)
-		.Process(this->AIAutoDeployMCV)
+		.Process(this->AINonAutoDeploy)
 		.Process(this->AISetBaseCenter)
 		.Process(this->AIBiasSpawnCell)
 		.Process(this->AIForbidConYard)

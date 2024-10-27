@@ -138,7 +138,7 @@ public:
 		PhobosPCXFile SelectedVehicleMissingPCX;
 		PhobosPCXFile SelectedAircraftMissingPCX;
 		PhobosPCXFile SelectedBuildingMissingPCX;
-		Valueable<bool> AIAutoDeployMCV;
+		Valueable<bool> AINonAutoDeploy;
 		Valueable<bool> AISetBaseCenter;
 		Valueable<bool> AIBiasSpawnCell;
 		Valueable<bool> AIForbidConYard;
@@ -320,7 +320,7 @@ public:
 			, SelectedVehicleMissingPCX {}
 			, SelectedAircraftMissingPCX {}
 			, SelectedBuildingMissingPCX {}
-			, AIAutoDeployMCV { false }
+			, AINonAutoDeploy { false }
 			, AISetBaseCenter { false }
 			, AIBiasSpawnCell { false }
 			, AIForbidConYard { false }
