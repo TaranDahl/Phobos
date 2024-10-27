@@ -186,7 +186,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	// Check destination
 	if (AbstractClass* const pDestination = pThis->Destination)
 	{
-		if (!pHouse->RecheckTechTree)
+		if (!pHouse->RecheckTechTree && Unsorted::CurrentFrame - HouseExt::ExtMap.Find(pHouse)->LastRecheckTechTreeFrame > pThis->UpdateTimer.TimeLeft)
 		{
 			CellClass* const pDestinationCell = (pDestination->WhatAmI() == AbstractType::Cell) ?
 				static_cast<CellClass*>(pDestination) : MapClass::Instance->GetCellAt(pDestination->GetCoords());
