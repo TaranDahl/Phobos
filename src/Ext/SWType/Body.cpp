@@ -25,6 +25,7 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SW_InitialReady)
 		.Process(this->SW_PostDependent)
 		.Process(this->SW_MaxCount)
+		.Process(this->SW_Shots)
 		.Process(this->SidebarPCX)
 		.Process(this->CameoPal)
 		.Process(this->UIDescription)
@@ -94,6 +95,7 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SW_InitialReady.Read(exINI, pSection, "SW.InitialReady");
 	this->SW_PostDependent.Read(exINI, pSection, "SW.PostDependent");
 	this->SW_MaxCount.Read(exINI, pSection, "SW.MaxCount");
+	this->SW_Shots.Read(exINI, pSection, "SW.Shots");
 	this->SidebarPCX.Read(pINI, pSection, "SidebarPCX");
 	this->CameoPal.LoadFromINI(pINI, pSection, "SidebarPalette");
 
