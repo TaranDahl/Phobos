@@ -355,7 +355,7 @@ void BuildingExt::KickOutStuckUnits(BuildingClass* pThis)
 				HouseClass* const pOwner = pThis->Owner;
 				const CellStruct unitCell = pUnit->GetMapCoords();
 				const CellStruct buildingCell = pThis->GetMapCoords();
-				Debug::Log("Frame: %d - Detected [%s(%s)] having a stuck unit [%s] at (%d,%d) in the weapon factory [%s] at (%d,%d) and is tether to it.\n",
+				Debug::Log("Frame: %d - Detected [%s(%s)] having a stuck unit [%s] at (%d,%d) in the weapons factory [%s] at (%d,%d) and is tether to it.\n",
 					static_cast<int>(Unsorted::CurrentFrame), pOwner->get_ID(), pOwner->PlainName, pUnit->Type->ID, unitCell.X, unitCell.Y, pThis->Type->ID, buildingCell.X, buildingCell.Y);
 
 				if (TeamClass* const pTeam = pUnit->Team)
@@ -389,7 +389,7 @@ void BuildingExt::KickOutStuckUnits(BuildingClass* pThis)
 				HouseClass* const pOwner = pThis->Owner;
 				const CellStruct unitCell = pUnit->GetMapCoords();
 				const CellStruct buildingCell = pThis->GetMapCoords();
-				Debug::Log("Frame: %d - Now [%s(%s)] is trying to kick out a stuck unit [%s] at (%d,%d) in the weapon factory [%s] at (%d,%d). Just wait a moment.\n",
+				Debug::Log("Frame: %d - Now [%s(%s)] is trying to kick out a stuck unit [%s] at (%d,%d) in the weapons factory [%s] at (%d,%d). Just wait a moment.\n",
 					static_cast<int>(Unsorted::CurrentFrame), pOwner->get_ID(), pOwner->PlainName, pUnit->Type->ID, unitCell.X, unitCell.Y, pThis->Type->ID, buildingCell.X, buildingCell.Y);
 
 				if (TeamClass* const pTeam = pUnit->Team)
