@@ -209,7 +209,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 
 	// Find nearest dock
 	const CoordStruct thisLocation = pThis->GetCoords();
-	const Point2D thisPosition { (thisLocation.X >> 4), (thisLocation.X >> 4) };
+	const Point2D thisPosition { (thisLocation.X >> 4), (thisLocation.Y >> 4) };
 
 	const CoordStruct destLocation = pThis->GetDestination();
 	CellStruct destCell { static_cast<short>(destLocation.X >> 8), static_cast<short>(destLocation.Y >> 8) };
@@ -229,7 +229,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 				if (reinterpret_cast<bool(__thiscall*)(DisplayClass*, CellStruct*, CellStruct*, MovementZone, bool, bool, bool)>(0x56D100)
 					(DisplayClass::Instance, &destCell, &dockCell, pType->MovementZone, pThis->IsOnBridge(), false ,false)) // Prevent send command
 				{
-					const Point2D difference { thisPosition.X - (destLocation.X >> 4), thisPosition.Y - (destLocation.X >> 4) };
+					const Point2D difference { thisPosition.X - (destLocation.X >> 4), thisPosition.Y - (destLocation.Y >> 4) };
 					const int newDistanceSquared = difference.X * difference.X + difference.Y * difference.Y;
 
 					if (newDistanceSquared < distanceSquared) // No check for primary building
@@ -250,7 +250,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 
 	// Find a final destination
 	const CoordStruct dockLocation = pDock->GetCoords();
-	CellStruct destCell = CellStruct::Empty;
+	destCell = CellStruct::Empty;
 
 	if (thisLocation.DistanceFromSquared(dockLocation) > 1638400.0)
 	{
