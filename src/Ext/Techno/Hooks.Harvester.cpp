@@ -229,8 +229,8 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 				if (reinterpret_cast<bool(__thiscall*)(DisplayClass*, CellStruct*, CellStruct*, MovementZone, bool, bool, bool)>(0x56D100)
 					(DisplayClass::Instance, &destCell, &dockCell, pType->MovementZone, pThis->IsOnBridge(), false ,false)) // Prevent send command
 				{
-					const Point2D difference { thisPosition.X - (destLocation.X >> 4), thisPosition.Y - (destLocation.Y >> 4) };
-					const int newDistanceSquared = difference.X * difference.X + difference.Y * difference.Y;
+					const Point2D difference { (thisPosition.X - (dockLocation.X >> 4)), (thisPosition.Y - (dockLocation.Y >> 4)) };
+					const int newDistanceSquared = (difference.X * difference.X) + (difference.Y * difference.Y);
 
 					if (newDistanceSquared < distanceSquared) // No check for primary building
 					{
@@ -250,25 +250,18 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 
 	// Find a final destination
 	const CoordStruct dockLocation = pDock->GetCoords();
-	destCell = CellStruct::Empty;
+	destCell = CellClass::Coord2Cell(dockLocation);
+	CellStruct closeTo = CellStruct::Empty;
 
-	if (thisLocation.DistanceFromSquared(dockLocation) > 1638400.0)
+	if (distanceSquared > 6400)
 	{
-		destCell = CellClass::Coord2Cell(dockLocation);
-		const CellStruct difference = CellClass::Coord2Cell(thisLocation) - CellClass::Coord2Cell(dockLocation);
-
+		const CellStruct difference = CellClass::Coord2Cell(thisLocation) - destCell;
 		const bool bias = abs(difference.X) >= abs(difference.Y);
-		const short dX = bias ? static_cast<short>(Math::sgn(difference.X)) : 0;
-		const short dY = bias ? 0 : static_cast<short>(Math::sgn(difference.Y));
+		closeTo.X = bias ? static_cast<short>(Math::sgn(difference.X)) : 0;
+		closeTo.Y = bias ? 0 : static_cast<short>(Math::sgn(difference.Y));
+	}
 
-		destCell = MapClass::Instance->NearByLocation((destCell + CellStruct{ dX, dY }), // Select a nearby cell close to unit
-			pType->SpeedType, -1, pType->MovementZone, false, 1, 1, false, false, false, true, CellStruct::Empty, false, false);
-	}
-	else
-	{
-		destCell = MapClass::Instance->NearByLocation(CellClass::Coord2Cell(dockLocation), // Select a nearby cell around dock
-			pType->SpeedType, -1, pType->MovementZone, false, 1, 1, false, false, false, true, CellStruct::Empty, false, false);
-	}
+	destCell = MapClass::Instance->NearByLocation(destCell, pType->SpeedType, -1, pType->MovementZone, false, 1, 1, false, false, false, true, closeTo, false, false);
 
 	if (destCell == CellStruct::Empty)
 	{
