@@ -296,6 +296,7 @@ public:
 		Nullable<CoordStruct> ExitCoord;
 		Valueable<bool> MissileSpawnUseOtherFLHs;
 		Valueable<bool> HarvesterQuickUnloader;
+		ValueableVector<BuildingTypeClass*> HarvesterQuickNewDocks;
 		Nullable<bool> KeepAlive;
 
 		ValueableVector<TechnoTypeClass*> InitialPayload_Types;
@@ -600,6 +601,7 @@ public:
 			, ExitCoord { }
 			, MissileSpawnUseOtherFLHs { false }
 			, HarvesterQuickUnloader { false }
+			, HarvesterQuickNewDocks {}
 			, KeepAlive { }
 
 			, InitialPayload_Types {}
