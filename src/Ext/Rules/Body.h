@@ -138,7 +138,7 @@ public:
 		PhobosPCXFile SelectedVehicleMissingPCX;
 		PhobosPCXFile SelectedAircraftMissingPCX;
 		PhobosPCXFile SelectedBuildingMissingPCX;
-		Valueable<bool> AIAutoDeployMCV;
+		Valueable<bool> AINonAutoDeploy;
 		Valueable<bool> AISetBaseCenter;
 		Valueable<bool> AIBiasSpawnCell;
 		Valueable<bool> AIForbidConYard;
@@ -364,7 +364,7 @@ public:
 			, ExpandLandGridFrames { { 1, 0, 0 } }
 			, ExpandWaterGridFrames { { 1, 0, 0 } }
 			, SWSidebarBackground { true }
-			, AIAutoDeployMCV { false }
+			, AINonAutoDeploy { false }
 			, AISetBaseCenter { false }
 			, AIBiasSpawnCell { false }
 			, AIForbidConYard { false }
