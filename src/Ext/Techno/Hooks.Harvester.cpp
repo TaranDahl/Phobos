@@ -250,7 +250,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 
 	// Find a final destination
 	const CoordStruct dockLocation = pDock->GetCoords();
-	CellStruct destCell = CellStruct::Empty;
+	destCell = CellStruct::Empty;
 
 	if (thisLocation.DistanceFromSquared(dockLocation) > 1638400.0)
 	{
