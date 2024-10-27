@@ -245,7 +245,7 @@ DEFINE_HOOK(0x4438B4, BuildingClass_SetRallyPoint_Naval, 0x6)
 DEFINE_HOOK(0x6DAAB2, TacticalClass_DrawRallyPointLines_NoUndeployBlyat, 0x6)
 {
 	GET(BuildingClass*, pBld, EDI);
-	if (pBld->Focus && pBld->CurrentMission != Mission::Selling)
+	if (pBld->ArchiveTarget && pBld->CurrentMission != Mission::Selling)
 		return 0x6DAAC0;
 	return 0x6DAD45;
 }
@@ -1088,3 +1088,15 @@ DEFINE_HOOK(0x44985B, BuildingClass_Mission_Guard_UnitReload, 0x6)
 // Patch tileset parsing to not reset certain tileset indices for Lunar theater.
 DEFINE_JUMP(LJMP, 0x546C8B, 0x546CBF);
 
+// Fixes an edge case that affects AI-owned technos where they lose ally targets instantly even if they have AttackFriendlies=yes - Starkku
+DEFINE_HOOK(0x6FA467, TechnoClass_AI_AttackFriendlies, 0x5)
+{
+	enum { SkipResetTarget = 0x6FA472 };
+
+	GET(TechnoClass*, pThis, ESI);
+
+	if (pThis->GetTechnoType()->AttackFriendlies)
+		return SkipResetTarget;
+
+	return 0;
+}
