@@ -248,7 +248,7 @@ void WarheadTypeExt::ExtData::ApplyBuildingUndeploy(TechnoClass* pTarget)
 	if (pType->GetFoundationWidth() > 2 || pType->GetFoundationHeight(false) > 2)
 		cell += CellStruct { 1, 1 };
 
-	pBuilding->SetFocus(MapClass::Instance->GetCellAt(cell));
+	pBuilding->SetArchiveTarget(MapClass::Instance->GetCellAt(cell));
 	pBuilding->Sell(0xFFFFFFFF);
 }
 
