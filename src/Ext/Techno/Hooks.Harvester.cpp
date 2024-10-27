@@ -145,155 +145,138 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	if (!pTypeExt || !pTypeExt->HarvesterQuickUnloader)
 		return 0;
 
-	const CoordStruct thisLocation = pThis->GetCoords();
-	HouseClass* const pHouse = pThis->Owner;
+	std::vector<BuildingTypeClass*> docks;
 
-	CellClass* pDestCell = nullptr;
+	if (const int dockCount = pType->Dock.Count)
 	{
-		BuildingClass* pDock = nullptr;
+		docks.reserve(dockCount);
+
+		for (auto const& pBuildingType : pType->Dock)
 		{
-			std::vector<BuildingTypeClass*> docks;
-			{
-				const int dockCount = pType->Dock.Count;
-				const int docksSize = pTypeExt->HarvesterQuickNewDocks.size();
-				docks.reserve(dockCount + docksSize);
+			if (pBuildingType)
+				docks.push_back(pBuildingType);
+		}
+	}
 
-				if (dockCount)
-				{
-					for (auto const& pBuildingType : pType->Dock)
-					{
-						if (pBuildingType)
-							docks.push_back(pBuildingType);
-					}
-				}
+	if (!docks.size())
+		return SkipGameCode;
 
-				if (docksSize)
-				{
-					for (auto const& pBuildingType : pTypeExt->HarvesterQuickNewDocks)
-					{
-						if (pBuildingType)
-							docks.push_back(pBuildingType);
-					}
-				}
-			}
+	// Check arrived
+	CellClass* const pThisCell = pThis->GetCell();
 
-			if (!docks.size())
-				return SkipGameCode;
-
-			// Check arrived
-			{
-				CellClass* const pThisCell = pThis->GetCell();
-
-				for (int i = 0; i < 4; ++i)
-				{
-					if (BuildingClass* const pBuilding = pThisCell->GetNeighbourCell(static_cast<FacingType>(i << 1))->GetBuilding())
-					{
-						BuildingTypeClass* const pCellBuildingType = pBuilding->Type;
-
-						for (auto const& pBuildingType : docks)
-						{
-							if (pCellBuildingType == pBuildingType)
-							{
-								ArrivingRefineryNearBy(pThis, pBuilding);
-								return SkipGameCode;
-							}
-						}
-					}
-				}
-			}
-
-			// Check destination
-			if (AbstractClass* const pDestination = pThis->Destination)
-			{
-				if (!pHouse->RecheckTechTree)
-				{
-					CellClass* const pDestinationCell = (pDestination->WhatAmI() == AbstractType::Cell) ?
-						static_cast<CellClass*>(pDestination) : MapClass::Instance->GetCellAt(pDestination->GetCoords());
-
-					for (int i = 0; i < 4; ++i)
-					{
-						if (BuildingClass* const pBuilding = pDestinationCell->GetNeighbourCell(static_cast<FacingType>(i << 1))->GetBuilding())
-						{
-							BuildingTypeClass* const pCellBuildingType = pBuilding->Type;
-
-							for (auto const& pBuildingType : docks)
-							{
-								if (pCellBuildingType == pBuildingType)
-									return SkipGameCode;
-							}
-						}
-					}
-				}
-			}
-
-			// Find nearest dock
-			const Point2D thisPosition { (thisLocation.X >> 4), (thisLocation.X >> 4) };
-			const CoordStruct destLocation = pThis->GetDestination();
-			CellStruct destCell { static_cast<short>(destLocation.X >> 8), static_cast<short>(destLocation.Y >> 8) };
-			int distanceSquared = INT_MAX;
+	for (int i = 0; i < 4; ++i)
+	{
+		if (BuildingClass* const pBuilding = pThisCell->GetNeighbourCell(static_cast<FacingType>(i << 1))->GetBuilding())
+		{
+			BuildingTypeClass* const pCellBuildingType = pBuilding->Type;
 
 			for (auto const& pBuildingType : docks)
 			{
-				for (auto const& pBuilding : pHouse->Buildings)
+				if (pCellBuildingType == pBuildingType)
 				{
-					if (pBuilding && pBuilding->Type == pBuildingType && !pBuilding->InLimbo) // Prevent check radio links
+					ArrivingRefineryNearBy(pThis, pBuilding);
+					return SkipGameCode;
+				}
+			}
+		}
+	}
+
+	HouseClass* const pHouse = pThis->Owner;
+
+	// Check destination
+	if (AbstractClass* const pDestination = pThis->Destination)
+	{
+		if (!pHouse->RecheckTechTree)
+		{
+			CellClass* const pDestinationCell = (pDestination->WhatAmI() == AbstractType::Cell) ?
+				static_cast<CellClass*>(pDestination) : MapClass::Instance->GetCellAt(pDestination->GetCoords());
+
+			for (int i = 0; i < 4; ++i)
+			{
+				if (BuildingClass* const pBuilding = pDestinationCell->GetNeighbourCell(static_cast<FacingType>(i << 1))->GetBuilding())
+				{
+					BuildingTypeClass* const pCellBuildingType = pBuilding->Type;
+
+					for (auto const& pBuildingType : docks)
 					{
-						const CoordStruct dockLocation = pBuilding->GetCoords();
-						CellStruct dockCell { static_cast<short>(dockLocation.X >> 8), static_cast<short>(dockLocation.Y >> 8) };
-
-						if (reinterpret_cast<bool(__thiscall*)(DisplayClass*, CellStruct*, CellStruct*, MovementZone, bool, bool, bool)>(0x56D100)
-							(DisplayClass::Instance, &destCell, &dockCell, pType->MovementZone, pThis->IsOnBridge(), false ,false)) // Prevent send command
-						{
-							const Point2D difference { thisPosition.X - (destLocation.X >> 4), thisPosition.Y - (destLocation.X >> 4) };
-							const int newDistanceSquared = difference.X * difference.X + difference.Y * difference.Y;
-
-							if (newDistanceSquared < distanceSquared) // No check for primary building
-							{
-								distanceSquared = newDistanceSquared;
-								pDock = pBuilding;
-							}
-						}
+						if (pCellBuildingType == pBuildingType)
+							return SkipGameCode;
 					}
 				}
 			}
 		}
-
-		if (!pDock)
-		{
-			pThis->SetDestination(nullptr, true);
-			return SkipGameCode;
-		}
-
-		// Find a final destination
-		const CoordStruct dockLocation = pDock->GetCoords();
-		CellStruct destCell = CellStruct::Empty;
-
-		if (thisLocation.DistanceFromSquared(dockLocation) > 1638400.0)
-		{
-			destCell = CellClass::Coord2Cell(dockLocation);
-			const CellStruct difference = CellClass::Coord2Cell(thisLocation) - CellClass::Coord2Cell(dockLocation);
-
-			const bool bias = abs(difference.X) >= abs(difference.Y);
-			const short dX = bias ? static_cast<short>(Math::sgn(difference.X)) : 0;
-			const short dY = bias ? 0 : static_cast<short>(Math::sgn(difference.Y));
-
-			destCell = MapClass::Instance->NearByLocation((destCell + CellStruct{ dX, dY }), // Select a nearby cell close to unit
-				pType->SpeedType, -1, pType->MovementZone, false, 1, 1, false, false, false, true, CellStruct::Empty, false, false);
-		}
-		else
-		{
-			destCell = MapClass::Instance->NearByLocation(CellClass::Coord2Cell(dockLocation), // Select a nearby cell around dock
-				pType->SpeedType, -1, pType->MovementZone, false, 1, 1, false, false, false, true, CellStruct::Empty, false, false);
-		}
-
-		if (destCell == CellStruct::Empty)
-		{
-			pThis->SetDestination(nullptr, true);
-			return SkipGameCode;
-		}
-
-		pDestCell = MapClass::Instance->TryGetCellAt(destCell);
 	}
+
+	// Find nearest dock
+	const CoordStruct thisLocation = pThis->GetCoords();
+	const Point2D thisPosition { (thisLocation.X >> 4), (thisLocation.X >> 4) };
+
+	const CoordStruct destLocation = pThis->GetDestination();
+	CellStruct destCell { static_cast<short>(destLocation.X >> 8), static_cast<short>(destLocation.Y >> 8) };
+
+	int distanceSquared = INT_MAX;
+	BuildingClass* pDock = nullptr;
+
+	for (auto const& pBuildingType : docks)
+	{
+		for (auto const& pBuilding : pHouse->Buildings)
+		{
+			if (pBuilding && pBuilding->Type == pBuildingType && !pBuilding->InLimbo) // Prevent check radio links
+			{
+				const CoordStruct dockLocation = pBuilding->GetCoords();
+				CellStruct dockCell { static_cast<short>(dockLocation.X >> 8), static_cast<short>(dockLocation.Y >> 8) };
+
+				if (reinterpret_cast<bool(__thiscall*)(DisplayClass*, CellStruct*, CellStruct*, MovementZone, bool, bool, bool)>(0x56D100)
+					(DisplayClass::Instance, &destCell, &dockCell, pType->MovementZone, pThis->IsOnBridge(), false ,false)) // Prevent send command
+				{
+					const Point2D difference { thisPosition.X - (destLocation.X >> 4), thisPosition.Y - (destLocation.X >> 4) };
+					const int newDistanceSquared = difference.X * difference.X + difference.Y * difference.Y;
+
+					if (newDistanceSquared < distanceSquared) // No check for primary building
+					{
+						distanceSquared = newDistanceSquared;
+						pDock = pBuilding;
+					}
+				}
+			}
+		}
+	}
+
+	if (!pDock)
+	{
+		pThis->SetDestination(nullptr, true);
+		return SkipGameCode;
+	}
+
+	// Find a final destination
+	const CoordStruct dockLocation = pDock->GetCoords();
+	CellStruct destCell = CellStruct::Empty;
+
+	if (thisLocation.DistanceFromSquared(dockLocation) > 1638400.0)
+	{
+		destCell = CellClass::Coord2Cell(dockLocation);
+		const CellStruct difference = CellClass::Coord2Cell(thisLocation) - CellClass::Coord2Cell(dockLocation);
+
+		const bool bias = abs(difference.X) >= abs(difference.Y);
+		const short dX = bias ? static_cast<short>(Math::sgn(difference.X)) : 0;
+		const short dY = bias ? 0 : static_cast<short>(Math::sgn(difference.Y));
+
+		destCell = MapClass::Instance->NearByLocation((destCell + CellStruct{ dX, dY }), // Select a nearby cell close to unit
+			pType->SpeedType, -1, pType->MovementZone, false, 1, 1, false, false, false, true, CellStruct::Empty, false, false);
+	}
+	else
+	{
+		destCell = MapClass::Instance->NearByLocation(CellClass::Coord2Cell(dockLocation), // Select a nearby cell around dock
+			pType->SpeedType, -1, pType->MovementZone, false, 1, 1, false, false, false, true, CellStruct::Empty, false, false);
+	}
+
+	if (destCell == CellStruct::Empty)
+	{
+		pThis->SetDestination(nullptr, true);
+		return SkipGameCode;
+	}
+
+	CellClass* const pDestCell = MapClass::Instance->TryGetCellAt(destCell);
 
 	if (!pDestCell || !pType->Teleporter)
 	{

@@ -526,7 +526,6 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->ExitCoord.Read(exINI, pSection, "ExitCoord");
 	this->MissileSpawnUseOtherFLHs.Read(exINI, pSection, "MissileSpawnUseOtherFLHs");
 	this->HarvesterQuickUnloader.Read(exINI, pSection, "HarvesterQuickUnloader");
-	this->HarvesterQuickNewDocks.Read(exINI, pSection, "HarvesterQuickNewDocks");
 
 	this->InitialPayload_Types.Read(exINI, pSection, "InitialPayload.Types");
 	this->InitialPayload_Nums.Read(exINI, pSection, "InitialPayload.Nums");
@@ -635,6 +634,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->ParseBurstFLHs(exArtINI, pArtSection, this->DeployedWeaponBurstFLHs, this->EliteDeployedWeaponBurstFLHs, "Deployed");
 	this->ParseBurstFLHs(exArtINI, pArtSection, this->CrouchedWeaponBurstFLHs, this->EliteCrouchedWeaponBurstFLHs, "Prone");
 
+	this->OnlyUseLandSequences.Read(exArtINI, pArtSection, "OnlyUseLandSequences");
 
 	this->PronePrimaryFireFLH.Read(exArtINI, pArtSection, "PronePrimaryFireFLH");
 	this->ProneSecondaryFireFLH.Read(exArtINI, pArtSection, "ProneSecondaryFireFLH");
@@ -829,6 +829,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Passengers_SyncOwner)
 		.Process(this->Passengers_SyncOwner_RevertOnExit)
 
+		.Process(this->OnlyUseLandSequences)
+
 		.Process(this->PronePrimaryFireFLH)
 		.Process(this->ProneSecondaryFireFLH)
 		.Process(this->DeployedPrimaryFireFLH)
@@ -979,7 +981,6 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ExitCoord)
 		.Process(this->MissileSpawnUseOtherFLHs)
 		.Process(this->HarvesterQuickUnloader)
-		.Process(this->HarvesterQuickNewDocks)
 		.Process(this->KeepAlive)
 
 		.Process(this->InitialPayload_Types)

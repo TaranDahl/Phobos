@@ -296,7 +296,6 @@ public:
 		Nullable<CoordStruct> ExitCoord;
 		Valueable<bool> MissileSpawnUseOtherFLHs;
 		Valueable<bool> HarvesterQuickUnloader;
-		ValueableVector<BuildingTypeClass*> HarvesterQuickNewDocks;
 		Nullable<bool> KeepAlive;
 
 		ValueableVector<TechnoTypeClass*> InitialPayload_Types;
@@ -324,7 +323,7 @@ public:
 		};
 
 		std::vector<LaserTrailDataEntry> LaserTrailData;
-
+		Valueable<bool> OnlyUseLandSequences;
 		Nullable<CoordStruct> PronePrimaryFireFLH;
 		Nullable<CoordStruct> ProneSecondaryFireFLH;
 		Nullable<CoordStruct> DeployedPrimaryFireFLH;
@@ -333,6 +332,7 @@ public:
 		std::vector<std::vector<CoordStruct>> EliteCrouchedWeaponBurstFLHs;
 		std::vector<std::vector<CoordStruct>> DeployedWeaponBurstFLHs;
 		std::vector<std::vector<CoordStruct>> EliteDeployedWeaponBurstFLHs;
+
 
 		ExtData(TechnoTypeClass* OwnerObject) : Extension<TechnoTypeClass>(OwnerObject)
 			, HealthBar_Hide { false }
@@ -454,6 +454,8 @@ public:
 			, SelfHealGainType {}
 			, Passengers_SyncOwner { false }
 			, Passengers_SyncOwner_RevertOnExit { true }
+
+			, OnlyUseLandSequences { false }
 
 			, PronePrimaryFireFLH {}
 			, ProneSecondaryFireFLH {}
@@ -601,7 +603,6 @@ public:
 			, ExitCoord { }
 			, MissileSpawnUseOtherFLHs { false }
 			, HarvesterQuickUnloader { false }
-			, HarvesterQuickNewDocks {}
 			, KeepAlive { }
 
 			, InitialPayload_Types {}

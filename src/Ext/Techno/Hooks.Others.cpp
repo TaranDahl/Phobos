@@ -870,7 +870,7 @@ DEFINE_HOOK(0x444CA3, BuildingClass_KickOutUnit_RallyPointAreaGuard1, 0x6)
 
 	if (RulesExt::Global()->RallyPointAreaGuard)
 	{
-		pProduct->SetFocus(pThis->Focus);
+		pProduct->SetArchiveTarget(pThis->ArchiveTarget);
 		pProduct->QueueMission(Mission::Area_Guard, true);
 		return SkipQueueMove;
 	}
@@ -889,7 +889,7 @@ DEFINE_HOOK(0x4448CE, BuildingClass_KickOutUnit_RallyPointAreaGuard2, 0x6)
 	GET(FootClass*, pProduct, EDI);
 	GET(BuildingClass*, pThis, ESI);
 
-	auto const pFocus = pThis->Focus;
+	auto const pFocus = pThis->ArchiveTarget;
 	auto const pUnit = abstract_cast<UnitClass*>(pProduct);
 	bool isHarvester = pUnit ? pUnit->Type->Harvester : false;
 
@@ -900,7 +900,7 @@ DEFINE_HOOK(0x4448CE, BuildingClass_KickOutUnit_RallyPointAreaGuard2, 0x6)
 	}
 	else if (RulesExt::Global()->RallyPointAreaGuard)
 	{
-		pProduct->SetFocus(pFocus);
+		pProduct->SetArchiveTarget(pFocus);
 		pProduct->QueueMission(Mission::Area_Guard, true);
 	}
 	else
@@ -965,7 +965,7 @@ DEFINE_HOOK(0x444424, BuildingClass_KickOutUnit_RallyPointAreaGuard3, 0x5)
 
 	if (RulesExt::Global()->RallyPointAreaGuard && !isHarvester)
 	{
-		pProduct->SetFocus(pFocus);
+		pProduct->SetArchiveTarget(pFocus);
 		pProduct->QueueMission(Mission::Area_Guard, true);
 		return SkipQueueMove;
 	}
@@ -984,7 +984,7 @@ DEFINE_HOOK(0x444061, BuildingClass_KickOutUnit_RallyPointAreaGuard4, 0x6)
 
 	if (RulesExt::Global()->RallyPointAreaGuard)
 	{
-		pProduct->SetFocus(pFocus);
+		pProduct->SetArchiveTarget(pFocus);
 		pProduct->QueueMission(Mission::Area_Guard, true);
 		return SkipQueueMove;
 	}
@@ -1003,7 +1003,7 @@ DEFINE_HOOK(0x443EB8, BuildingClass_KickOutUnit_RallyPointAreaGuard5, 0x5)
 
 	if (RulesExt::Global()->RallyPointAreaGuard)
 	{
-		pProduct->SetFocus(pFocus);
+		pProduct->SetArchiveTarget(pFocus);
 		pProduct->QueueMission(Mission::Area_Guard, true);
 		return SkipQueueMove;
 	}
@@ -1022,7 +1022,7 @@ DEFINE_HOOK(0x73AAB3, UnitClass_UpdateMoving_RallyPointAreaGuard, 0x5)
 	bool isHarvester = pThis->Type->Harvester;
 	if (RulesExt::Global()->RallyPointAreaGuard && !isHarvester)
 	{
-		pThis->SetFocus(pFocus);
+		pThis->SetArchiveTarget(pFocus);
 		pThis->QueueMission(Mission::Area_Guard, true);
 		return SkipQueueMove;
 	}
