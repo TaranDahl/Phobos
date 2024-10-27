@@ -1248,8 +1248,13 @@ DEFINE_HOOK(0x42EB8E, BaseClass_GetBaseNodeIndex_CheckValidBaseNode, 0x6)
 	GET(BaseClass* const, pBase, ESI);
 	GET(BaseNodeClass* const, pBaseNode, EAX);
 
-	if (pBaseNode->Placed && pBaseNode->BuildingTypeIndex >= 0 && pBaseNode->BuildingTypeIndex < BuildingTypeClass::Array->Count && BuildingTypeExt::ExtMap.Find(BuildingTypeClass::Array->Items[pBaseNode->BuildingTypeIndex])->LimboBuild)
-		return Invalid;
+	if (pBaseNode->Placed)
+	{
+		const int index = pBaseNode->BuildingTypeIndex;
+
+		if (index >= 0 && index < BuildingTypeClass::Array->Count && BuildingTypeExt::ExtMap.Find(BuildingTypeClass::Array->Items[index])->LimboBuild)
+			return Invalid;
+	}
 
 	return reinterpret_cast<bool(__thiscall*)(HouseClass*, BaseNodeClass*)>(0x50CAD0)(pBase->Owner, pBaseNode) ? Valid : Invalid;
 }
