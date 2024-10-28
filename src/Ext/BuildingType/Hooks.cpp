@@ -67,12 +67,12 @@ DEFINE_HOOK(0x458623, BuildingClass_KillOccupiers_Replace_MuzzleFix, 0x7)
 
 DEFINE_HOOK(0x6D528A, TacticalClass_DrawPlacement_PlacementPreview, 0x6)
 {
-	auto pRules = RulesExt::Global();
-
-	if (pRules->DrawAdjacentBoundary)
+	if (Phobos::Config::DrawAdjacentBoundary)
 		BuildingTypeExt::DrawAdjacentLines();
 
-	if (!pRules->PlacementPreview || !Phobos::Config::ShowPlacementPreview)
+	auto pRulesExt = RulesExt::Global();
+
+	if (!pRulesExt->PlacementPreview || !Phobos::Config::ShowPlacementPreview)
 		return 0;
 
 	auto pBuilding = specific_cast<BuildingClass*>(DisplayClass::Instance->CurrentBuilding);
@@ -110,7 +110,6 @@ DEFINE_HOOK(0x6D528A, TacticalClass_DrawPlacement_PlacementPreview, 0x6)
 			nImageFrame = Math::clamp(pTypeExt->PlacementPreview_ShapeFrame.Get(nImageFrame), 0, (int)pImage->Frames);
 		}
 
-
 		Point2D point;
 		{
 			CoordStruct offset = pTypeExt->PlacementPreview_Offset;
@@ -122,7 +121,7 @@ DEFINE_HOOK(0x6D528A, TacticalClass_DrawPlacement_PlacementPreview, 0x6)
 			point.Y += offset.Y;
 		}
 
-		BlitterFlags blitFlags = pTypeExt->PlacementPreview_Translucency.Get(pRules->PlacementPreview_Translucency) |
+		BlitterFlags blitFlags = pTypeExt->PlacementPreview_Translucency.Get(pRulesExt->PlacementPreview_Translucency) |
 			BlitterFlags::Centered | BlitterFlags::Nonzero | BlitterFlags::MultiPass;
 
 		ConvertClass* pPalette = pTypeExt->PlacementPreview_Remap.Get()

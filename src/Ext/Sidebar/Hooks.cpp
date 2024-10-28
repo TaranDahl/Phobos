@@ -177,7 +177,7 @@ DEFINE_HOOK(0x6A9BC5, StripClass_Draw_DrawGreyCameoExtraCover, 0x6)
 					1000, 0, 0, 0, 0, 0);
 			}
 
-			if (pRulesExt->BuildingStatisticsCameo)
+			if (Phobos::Config::BuildingStatisticsCameo)
 			{
 				GET_STACK(RectangleStruct, surfaceRect, STACK_OFFSET(0x48C, -0x438));
 
