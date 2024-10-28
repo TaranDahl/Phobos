@@ -223,6 +223,145 @@ DEFINE_HOOK(0x4444A0, BuildingClass_KickOutUnit_NoKickOutInConstruction, 0xA)
 
 #pragma endregion
 
+#pragma region GattlingNoRateDown
+
+DEFINE_HOOK(0x70DE40, BuildingClass_sub_70DE40_GattlingNoRateDown, 0xA)
+{
+	enum { Return = 0x70DE62 };
+
+	GET(BuildingClass* const, pThis, ECX);
+	GET_STACK(int, rateDown, STACK_OFFSET(0x0, 0x4));
+
+	do
+	{
+		int newValue = pThis->GattlingValue;
+
+		if (TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis))
+		{
+			TechnoTypeExt::ExtData* const pTypeExt = pExt->TypeExtData;
+
+			if (!pTypeExt->RateDown_Delay)
+				return 0;
+
+			if (pTypeExt->RateDown_Delay < 0)
+				return Return;
+
+			pExt->AccumulatedGattlingValue++;
+			int remain = pExt->AccumulatedGattlingValue;
+
+			if (!pExt->ShouldUpdateGattlingValue)
+				remain -= pTypeExt->RateDown_Delay;
+
+			if (remain <= 0)
+				return Return;
+
+			if (!rateDown)
+				break;
+
+			newValue -= (rateDown * remain);
+			pExt->AccumulatedGattlingValue = 0;
+			pExt->ShouldUpdateGattlingValue = true;
+		}
+		else
+		{
+			if (!rateDown)
+				break;
+
+			newValue -= rateDown;
+		}
+
+		if (newValue <= 0)
+			break;
+
+		pThis->GattlingValue = newValue;
+
+		return Return;
+	}
+	while (false);
+
+	pThis->GattlingValue = 0;
+
+	return Return;
+}
+
+DEFINE_HOOK(0x70DE70, TechnoClass_sub_70DE70_GattlingNoRateDown, 0x5)
+{
+	GET(TechnoClass* const, pThis, ECX);
+
+	if (TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis))
+	{
+		pExt->AccumulatedGattlingValue = 0;
+		pExt->ShouldUpdateGattlingValue = false;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingNoRateDown, 0x6)
+{
+	enum { SkipGameCode = 0x70E04D };
+
+	GET(TechnoClass* const, pThis, ESI);
+	GET_STACK(int, rateMult, STACK_OFFSET(0x10, 0x4));
+
+	do
+	{
+		int newValue = pThis->GattlingValue;
+
+		if (TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis))
+		{
+			TechnoTypeExt::ExtData* const pTypeExt = pExt->TypeExtData;
+
+			if (!pTypeExt->RateDown_Delay)
+				return 0;
+
+			if (pTypeExt->RateDown_Delay < 0)
+				return SkipGameCode;
+
+			pExt->AccumulatedGattlingValue += rateMult;
+			int remain = pExt->AccumulatedGattlingValue;
+
+			if (!pExt->ShouldUpdateGattlingValue)
+				remain -= pTypeExt->RateDown_Delay;
+
+			if (remain <= 0)
+				return SkipGameCode;
+
+			const int rateDown = pTypeExt->OwnerObject()->RateDown;
+
+			if (!rateDown)
+				break;
+
+			newValue -= (rateDown * remain);
+			pExt->AccumulatedGattlingValue = 0;
+			pExt->ShouldUpdateGattlingValue = true;
+		}
+		else
+		{
+			const int rateDown = pThis->GetTechnoType()->RateDown;
+
+			if (!rateDown)
+				break;
+
+			newValue -= rateDown * rateMult;
+		}
+
+		if (newValue <= 0)
+			break;
+
+		pThis->GattlingValue = newValue;
+
+		return SkipGameCode;
+	}
+	while (false);
+
+	pThis->GattlingValue = 0;
+
+	return SkipGameCode;
+}
+
+#pragma endregion
+
 #pragma region NewWaypoints
 
 bool __fastcall BuildingTypeClass_CanUseWaypoint(BuildingTypeClass* pThis)
