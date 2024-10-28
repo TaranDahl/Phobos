@@ -55,6 +55,8 @@ public:
 		CDTimerClass UnitAutoDeployTimer;
 		WeaponTypeClass* LastWeaponType;
 		CoordStruct LastWeaponFLH;
+		int AccumulatedGattlingValue;
+		bool ShouldUpdateGattlingValue;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 		bool KeepTargetOnMove;
 		bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
@@ -99,6 +101,8 @@ public:
 			, UnitAutoDeployTimer {}
 			, LastWeaponType {}
 			, LastWeaponFLH {}
+			, AccumulatedGattlingValue {}
+			, ShouldUpdateGattlingValue {}
 			, FiringObstacleCell {}
 			, KeepTargetOnMove { false }
 			, IsDetachingForCloak { false }
