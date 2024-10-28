@@ -252,6 +252,7 @@ public:
 		CustomPalette CameoPal;
 		Nullable<bool> NoRearmInEMPState;
 		Nullable<bool> NoRearmInTemporal;
+		Valueable<int> RateDown_Delay;
 		Valueable<bool> HarvesterQuickUnloader;
 
 		Nullable<AnimTypeClass*> Wake;
@@ -509,6 +510,7 @@ public:
 			, CameoPal {}
 			, NoRearmInEMPState {}
 			, NoRearmInTemporal {}
+			, RateDown_Delay { 0 }
 			, HarvesterQuickUnloader { false }
 
 			, Wake { }
