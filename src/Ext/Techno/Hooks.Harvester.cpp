@@ -259,6 +259,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 		const bool bias = abs(difference.X) >= abs(difference.Y);
 		closeTo.X = bias ? static_cast<short>(Math::sgn(difference.X)) : 0;
 		closeTo.Y = bias ? 0 : static_cast<short>(Math::sgn(difference.Y));
+		closeTo += destCell;
 	}
 
 	destCell = MapClass::Instance->NearByLocation(destCell, pType->SpeedType, -1, pType->MovementZone, false, 1, 1, false, false, false, true, closeTo, false, false);
