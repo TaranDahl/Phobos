@@ -254,6 +254,7 @@ public:
 		Nullable<bool> NoRearmInTemporal;
 		Valueable<int> RateDown_Ammo;
 		Valueable<int> RateDown_Delay;
+		Valueable<int> RateDown_Cover;
 
 		Nullable<bool> CombatAlert;
 		Nullable<bool> CombatAlert_NotBuilding;
@@ -563,6 +564,7 @@ public:
 			, NoRearmInTemporal {}
 			, RateDown_Ammo { -1 }
 			, RateDown_Delay { 0 }
+			, RateDown_Cover { 0 }
 
 			, CombatAlert {}
 			, CombatAlert_NotBuilding {}

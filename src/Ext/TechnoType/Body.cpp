@@ -484,6 +484,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoRearmInTemporal.Read(exINI, pSection, "NoRearmInTemporal");
 	this->RateDown_Ammo.Read(exINI, pSection, "RateDown.Ammo");
 	this->RateDown_Delay.Read(exINI, pSection, "RateDown.Delay");
+	this->RateDown_Cover.Read(exINI, pSection, "RateDown.Cover");
 
 	this->CombatAlert.Read(exINI, pSection, "CombatAlert");
 	this->CombatAlert_NotBuilding.Read(exINI, pSection, "CombatAlert.NotBuilding");
@@ -941,6 +942,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->NoRearmInTemporal)
 		.Process(this->RateDown_Ammo)
 		.Process(this->RateDown_Delay)
+		.Process(this->RateDown_Cover)
 
 		.Process(this->CombatAlert)
 		.Process(this->CombatAlert_NotBuilding)
