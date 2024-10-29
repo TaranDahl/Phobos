@@ -1777,11 +1777,7 @@ DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 // SW buttons update hooks
 DEFINE_HOOK(0x4F9283, HouseClass_Update_RecheckTechTree, 0x5)
 {
-	GET(HouseClass*, pHouse, ESI);
-
 	TacticalButtonsClass::Instance.SWSidebarRecheck();
-
-	HouseExt::ExtMap.Find(pHouse)->LastRecheckTechTreeFrame = Unsorted::CurrentFrame;
 
 	return 0;
 }

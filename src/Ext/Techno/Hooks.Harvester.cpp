@@ -175,6 +175,13 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 				if (pCellBuildingType == pBuildingType)
 				{
 					ArrivingRefineryNearBy(pThis, pBuilding);
+
+					HouseClass* const pOwner = pThis->Owner;
+					const CellStruct unitCell = pThis->GetMapCoords();
+					const CellStruct buildingCell = pBuilding->GetMapCoords();
+					Debug::Log("Frame: %d - Now [%s(%s)] having a harvester [%s] at (%d,%d) docking with [%s] at (%d,%d).\n",
+						static_cast<int>(Unsorted::CurrentFrame), pOwner->get_ID(), pOwner->PlainName, pType->ID, unitCell.X, unitCell.Y, pBuilding->Type->ID, buildingCell.X, buildingCell.Y);
+
 					return SkipGameCode;
 				}
 			}
@@ -186,7 +193,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	// Check destination
 	if (AbstractClass* const pDestination = pThis->Destination)
 	{
-		if (!pHouse->RecheckTechTree && Unsorted::CurrentFrame - HouseExt::ExtMap.Find(pHouse)->LastRecheckTechTreeFrame > pThis->UpdateTimer.TimeLeft)
+		if (Unsorted::CurrentFrame - HouseExt::ExtMap.Find(pHouse)->LastRefineryBuildFrame >= pThis->UpdateTimer.TimeLeft)
 		{
 			CellClass* const pDestinationCell = (pDestination->WhatAmI() == AbstractType::Cell) ?
 				static_cast<CellClass*>(pDestination) : MapClass::Instance->GetCellAt(pDestination->GetCoords());
@@ -245,6 +252,12 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	if (!pDock)
 	{
 		pThis->SetDestination(nullptr, true);
+
+		HouseClass* const pOwner = pThis->Owner;
+		const CellStruct unitCell = pThis->GetMapCoords();
+		Debug::Log("Frame: %d - Detected [%s(%s)] having a harvester [%s] at (%d,%d) cannot find a refinery to dock.\n",
+			static_cast<int>(Unsorted::CurrentFrame), pOwner->get_ID(), pOwner->PlainName, pType->ID, unitCell.X, unitCell.Y);
+
 		return SkipGameCode;
 	}
 
@@ -263,6 +276,14 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	}
 
 	destCell = MapClass::Instance->NearByLocation(destCell, pType->SpeedType, -1, pType->MovementZone, false, 1, 1, false, false, false, true, closeTo, false, false);
+
+	{
+		HouseClass* const pOwner = pThis->Owner;
+		const CellStruct unitCell = pThis->GetMapCoords();
+		const CellStruct buildingCell = pDock->GetMapCoords();
+		Debug::Log("Frame: %d - Now [%s(%s)] having a harvester [%s] at (%d,%d) try to dock [%s] at (%d,%d), destination is at (%d,%d).\n",
+			static_cast<int>(Unsorted::CurrentFrame), pOwner->get_ID(), pOwner->PlainName, pType->ID, unitCell.X, unitCell.Y, pDock->Type->ID, buildingCell.X, buildingCell.Y, destCell.X, destCell.Y);
+	}
 
 	if (destCell == CellStruct::Empty)
 	{
@@ -308,4 +329,17 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 		GameCreate<AnimClass>(pWarpOut, pThis->Location, 0, 1)->Owner = pHouse;
 
 	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x441226, BuildingClass_Unlimbo_RecheckRefinery, 0x6)
+{
+	GET(BuildingClass* const, pThis, ESI);
+
+	if (pThis->Type->Refinery)
+	{
+		if (HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pThis->Owner))
+			pHouseExt->LastRefineryBuildFrame = Unsorted::CurrentFrame;
+	}
+
+	return 0;
 }
