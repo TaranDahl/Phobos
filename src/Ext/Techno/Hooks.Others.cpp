@@ -259,10 +259,8 @@ DEFINE_HOOK(0x70DE40, BuildingClass_sub_70DE40_GattlingRateDownDelay, 0xA)
 			pExt->AccumulatedGattlingValue = 0;
 			pExt->ShouldUpdateGattlingValue = true;
 
-			const int rateDownAmmo = pTypeExt->RateDown_Ammo;
-
-			if (rateDownAmmo >= 0 && pThis->Ammo > rateDownAmmo)
-				return Return;
+			if (pThis->Ammo <= pTypeExt->RateDown_Ammo)
+				rateDown = pTypeExt->RateDown_Cover;
 
 			if (!rateDown)
 				break;
@@ -338,12 +336,7 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 			pExt->AccumulatedGattlingValue = 0;
 			pExt->ShouldUpdateGattlingValue = true;
 
-			const int rateDownAmmo = pTypeExt->RateDown_Ammo;
-
-			if (rateDownAmmo >= 0 && pThis->Ammo > rateDownAmmo)
-				return SkipGameCode;
-
-			const int rateDown = pTypeExt->OwnerObject()->RateDown;
+			const int rateDown = (pThis->Ammo <= pTypeExt->RateDown_Ammo) ? pTypeExt->RateDown_Cover : pTypeExt->OwnerObject()->RateDown;
 
 			if (!rateDown)
 				break;
