@@ -252,6 +252,7 @@ public:
 		CustomPalette CameoPal;
 		Nullable<bool> NoRearmInEMPState;
 		Nullable<bool> NoRearmInTemporal;
+		Valueable<int> RateDown_Ammo;
 		Valueable<int> RateDown_Delay;
 
 		Nullable<bool> CombatAlert;
@@ -560,6 +561,7 @@ public:
 			, CameoPal {}
 			, NoRearmInEMPState {}
 			, NoRearmInTemporal {}
+			, RateDown_Ammo { -1 }
 			, RateDown_Delay { 0 }
 
 			, CombatAlert {}
