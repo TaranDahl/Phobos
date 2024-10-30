@@ -584,6 +584,11 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 
 			if (pFactoryType->ConstructionYard)
 			{
+				const int sound = pFactoryType->CreateUnitSound;
+
+				if (sound != -1)
+					VocClass::PlayIndexAtPos(sound, pFactory->Location);
+
 				pFactory->DestroyNthAnim(BuildingAnimSlot::PreProduction);
 				pFactory->DestroyNthAnim(BuildingAnimSlot::Idle);
 
@@ -815,6 +820,11 @@ DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)
 
 			if (pFactoryType->ConstructionYard)
 			{
+				const int sound = pFactoryType->CreateUnitSound;
+
+				if (sound != -1)
+					VocClass::PlayIndexAtPos(sound, pFactory->Location);
+
 				pFactory->DestroyNthAnim(BuildingAnimSlot::PreProduction);
 				pFactory->DestroyNthAnim(BuildingAnimSlot::Idle);
 
