@@ -164,9 +164,9 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	// Check arrived
 	CellClass* const pThisCell = pThis->GetCell();
 
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 8; ++i)
 	{
-		if (BuildingClass* const pBuilding = pThisCell->GetNeighbourCell(static_cast<FacingType>(i << 1))->GetBuilding())
+		if (BuildingClass* const pBuilding = pThisCell->GetNeighbourCell(static_cast<FacingType>(i))->GetBuilding())
 		{
 			BuildingTypeClass* const pCellBuildingType = pBuilding->Type;
 
@@ -175,13 +175,6 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 				if (pCellBuildingType == pBuildingType)
 				{
 					ArrivingRefineryNearBy(pThis, pBuilding);
-
-					HouseClass* const pOwner = pThis->Owner;
-					const CellStruct unitCell = pThis->GetMapCoords();
-					const CellStruct buildingCell = pBuilding->GetMapCoords();
-					Debug::Log("Frame: %d - Now [%s(%s)] having a harvester [%s] at (%d,%d) docking with [%s] at (%d,%d).\n",
-						static_cast<int>(Unsorted::CurrentFrame), pOwner->get_ID(), pOwner->PlainName, pType->ID, unitCell.X, unitCell.Y, pBuilding->Type->ID, buildingCell.X, buildingCell.Y);
-
 					return SkipGameCode;
 				}
 			}
@@ -198,9 +191,9 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 			CellClass* const pDestinationCell = (pDestination->WhatAmI() == AbstractType::Cell) ?
 				static_cast<CellClass*>(pDestination) : MapClass::Instance->GetCellAt(pDestination->GetCoords());
 
-			for (int i = 0; i < 4; ++i)
+			for (int i = 0; i < 8; ++i)
 			{
-				if (BuildingClass* const pBuilding = pDestinationCell->GetNeighbourCell(static_cast<FacingType>(i << 1))->GetBuilding())
+				if (BuildingClass* const pBuilding = pDestinationCell->GetNeighbourCell(static_cast<FacingType>(i))->GetBuilding())
 				{
 					BuildingTypeClass* const pCellBuildingType = pBuilding->Type;
 
@@ -218,6 +211,11 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	const CoordStruct thisLocation = pThis->GetCoords();
 	const Point2D thisPosition { (thisLocation.X >> 4), (thisLocation.Y >> 4) };
 
+	MovementZone move = pType->MovementZone;
+
+	if (pType->Teleporter && (move == MovementZone::AmphibiousCrusher || move == MovementZone::AmphibiousDestroyer))
+		move = MovementZone::Amphibious;
+
 	const CoordStruct destLocation = pThis->GetDestination();
 	CellStruct destCell { static_cast<short>(destLocation.X >> 8), static_cast<short>(destLocation.Y >> 8) };
 
@@ -234,7 +232,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 				CellStruct dockCell { static_cast<short>(dockLocation.X >> 8), static_cast<short>(dockLocation.Y >> 8) };
 
 				if (reinterpret_cast<bool(__thiscall*)(DisplayClass*, CellStruct*, CellStruct*, MovementZone, bool, bool, bool)>(0x56D100)
-					(DisplayClass::Instance, &destCell, &dockCell, pType->MovementZone, pThis->IsOnBridge(), false ,false)) // Prevent send command
+					(DisplayClass::Instance, &destCell, &dockCell, move, pThis->IsOnBridge(), false ,false)) // Prevent send command
 				{
 					const Point2D difference { (thisPosition.X - (dockLocation.X >> 4)), (thisPosition.Y - (dockLocation.Y >> 4)) };
 					const int newDistanceSquared = (difference.X * difference.X) + (difference.Y * difference.Y);
@@ -252,38 +250,25 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	if (!pDock)
 	{
 		pThis->SetDestination(nullptr, true);
-
-		HouseClass* const pOwner = pThis->Owner;
-		const CellStruct unitCell = pThis->GetMapCoords();
-		Debug::Log("Frame: %d - Detected [%s(%s)] having a harvester [%s] at (%d,%d) cannot find a refinery to dock.\n",
-			static_cast<int>(Unsorted::CurrentFrame), pOwner->get_ID(), pOwner->PlainName, pType->ID, unitCell.X, unitCell.Y);
-
 		return SkipGameCode;
 	}
 
 	// Find a final destination
 	const CoordStruct dockLocation = pDock->GetCoords();
 	destCell = CellClass::Coord2Cell(dockLocation);
+
+	if (thisLocation.X < dockLocation.X && !(pDock->Type->GetFoundationWidth() & 1))
+		destCell.X--;
+
+	if (thisLocation.Y < dockLocation.Y && !(pDock->Type->GetFoundationHeight(false) & 1))
+		destCell.Y--;
+
 	CellStruct closeTo = CellStruct::Empty;
 
 	if (distanceSquared > 6400)
-	{
-		const CellStruct difference = CellClass::Coord2Cell(thisLocation) - destCell;
-		const bool bias = abs(difference.X) >= abs(difference.Y);
-		closeTo.X = bias ? static_cast<short>(Math::sgn(difference.X)) : 0;
-		closeTo.Y = bias ? 0 : static_cast<short>(Math::sgn(difference.Y));
-		closeTo += destCell;
-	}
+		closeTo = CellClass::Coord2Cell(thisLocation);
 
-	destCell = MapClass::Instance->NearByLocation(destCell, pType->SpeedType, -1, pType->MovementZone, false, 1, 1, false, false, false, true, closeTo, false, false);
-
-	{
-		HouseClass* const pOwner = pThis->Owner;
-		const CellStruct unitCell = pThis->GetMapCoords();
-		const CellStruct buildingCell = pDock->GetMapCoords();
-		Debug::Log("Frame: %d - Now [%s(%s)] having a harvester [%s] at (%d,%d) try to dock [%s] at (%d,%d), destination is at (%d,%d).\n",
-			static_cast<int>(Unsorted::CurrentFrame), pOwner->get_ID(), pOwner->PlainName, pType->ID, unitCell.X, unitCell.Y, pDock->Type->ID, buildingCell.X, buildingCell.Y, destCell.X, destCell.Y);
-	}
+	destCell = MapClass::Instance->NearByLocation(destCell, pType->SpeedType, -1, move, false, 1, 1, false, false, false, true, closeTo, false, false);
 
 	if (destCell == CellStruct::Empty)
 	{
