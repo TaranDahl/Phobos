@@ -142,6 +142,7 @@ public:
 		Valueable<bool> AIForbidConYard;
 		Valueable<bool> NoRearmInEMPState;
 		Valueable<bool> NoRearmInTemporal;
+		Valueable<int> CleanUpAirBarrier;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -370,6 +371,7 @@ public:
 			, SelectedBuildingMissingPCX {}
 			, NoRearmInEMPState { false }
 			, NoRearmInTemporal { false }
+			, CleanUpAirBarrier { 0 }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }

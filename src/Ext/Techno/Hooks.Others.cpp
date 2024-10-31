@@ -369,6 +369,58 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 
 #pragma endregion
 
+#pragma region AirBarrier
+
+DEFINE_HOOK(0x55B4E1, LogicClass_Update_UnmarkCellOccupationFlags, 0x5)
+{
+	const int delay = RulesExt::Global()->CleanUpAirBarrier;
+
+	if (delay > 0 && !(Unsorted::CurrentFrame % delay))
+	{
+		MapClass* const pMap = MapClass::Instance;
+		pMap->CellIteratorReset();
+
+		for (CellClass* pCell = pMap->CellIteratorNext(); pCell; pCell = pMap->CellIteratorNext())
+		{
+			if ((0xFF & pCell->OccupationFlags) && !pCell->FirstObject)
+			{
+				pCell->OccupationFlags &= 0x3F; // ~(Aircraft | Building)
+				const DWORD flagO = pCell->OccupationFlags;
+				pCell->OccupationFlags = 0;
+
+				for (int i = 0; i < 8; ++i)
+				{
+					if (abstract_cast<FootClass*>(pCell->GetNeighbourCell(static_cast<FacingType>(i))->FirstObject))
+					{
+						pCell->OccupationFlags = flagO;
+						break;
+					}
+				}
+			}
+
+			if ((0xFF & pCell->AltOccupationFlags) && !pCell->AltObject)
+			{
+				pCell->AltOccupationFlags &= 0x3F; // ~(Aircraft | Building)
+				const DWORD flagA = pCell->AltOccupationFlags;
+				pCell->AltOccupationFlags = 0;
+
+				for (int i = 0; i < 8; ++i)
+				{
+					if (abstract_cast<FootClass*>(pCell->GetNeighbourCell(static_cast<FacingType>(i))->AltObject))
+					{
+						pCell->AltOccupationFlags = flagA;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+#pragma endregion
+
 #pragma region DetectionLogic
 
 // 0x655DDD
