@@ -255,7 +255,7 @@ public:
 		Valueable<int> RateDown_Ammo;
 		Valueable<int> RateDown_Delay;
 		Valueable<int> RateDown_Cover;
-		Valueable<bool> Hero;
+		Valueable<bool> UniqueTechno;
 
 		Nullable<bool> CombatAlert;
 		Nullable<bool> CombatAlert_NotBuilding;
@@ -558,7 +558,7 @@ public:
 			, RateDown_Ammo { -1 }
 			, RateDown_Delay { 0 }
 			, RateDown_Cover { 0 }
-			, Hero { false }
+			, UniqueTechno { false }
 
 			, CombatAlert {}
 			, CombatAlert_NotBuilding {}

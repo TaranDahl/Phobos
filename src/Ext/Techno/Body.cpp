@@ -31,7 +31,7 @@ TechnoExt::ExtData::~ExtData()
 		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
 	}
 
-	if (pTypeExt->Hero)
+	if (pTypeExt->UniqueTechno)
 	{
 		auto& vec = HouseExt::ExtMap.Find(pThis->Owner)->OwnedHeros;
 		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
