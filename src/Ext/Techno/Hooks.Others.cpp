@@ -27,16 +27,20 @@ DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstNoDelay, 0x5)
 				{
 					if (pThis->Fire(pTarget, wpIdx))
 					{
+						if (!pThis->CurrentBurstIndex)
+							return SkipVanillaFire;
+
 						int rof = pThis->RearmTimer.TimeLeft;
 						pThis->RearmTimer.Start(0);
 
-						for (int i = 1; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
+						for (int i = pThis->CurrentBurstIndex; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
 						{
 							rof = pThis->RearmTimer.TimeLeft;
 							pThis->RearmTimer.Start(0);
 						}
 
 						pThis->RearmTimer.Start(rof);
+						pThis->ChargeTurretDelay = rof;
 					}
 
 					return SkipVanillaFire;
@@ -66,16 +70,20 @@ DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 				{
 					if (pThis->Fire(pTarget, wpIdx))
 					{
+						if (!pThis->CurrentBurstIndex)
+							return SkipVanillaFire;
+
 						int rof = pThis->RearmTimer.TimeLeft;
 						pThis->RearmTimer.Start(0);
 
-						for (int i = 1; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
+						for (int i = pThis->CurrentBurstIndex; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
 						{
 							rof = pThis->RearmTimer.TimeLeft;
 							pThis->RearmTimer.Start(0);
 						}
 
 						pThis->RearmTimer.Start(rof);
+						pThis->ChargeTurretDelay = rof;
 					}
 
 					return SkipVanillaFire;

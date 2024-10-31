@@ -249,6 +249,8 @@ DEFINE_HOOK(0x4AE511, DisplayClass_GetToolTip_SkipTacticalTip, 0x5)
 
 	if (buttonIndex <= 10) // Button index 1-10 : Super weapons buttons
 		R->EAX(PhobosToolTip::Instance.GetBuffer());
+	else if (buttonIndex > 60 && buttonIndex <= 68) // Button index 61-68 : Hero buttons
+		R->EAX(0);
 	else if (buttonIndex > 70 && buttonIndex <= 100) // Button index 71-100 : Select buttons
 		R->EAX(pButtons->HoveredSelected);
 	else
