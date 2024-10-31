@@ -423,6 +423,18 @@ DEFINE_HOOK(0x55B4E1, LogicClass_Update_UnmarkCellOccupationFlags, 0x5)
 
 #pragma region DetectionLogic
 
+DEFINE_HOOK(0x5865E2, MapClass_IsLocationFogged_Check, 0x5)
+{
+	REF_STACK(CoordStruct*, pCoords, STACK_OFFSET(0x0, 0x4));
+
+	const int level = pCoords->Z / Unsorted::LevelHeight;
+	const int extra = (level & 1) ? ((level >> 1) + 1) : (level >> 1);
+	const CellStruct cell { static_cast<short>((pCoords->X >> 8) - extra), static_cast<short>((pCoords->Y >> 8) - extra) };
+
+	R->EAX(!(MapClass::Instance->GetCellAt(cell)->AltFlags & AltCellFlags::NoFog));
+	return 0;
+}
+
 // 0x655DDD
 // 0x6D8FD0
 
