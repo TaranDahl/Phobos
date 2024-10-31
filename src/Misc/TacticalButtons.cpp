@@ -215,7 +215,7 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 
 	// TODO New buttons
 
-	if (Phobos::Config::HerosDisplay_Enable) // Button index 61-68 : Heros buttons
+	if (Phobos::Config::UniqueDisplay_Enable) // Button index 61-68 : Heros buttons
 	{
 		auto& vec = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->OwnedHeros;
 
@@ -921,7 +921,7 @@ inline bool TacticalButtonsClass::IndexInHerosButtons()
 
 void TacticalButtonsClass::HerosDraw()
 {
-	if (!Phobos::Config::HerosDisplay_Enable)
+	if (!Phobos::Config::UniqueDisplay_Enable)
 		return;
 
 	HouseClass* const pHouse = HouseClass::CurrentPlayer;
@@ -1047,15 +1047,9 @@ void TacticalButtonsClass::HerosDraw()
 			DSurface::Composite->FillRect(&rect, 0);
 
 			const AbstractType absType = pTechno->WhatAmI();
-			BuildCat cat = BuildCat::DontCare;
-
-			if (absType == AbstractType::Building)
-				cat = static_cast<BuildingClass*>(pTechno)->Type->BuildCat;
-
-			double ratio = 1.0;
-
-			if (FactoryClass* const pFactory = pTechno->Owner->GetPrimaryFactory(absType, pType->Naval, cat))
-				ratio = (static_cast<double>(pFactory->GetProgress()) / 54);
+			const BuildCat buildCat = (absType == AbstractType::Building) ? static_cast<BuildingClass*>(pTechno)->Type->BuildCat : BuildCat::DontCare;
+			FactoryClass* const pFactory = pTechno->Owner->GetPrimaryFactory(absType, pType->Naval, buildCat);
+			const double ratio = (pFactory && pFactory->Object == pTechno) ? (static_cast<double>(pFactory->GetProgress()) / 54) : 1.0;
 
 			rect = RectangleStruct { (position.X + 5), (position.Y + 3), static_cast<int>(50 * ratio), 3 };
 			DSurface::Composite->FillRect(&rect, 0x7BEF);
@@ -1071,7 +1065,7 @@ void TacticalButtonsClass::HerosDraw()
 
 void TacticalButtonsClass::HeroSelect(int buttonIndex)
 {
-	if (ScenarioClass::Instance->UserInputLocked || !Phobos::Config::HerosDisplay_Enable)
+	if (ScenarioClass::Instance->UserInputLocked || !Phobos::Config::UniqueDisplay_Enable)
 		return;
 
 	HouseClass* const pHouse = HouseClass::CurrentPlayer;
@@ -1091,10 +1085,13 @@ void TacticalButtonsClass::HeroSelect(int buttonIndex)
 		for (TechnoClass* pTrans = pSelect->Transporter; pTrans; pTrans = pTrans->Transporter)
 			pSelect = pTrans;
 
-		if (pSelect->Select())
+		if (pSelect->Location != CoordStruct::Empty && pSelect->IsOnMap)
 		{
-			MapClass::Instance->CenterMap();
-			MapClass::Instance->MarkNeedsRedraw(1);
+			if (pSelect->Select())
+			{
+				MapClass::Instance->CenterMap();
+				MapClass::Instance->MarkNeedsRedraw(1);
+			}
 		}
 	}
 }
@@ -2053,7 +2050,7 @@ DEFINE_HOOK(0x7015C9, TechnoClass_SetOwningHouse_ChangeHeroOwner, 0x6)
 	GET(TechnoClass* const, pThis, ESI);
 	GET(HouseClass* const, pNewOwner, EBP);
 
-	if (TechnoExt::ExtMap.Find(pThis)->TypeExtData->Hero)
+	if (TechnoExt::ExtMap.Find(pThis)->TypeExtData->UniqueTechno)
 	{
 		auto& vec = HouseExt::ExtMap.Find(pThis->Owner)->OwnedHeros;
 		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());

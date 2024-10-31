@@ -80,7 +80,7 @@ public:
 		static bool EnableBuildingPlacementPreview;
 		static bool DigitalDisplay_Enable;
 		static bool SelectedDisplay_Enable;
-		static bool HerosDisplay_Enable;
+		static bool UniqueDisplay_Enable;
 		static bool MessageDisplayInCenter;
 		static bool BuildingStatisticsCameo;
 		static bool DrawAdjacentBoundary;
