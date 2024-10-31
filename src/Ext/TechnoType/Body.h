@@ -255,6 +255,7 @@ public:
 		Valueable<int> RateDown_Ammo;
 		Valueable<int> RateDown_Delay;
 		Valueable<int> RateDown_Cover;
+		Valueable<bool> Hero;
 
 		Nullable<bool> CombatAlert;
 		Nullable<bool> CombatAlert_NotBuilding;
@@ -264,8 +265,6 @@ public:
 		NullableIdx<VoxClass> CombatAlert_EVA;
 		Valueable<int> Spawner_RecycleRange;
 		Valueable<AnimTypeClass*> Spawner_RecycleAnim;
-		//Valueable<CoordStruct> Spawner_RecycleFLH;
-		//Valueable<bool> Spawner_RecycleOnTurret;
 		Nullable<int> AINormalTargetingDelay;
 		Nullable<int> PlayerNormalTargetingDelay;
 		Nullable<int> AIGuardAreaTargetingDelay;
@@ -559,6 +558,7 @@ public:
 			, RateDown_Ammo { -1 }
 			, RateDown_Delay { 0 }
 			, RateDown_Cover { 0 }
+			, Hero { false }
 
 			, CombatAlert {}
 			, CombatAlert_NotBuilding {}
@@ -568,8 +568,6 @@ public:
 			, CombatAlert_EVA {}
 			, Spawner_RecycleRange { -1 }
 			, Spawner_RecycleAnim { nullptr }
-			//, Spawner_RecycleFLH { {0,0,0} }
-			//, Spawner_RecycleOnTurret { false }
 			, AINormalTargetingDelay {}
 			, PlayerNormalTargetingDelay {}
 			, AIGuardAreaTargetingDelay {}

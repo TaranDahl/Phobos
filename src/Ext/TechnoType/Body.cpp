@@ -485,6 +485,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->RateDown_Ammo.Read(exINI, pSection, "RateDown.Ammo");
 	this->RateDown_Delay.Read(exINI, pSection, "RateDown.Delay");
 	this->RateDown_Cover.Read(exINI, pSection, "RateDown.Cover");
+	this->Hero.Read(exINI, pSection, "Hero");
 
 	this->CombatAlert.Read(exINI, pSection, "CombatAlert");
 	this->CombatAlert_NotBuilding.Read(exINI, pSection, "CombatAlert.NotBuilding");
@@ -494,8 +495,6 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->CombatAlert_EVA.Read(exINI, pSection, "CombatAlert.EVA");
 	this->Spawner_RecycleRange.Read(exINI, pSection, "Spawner.RecycleRange");
 	this->Spawner_RecycleAnim.Read(exINI, pSection, "Spawner.RecycleAnim");
-	//this->Spawner_RecycleFLH.Read(exINI, pSection, "Spawner.FLH");
-	//this->Spawner_RecycleOnTurret.Read(exINI, pSection, "Spawner.RecycleOnTurret");
 	this->AINormalTargetingDelay.Read(exINI, pSection, "AINormalTargetingDelay");
 	this->PlayerNormalTargetingDelay.Read(exINI, pSection, "PlayerNormalTargetingDelay");
 	this->AIGuardAreaTargetingDelay.Read(exINI, pSection, "AIGuardAreaTargetingDelay");
@@ -943,6 +942,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->RateDown_Ammo)
 		.Process(this->RateDown_Delay)
 		.Process(this->RateDown_Cover)
+		.Process(this->Hero)
 
 		.Process(this->CombatAlert)
 		.Process(this->CombatAlert_NotBuilding)
@@ -952,8 +952,6 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->CombatAlert_EVA)
 		.Process(this->Spawner_RecycleRange)
 		.Process(this->Spawner_RecycleAnim)
-		//.Process(this->Spawner_RecycleFLH)
-		//.Process(this->Spawner_RecycleOnTurret)
 		.Process(this->AINormalTargetingDelay)
 		.Process(this->PlayerNormalTargetingDelay)
 		.Process(this->AIGuardAreaTargetingDelay)
