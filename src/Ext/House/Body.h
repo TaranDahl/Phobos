@@ -46,7 +46,7 @@ public:
 		CellStruct CurrentBuildingTopLeft;
 		CDTimerClass CurrentBuildingTimer;
 		int CurrentBuildingTimes;
-		int LastRecheckTechTreeFrame;
+		int LastRefineryBuildFrame;
 
 		//Read from INI
 		Nullable<bool> RepairBaseNodes[3];
@@ -92,7 +92,7 @@ public:
 			, CurrentBuildingTopLeft {}
 			, CurrentBuildingTimer {}
 			, CurrentBuildingTimes { 0 }
-			, LastRecheckTechTreeFrame { 0 }
+			, LastRefineryBuildFrame { 0 }
 			, AISuperWeaponDelayTimer {}
 			, RepairBaseNodes { }
 			, RestrictedFactoryPlants {}

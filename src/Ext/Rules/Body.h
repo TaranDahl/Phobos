@@ -124,12 +124,10 @@ public:
 		Valueable<double> DamageEnemiesMultiplier;
 		Valueable<bool> CheckUnitBaseNormal;
 		Valueable<bool> AlwaysExistTheCameo;
-		Valueable<bool> BuildingStatisticsCameo;
 		Valueable<SHPStruct*> CameoOverlayShapes;
 		Valueable<Vector3D<int>> CameoOverlayFrames;
 		CustomPalette CameoOverlayPalette;
 		Valueable<bool> ExpandBuildingPlace;
-		Valueable<bool> DrawAdjacentBoundary;
 		Valueable<bool> CheckExpandPlaceGrid;
 		Valueable<Vector3D<int>> ExpandLandGridFrames;
 		Valueable<Vector3D<int>> ExpandWaterGridFrames;
@@ -144,6 +142,7 @@ public:
 		Valueable<bool> AIForbidConYard;
 		Valueable<bool> NoRearmInEMPState;
 		Valueable<bool> NoRearmInTemporal;
+		Valueable<int> CleanUpAirBarrier;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -306,26 +305,25 @@ public:
 			, DamageEnemiesMultiplier { 1.0 }
 			, CheckUnitBaseNormal { false }
 			, AlwaysExistTheCameo { false }
-			, BuildingStatisticsCameo { false }
 			, CameoOverlayShapes { FileSystem::PIPS_SHP }
 			, CameoOverlayFrames { { -1, -1, -1 } }
 			, CameoOverlayPalette {}
 			, ExpandBuildingPlace { false }
-			, DrawAdjacentBoundary { false }
 			, CheckExpandPlaceGrid { false }
 			, ExpandLandGridFrames { { 1, 0, 0 } }
 			, ExpandWaterGridFrames { { 1, 0, 0 } }
 			, SWSidebarBackground { true }
-			, SelectedInfantryMissingPCX {}
-			, SelectedVehicleMissingPCX {}
-			, SelectedAircraftMissingPCX {}
-			, SelectedBuildingMissingPCX {}
 			, AINonAutoDeploy { false }
 			, AISetBaseCenter { false }
 			, AIBiasSpawnCell { false }
 			, AIForbidConYard { false }
+			, SelectedInfantryMissingPCX {}
+			, SelectedVehicleMissingPCX {}
+			, SelectedAircraftMissingPCX {}
+			, SelectedBuildingMissingPCX {}
 			, NoRearmInEMPState { false }
 			, NoRearmInTemporal { false }
+			, CleanUpAirBarrier { 0 }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }

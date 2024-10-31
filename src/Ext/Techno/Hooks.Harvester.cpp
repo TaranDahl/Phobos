@@ -138,9 +138,9 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	// Check arrived
 	CellClass* const pThisCell = pThis->GetCell();
 
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 8; ++i)
 	{
-		if (BuildingClass* const pBuilding = pThisCell->GetNeighbourCell(static_cast<FacingType>(i << 1))->GetBuilding())
+		if (BuildingClass* const pBuilding = pThisCell->GetNeighbourCell(static_cast<FacingType>(i))->GetBuilding())
 		{
 			BuildingTypeClass* const pCellBuildingType = pBuilding->Type;
 
@@ -160,14 +160,14 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	// Check destination
 	if (AbstractClass* const pDestination = pThis->Destination)
 	{
-		if (!pHouse->RecheckTechTree && Unsorted::CurrentFrame - HouseExt::ExtMap.Find(pHouse)->LastRecheckTechTreeFrame > pThis->UpdateTimer.TimeLeft)
+		if (Unsorted::CurrentFrame - HouseExt::ExtMap.Find(pHouse)->LastRefineryBuildFrame >= pThis->UpdateTimer.TimeLeft)
 		{
 			CellClass* const pDestinationCell = (pDestination->WhatAmI() == AbstractType::Cell) ?
 				static_cast<CellClass*>(pDestination) : MapClass::Instance->GetCellAt(pDestination->GetCoords());
 
-			for (int i = 0; i < 4; ++i)
+			for (int i = 0; i < 8; ++i)
 			{
-				if (BuildingClass* const pBuilding = pDestinationCell->GetNeighbourCell(static_cast<FacingType>(i << 1))->GetBuilding())
+				if (BuildingClass* const pBuilding = pDestinationCell->GetNeighbourCell(static_cast<FacingType>(i))->GetBuilding())
 				{
 					BuildingTypeClass* const pCellBuildingType = pBuilding->Type;
 
@@ -185,6 +185,11 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	const CoordStruct thisLocation = pThis->GetCoords();
 	const Point2D thisPosition { (thisLocation.X >> 4), (thisLocation.Y >> 4) };
 
+	MovementZone move = pType->MovementZone;
+
+	if (pType->Teleporter && (move == MovementZone::AmphibiousCrusher || move == MovementZone::AmphibiousDestroyer))
+		move = MovementZone::Amphibious;
+
 	const CoordStruct destLocation = pThis->GetDestination();
 	CellStruct destCell { static_cast<short>(destLocation.X >> 8), static_cast<short>(destLocation.Y >> 8) };
 
@@ -201,7 +206,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 				CellStruct dockCell { static_cast<short>(dockLocation.X >> 8), static_cast<short>(dockLocation.Y >> 8) };
 
 				if (reinterpret_cast<bool(__thiscall*)(DisplayClass*, CellStruct*, CellStruct*, MovementZone, bool, bool, bool)>(0x56D100)
-					(DisplayClass::Instance, &destCell, &dockCell, pType->MovementZone, pThis->IsOnBridge(), false ,false)) // Prevent send command
+					(DisplayClass::Instance, &destCell, &dockCell, move, pThis->IsOnBridge(), false ,false)) // Prevent send command
 				{
 					const Point2D difference { (thisPosition.X - (dockLocation.X >> 4)), (thisPosition.Y - (dockLocation.Y >> 4)) };
 					const int newDistanceSquared = (difference.X * difference.X) + (difference.Y * difference.Y);
@@ -225,17 +230,19 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	// Find a final destination
 	const CoordStruct dockLocation = pDock->GetCoords();
 	destCell = CellClass::Coord2Cell(dockLocation);
+
+	if (thisLocation.X < dockLocation.X && !(pDock->Type->GetFoundationWidth() & 1))
+		destCell.X--;
+
+	if (thisLocation.Y < dockLocation.Y && !(pDock->Type->GetFoundationHeight(false) & 1))
+		destCell.Y--;
+
 	CellStruct closeTo = CellStruct::Empty;
 
 	if (distanceSquared > 6400)
-	{
-		const CellStruct difference = CellClass::Coord2Cell(thisLocation) - destCell;
-		const bool bias = abs(difference.X) >= abs(difference.Y);
-		closeTo.X = bias ? static_cast<short>(Math::sgn(difference.X)) : 0;
-		closeTo.Y = bias ? 0 : static_cast<short>(Math::sgn(difference.Y));
-	}
+		closeTo = CellClass::Coord2Cell(thisLocation);
 
-	destCell = MapClass::Instance->NearByLocation(destCell, pType->SpeedType, -1, pType->MovementZone, false, 1, 1, false, false, false, true, closeTo, false, false);
+	destCell = MapClass::Instance->NearByLocation(destCell, pType->SpeedType, -1, move, false, 1, 1, false, false, false, true, closeTo, false, false);
 
 	if (destCell == CellStruct::Empty)
 	{
@@ -281,4 +288,17 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 		GameCreate<AnimClass>(pWarpOut, pThis->Location, 0, 1)->Owner = pHouse;
 
 	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x441226, BuildingClass_Unlimbo_RecheckRefinery, 0x6)
+{
+	GET(BuildingClass* const, pThis, ESI);
+
+	if (pThis->Type->Refinery)
+	{
+		if (HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pThis->Owner))
+			pHouseExt->LastRefineryBuildFrame = Unsorted::CurrentFrame;
+	}
+
+	return 0;
 }

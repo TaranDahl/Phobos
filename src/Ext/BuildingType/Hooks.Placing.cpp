@@ -77,6 +77,37 @@ DEFINE_HOOK(0x5684B1, MapClass_PlaceDown_BuildableUponTypes, 0x6)
 	return 0;
 }
 
+// Buildable-upon TerrainTypes Hook #4 -> sub_5FD270 - Allow placing buildings on top of them
+DEFINE_HOOK(0x5FD2B6, OverlayClass_Unlimbo_SkipTerrainCheck, 0x9)
+{
+	enum { Unlimbo = 0x5FD2CA, NoUnlimbo = 0x5FD2C3 };
+
+	GET(CellClass* const, pCell, EAX);
+
+	if (!Game::IsActive)
+		return Unlimbo;
+
+	ObjectClass* pCellObject = pCell->FirstObject;
+
+	while (pCellObject)
+	{
+		if (TerrainClass* const pTerrain = abstract_cast<TerrainClass*>(pCellObject))
+		{
+			auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type);
+
+			if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
+				return NoUnlimbo;
+
+			pCell->RemoveContent(pTerrain, false);
+			TerrainTypeExt::Remove(pTerrain);
+		}
+
+		pCellObject = pCellObject->NextObject;
+	}
+
+	return Unlimbo;
+}
+
 // BaseNormal for units Hook #1 -> sub_4A8EB0 - Rewrite and add functions in
 DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormalExtra, 0x9)
 {
@@ -553,6 +584,8 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 
 			if (pFactoryType->ConstructionYard)
 			{
+				VocClass::PlayGlobal(RulesClass::Instance->BuildingSlam, 0x2000, 1.0);
+
 				pFactory->DestroyNthAnim(BuildingAnimSlot::PreProduction);
 				pFactory->DestroyNthAnim(BuildingAnimSlot::Idle);
 
@@ -666,6 +699,8 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 // Buildable-upon TechnoTypes Hook #4-1 -> sub_4FB0E0 - Check whether need to skip the replace command
 DEFINE_HOOK(0x4FB395, HouseClass_UnitFromFactory_SkipMouseReturn, 0x6)
 {
+	enum { SkipGameCode = 0x4FB489 };
+
 	if (!RulesExt::Global()->ExpandBuildingPlace)
 		return 0;
 
@@ -676,12 +711,14 @@ DEFINE_HOOK(0x4FB395, HouseClass_UnitFromFactory_SkipMouseReturn, 0x6)
 	}
 
 	R->EBX(0);
-	return 0x4FB489;
+	return SkipGameCode;
 }
 
 // Buildable-upon TechnoTypes Hook #4-2 -> sub_4FB0E0 - Check whether need to skip the clear command
 DEFINE_HOOK(0x4FB319, HouseClass_UnitFromFactory_SkipMouseClear, 0x5)
 {
+	enum { SkipGameCode = 0x4FB4A0 };
+
 	GET(TechnoClass* const, pTechno, ESI);
 
 	if (BuildingClass* const pBuilding = abstract_cast<BuildingClass*>(pTechno))
@@ -689,7 +726,26 @@ DEFINE_HOOK(0x4FB319, HouseClass_UnitFromFactory_SkipMouseClear, 0x5)
 		BuildingTypeExt::ExtData* const pTypeExt = BuildingTypeExt::ExtMap.Find(pBuilding->Type);
 
 		if (pTypeExt->AutoUpgrade && DisplayClass::Instance->CurrentBuilding != pBuilding)
-			return 0x4FB4A0;
+			return SkipGameCode;
+	}
+
+	return 0;
+}
+
+// Buildable-upon TechnoTypes Hook #4-3 -> sub_4FB0E0 - Check whether need to skip the clear command
+DEFINE_HOOK(0x4FAB83, HouseClass_AbandonProductionOf_SkipMouseClear, 0x7)
+{
+	enum { SkipGameCode = 0x4FABA4 };
+
+	GET(const int, index, EBX);
+
+	if (index >= 0)
+	{
+		BuildingTypeClass* const pType = BuildingTypeClass::Array->Items[index];
+		BuildingTypeExt::ExtData* const pTypeExt = BuildingTypeExt::ExtMap.Find(pType);
+
+		if (pTypeExt->AutoUpgrade && DisplayClass::Instance->CurrentBuildingType != pType)
+			return SkipGameCode;
 	}
 
 	return 0;
@@ -761,6 +817,8 @@ DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)
 
 			if (pFactoryType->ConstructionYard)
 			{
+				VocClass::PlayGlobal(RulesClass::Instance->BuildingSlam, 0x2000, 1.0);
+
 				pFactory->DestroyNthAnim(BuildingAnimSlot::PreProduction);
 				pFactory->DestroyNthAnim(BuildingAnimSlot::Idle);
 

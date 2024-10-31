@@ -47,9 +47,6 @@ public:
 		bool CanCloakDuringRearm; // Current rearm timer was started by DecloakToFire=no weapon.
 		int WHAnimRemainingCreationInterval;
 		bool CanCurrentlyDeployIntoBuilding; // Only set on UnitClass technos with DeploysInto set in multiplayer games, recalculated once per frame so no need to serialize.
-		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
-		bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
-
 		bool UnitIdleAction;
 		bool UnitIdleActionSelected;
 		bool UnitIdleIsSelected;
@@ -60,6 +57,8 @@ public:
 		CoordStruct LastWeaponFLH;
 		int AccumulatedGattlingValue;
 		bool ShouldUpdateGattlingValue;
+		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
+		bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
 
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
 		// as neither is guaranteed to point to the house the TechnoClass had prior to entering transport and cannot be safely overridden.
@@ -99,10 +98,10 @@ public:
 			, UnitIdleActionTimer {}
 			, UnitIdleActionGapTimer {}
 			, UnitAutoDeployTimer {}
-			, AccumulatedGattlingValue {}
-			, ShouldUpdateGattlingValue {}
 			, LastWeaponType {}
 			, LastWeaponFLH {}
+			, AccumulatedGattlingValue {}
+			, ShouldUpdateGattlingValue {}
 			, FiringObstacleCell {}
 			, IsDetachingForCloak { false }
 			, OriginalPassengerOwner {}
@@ -208,17 +207,17 @@ public:
 	static int GetCustomTintColor(TechnoClass* pThis);
 	static int GetCustomTintIntensity(TechnoClass* pThis);
 	static void ApplyCustomTintValues(TechnoClass* pThis, int& color, int& intensity);
-	static Point2D GetScreenLocation(TechnoClass* pThis);
-	static Point2D GetFootSelectBracketPosition(TechnoClass* pThis, Anchor anchor);
-	static Point2D GetBuildingSelectBracketPosition(TechnoClass* pThis, BuildingSelectBracketPosition bracketPosition);
-	static void ProcessDigitalDisplays(TechnoClass* pThis);
-	static void GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType, int& value, int& maxValue);
 	static void DrawFactoryProgress(BuildingClass* pThis, RectangleStruct* pBounds, Point2D basePosition);
 	static void DrawSuperProgress(BuildingClass* pThis, RectangleStruct* pBounds, Point2D basePosition);
 	static void DrawIronCurtainProgress(TechnoClass* pThis, RectangleStruct* pBounds, Point2D basePosition, bool isBuilding, bool isInfantry);
 	static void DrawTemporalProgress(TechnoClass* pThis, RectangleStruct* pBounds, Point2D basePosition, bool isBuilding, bool isInfantry);
 	static void DrawVanillaStyleFootBar(DrawFrameStruct* pDraw);
 	static void DrawVanillaStyleBuildingBar(DrawFrameStruct* pDraw);
+	static Point2D GetScreenLocation(TechnoClass* pThis);
+	static Point2D GetFootSelectBracketPosition(TechnoClass* pThis, Anchor anchor);
+	static Point2D GetBuildingSelectBracketPosition(TechnoClass* pThis, BuildingSelectBracketPosition bracketPosition);
+	static void ProcessDigitalDisplays(TechnoClass* pThis);
+	static void GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType, int& value, int& maxValue);
 
 	// WeaponHelpers.cpp
 	static int PickWeaponIndex(TechnoClass* pThis, TechnoClass* pTargetTechno, AbstractClass* pTarget, int weaponIndexOne, int weaponIndexTwo, bool allowFallback = true, bool allowAAFallback = true);

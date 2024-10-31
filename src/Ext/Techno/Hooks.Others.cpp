@@ -1,7 +1,11 @@
 #include "Body.h"
 
+#include <EventClass.h>
+#include <SpawnManagerClass.h>
+
 #include <Ext/Building/Body.h>
 #include <Ext/WeaponType/Body.h>
+#include "Ext/BulletType/Body.h"
 
 #pragma region NoBurstDelay
 
@@ -85,43 +89,6 @@ DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 
 #pragma endregion
 
-#pragma region KickOutStuckUnits
-
-// Kick out stuck units when the factory building is not busy
-DEFINE_HOOK(0x450248, BuildingClass_UpdateFactory_KickOutStuckUnits, 0x6)
-{
-	GET(BuildingClass*, pThis, ESI);
-
-	if (!(Unsorted::CurrentFrame % 15))
-	{
-		BuildingTypeClass* const pType = pThis->Type;
-
-		if (pType->Factory == AbstractType::UnitType && pType->WeaponsFactory && !pType->Naval && pThis->QueuedMission != Mission::Unload)
-		{
-			const Mission mission = pThis->CurrentMission;
-
-			if (mission == Mission::Guard || (mission == Mission::Unload && pThis->MissionStatus == 1))
-				BuildingExt::KickOutStuckUnits(pThis);
-		}
-	}
-
-	return 0;
-}
-
-// Should not kick out units if the factory building is in construction process
-DEFINE_HOOK(0x4444A0, BuildingClass_KickOutUnit_NoKickOutInConstruction, 0xA)
-{
-	enum { ThisIsOK = 0x444565, ThisIsNotOK = 0x4444B3};
-
-	GET(BuildingClass* const, pThis, ESI);
-
-	const Mission mission = pThis->GetCurrentMission();
-
-	return (mission == Mission::Unload || mission == Mission::Construction) ? ThisIsNotOK : ThisIsOK;
-}
-
-#pragma endregion
-
 #pragma region AIConstructionYard
 
 DEFINE_HOOK(0x740A11, UnitClass_Mission_Guard_AINonAutoDeploy, 0x6)
@@ -190,9 +157,46 @@ DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
 
 #pragma endregion
 
+#pragma region KickOutStuckUnits
+
+// Kick out stuck units when the factory building is not busy
+DEFINE_HOOK(0x450248, BuildingClass_UpdateFactory_KickOutStuckUnits, 0x6)
+{
+	GET(BuildingClass*, pThis, ESI);
+
+	if (!(Unsorted::CurrentFrame % 15))
+	{
+		BuildingTypeClass* const pType = pThis->Type;
+
+		if (pType->Factory == AbstractType::UnitType && pType->WeaponsFactory && !pType->Naval && pThis->QueuedMission != Mission::Unload)
+		{
+			const Mission mission = pThis->CurrentMission;
+
+			if (mission == Mission::Guard || (mission == Mission::Unload && pThis->MissionStatus == 1))
+				BuildingExt::KickOutStuckUnits(pThis);
+		}
+	}
+
+	return 0;
+}
+
+// Should not kick out units if the factory building is in construction process
+DEFINE_HOOK(0x4444A0, BuildingClass_KickOutUnit_NoKickOutInConstruction, 0xA)
+{
+	enum { ThisIsOK = 0x444565, ThisIsNotOK = 0x4444B3};
+
+	GET(BuildingClass* const, pThis, ESI);
+
+	const Mission mission = pThis->GetCurrentMission();
+
+	return (mission == Mission::Unload || mission == Mission::Construction) ? ThisIsNotOK : ThisIsOK;
+}
+
+#pragma endregion
+
 #pragma region GattlingNoRateDown
 
-DEFINE_HOOK(0x70DE40, BuildingClass_sub_70DE40_GattlingNoRateDown, 0xA)
+DEFINE_HOOK(0x70DE40, BuildingClass_sub_70DE40_GattlingRateDownDelay, 0xA)
 {
 	enum { Return = 0x70DE62 };
 
@@ -222,12 +226,17 @@ DEFINE_HOOK(0x70DE40, BuildingClass_sub_70DE40_GattlingNoRateDown, 0xA)
 			if (remain <= 0)
 				return Return;
 
+			// Time's up
+			pExt->AccumulatedGattlingValue = 0;
+			pExt->ShouldUpdateGattlingValue = true;
+
+			if (pThis->Ammo <= pTypeExt->RateDown_Ammo)
+				rateDown = pTypeExt->RateDown_Cover;
+
 			if (!rateDown)
 				break;
 
 			newValue -= (rateDown * remain);
-			pExt->AccumulatedGattlingValue = 0;
-			pExt->ShouldUpdateGattlingValue = true;
 		}
 		else
 		{
@@ -251,7 +260,7 @@ DEFINE_HOOK(0x70DE40, BuildingClass_sub_70DE40_GattlingNoRateDown, 0xA)
 	return Return;
 }
 
-DEFINE_HOOK(0x70DE70, TechnoClass_sub_70DE70_GattlingNoRateDown, 0x5)
+DEFINE_HOOK(0x70DE70, TechnoClass_sub_70DE70_GattlingRateDownReset, 0x5)
 {
 	GET(TechnoClass* const, pThis, ECX);
 
@@ -264,7 +273,7 @@ DEFINE_HOOK(0x70DE70, TechnoClass_sub_70DE70_GattlingNoRateDown, 0x5)
 	return 0;
 }
 
-DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingNoRateDown, 0x6)
+DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 {
 	enum { SkipGameCode = 0x70E04D };
 
@@ -294,14 +303,16 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingNoRateDown, 0x6)
 			if (remain <= 0)
 				return SkipGameCode;
 
-			const int rateDown = pTypeExt->OwnerObject()->RateDown;
+			// Time's up
+			pExt->AccumulatedGattlingValue = 0;
+			pExt->ShouldUpdateGattlingValue = true;
+
+			const int rateDown = (pThis->Ammo <= pTypeExt->RateDown_Ammo) ? pTypeExt->RateDown_Cover : pTypeExt->OwnerObject()->RateDown;
 
 			if (!rateDown)
 				break;
 
 			newValue -= (rateDown * remain);
-			pExt->AccumulatedGattlingValue = 0;
-			pExt->ShouldUpdateGattlingValue = true;
 		}
 		else
 		{
@@ -310,7 +321,7 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingNoRateDown, 0x6)
 			if (!rateDown)
 				break;
 
-			newValue -= rateDown * rateMult;
+			newValue -= (rateDown * rateMult);
 		}
 
 		if (newValue <= 0)
@@ -325,6 +336,58 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingNoRateDown, 0x6)
 	pThis->GattlingValue = 0;
 
 	return SkipGameCode;
+}
+
+#pragma endregion
+
+#pragma region AirBarrier
+
+DEFINE_HOOK(0x55B4E1, LogicClass_Update_UnmarkCellOccupationFlags, 0x5)
+{
+	const int delay = RulesExt::Global()->CleanUpAirBarrier;
+
+	if (delay > 0 && !(Unsorted::CurrentFrame % delay))
+	{
+		MapClass* const pMap = MapClass::Instance;
+		pMap->CellIteratorReset();
+
+		for (CellClass* pCell = pMap->CellIteratorNext(); pCell; pCell = pMap->CellIteratorNext())
+		{
+			if ((0xFF & pCell->OccupationFlags) && !pCell->FirstObject)
+			{
+				pCell->OccupationFlags &= 0x3F; // ~(Aircraft | Building)
+				const DWORD flagO = pCell->OccupationFlags;
+				pCell->OccupationFlags = 0;
+
+				for (int i = 0; i < 8; ++i)
+				{
+					if (abstract_cast<FootClass*>(pCell->GetNeighbourCell(static_cast<FacingType>(i))->FirstObject))
+					{
+						pCell->OccupationFlags = flagO;
+						break;
+					}
+				}
+			}
+
+			if ((0xFF & pCell->AltOccupationFlags) && !pCell->AltObject)
+			{
+				pCell->AltOccupationFlags &= 0x3F; // ~(Aircraft | Building)
+				const DWORD flagA = pCell->AltOccupationFlags;
+				pCell->AltOccupationFlags = 0;
+
+				for (int i = 0; i < 8; ++i)
+				{
+					if (abstract_cast<FootClass*>(pCell->GetNeighbourCell(static_cast<FacingType>(i))->AltObject))
+					{
+						pCell->AltOccupationFlags = flagA;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return 0;
 }
 
 #pragma endregion

@@ -81,6 +81,8 @@ public:
 		static bool DigitalDisplay_Enable;
 		static bool SelectedDisplay_Enable;
 		static bool MessageDisplayInCenter;
+		static bool BuildingStatisticsCameo;
+		static bool DrawAdjacentBoundary;
 		static bool RealTimeTimers;
 		static bool RealTimeTimers_Adaptive;
 		static int CampaignDefaultGameSpeed;
