@@ -44,6 +44,7 @@ bool Phobos::Config::ArtImageSwap = false;
 bool Phobos::Config::ShowPlacementPreview = false;
 bool Phobos::Config::DigitalDisplay_Enable = false;
 bool Phobos::Config::SelectedDisplay_Enable = true;
+bool Phobos::Config::HerosDisplay_Enable = true;
 bool Phobos::Config::MessageDisplayInCenter = false;
 bool Phobos::Config::BuildingStatisticsCameo = false;
 bool Phobos::Config::DrawAdjacentBoundary = false;
@@ -75,6 +76,7 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 	Phobos::Config::RealTimeTimers_Adaptive = CCINIClass::INI_RA2MD->ReadBool("Phobos", "RealTimeTimers.Adaptive", false);
 	Phobos::Config::DigitalDisplay_Enable = CCINIClass::INI_RA2MD->ReadBool("Phobos", "DigitalDisplay.Enable", false);
 	Phobos::Config::SelectedDisplay_Enable = CCINIClass::INI_RA2MD->ReadBool("Phobos", "SelectedDisplay.Enable", true);
+	Phobos::Config::HerosDisplay_Enable = CCINIClass::INI_RA2MD->ReadBool("Phobos", "HerosDisplay.Enable", true);
 	Phobos::Config::MessageDisplayInCenter = CCINIClass::INI_RA2MD->ReadBool("Phobos", "MessageDisplayInCenter", false);
 	Phobos::Config::BuildingStatisticsCameo = CCINIClass::INI_RA2MD->ReadBool("Phobos", "BuildingStatisticsCameo", false);
 	Phobos::Config::DrawAdjacentBoundary = CCINIClass::INI_RA2MD->ReadBool("Phobos", "DrawAdjacentBoundary", false);

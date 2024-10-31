@@ -84,6 +84,9 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 		while (false);
 	}
 
+	if (*args->Damage > 0)
+		TechnoExt::ExtMap.Find(pThis)->LastHurtFrame = Unsorted::CurrentFrame;
+
 	if (!*args->Damage || args->IgnoreDefenses)
 		return 0;
 

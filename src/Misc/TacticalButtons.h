@@ -49,6 +49,11 @@ public:
 
 	// TODO New buttons
 
+	// Button index 61-68 : Heros buttons
+	inline bool IndexInHerosButtons();
+	void HerosDraw();
+	void HeroSelect(int buttonIndex);
+
 	// Button index 71-100 : Select buttons
 	inline bool IndexInSelectButtons();
 	inline void AddToCurrentSelect(TechnoTypeExt::ExtData* pTypeExt, int count, int checkIndex);
@@ -79,6 +84,8 @@ public:
 
 	// TODO New buttons
 
+	// Button index 61-68 : Heros buttons
+
 	// Button index 71-100 : Select buttons
 	const wchar_t* HoveredSelected { nullptr };
 
@@ -94,6 +101,8 @@ private:
 	bool SuperVisible { true };
 
 	// TODO New buttons
+
+	// Button index 61-68 : Heros buttons
 
 	// Button index 71-100 : Select buttons
 	int RecordIndex { 71 };

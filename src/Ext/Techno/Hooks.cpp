@@ -108,6 +108,9 @@ DEFINE_HOOK(0x6F42F7, TechnoClass_Init, 0x2)
 	pExt->InitializeDisplayInfo();
 	pExt->InitializeUnitIdleAction();
 
+	if (pExt->TypeExtData->Hero)
+		HouseExt::ExtMap.Find(pThis->Owner)->OwnedHeros.push_back(pThis);
+
 	return 0;
 }
 
