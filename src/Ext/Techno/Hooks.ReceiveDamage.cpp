@@ -3,6 +3,7 @@
 #include <Ext/WarheadType/Body.h>
 #include <Ext/WeaponType/Body.h>
 #include <Ext/TEvent/Body.h>
+#include <Ext/House/Body.h>
 
 namespace ReceiveDamageTemp
 {
@@ -15,22 +16,26 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	GET(TechnoClass*, pThis, ECX);
 	LEA_STACK(args_ReceiveDamage*, args, 0x4);
 
+	if (*args->Damage > 0)
+		TechnoExt::ExtMap.Find(pThis)->LastHurtFrame = Unsorted::CurrentFrame;
+
 	if (!*args->Damage || args->IgnoreDefenses)
 		return 0;
 
 	//Calculate Damage Multiplier
-	if (const auto pWHExt = WarheadTypeExt::ExtMap.Find(args->WH))
+	if (auto const pWHExt = WarheadTypeExt::ExtMap.Find(args->WH))
 	{
+		auto const pRules = RulesExt::Global();
 		const auto pFirerHouse = pThis->Owner;
 		const auto pTargetHouse = args->SourceHouse;
 		double multiplier = 1.0;
 
 		if (!pFirerHouse || !pTargetHouse || !pFirerHouse->IsAlliedWith(pTargetHouse))
-			multiplier = pWHExt->DamageEnemiesMultiplier.Get(RulesExt::Global()->DamageEnemiesMultiplier);
+			multiplier = pWHExt->DamageEnemiesMultiplier.Get(pRules->DamageEnemiesMultiplier);
 		else if (pFirerHouse != pTargetHouse)
-			multiplier = pWHExt->DamageAlliesMultiplier.Get(RulesExt::Global()->DamageAlliesMultiplier);
+			multiplier = pWHExt->DamageAlliesMultiplier.Get(pRules->DamageAlliesMultiplier);
 		else
-			multiplier = pWHExt->DamageOwnerMultiplier.Get(RulesExt::Global()->DamageOwnerMultiplier);
+			multiplier = pWHExt->DamageOwnerMultiplier.Get(pRules->DamageOwnerMultiplier);
 
 		if (multiplier != 1.0)
 		{

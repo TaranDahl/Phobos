@@ -31,6 +31,12 @@ TechnoExt::ExtData::~ExtData()
 		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
 	}
 
+	if (pTypeExt->UniqueTechno)
+	{
+		auto& vec = HouseExt::ExtMap.Find(pThis->Owner)->OwnedHeros;
+		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
+	}
+
 	if (pThis->WhatAmI() != AbstractType::Aircraft && pThis->WhatAmI() != AbstractType::Building
 		&& pType->Ammo > 0 && pTypeExt->ReloadInTransport)
 	{
@@ -511,6 +517,7 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->LastWeaponFLH)
 		.Process(this->AccumulatedGattlingValue)
 		.Process(this->ShouldUpdateGattlingValue)
+		.Process(this->LastHurtFrame)
 		.Process(this->FiringObstacleCell)
 		.Process(this->IsDetachingForCloak)
 		.Process(this->OriginalPassengerOwner)

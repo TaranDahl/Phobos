@@ -8,7 +8,6 @@
 #include <Ext/House/Body.h>
 #include <Ext/SWType/Body.h>
 #include <Utilities/TemplateDef.h>
-#include <Utilities/AresHelper.h>
 #include <TacticalClass.h>
 #include <WWMouseClass.h>
 #include <CCToolTip.h>
@@ -216,6 +215,34 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 
 	// TODO New buttons
 
+	if (Phobos::Config::UniqueDisplay_Enable) // Button index 61-68 : Heros buttons
+	{
+		auto& vec = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->OwnedHeros;
+
+		if (const int counts = Math::min(8, static_cast<int>(vec.size())))
+		{
+			const int width = DSurface::Composite->GetWidth() - 65;
+
+			if (pMousePosition->X >= width && pMousePosition->X < (width + 60))
+			{
+				int checkHight = 35;
+
+				for (int i = 0; i < counts; ++i)
+				{
+					if (pMousePosition->Y < checkHight)
+						break;
+
+					checkHight += 48;
+
+					if (pMousePosition->Y < checkHight)
+						return i + 61;
+
+					checkHight += 2;
+				}
+			}
+		}
+	}
+
 	if (Phobos::Config::SelectedDisplay_Enable) // Button index 71-100 : Select buttons
 	{
 		if (const int currentCounts = Math::min(30, static_cast<int>(this->CurrentSelectCameo.size())))
@@ -412,6 +439,11 @@ void TacticalButtonsClass::PressDesignatedButton(int triggerIndex)
 	{
 		;
 	}*/
+	else if (this->IndexInHerosButtons())
+	{
+		if (!triggerIndex)
+			this->HeroSelect(this->ButtonIndex);
+	}
 	else if (this->IndexInSelectButtons())
 	{
 		if (!triggerIndex)
@@ -544,9 +576,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 		// Draw cameo
 		if (SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pSWType))
 		{
-			BSurface* const CameoPCX = pTypeExt->SidebarPCX.GetSurface();
-
-			if (CAN_USE_ARES && AresHelper::CanUseAres && CameoPCX)
+			if (BSurface* const CameoPCX = pTypeExt->SidebarPCX.GetSurface())
 			{
 				RectangleStruct drawRect { position.X, position.Y, 60, 48 };
 				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
@@ -881,6 +911,350 @@ bool TacticalButtonsClass::SWQuickLaunch(int superIndex)
 	}
 
 	return false;
+}
+
+// Button index 61-68 : Heros buttons
+inline bool TacticalButtonsClass::IndexInHerosButtons()
+{
+	return this->ButtonIndex > 60 && this->ButtonIndex <= 68;
+}
+
+void TacticalButtonsClass::HerosDraw()
+{
+	if (!Phobos::Config::UniqueDisplay_Enable)
+		return;
+
+	HouseClass* const pHouse = HouseClass::CurrentPlayer;
+
+	if (pHouse->IsObserver())
+		return;
+
+	auto& vec = HouseExt::ExtMap.Find(pHouse)->OwnedHeros;
+	const int size = vec.size();
+
+	if (!size)
+		return;
+
+	Point2D position { DSurface::Composite->GetWidth() - 65, 35 };
+	RectangleStruct drawRect { position.X, position.Y, 60, 48 };
+	const int recordIndex = this->ButtonIndex - 61;
+	int counts = Math::min(8, size);
+
+	for (int i = 0; i < counts; ++i, position.Y += 50, drawRect.Y = position.Y)
+	{
+		TechnoClass* const pTechno = vec[i];
+		TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pTechno);
+		TechnoTypeExt::ExtData* const pTypeExt = pExt->TypeExtData;
+		TechnoTypeClass* const pType = pTypeExt->OwnerObject();
+
+		if (BSurface* const CameoPCX = pTypeExt->CameoPCX.GetSurface())
+		{
+			PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
+		}
+		else if (SHPStruct* const pSHP = pType->GetCameo())
+		{
+			SHPReference* const pCameoRef = pSHP->AsReference();
+
+			char pFilename[0x20];
+			strcpy_s(pFilename, RulesExt::Global()->MissingCameo.data());
+			_strlwr_s(pFilename);
+
+			if (!_stricmp(pCameoRef->Filename, GameStrings::XXICON_SHP) && strstr(pFilename, ".pcx"))
+			{
+				PCX::Instance->LoadFile(pFilename);
+
+				if (BSurface* const MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
+					PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
+			}
+			else
+			{
+				RectangleStruct rect { 0, 0, position.X + 60, position.Y + 48 };
+				DSurface::Composite->DrawSHP(pTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL), pSHP, 0, &position, &rect,
+					BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
+			}
+		}
+
+		if (!pTechno->InLimbo)
+		{
+			RulesClass* const pRules = RulesClass::Instance;
+			double ratio = pTechno->GetHealthPercentage();
+
+			if (pTechno->IsIronCurtained())
+			{
+				ColorStruct fillColor { 50, 50, 50 };
+				DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 20);
+			}
+			else
+			{
+				int time = Unsorted::CurrentFrame - pExt->LastHurtFrame;
+
+				if (ratio < pRules->ConditionRed)
+				{
+					ColorStruct fillColor { 255, 0, 0 };
+					int trans = 40 - time;
+
+					if (trans < 0)
+					{
+						const int round = time % 60;
+						trans = ((round <= 20) ? 0 : ((round <= 40) ? (round - 20) : (60 - round)));
+					}
+
+					if (trans > 0)
+						DSurface::Composite->FillRectTrans(&drawRect, &fillColor, trans);
+				}
+				else if (ratio < pRules->ConditionYellow)
+				{
+					ColorStruct fillColor { 255, 0, 0 };
+					int trans = 30 - time;
+
+					if (trans < 0)
+					{
+						const int round = time % 160;
+						trans = ((round <= 140) ? 0 : ((round <= 150) ? (round - 140) : (160 - round)));
+					}
+
+					if (trans > 0)
+						DSurface::Composite->FillRectTrans(&drawRect, &fillColor, trans);
+				}
+				else if (time < 20)
+				{
+					ColorStruct fillColor { 255, 0, 0 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, (20 - time));
+				}
+
+				time = Unsorted::CurrentFrame - pTechno->unknown_int_120;
+
+				if (time < 20)
+				{
+					ColorStruct fillColor { 255, 255, 0 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, (40 - (time << 1)));
+				}
+
+				if (pTechno->TemporalTargetingMe)
+				{
+					ColorStruct fillColor { 100, 100, 255 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+				}
+				else if (pTechno->AirstrikeTintStage)
+				{
+					ColorStruct fillColor { 255, 50, 0 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+				}
+				else if (pTechno->DrainingMe || pTechno->LocomotorSource)
+				{
+					ColorStruct fillColor { 200, 0, 255 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+				}
+				else if (pTechno->IsUnderEMP())
+				{
+					ColorStruct fillColor { 128, 128, 128 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+				}
+			}
+
+			if (pTechno->BunkerLinkedItem && pTechno->WhatAmI() != AbstractType::Building)
+			{
+				RectangleStruct rect { (position.X + 3), (position.Y + 1), 54, 7 };
+				DSurface::Composite->FillRect(&rect, 0x94BF);
+			}
+			else
+			{
+				RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
+				DSurface::Composite->DrawRect(&rect, 0);
+			}
+
+			RectangleStruct rect { (position.X + 5), (position.Y + 3), 50, 3 };
+			DSurface::Composite->FillRect(&rect, 0);
+
+			rect.Width = static_cast<int>(50 * ratio + 0.5);
+			const int color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
+			DSurface::Composite->FillRect(&rect, color);
+
+			ShieldClass* const pShield = pExt->Shield.get();
+
+			if (pShield && !pShield->IsBrokenAndNonRespawning())
+			{
+				ratio = (static_cast<double>(pShield->GetHP()) / pShield->GetType()->Strength.Get());
+				rect.Width = static_cast<int>(50 * ratio + 0.5);
+				ColorStruct fillColor { 153, 153, 255 };
+				DSurface::Composite->FillRectTrans(&rect, &fillColor, 80);
+			}
+
+			if (pTechno->IsIronCurtained())
+			{
+				const CDTimerClass* const timer = &pTechno->IronCurtainTimer;
+				ratio = static_cast<double>(timer->GetTimeLeft()) / timer->TimeLeft;
+				rect.Width = static_cast<int>(50 * ratio + 0.5);
+				ColorStruct fillColor { 200, 50, 50 };
+				DSurface::Composite->FillRectTrans(&rect, &fillColor, 80);
+			}
+		}
+		else if (TechnoClass* pSelect = pTechno->Transporter)
+		{
+			for (TechnoClass* pTrans = pSelect; pTrans; pTrans = pTrans->Transporter)
+				pSelect = pTrans;
+
+			TechnoExt::ExtData* const pSelectExt = TechnoExt::ExtMap.Find(pSelect);
+			RulesClass* const pRules = RulesClass::Instance;
+			double ratio = pSelect->GetHealthPercentage();
+
+			if (pTechno->IsIronCurtained())
+			{
+				ColorStruct fillColor { 50, 50, 50 };
+				DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 20);
+			}
+			else
+			{
+				int time = Unsorted::CurrentFrame - pSelectExt->LastHurtFrame;
+
+				if (ratio < pRules->ConditionRed)
+				{
+					ColorStruct fillColor { 255, 0, 0 };
+					int trans = 40 - time;
+
+					if (trans < 0)
+					{
+						const int round = time % 60;
+						trans = ((round <= 20) ? 0 : ((round <= 40) ? (round - 20) : (60 - round)));
+					}
+
+					if (trans > 0)
+						DSurface::Composite->FillRectTrans(&drawRect, &fillColor, trans);
+				}
+				else if (ratio < pRules->ConditionYellow)
+				{
+					ColorStruct fillColor { 255, 0, 0 };
+					int trans = 30 - time;
+
+					if (trans < 0)
+					{
+						const int round = time % 160;
+						trans = ((round <= 140) ? 0 : ((round <= 150) ? (round - 140) : (160 - round)));
+					}
+
+					if (trans > 0)
+						DSurface::Composite->FillRectTrans(&drawRect, &fillColor, trans);
+				}
+				else if (time < 20)
+				{
+					ColorStruct fillColor { 255, 0, 0 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, (20 - time));
+				}
+
+				time = Unsorted::CurrentFrame - pSelect->unknown_int_120;
+
+				if (time < 20)
+				{
+					ColorStruct fillColor { 255, 255, 0 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, (40 - (time << 1)));
+				}
+
+				if (pSelect->TemporalTargetingMe)
+				{
+					ColorStruct fillColor { 100, 100, 255 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+				}
+				else if (pSelect->LocomotorSource)
+				{
+					ColorStruct fillColor { 200, 0, 255 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+				}
+				else if (pSelect->IsUnderEMP())
+				{
+					ColorStruct fillColor { 128, 128, 128 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+				}
+			}
+
+			RectangleStruct rect { (position.X + 3), (position.Y + 1), 54, 7 };
+			DSurface::Composite->FillRect(&rect, 0x94BF);
+
+			rect = RectangleStruct { (position.X + 5), (position.Y + 3), 50, 3 };
+			DSurface::Composite->FillRect(&rect, 0);
+
+			rect.Width = static_cast<int>(50 * ratio + 0.5);
+			const int color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
+			DSurface::Composite->FillRect(&rect, color);
+
+			ShieldClass* const pShield = pSelectExt->Shield.get();
+
+			if (pShield && !pShield->IsBrokenAndNonRespawning())
+			{
+				ratio = (static_cast<double>(pShield->GetHP()) / pShield->GetType()->Strength.Get());
+				rect.Width = static_cast<int>(50 * ratio + 0.5);
+				ColorStruct fillColor { 153, 153, 255 };
+				DSurface::Composite->FillRectTrans(&rect, &fillColor, 80);
+			}
+
+			if (pSelect->IsIronCurtained())
+			{
+				const CDTimerClass* const timer = &pSelect->IronCurtainTimer;
+				ratio = static_cast<double>(timer->GetTimeLeft()) / timer->TimeLeft;
+				rect.Width = static_cast<int>(50 * ratio + 0.5);
+				ColorStruct fillColor { 200, 50, 50 };
+				DSurface::Composite->FillRectTrans(&rect, &fillColor, 80);
+			}
+		}
+		else
+		{
+			ColorStruct fillColor { 0, 0, 0 };
+			DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 40);
+
+			RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
+			DSurface::Composite->FillRect(&rect, 0);
+
+			const AbstractType absType = pTechno->WhatAmI();
+			const BuildCat buildCat = (absType == AbstractType::Building) ? static_cast<BuildingClass*>(pTechno)->Type->BuildCat : BuildCat::DontCare;
+			FactoryClass* const pFactory = pTechno->Owner->GetPrimaryFactory(absType, pType->Naval, buildCat);
+			const double ratio = (pFactory && pFactory->Object == pTechno) ? (static_cast<double>(pFactory->GetProgress()) / 54) : 1.0;
+
+			rect = RectangleStruct { (position.X + 5), (position.Y + 3), static_cast<int>(50 * ratio), 3 };
+			DSurface::Composite->FillRect(&rect, 0xFFFF);
+		}
+
+		if (i == recordIndex && !ScenarioClass::Instance->UserInputLocked)
+		{
+			RectangleStruct rect { 0, 0, position.X + 60, position.Y + 48 };
+			DSurface::Composite->DrawRectEx(&rect, &drawRect, Drawing::RGB_To_Int(Drawing::TooltipColor));
+		}
+	}
+}
+
+void TacticalButtonsClass::HeroSelect(int buttonIndex)
+{
+	if (ScenarioClass::Instance->UserInputLocked || !Phobos::Config::UniqueDisplay_Enable)
+		return;
+
+	HouseClass* const pHouse = HouseClass::CurrentPlayer;
+	auto& vec = HouseExt::ExtMap.Find(pHouse)->OwnedHeros;
+	const int index = buttonIndex - 61;
+
+	if (index >= static_cast<int>(vec.size()))
+		return;
+
+	TechnoClass* const pTechno = vec[index];
+
+	if (pTechno->IsAlive)
+	{
+		TechnoClass* pSelect = pTechno;
+
+		for (TechnoClass* pTrans = pSelect->Transporter; pTrans; pTrans = pTrans->Transporter)
+			pSelect = pTrans;
+
+		if (pSelect->Location != CoordStruct::Empty && pSelect->IsOnMap)
+		{
+			if (ObjectClass::CurrentObjects->Count == 1 && pSelect->IsSelected)
+			{
+				MapClass::Instance->CenterMap();
+				MapClass::Instance->MarkNeedsRedraw(1);
+			}
+			else
+			{
+				MapClass::UnselectAll();
+				pSelect->Select();
+			}
+		}
+	}
 }
 
 // Button index 71-100 : Select buttons
@@ -1768,7 +2142,7 @@ DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 
 	pButtons->SelectedUpdate();
 	pButtons->SelectedDraw();
-
+	pButtons->HerosDraw();
 	pButtons->SWSidebarDraw();
 
 	return 0;
@@ -1829,6 +2203,22 @@ DEFINE_HOOK(0x6AB961, SelectClass_Action_ButtonClick3, 0x7)
 	pButtons->DummyAction = false;
 
 	return SkipControlAction;
+}
+
+// Heros hooks
+DEFINE_HOOK(0x7015C9, TechnoClass_SetOwningHouse_ChangeHeroOwner, 0x6)
+{
+	GET(TechnoClass* const, pThis, ESI);
+	GET(HouseClass* const, pNewOwner, EBP);
+
+	if (TechnoExt::ExtMap.Find(pThis)->TypeExtData->UniqueTechno)
+	{
+		auto& vec = HouseExt::ExtMap.Find(pThis->Owner)->OwnedHeros;
+		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
+		HouseExt::ExtMap.Find(pNewOwner)->OwnedHeros.push_back(pThis);
+	}
+
+	return 0;
 }
 
 // Shortcuts keys hooks

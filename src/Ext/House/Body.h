@@ -25,6 +25,7 @@ public:
 		std::vector<BuildingClass*> OwnedLimboDeliveredBuildings;
 		std::vector<TechnoTypeExt::ExtData*> OwnedExistCameoTechnoTypes;
 		std::vector<UnitClass*> OwnedDeployingUnits;
+		std::vector<TechnoClass*> OwnedHeros;
 		std::vector<CellStruct> BaseNormalCells;
 
 		CounterClass LimboAircraft;  // Currently owned aircraft in limbo
@@ -77,6 +78,7 @@ public:
 			, OwnedLimboDeliveredBuildings {}
 			, OwnedExistCameoTechnoTypes {}
 			, OwnedDeployingUnits {}
+			, OwnedHeros {}
 			, BaseNormalCells {}
 			, LimboAircraft {}
 			, LimboBuildings {}

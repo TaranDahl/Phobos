@@ -36,17 +36,17 @@ inline const wchar_t* PhobosToolTip::GetUIDescription(TechnoTypeExt::ExtData* pD
 		: nullptr;
 }
 
-inline const wchar_t* PhobosToolTip::GetUIDescription(SWTypeExt::ExtData* pData) const
-{
-	return Phobos::Config::ToolTipDescriptions && !pData->UIDescription.Get().empty()
-		? pData->UIDescription.Get().Text
-		: nullptr;
-}
-
 inline const wchar_t* PhobosToolTip::GetUIExtraDescription(TechnoTypeExt::ExtData* pData) const
 {
 	return Phobos::Config::ToolTipDescriptions && !pData->UIExtraDescription.Get().empty()
 		? pData->UIExtraDescription.Get().Text
+		: nullptr;
+}
+
+inline const wchar_t* PhobosToolTip::GetUIDescription(SWTypeExt::ExtData* pData) const
+{
+	return Phobos::Config::ToolTipDescriptions && !pData->UIDescription.Get().empty()
+		? pData->UIDescription.Get().Text
 		: nullptr;
 }
 
@@ -249,6 +249,8 @@ DEFINE_HOOK(0x4AE511, DisplayClass_GetToolTip_SkipTacticalTip, 0x5)
 
 	if (buttonIndex <= 10) // Button index 1-10 : Super weapons buttons
 		R->EAX(PhobosToolTip::Instance.GetBuffer());
+	else if (buttonIndex > 60 && buttonIndex <= 68) // Button index 61-68 : Hero buttons
+		R->EAX(0);
 	else if (buttonIndex > 70 && buttonIndex <= 100) // Button index 71-100 : Select buttons
 		R->EAX(pButtons->HoveredSelected);
 	else

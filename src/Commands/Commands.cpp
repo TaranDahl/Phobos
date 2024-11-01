@@ -12,6 +12,7 @@
 #include "SaveVariablesToFile.h"
 #include "SWShortcuts.h"
 #include "SelectedInfo.h"
+#include "HerosInfo.h"
 
 DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 {
@@ -33,6 +34,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<SWShortcutsCommandClass<9>>();
 	MakeCommand<SWShortcutsCommandClass<10>>();
 	MakeCommand<SelectedInfoCommandClass>();
+	MakeCommand<HerosInfoCommandClass>();
 
 	if (Phobos::Config::DevelopmentCommands)
 	{
