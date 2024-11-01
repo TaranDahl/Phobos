@@ -976,21 +976,97 @@ void TacticalButtonsClass::HerosDraw()
 
 		if (!pTechno->InLimbo)
 		{
-			const int time = Unsorted::CurrentFrame - pExt->LastHurtFrame;
+			RulesClass* const pRules = RulesClass::Instance;
+			double ratio = pTechno->GetHealthPercentage();
 
-			if (time < 40)
+			if (pTechno->IsIronCurtained())
 			{
-				ColorStruct fillColor { 255, 0, 0 };
-				DSurface::Composite->FillRectTrans(&drawRect, &fillColor, (40 - time));
+				ColorStruct fillColor { 50, 50, 50 };
+				DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 20);
+			}
+			else
+			{
+				int time = Unsorted::CurrentFrame - pExt->LastHurtFrame;
+
+				if (ratio < pRules->ConditionRed)
+				{
+					ColorStruct fillColor { 255, 0, 0 };
+					int trans = 40 - time;
+
+					if (trans < 0)
+					{
+						const int round = time % 60;
+						trans = ((round <= 20) ? 0 : ((round <= 40) ? (round - 20) : (60 - round)));
+					}
+
+					if (trans > 0)
+						DSurface::Composite->FillRectTrans(&drawRect, &fillColor, trans);
+				}
+				else if (ratio < pRules->ConditionYellow)
+				{
+					ColorStruct fillColor { 255, 0, 0 };
+					int trans = 30 - time;
+
+					if (trans < 0)
+					{
+						const int round = time % 160;
+						trans = ((round <= 140) ? 0 : ((round <= 150) ? (round - 140) : (160 - round)));
+					}
+
+					if (trans > 0)
+						DSurface::Composite->FillRectTrans(&drawRect, &fillColor, trans);
+				}
+				else if (time < 20)
+				{
+					ColorStruct fillColor { 255, 0, 0 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, (20 - time));
+				}
+
+				time = Unsorted::CurrentFrame - pTechno->unknown_int_120;
+
+				if (time < 20)
+				{
+					ColorStruct fillColor { 255, 255, 0 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, (40 - (time << 1)));
+				}
+
+				if (pTechno->TemporalTargetingMe)
+				{
+					ColorStruct fillColor { 100, 100, 255 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+				}
+				else if (pTechno->AirstrikeTintStage)
+				{
+					ColorStruct fillColor { 255, 50, 0 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+				}
+				else if (pTechno->DrainingMe || pTechno->LocomotorSource)
+				{
+					ColorStruct fillColor { 200, 0, 255 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+				}
+				else if (pTechno->IsUnderEMP())
+				{
+					ColorStruct fillColor { 128, 128, 128 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+				}
 			}
 
-			RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
+			if (pTechno->BunkerLinkedItem && pTechno->WhatAmI() != AbstractType::Building)
+			{
+				RectangleStruct rect { (position.X + 3), (position.Y + 1), 54, 7 };
+				DSurface::Composite->FillRect(&rect, 0x94BF);
+			}
+			else
+			{
+				RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
+				DSurface::Composite->DrawRect(&rect, 0);
+			}
+
+			RectangleStruct rect { (position.X + 5), (position.Y + 3), 50, 3 };
 			DSurface::Composite->FillRect(&rect, 0);
 
-			double ratio = pTechno->GetHealthPercentage();
-			rect = RectangleStruct { (position.X + 5), (position.Y + 3), static_cast<int>(50 * ratio + 0.5), 3 };
-
-			RulesClass* const pRules = RulesClass::Instance;
+			rect.Width = static_cast<int>(50 * ratio + 0.5);
 			const int color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
 			DSurface::Composite->FillRect(&rect, color);
 
@@ -998,10 +1074,19 @@ void TacticalButtonsClass::HerosDraw()
 
 			if (pShield && !pShield->IsBrokenAndNonRespawning())
 			{
-				ratio = pShield->GetHP() / pShield->GetType()->Strength.Get();
+				ratio = (static_cast<double>(pShield->GetHP()) / pShield->GetType()->Strength.Get());
 				rect.Width = static_cast<int>(50 * ratio + 0.5);
 				ColorStruct fillColor { 153, 153, 255 };
-				DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 70);
+				DSurface::Composite->FillRectTrans(&rect, &fillColor, 80);
+			}
+
+			if (pTechno->IsIronCurtained())
+			{
+				const CDTimerClass* const timer = &pTechno->IronCurtainTimer;
+				ratio = static_cast<double>(timer->GetTimeLeft()) / timer->TimeLeft;
+				rect.Width = static_cast<int>(50 * ratio + 0.5);
+				ColorStruct fillColor { 200, 50, 50 };
+				DSurface::Composite->FillRectTrans(&rect, &fillColor, 80);
 			}
 		}
 		else if (TechnoClass* pSelect = pTechno->Transporter)
@@ -1010,24 +1095,84 @@ void TacticalButtonsClass::HerosDraw()
 				pSelect = pTrans;
 
 			TechnoExt::ExtData* const pSelectExt = TechnoExt::ExtMap.Find(pSelect);
-			const int time = Unsorted::CurrentFrame - pSelectExt->LastHurtFrame;
+			RulesClass* const pRules = RulesClass::Instance;
+			double ratio = pSelect->GetHealthPercentage();
 
-			if (time < 40)
+			if (pTechno->IsIronCurtained())
 			{
-				ColorStruct fillColor { 255, 0, 0 };
-				DSurface::Composite->FillRectTrans(&drawRect, &fillColor, (50 - time));
+				ColorStruct fillColor { 50, 50, 50 };
+				DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 20);
+			}
+			else
+			{
+				int time = Unsorted::CurrentFrame - pSelectExt->LastHurtFrame;
+
+				if (ratio < pRules->ConditionRed)
+				{
+					ColorStruct fillColor { 255, 0, 0 };
+					int trans = 40 - time;
+
+					if (trans < 0)
+					{
+						const int round = time % 60;
+						trans = ((round <= 20) ? 0 : ((round <= 40) ? (round - 20) : (60 - round)));
+					}
+
+					if (trans > 0)
+						DSurface::Composite->FillRectTrans(&drawRect, &fillColor, trans);
+				}
+				else if (ratio < pRules->ConditionYellow)
+				{
+					ColorStruct fillColor { 255, 0, 0 };
+					int trans = 30 - time;
+
+					if (trans < 0)
+					{
+						const int round = time % 160;
+						trans = ((round <= 140) ? 0 : ((round <= 150) ? (round - 140) : (160 - round)));
+					}
+
+					if (trans > 0)
+						DSurface::Composite->FillRectTrans(&drawRect, &fillColor, trans);
+				}
+				else if (time < 20)
+				{
+					ColorStruct fillColor { 255, 0, 0 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, (20 - time));
+				}
+
+				time = Unsorted::CurrentFrame - pSelect->unknown_int_120;
+
+				if (time < 20)
+				{
+					ColorStruct fillColor { 255, 255, 0 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, (40 - (time << 1)));
+				}
+
+				if (pSelect->TemporalTargetingMe)
+				{
+					ColorStruct fillColor { 100, 100, 255 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+				}
+				else if (pSelect->LocomotorSource)
+				{
+					ColorStruct fillColor { 200, 0, 255 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+				}
+				else if (pSelect->IsUnderEMP())
+				{
+					ColorStruct fillColor { 128, 128, 128 };
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+				}
 			}
 
-			ColorStruct fillColor { 153, 153, 255 };
-			DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 25);
+			RectangleStruct rect { (position.X + 3), (position.Y + 1), 54, 7 };
+			DSurface::Composite->FillRect(&rect, 0x94BF);
 
-			RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
+			rect = RectangleStruct { (position.X + 5), (position.Y + 3), 50, 3 };
 			DSurface::Composite->FillRect(&rect, 0);
 
-			double ratio = pSelect->GetHealthPercentage();
-			rect = RectangleStruct { (position.X + 5), (position.Y + 3), static_cast<int>(50 * ratio + 0.5), 3 };
-
-			RulesClass* const pRules = RulesClass::Instance;
+			rect.Width = static_cast<int>(50 * ratio + 0.5);
 			const int color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
 			DSurface::Composite->FillRect(&rect, color);
 
@@ -1035,14 +1180,26 @@ void TacticalButtonsClass::HerosDraw()
 
 			if (pShield && !pShield->IsBrokenAndNonRespawning())
 			{
-				ratio = pShield->GetHP() / pShield->GetType()->Strength.Get();
+				ratio = (static_cast<double>(pShield->GetHP()) / pShield->GetType()->Strength.Get());
 				rect.Width = static_cast<int>(50 * ratio + 0.5);
-				fillColor = ColorStruct { 153, 153, 255 };
-				DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 70);
+				ColorStruct fillColor { 153, 153, 255 };
+				DSurface::Composite->FillRectTrans(&rect, &fillColor, 80);
+			}
+
+			if (pSelect->IsIronCurtained())
+			{
+				const CDTimerClass* const timer = &pSelect->IronCurtainTimer;
+				ratio = static_cast<double>(timer->GetTimeLeft()) / timer->TimeLeft;
+				rect.Width = static_cast<int>(50 * ratio + 0.5);
+				ColorStruct fillColor { 200, 50, 50 };
+				DSurface::Composite->FillRectTrans(&rect, &fillColor, 80);
 			}
 		}
 		else
 		{
+			ColorStruct fillColor { 0, 0, 0 };
+			DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 40);
+
 			RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
 			DSurface::Composite->FillRect(&rect, 0);
 
@@ -1052,7 +1209,7 @@ void TacticalButtonsClass::HerosDraw()
 			const double ratio = (pFactory && pFactory->Object == pTechno) ? (static_cast<double>(pFactory->GetProgress()) / 54) : 1.0;
 
 			rect = RectangleStruct { (position.X + 5), (position.Y + 3), static_cast<int>(50 * ratio), 3 };
-			DSurface::Composite->FillRect(&rect, 0x7BEF);
+			DSurface::Composite->FillRect(&rect, 0xFFFF);
 		}
 
 		if (i == recordIndex && !ScenarioClass::Instance->UserInputLocked)
@@ -1079,7 +1236,6 @@ void TacticalButtonsClass::HeroSelect(int buttonIndex)
 
 	if (pTechno->IsAlive)
 	{
-		MapClass::UnselectAll();
 		TechnoClass* pSelect = pTechno;
 
 		for (TechnoClass* pTrans = pSelect->Transporter; pTrans; pTrans = pTrans->Transporter)
@@ -1087,10 +1243,15 @@ void TacticalButtonsClass::HeroSelect(int buttonIndex)
 
 		if (pSelect->Location != CoordStruct::Empty && pSelect->IsOnMap)
 		{
-			if (pSelect->Select())
+			if (ObjectClass::CurrentObjects->Count == 1 && pSelect->IsSelected)
 			{
 				MapClass::Instance->CenterMap();
 				MapClass::Instance->MarkNeedsRedraw(1);
+			}
+			else
+			{
+				MapClass::UnselectAll();
+				pSelect->Select();
 			}
 		}
 	}
