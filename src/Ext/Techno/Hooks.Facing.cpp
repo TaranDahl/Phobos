@@ -1,5 +1,6 @@
 #include "Body.h"
 
+#include <JumpjetLocomotionClass.h>
 #include <BulletTypeClass.h>
 
 #pragma region UnitsFacing
@@ -158,7 +159,7 @@ DEFINE_HOOK(0x736B7E, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0xA)
 
 		if (!pExt->UnitIdleIsSelected)
 		{
-			if (!pThis->Destination)
+			if (!pThis->Destination || locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor))
 			{
 				// Idle main
 				if (pExt && pExt->UnitIdleAction && (currentMission == Mission::Guard || currentMission == Mission::Sticky))
