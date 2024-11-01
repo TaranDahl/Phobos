@@ -56,6 +56,7 @@ public:
 		WeaponTypeClass* LastWeaponType;
 		CoordStruct LastWeaponFLH;
 		int LastHurtFrame;
+		int MyTargetingFrame;
 		int AccumulatedGattlingValue;
 		bool ShouldUpdateGattlingValue;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
@@ -103,6 +104,7 @@ public:
 			, LastWeaponType {}
 			, LastWeaponFLH {}
 			, LastHurtFrame { 0 }
+			, MyTargetingFrame { ScenarioClass::Instance->Random.RandomRanged(0,15) }
 			, AccumulatedGattlingValue { 0 }
 			, ShouldUpdateGattlingValue { false }
 			, FiringObstacleCell {}
