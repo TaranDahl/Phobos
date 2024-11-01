@@ -67,10 +67,10 @@ DEFINE_HOOK(0x458623, BuildingClass_KillOccupiers_Replace_MuzzleFix, 0x7)
 
 DEFINE_HOOK(0x6D528A, TacticalClass_DrawPlacement_PlacementPreview, 0x6)
 {
-	auto pRules = RulesExt::Global();
-
-	if (pRules->DrawAdjacentBoundary)
+	if (Phobos::Config::DrawAdjacentBoundary)
 		BuildingTypeExt::DrawAdjacentLines();
+
+	auto pRules = RulesExt::Global();
 
 	if (!pRules->PlacementPreview || !Phobos::Config::ShowPlacementPreview)
 		return 0;
