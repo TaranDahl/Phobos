@@ -246,6 +246,7 @@ public:
 		Valueable<bool> AIAngerOnAlly;
 		Valueable<bool> FollowTargetSelf;
 		Valueable<bool> HarvesterScanAfterUnload;
+		Valueable<bool> DistributeTargetingFrame;
 
 		Valueable<double> AircraftLevelLightMultiplier;
 		Valueable<double> JumpjetLevelLightMultiplier;
@@ -468,6 +469,7 @@ public:
 			, AIAngerOnAlly { true }
 			, FollowTargetSelf { false }
 			, HarvesterScanAfterUnload { false }
+			, DistributeTargetingFrame { false }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
 			, VoxelLightSource { }
