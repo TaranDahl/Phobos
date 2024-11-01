@@ -121,25 +121,6 @@ DEFINE_HOOK(0x736990, UnitClass_UpdateRotation_TurretFacing_EMP, 0x6)
 	return 0;
 }
 
-// Bugfix: Align jumpjet turret's facing with body's
-DEFINE_HOOK_AGAIN(0x54BB80, JumpjetLocomotionClass_ProcessState_ClearDestination, 0x7) // ProcessAscending
-DEFINE_HOOK_AGAIN(0x54C2CB, JumpjetLocomotionClass_ProcessState_ClearDestination, 0x7) // ProcessCruising
-DEFINE_HOOK_AGAIN(0x54C376, JumpjetLocomotionClass_ProcessState_ClearDestination, 0x7) // ProcessCruising
-DEFINE_HOOK(0x54C64B, JumpjetLocomotionClass_ProcessState_ClearDestination, 0x7) // ProcessDescending
-{
-	GET(FootClass* const, pThis, ECX);
-
-	if (pThis->Destination == pThis->GetCell())
-	{
-		pThis->SetDestination(nullptr, true);
-
-		if (!pThis->Target)
-			pThis->QueueMission(Mission::Guard, true);
-	}
-
-	return 0;
-}
-
 // Bugfix: Jumpjet detect cloaked objects beneath
 DEFINE_HOOK(0x54C036, JumpjetLocomotionClass_State3_UpdateSensors, 0x7)
 {
