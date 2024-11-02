@@ -298,6 +298,8 @@ public:
 		Nullable<CoordStruct> ExitCoord;
 		Valueable<bool> MissileSpawnUseOtherFLHs;
 		Valueable<bool> HarvesterQuickUnloader;
+		Nullable<bool> DistributeTargetingFrame;
+		Nullable<bool> AttackMove_StopWhenTargetAcquired;
 		Nullable<bool> KeepAlive;
 
 		ValueableVector<TechnoTypeClass*> InitialPayload_Types;
@@ -596,12 +598,14 @@ public:
 			, DigEndROT { -1 }
 			, FlightClimb { -1 }
 			, FlightCrash { -1 }
-			, ExplodeOnDestroy { }
-			, FireDeathWeaponOnCrushed { }
-			, ExitCoord { }
+			, ExplodeOnDestroy {}
+			, FireDeathWeaponOnCrushed {}
+			, ExitCoord {}
 			, MissileSpawnUseOtherFLHs { false }
 			, HarvesterQuickUnloader { false }
-			, KeepAlive { }
+			, DistributeTargetingFrame {}
+			, AttackMove_StopWhenTargetAcquired {}
+			, KeepAlive {}
 
 			, InitialPayload_Types {}
 			, InitialPayload_Nums {}
