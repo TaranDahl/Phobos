@@ -1192,19 +1192,37 @@ void TacticalButtonsClass::HerosDraw()
 		}
 		else
 		{
-			ColorStruct fillColor { 0, 0, 0 };
-			DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 40);
-
-			RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
-			DSurface::Composite->FillRect(&rect, 0);
-
 			const AbstractType absType = pTechno->WhatAmI();
 			const BuildCat buildCat = (absType == AbstractType::Building) ? static_cast<BuildingClass*>(pTechno)->Type->BuildCat : BuildCat::DontCare;
 			FactoryClass* const pFactory = pTechno->Owner->GetPrimaryFactory(absType, pType->Naval, buildCat);
-			const double ratio = (pFactory && pFactory->Object == pTechno) ? (static_cast<double>(pFactory->GetProgress()) / 54) : 1.0;
 
-			rect = RectangleStruct { (position.X + 5), (position.Y + 3), static_cast<int>(50 * ratio), 3 };
-			DSurface::Composite->FillRect(&rect, 0xFFFF);
+			if (pFactory && pFactory->Object == pTechno)
+			{
+				ColorStruct fillColor { 0, 0, 0 };
+				DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 30);
+
+				RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
+				DSurface::Composite->FillRect(&rect, 0);
+
+				const double ratio = static_cast<double>(pFactory->GetProgress()) / 54;
+				rect = RectangleStruct { (position.X + 5), (position.Y + 3), static_cast<int>(50 * ratio), 3 };
+				DSurface::Composite->FillRect(&rect, 0xFFFF);
+			}
+			else
+			{
+				ColorStruct fillColor { 20, 100, 50 };
+				DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 10);
+
+				RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
+				DSurface::Composite->FillRect(&rect, 0);
+
+				const double ratio = pTechno->GetHealthPercentage();
+				rect = RectangleStruct { (position.X + 5), (position.Y + 3), static_cast<int>(50 * ratio), 3 };
+
+				RulesClass* const pRules = RulesClass::Instance;
+				const int color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
+				DSurface::Composite->FillRect(&rect, color);
+			}
 		}
 
 		if (i == recordIndex && !ScenarioClass::Instance->UserInputLocked)
