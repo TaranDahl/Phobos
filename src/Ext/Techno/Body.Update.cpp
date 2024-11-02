@@ -424,14 +424,23 @@ void TechnoExt::ExtData::UpdateTypeData(TechnoTypeClass* pCurrentType)
 	this->UpdateSelfOwnedAttachEffects();
 
 	// Reset Hero Flag
-	if (pOldTypeExt->UniqueTechno && !this->TypeExtData->UniqueTechno)
+	if (pThis->Owner->IsControlledByCurrentPlayer())
 	{
-		auto& vec = HouseExt::ExtMap.Find(pThis->Owner)->OwnedHeros;
-		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
-	}
-	else if (this->TypeExtData->UniqueTechno && !pOldTypeExt->UniqueTechno)
-	{
-		HouseExt::ExtMap.Find(pThis->Owner)->OwnedHeros.push_back(pThis);
+		if (pOldTypeExt->UniqueTechno)
+		{
+			if (!this->TypeExtData->UniqueTechno)
+			{
+				auto& vec = ScenarioExt::Global()->OwnedHeros;
+				vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
+			}
+		}
+		else if (this->TypeExtData->UniqueTechno)
+		{
+			auto& vec = ScenarioExt::Global()->OwnedHeros;
+
+			if (std::find(vec.begin(), vec.end(), this) == vec.end())
+				vec.push_back(this);
+		}
 	}
 
 	// Recreate Laser Trails

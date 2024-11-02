@@ -2,6 +2,7 @@
 
 #include <SessionClass.h>
 #include <VeinholeMonsterClass.h>
+#include <Misc/TacticalButtons.h>
 
 std::unique_ptr<ScenarioExt::ExtData> ScenarioExt::Data = nullptr;
 
@@ -162,6 +163,8 @@ void ScenarioExt::ExtData::Serialize(T& Stm)
 		.Process(this->BriefingTheme)
 		.Process(this->AutoDeathObjects)
 		.Process(this->TransportReloaders)
+		.Process(this->SWButtonData)
+		.Process(this->OwnedHeros)
 		;
 }
 
@@ -225,6 +228,8 @@ DEFINE_HOOK(0x689669, ScenarioClass_Load_Suffix, 0x6)
 		if (Reader.Expect(ScenarioExt::Canary) && Reader.RegisterChange(buffer))
 			buffer->LoadFromStream(Reader);
 	}
+
+	TacticalButtonsClass::Instance.UpdateSelect = true;
 
 	return 0;
 }

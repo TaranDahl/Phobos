@@ -33,8 +33,8 @@ TechnoExt::ExtData::~ExtData()
 
 	if (pTypeExt->UniqueTechno)
 	{
-		auto& vec = HouseExt::ExtMap.Find(pThis->Owner)->OwnedHeros;
-		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
+		auto& vec = ScenarioExt::Global()->OwnedHeros;
+		vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
 	}
 
 	if (pThis->WhatAmI() != AbstractType::Aircraft && pThis->WhatAmI() != AbstractType::Building

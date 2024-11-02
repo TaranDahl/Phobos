@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Utilities/Macro.h>
 #include <Ext/SWType/Body.h>
 #include <ControlClass.h>
@@ -77,25 +79,9 @@ public:
 	// Button index 1-10 : Super weapons buttons
 	bool DummyAction { false };
 	bool KeyboardCall { false };
+	int RecordSuperIndex { -1 };
 	std::wstring KeyCodeText[10] {};
 	int KeyCodeData[10] {};
-
-	// Button index 11 : SW sidebar switch
-
-	// TODO New buttons
-
-	// Button index 61-68 : Heros buttons
-
-	// Button index 71-100 : Select buttons
-	const wchar_t* HoveredSelected { nullptr };
-
-private:
-	int ButtonIndex { -1 }; // -1 -> above no buttons, 0 -> above buttons background, POSITIVE -> above button who have this index
-
-	// Button index N/A : Message Lists
-
-	// Button index 1-10 : Super weapons buttons
-	int RecordSuperIndex { -1 }; // Cannot be used, only for comparison purposes
 
 	// Button index 11 : SW sidebar switch
 	bool SuperVisible { true };
@@ -105,6 +91,11 @@ private:
 	// Button index 61-68 : Heros buttons
 
 	// Button index 71-100 : Select buttons
+	bool UpdateSelect { false };
 	int RecordIndex { 71 };
 	std::vector<SelectRecordStruct> CurrentSelectCameo {};
+	const wchar_t* HoveredSelected { nullptr };
+
+private:
+	int ButtonIndex { -1 }; // -1 -> above no buttons, 0 -> above buttons background, POSITIVE -> above button who have this index
 };

@@ -6,7 +6,7 @@
 #include <TunnelLocomotionClass.h>
 
 #include <Ext/BuildingType/Body.h>
-#include <Ext/House/Body.h>
+#include <Ext/Scenario/Body.h>
 #include <Ext/WarheadType/Body.h>
 #include <Ext/WeaponType/Body.h>
 #include <Utilities/EnumFunctions.h>
@@ -108,8 +108,8 @@ DEFINE_HOOK(0x6F42F7, TechnoClass_Init, 0x2)
 	pExt->InitializeDisplayInfo();
 	pExt->InitializeUnitIdleAction();
 
-	if (pExt->TypeExtData->UniqueTechno)
-		HouseExt::ExtMap.Find(pThis->Owner)->OwnedHeros.push_back(pThis);
+	if (pExt->TypeExtData->UniqueTechno && pThis->Owner->IsControlledByCurrentPlayer())
+		ScenarioExt::Global()->OwnedHeros.push_back(pExt);
 
 	return 0;
 }

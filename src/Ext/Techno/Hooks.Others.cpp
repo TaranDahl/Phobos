@@ -430,7 +430,7 @@ DEFINE_HOOK(0x55B4E1, LogicClass_Update_UnmarkCellOccupationFlags, 0x5)
 #pragma endregion
 
 #pragma region DetectionLogic
-
+/*
 DEFINE_HOOK(0x5865E2, MapClass_IsLocationFogged_Check, 0x5)
 {
 	REF_STACK(CoordStruct*, pCoords, STACK_OFFSET(0x0, 0x4));
@@ -442,7 +442,7 @@ DEFINE_HOOK(0x5865E2, MapClass_IsLocationFogged_Check, 0x5)
 	R->EAX(!(MapClass::Instance->GetCellAt(cell)->AltFlags & AltCellFlags::NoFog));
 	return 0;
 }
-
+*/
 // 0x655DDD
 // 0x6D8FD0
 
