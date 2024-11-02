@@ -1,22 +1,24 @@
-#pragma once
+#include "TacticalButtons.h"
+#include "PhobosToolTip.h"
+
 #include <GameOptionsClass.h>
 #include <EventClass.h>
 #include <SuperClass.h>
 #include <AircraftClass.h>
 #include <MessageListClass.h>
-#include <Ext/Side/Body.h>
-#include <Ext/House/Body.h>
-#include <Ext/SWType/Body.h>
-#include <Utilities/TemplateDef.h>
 #include <TacticalClass.h>
 #include <WWMouseClass.h>
 #include <CCToolTip.h>
 #include <InputManagerClass.h>
+
+#include <Ext/Side/Body.h>
+#include <Ext/House/Body.h>
+#include <Ext/SWType/Body.h>
+#include <Ext/Scenario/Body.h>
+#include <Utilities/TemplateDef.h>
+
 #include <sstream>
 #include <iomanip>
-
-#include "PhobosToolTip.h"
-#include "TacticalButtons.h"
 
 TacticalButtonsClass TacticalButtonsClass::Instance;
 
@@ -179,7 +181,7 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 		}
 	}
 
-	if (const int currentCounts = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->SWButtonData.size()) // Button index 1-11
+	if (const int currentCounts = ScenarioExt::Global()->SWButtonData.size()) // Button index 1-11
 	{
 		const int height = DSurface::Composite->GetHeight() - 32;
 
@@ -217,7 +219,7 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 
 	if (Phobos::Config::UniqueDisplay_Enable) // Button index 61-68 : Heros buttons
 	{
-		auto& vec = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->OwnedHeros;
+		auto& vec = ScenarioExt::Global()->OwnedHeros;
 
 		if (const int counts = Math::min(8, static_cast<int>(vec.size())))
 		{
@@ -304,7 +306,7 @@ bool TacticalButtonsClass::CheckMouseOverBackground(const Point2D* pMousePositio
 {
 	if (RulesExt::Global()->SWSidebarBackground && this->SuperVisible)
 	{
-		if (const int currentCounts = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->SWButtonData.size())
+		if (const int currentCounts = ScenarioExt::Global()->SWButtonData.size())
 		{
 			if (pMousePosition->X < 80 && pMousePosition->X >= 0)
 			{
@@ -365,8 +367,7 @@ void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 	// SW ToolTip
 	if (this->IndexInSWButtons()) // Button index 1-10 : Super weapons buttons
 	{
-		HouseClass* const pHouse = HouseClass::CurrentPlayer;
-		const int superIndex = HouseExt::ExtMap.Find(pHouse)->SWButtonData[this->ButtonIndex - 1];
+		const int superIndex = ScenarioExt::Global()->SWButtonData[this->ButtonIndex - 1];
 
 		if (superIndex != -1 && superIndex != this->RecordSuperIndex)
 		{
@@ -484,13 +485,13 @@ inline bool TacticalButtonsClass::IndexInSWButtons()
 
 void TacticalButtonsClass::SWSidebarDraw()
 {
-	HouseClass* const pHouse = HouseClass::CurrentPlayer;
-	HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pHouse);
-	const int currentCounts = pHouseExt->SWButtonData.size();
+	auto& data = ScenarioExt::Global()->SWButtonData;
+	const int currentCounts = data.size();
 
 	if (!currentCounts)
 		return;
 
+	HouseClass* const pHouse = HouseClass::CurrentPlayer;
 	SideExt::ExtData* const pSideExt = SideExt::ExtMap.Find(SideClass::Array->GetItem(pHouse->SideIndex));
 	const bool drawSWSidebarBackground = RulesExt::Global()->SWSidebarBackground && pSideExt;
 	const int height = DSurface::Composite->GetHeight() - 32;
@@ -536,7 +537,6 @@ void TacticalButtonsClass::SWSidebarDraw()
 		return;
 	}
 
-	auto& data = pHouseExt->SWButtonData;
 	Point2D position { 5, (height - 48 * currentCounts - 2 * (currentCounts - 1)) / 2 };
 	RectangleStruct rect { 0, 0, 65, position.Y + 48 };
 	int recordHeight = -1;
@@ -681,7 +681,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 void TacticalButtonsClass::SWSidebarRecheck()
 {
 	HouseClass* const pHouse = HouseClass::CurrentPlayer;
-	auto& data = HouseExt::ExtMap.Find(pHouse)->SWButtonData;
+	auto& data = ScenarioExt::Global()->SWButtonData;
 
 	for (auto it = data.begin(); it != data.end();)
 	{
@@ -696,20 +696,18 @@ void TacticalButtonsClass::SWSidebarRecheck()
 
 bool TacticalButtonsClass::SWSidebarAdd(int& superIndex)
 {
-	HouseClass* const pHouse = HouseClass::CurrentPlayer;
 	SuperWeaponTypeClass* const pType = SuperWeaponTypeClass::Array->Items[superIndex];
 	SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pType);
 	bool overflow = true;
 
 	if (pTypeExt && pTypeExt->SW_InScreen_Show)
 	{
-		const unsigned int ownerBits = 1u << pHouse->Type->ArrayIndex;
+		const unsigned int ownerBits = 1u << HouseClass::CurrentPlayer->Type->ArrayIndex;
 
 		if (pTypeExt->SW_InScreen_RequiredHouses & ownerBits)
 		{
-			HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pHouse);
-			const int currentCounts = pHouseExt->SWButtonData.size();
-			auto& data = pHouseExt->SWButtonData;
+			auto& data = ScenarioExt::Global()->SWButtonData;
+			const int currentCounts = data.size();
 			bool move = false;
 
 			for (int i = 0; i < 10; ++i) // 10 buttons at max
@@ -782,17 +780,12 @@ bool TacticalButtonsClass::SWSidebarSort(SuperWeaponTypeClass* pDataType, SuperW
 
 void TacticalButtonsClass::SWSidebarTrigger(int buttonIndex)
 {
-	if (ScenarioClass::Instance->UserInputLocked || !this->SuperVisible)
+	if (ScenarioClass::Instance->UserInputLocked || !this->SuperVisible || HouseClass::CurrentPlayer->IsObserver())
 		return;
 
-	HouseClass* const pHouse = HouseClass::CurrentPlayer;
+	auto& data = ScenarioExt::Global()->SWButtonData;
 
-	if (pHouse->IsObserver())
-		return;
-
-	HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pHouse);
-
-	if (static_cast<size_t>(buttonIndex) > pHouseExt->SWButtonData.size())
+	if (static_cast<size_t>(buttonIndex) > data.size())
 		return;
 
 	SidebarClass* const pSidebar = SidebarClass::Instance;
@@ -801,7 +794,7 @@ void TacticalButtonsClass::SWSidebarTrigger(int buttonIndex)
 	DummySelectClass pButton;
 	pButton.LinkTo = &pSidebar->Tabs[pSidebar->ActiveTabIndex];
 	pButton.unknown_int_30 = 0x7FFFFFFF - (2 * pButton.LinkTo->TopRowIndex);
-	pButton.SWIndex = pHouseExt->SWButtonData[buttonIndex - 1];
+	pButton.SWIndex = data[buttonIndex - 1];
 
 	DWORD KeyNum = 0;
 	reinterpret_cast<bool(__thiscall*)(DummySelectClass*, GadgetFlag, DWORD*, KeyModifier)>(0x6AAD00)(&pButton, GadgetFlag::LeftPress, &KeyNum, KeyModifier::None); // SelectClass_Action
@@ -844,7 +837,12 @@ inline bool TacticalButtonsClass::IndexIsSWSwitch()
 
 void TacticalButtonsClass::SWSidebarSwitch()
 {
-	if (ScenarioClass::Instance->UserInputLocked || HouseClass::CurrentPlayer->IsObserver())
+	if (ScenarioClass::Instance->UserInputLocked)
+		return;
+
+	HouseClass* const pHouse = HouseClass::CurrentPlayer;
+
+	if (pHouse->IsObserver())
 		return;
 
 	this->SuperVisible = !this->SuperVisible;
@@ -855,7 +853,7 @@ void TacticalButtonsClass::SWSidebarSwitch()
 			GeneralUtils::LoadStringUnlessMissing("TXT_EX_SW_BAR_VISIBLE", L"Set exclusive SW sidebar visible.") :
 			GeneralUtils::LoadStringUnlessMissing("TXT_EX_SW_BAR_INVISIBLE", L"Set exclusive SW sidebar invisible.")),
 		RulesClass::Instance->MessageDelay,
-		HouseClass::CurrentPlayer->ColorSchemeIndex,
+		pHouse->ColorSchemeIndex,
 		true
 	);
 }
@@ -875,6 +873,8 @@ bool TacticalButtonsClass::SWQuickLaunch(int superIndex)
 
 	if (SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pType))
 	{
+		const int index = HouseClass::CurrentPlayer->ArrayIndex;
+
 		if (pTypeExt->SW_QuickFireAtMouse && keyboardCall)
 		{
 			const CoordStruct mouseCoords = TacticalClass::Instance->ClientToCoords(WWMouseClass::Instance->XY1);
@@ -883,7 +883,7 @@ bool TacticalButtonsClass::SWQuickLaunch(int superIndex)
 			{
 				EventClass event
 				(
-					HouseClass::CurrentPlayer->ArrayIndex,
+					index,
 					EventType::SpecialPlace,
 					pType->ArrayIndex,
 					CellClass::Coord2Cell(mouseCoords)
@@ -900,7 +900,7 @@ bool TacticalButtonsClass::SWQuickLaunch(int superIndex)
 
 		EventClass event
 		(
-			HouseClass::CurrentPlayer->ArrayIndex,
+			index,
 			EventType::SpecialPlace,
 			pType->ArrayIndex,
 			CellClass::Coord2Cell(TacticalClass::Instance->ClientToCoords(Point2D{ (DSurface::Composite->Width >> 1), (DSurface::Composite->Height >> 1) }))
@@ -921,15 +921,10 @@ inline bool TacticalButtonsClass::IndexInHerosButtons()
 
 void TacticalButtonsClass::HerosDraw()
 {
-	if (!Phobos::Config::UniqueDisplay_Enable)
+	if (!Phobos::Config::UniqueDisplay_Enable || HouseClass::CurrentPlayer->IsObserver())
 		return;
 
-	HouseClass* const pHouse = HouseClass::CurrentPlayer;
-
-	if (pHouse->IsObserver())
-		return;
-
-	auto& vec = HouseExt::ExtMap.Find(pHouse)->OwnedHeros;
+	auto& vec = ScenarioExt::Global()->OwnedHeros;
 	const int size = vec.size();
 
 	if (!size)
@@ -942,8 +937,8 @@ void TacticalButtonsClass::HerosDraw()
 
 	for (int i = 0; i < counts; ++i, position.Y += 50, drawRect.Y = position.Y)
 	{
-		TechnoClass* const pTechno = vec[i];
-		TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pTechno);
+		TechnoExt::ExtData* const pExt = vec[i];
+		TechnoClass* const pTechno = pExt->OwnerObject();
 		TechnoTypeExt::ExtData* const pTypeExt = pExt->TypeExtData;
 		TechnoTypeClass* const pType = pTypeExt->OwnerObject();
 
@@ -1197,19 +1192,37 @@ void TacticalButtonsClass::HerosDraw()
 		}
 		else
 		{
-			ColorStruct fillColor { 0, 0, 0 };
-			DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 40);
-
-			RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
-			DSurface::Composite->FillRect(&rect, 0);
-
 			const AbstractType absType = pTechno->WhatAmI();
 			const BuildCat buildCat = (absType == AbstractType::Building) ? static_cast<BuildingClass*>(pTechno)->Type->BuildCat : BuildCat::DontCare;
 			FactoryClass* const pFactory = pTechno->Owner->GetPrimaryFactory(absType, pType->Naval, buildCat);
-			const double ratio = (pFactory && pFactory->Object == pTechno) ? (static_cast<double>(pFactory->GetProgress()) / 54) : 1.0;
 
-			rect = RectangleStruct { (position.X + 5), (position.Y + 3), static_cast<int>(50 * ratio), 3 };
-			DSurface::Composite->FillRect(&rect, 0xFFFF);
+			if (pFactory && pFactory->Object == pTechno)
+			{
+				ColorStruct fillColor { 0, 0, 0 };
+				DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 30);
+
+				RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
+				DSurface::Composite->FillRect(&rect, 0);
+
+				const double ratio = static_cast<double>(pFactory->GetProgress()) / 54;
+				rect = RectangleStruct { (position.X + 5), (position.Y + 3), static_cast<int>(50 * ratio), 3 };
+				DSurface::Composite->FillRect(&rect, 0xFFFF);
+			}
+			else
+			{
+				ColorStruct fillColor { 20, 100, 50 };
+				DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 10);
+
+				RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
+				DSurface::Composite->FillRect(&rect, 0);
+
+				const double ratio = pTechno->GetHealthPercentage();
+				rect = RectangleStruct { (position.X + 5), (position.Y + 3), static_cast<int>(50 * ratio), 3 };
+
+				RulesClass* const pRules = RulesClass::Instance;
+				const int color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
+				DSurface::Composite->FillRect(&rect, color);
+			}
 		}
 
 		if (i == recordIndex && !ScenarioClass::Instance->UserInputLocked)
@@ -1225,14 +1238,13 @@ void TacticalButtonsClass::HeroSelect(int buttonIndex)
 	if (ScenarioClass::Instance->UserInputLocked || !Phobos::Config::UniqueDisplay_Enable)
 		return;
 
-	HouseClass* const pHouse = HouseClass::CurrentPlayer;
-	auto& vec = HouseExt::ExtMap.Find(pHouse)->OwnedHeros;
+	auto& vec = ScenarioExt::Global()->OwnedHeros;
 	const int index = buttonIndex - 61;
 
 	if (index >= static_cast<int>(vec.size()))
 		return;
 
-	TechnoClass* const pTechno = vec[index];
+	TechnoClass* const pTechno = vec[index]->OwnerObject();
 
 	if (pTechno->IsAlive)
 	{
@@ -1399,10 +1411,12 @@ void TacticalButtonsClass::SelectedTrigger(int buttonIndex, bool select)
 
 void TacticalButtonsClass::SelectedUpdate()
 {
+	this->UpdateSelect = false;
+
 	if (this->CurrentSelectCameo.size())
 		this->CurrentSelectCameo.clear();
 
-	if (!Phobos::Config::SelectedDisplay_Enable || ObjectClass::CurrentObjects->Count <= 0) // TODO Optimize
+	if (ObjectClass::CurrentObjects->Count <= 0)
 	{
 		this->RecordIndex = 71;
 		return;
@@ -1421,11 +1435,11 @@ void TacticalButtonsClass::SelectedUpdate()
 
 		if (absType == AbstractType::Infantry)
 			++CurrentSelectInfantry[static_cast<InfantryClass*>(pCurrent)->Type->ArrayIndex];
-		if (absType == AbstractType::Unit)
+		else if (absType == AbstractType::Unit)
 			++CurrentSelectUnit[static_cast<UnitClass*>(pCurrent)->Type->ArrayIndex];
-		if (absType == AbstractType::Aircraft)
+		else if (absType == AbstractType::Aircraft)
 			++CurrentSelectAircraft[static_cast<AircraftClass*>(pCurrent)->Type->ArrayIndex];
-		if (absType == AbstractType::Building)
+		else if (absType == AbstractType::Building)
 			++CurrentSelectBuilding[static_cast<BuildingClass*>(pCurrent)->Type->ArrayIndex];
 	}
 
@@ -1481,6 +1495,9 @@ void TacticalButtonsClass::SelectedDraw()
 {
 	if (!Phobos::Config::SelectedDisplay_Enable)
 		return;
+
+	if (this->UpdateSelect)
+		this->SelectedUpdate();
 
 	const int currentCounts = Math::min(30, static_cast<int>(this->CurrentSelectCameo.size()));
 	RulesExt::ExtData* const pRulesExt = RulesExt::Global();
@@ -2021,15 +2038,29 @@ void TacticalButtonsClass::SelectedSwitch()
 {
 	Phobos::Config::SelectedDisplay_Enable = !Phobos::Config::SelectedDisplay_Enable;
 
-	MessageListClass::Instance->PrintMessage
-	(
-		(Phobos::Config::SelectedDisplay_Enable ?
-			GeneralUtils::LoadStringUnlessMissing("TXT_SELECT_VISIBLE", L"Set select info visible.") :
-			GeneralUtils::LoadStringUnlessMissing("TXT_SELECT_INVISIBLE", L"Set select info invisible.")),
-		RulesClass::Instance->MessageDelay,
-		HouseClass::CurrentPlayer->ColorSchemeIndex,
-		true
-	);
+	if (Phobos::Config::SelectedDisplay_Enable)
+	{
+		this->UpdateSelect = true;
+		MessageListClass::Instance->PrintMessage
+		(
+			GeneralUtils::LoadStringUnlessMissing("TXT_SELECT_VISIBLE", L"Set select info visible."),
+			RulesClass::Instance->MessageDelay,
+			HouseClass::CurrentPlayer->ColorSchemeIndex,
+			true
+		);
+	}
+	else
+	{
+		this->RecordIndex = 71;
+		MessageListClass::Instance->PrintMessage
+		(
+			GeneralUtils::LoadStringUnlessMissing("TXT_SELECT_INVISIBLE", L"Set select info invisible."),
+			RulesClass::Instance->MessageDelay,
+			HouseClass::CurrentPlayer->ColorSchemeIndex,
+			true
+		);
+	}
+
 }
 
 // Hooks
@@ -2138,11 +2169,13 @@ DEFINE_HOOK(0x69300B, ScrollClass_MouseUpdate_SkipMouseActionUpdate, 0x6)
 DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 {
 	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
+
 	// TODO New buttons (The later draw, the higher layer)
 
-	pButtons->SelectedUpdate();
 	pButtons->SelectedDraw();
+
 	pButtons->HerosDraw();
+
 	pButtons->SWSidebarDraw();
 
 	return 0;
@@ -2151,7 +2184,10 @@ DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 // SW buttons update hooks
 DEFINE_HOOK(0x4F9283, HouseClass_Update_RecheckTechTree, 0x5)
 {
-	TacticalButtonsClass::Instance.SWSidebarRecheck();
+	GET(HouseClass*, pHouse, ESI);
+
+	if (pHouse == HouseClass::CurrentPlayer)
+		TacticalButtonsClass::Instance.SWSidebarRecheck();
 
 	return 0;
 }
@@ -2211,12 +2247,55 @@ DEFINE_HOOK(0x7015C9, TechnoClass_SetOwningHouse_ChangeHeroOwner, 0x6)
 	GET(TechnoClass* const, pThis, ESI);
 	GET(HouseClass* const, pNewOwner, EBP);
 
-	if (TechnoExt::ExtMap.Find(pThis)->TypeExtData->UniqueTechno)
+	TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (pExt->TypeExtData->UniqueTechno)
 	{
-		auto& vec = HouseExt::ExtMap.Find(pThis->Owner)->OwnedHeros;
-		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
-		HouseExt::ExtMap.Find(pNewOwner)->OwnedHeros.push_back(pThis);
+		HouseClass* const pOldOwner = pThis->Owner;
+
+		if (pOldOwner->IsControlledByCurrentPlayer())
+		{
+			if (!pNewOwner->IsControlledByCurrentPlayer())
+			{
+				auto& vec = ScenarioExt::Global()->OwnedHeros;
+				vec.erase(std::remove(vec.begin(), vec.end(), pExt), vec.end());
+			}
+		}
+		else if (pNewOwner->IsControlledByCurrentPlayer())
+		{
+			auto& vec = ScenarioExt::Global()->OwnedHeros;
+
+			if (std::find(vec.begin(), vec.end(), pExt) == vec.end())
+				vec.push_back(pExt);
+		}
 	}
+
+	return 0;
+}
+
+// Select hooks
+DEFINE_HOOK_AGAIN(0x5F4718, ObjectClass_Select, 0x7)
+DEFINE_HOOK(0x5F46AE, ObjectClass_Select, 0x7)
+{
+	GET(ObjectClass*, pThis, ESI);
+
+	pThis->IsSelected = true;
+
+	if (RulesExt::Global()->SelectionFlashDuration > 0 && pThis->GetOwningHouse()->IsControlledByCurrentPlayer())
+		pThis->Flash(RulesExt::Global()->SelectionFlashDuration);
+
+	TacticalButtonsClass::Instance.UpdateSelect = true;
+
+	return 0;
+}
+
+DEFINE_HOOK(0x5F44FC, ObjectClass_Deselect, 0x7)
+{
+	GET(ObjectClass*, pThis, ESI);
+
+	pThis->IsSelected = false;
+
+	TacticalButtonsClass::Instance.UpdateSelect = true;
 
 	return 0;
 }

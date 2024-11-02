@@ -25,7 +25,6 @@ public:
 		std::vector<BuildingClass*> OwnedLimboDeliveredBuildings;
 		std::vector<TechnoTypeExt::ExtData*> OwnedExistCameoTechnoTypes;
 		std::vector<UnitClass*> OwnedDeployingUnits;
-		std::vector<TechnoClass*> OwnedHeros;
 		std::vector<CellStruct> BaseNormalCells;
 
 		CounterClass LimboAircraft;  // Currently owned aircraft in limbo
@@ -42,7 +41,6 @@ public:
 		CDTimerClass AISuperWeaponDelayTimer;
 		CDTimerClass AIFireSaleDelayTimer;
 
-		std::vector<int> SWButtonData;
 		BuildingTypeClass* CurrentBuildingType;
 		CellStruct CurrentBuildingTopLeft;
 		CDTimerClass CurrentBuildingTimer;
@@ -78,7 +76,6 @@ public:
 			, OwnedLimboDeliveredBuildings {}
 			, OwnedExistCameoTechnoTypes {}
 			, OwnedDeployingUnits {}
-			, OwnedHeros {}
 			, BaseNormalCells {}
 			, LimboAircraft {}
 			, LimboBuildings {}
@@ -89,7 +86,6 @@ public:
 			, Factory_VehicleType { nullptr }
 			, Factory_NavyType { nullptr }
 			, Factory_AircraftType { nullptr }
-			, SWButtonData {}
 			, CurrentBuildingType { nullptr }
 			, CurrentBuildingTopLeft {}
 			, CurrentBuildingTimer {}
