@@ -248,9 +248,6 @@ DEFINE_HOOK(0x70DE40, BuildingClass_sub_70DE40_GattlingRateDownDelay, 0xA)
 		{
 			TechnoTypeExt::ExtData* const pTypeExt = pExt->TypeExtData;
 
-			if (!pTypeExt->RateDown_Delay)
-				return 0;
-
 			if (pTypeExt->RateDown_Delay < 0)
 				return Return;
 
@@ -324,9 +321,6 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 		if (TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis))
 		{
 			TechnoTypeExt::ExtData* const pTypeExt = pExt->TypeExtData;
-
-			if (!pTypeExt->RateDown_Delay)
-				return 0;
 
 			if (pTypeExt->RateDown_Delay < 0)
 				return SkipGameCode;
