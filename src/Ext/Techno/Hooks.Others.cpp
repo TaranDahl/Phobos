@@ -680,57 +680,6 @@ DEFINE_HOOK(0x638D73, UnknownClass_CheckLastWaypoint_ContinuePlanningWaypoint, 0
 
 #pragma endregion
 
-#pragma region ScanDelay
-
-DEFINE_HOOK(0x6FA697, TechnoClass_Update_DontScanIfUnarmed, 0x6)
-{
-	enum { SkipTargeting = 0x6FA6F5 };
-
-	GET(TechnoClass* const, pThis, ESI);
-
-	return pThis->IsArmed() ? 0 : SkipTargeting;
-}
-
-DEFINE_HOOK(0x709866, TechnoClass_TargetAndEstimateDamage_ScanDelayGuardArea, 0x6)
-{
-	GET(TechnoClass* const, pThis, ESI);
-
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
-	auto const pOwner = pThis->Owner;
-	auto const pRulesExt = RulesExt::Global();
-	auto const pRules = RulesClass::Instance();
-	int delay = 1;
-
-	if (pOwner->IsHumanPlayer || pOwner->IsControlledByHuman())
-		delay = pTypeExt->PlayerGuardAreaTargetingDelay.Get(pRulesExt->PlayerGuardAreaTargetingDelay.Get(pRules->GuardAreaTargetingDelay));
-	else
-		delay = pTypeExt->AIGuardAreaTargetingDelay.Get(pRulesExt->AIGuardAreaTargetingDelay.Get(pRules->GuardAreaTargetingDelay));
-
-	R->ECX(delay);
-	return 0;
-}
-
-DEFINE_HOOK(0x70989C, TechnoClass_TargetAndEstimateDamage_ScanDelayNormal, 0x6)
-{
-	GET(TechnoClass* const, pThis, ESI);
-
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
-	auto const pOwner = pThis->Owner;
-	auto const pRulesExt = RulesExt::Global();
-	auto const pRules = RulesClass::Instance();
-	int delay = (pThis->Location.X + pThis->Location.Y + Unsorted::CurrentFrame) % 3;
-
-	if (pOwner->IsHumanPlayer || pOwner->IsControlledByHuman())
-		delay += pTypeExt->PlayerNormalTargetingDelay.Get(pRulesExt->PlayerNormalTargetingDelay.Get(pRules->NormalTargetingDelay));
-	else
-		delay += pTypeExt->AINormalTargetingDelay.Get(pRulesExt->AINormalTargetingDelay.Get(pRules->NormalTargetingDelay));
-
-	R->ECX(delay);
-	return 0;
-}
-
-#pragma endregion
-
 #pragma region TargetIronCurtain
 
 DEFINE_HOOK(0x6FC22A, TechnoClass_GetFireError_TargetingIronCurtain, 0x6)

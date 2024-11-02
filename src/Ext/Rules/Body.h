@@ -247,6 +247,8 @@ public:
 		Valueable<bool> FollowTargetSelf;
 		Valueable<bool> HarvesterScanAfterUnload;
 		Valueable<bool> DistributeTargetingFrame;
+		Valueable<bool> DistributeTargetingFrame_AIOnly;
+		Valueable<bool> AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault;
 
 		Valueable<double> AircraftLevelLightMultiplier;
 		Valueable<double> JumpjetLevelLightMultiplier;
@@ -470,6 +472,8 @@ public:
 			, FollowTargetSelf { false }
 			, HarvesterScanAfterUnload { false }
 			, DistributeTargetingFrame { false }
+			, DistributeTargetingFrame_AIOnly { true }
+			, AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault { false }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
 			, VoxelLightSource { }
