@@ -557,7 +557,7 @@ public:
 			, CameoPal {}
 			, NoRearmInEMPState {}
 			, NoRearmInTemporal {}
-			, RateDown_Ammo { -1 }
+			, RateDown_Ammo { -2 }
 			, RateDown_Delay { 0 }
 			, RateDown_Cover { 0 }
 			, UniqueTechno { false }

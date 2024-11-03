@@ -1058,7 +1058,7 @@ void TacticalButtonsClass::HerosDraw()
 			if (pTechno->BunkerLinkedItem && pTechno->WhatAmI() != AbstractType::Building)
 			{
 				RectangleStruct rect { (position.X + 3), (position.Y + 1), 54, 7 };
-				DSurface::Composite->DrawRect(&rect, 0xFB20);
+				DSurface::Composite->DrawRect(&rect, 0x781F);
 			}
 
 			RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
@@ -1173,12 +1173,12 @@ void TacticalButtonsClass::HerosDraw()
 			if (pSelect->BunkerLinkedItem && pSelect->WhatAmI() != AbstractType::Building)
 			{
 				rect.Width = 54;
-				DSurface::Composite->DrawRect(&rect, 0xFB20);
+				DSurface::Composite->DrawRect(&rect, 0x781F);
 			}
 			else
 			{
 				rect.Width = static_cast<int>(54 * pSelect->GetHealthPercentage() + 0.5);
-				DSurface::Composite->DrawRect(&rect, 0x94BF);
+				DSurface::Composite->DrawRect(&rect, 0xFB20);
 			}
 
 			++rect.X;
