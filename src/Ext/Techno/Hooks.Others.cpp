@@ -1263,26 +1263,6 @@ DEFINE_HOOK(0x4D9620, FootClass_SetDestination_FollowTargetSelf, 0x5)
 
 #pragma endregion
 
-#pragma region DistributeTarget
-
-DEFINE_HOOK(0x6FA67D, TechnoClass_Update_DistributeTargetingFrame, 0xA)
-{
-	enum { Targeting = 0x6FA687, SkipTargeting = 0x6FA6F5 };
-	GET(TechnoClass* const, pThis, ESI);
-	if (RulesExt::Global()->DistributeTargetingFrame)
-	{
-		auto const pExt = TechnoExt::ExtMap.Find(pThis);
-		if (pExt && Unsorted::CurrentFrame % 16 != pExt->MyTargetingFrame)
-		{
-			return SkipTargeting;
-		}
-	}
-	R->EAX(pThis->vt_entry_4C4());
-	return Targeting;
-}
-
-#pragma endregion
-
 #pragma region KeepTargetOnMove
 
 // Do not explicitly reset target for KeepTargetOnMove vehicles when issued move command.
