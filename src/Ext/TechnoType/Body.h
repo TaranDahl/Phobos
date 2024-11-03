@@ -248,6 +248,8 @@ public:
 		std::vector<std::vector<CoordStruct>> DeployedWeaponBurstFLHs;
 		std::vector<std::vector<CoordStruct>> EliteDeployedWeaponBurstFLHs;
 
+		Valueable<TechnoTypeClass*> ThisIsAJumpjet;
+		Valueable<bool> ImAJumpjetFromAirport;
 
 		ExtData(TechnoTypeClass* OwnerObject) : Extension<TechnoTypeClass>(OwnerObject)
 			, HealthBar_Hide { false }
@@ -450,6 +452,9 @@ public:
 			, Wake { }
 			, Wake_Grapple { }
 			, Wake_Sinking { }
+
+			, ThisIsAJumpjet { nullptr }
+			, ImAJumpjetFromAirport { false }
 		{ }
 
 		virtual ~ExtData() = default;
