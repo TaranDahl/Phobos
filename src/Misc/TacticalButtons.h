@@ -8,7 +8,7 @@ class TacticalButtonsClass
 {
 public:
 	static TacticalButtonsClass Instance;
-	static PhobosMap<int, const wchar_t*> KeyboardCodeTextMap;
+//	static PhobosMap<int, const wchar_t*> KeyboardCodeTextMap;
 
 private:
 	int CheckMouseOverButtons(const Point2D* pMousePosition);

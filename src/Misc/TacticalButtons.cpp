@@ -22,6 +22,7 @@
 
 TacticalButtonsClass TacticalButtonsClass::Instance;
 
+/*
 // Keyboard code dictionary
 static PhobosMap<int , const wchar_t*> CreateKeyboardCodeTextMap()
 {
@@ -157,6 +158,7 @@ static PhobosMap<int , const wchar_t*> CreateKeyboardCodeTextMap()
 }
 
 PhobosMap<int , const wchar_t*> TacticalButtonsClass::KeyboardCodeTextMap = CreateKeyboardCodeTextMap();
+*/
 
 // Functions
 
@@ -808,7 +810,13 @@ void TacticalButtonsClass::SWSidebarRecord(int buttonIndex, int key)
 		return;
 
 	this->KeyCodeData[index] = key;
-	std::wostringstream oss;
+
+	wchar_t text[0x40];
+	reinterpret_cast<void(__fastcall*)(short, wchar_t*)>(0x61EF70)(static_cast<short>(key), text);
+
+	this->KeyCodeText[index] = text;
+
+/*	std::wostringstream oss;
 
 	if (key & static_cast<int>(WWKey::Shift))
 		oss << KeyboardCodeTextMap[static_cast<int>(WWKey::Shift)] << L"+";
@@ -826,7 +834,7 @@ void TacticalButtonsClass::SWSidebarRecord(int buttonIndex, int key)
 	else
 		oss << L"Unknown";
 
-	this->KeyCodeText[index] = oss.str();
+	this->KeyCodeText[index] = oss.str();*/
 }
 
 // Button index 11 : SW sidebar switch
@@ -1050,18 +1058,17 @@ void TacticalButtonsClass::HerosDraw()
 			if (pTechno->BunkerLinkedItem && pTechno->WhatAmI() != AbstractType::Building)
 			{
 				RectangleStruct rect { (position.X + 3), (position.Y + 1), 54, 7 };
-				DSurface::Composite->FillRect(&rect, 0x94BF);
-			}
-			else
-			{
-				RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
-				DSurface::Composite->DrawRect(&rect, 0);
+				DSurface::Composite->DrawRect(&rect, 0x781F);
 			}
 
-			RectangleStruct rect { (position.X + 5), (position.Y + 3), 50, 3 };
+			RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
 			DSurface::Composite->FillRect(&rect, 0);
 
+			++rect.X;
+			++rect.Y;
 			rect.Width = static_cast<int>(50 * ratio + 0.5);
+			rect.Height = 3;
+
 			const int color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
 			DSurface::Composite->FillRect(&rect, color);
 
@@ -1091,9 +1098,9 @@ void TacticalButtonsClass::HerosDraw()
 
 			TechnoExt::ExtData* const pSelectExt = TechnoExt::ExtMap.Find(pSelect);
 			RulesClass* const pRules = RulesClass::Instance;
-			double ratio = pSelect->GetHealthPercentage();
+			double ratio = pTechno->GetHealthPercentage();
 
-			if (pTechno->IsIronCurtained())
+			if (pSelect->IsIronCurtained())
 			{
 				ColorStruct fillColor { 50, 50, 50 };
 				DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 20);
@@ -1161,13 +1168,31 @@ void TacticalButtonsClass::HerosDraw()
 				}
 			}
 
-			RectangleStruct rect { (position.X + 3), (position.Y + 1), 54, 7 };
-			DSurface::Composite->FillRect(&rect, 0x94BF);
+			RectangleStruct rect { (position.X + 3), (position.Y + 1), 0, 7 };
 
-			rect = RectangleStruct { (position.X + 5), (position.Y + 3), 50, 3 };
+			if (pSelect->BunkerLinkedItem && pSelect->WhatAmI() != AbstractType::Building)
+			{
+				rect.Width = 54;
+				DSurface::Composite->DrawRect(&rect, 0x781F);
+			}
+			else
+			{
+				rect.Width = static_cast<int>(54 * pSelect->GetHealthPercentage() + 0.5);
+				DSurface::Composite->DrawRect(&rect, 0xFB20);
+			}
+
+			++rect.X;
+			++rect.Y;
+			rect.Width = 52;
+			rect.Height = 5;
+
 			DSurface::Composite->FillRect(&rect, 0);
 
+			++rect.X;
+			++rect.Y;
 			rect.Width = static_cast<int>(50 * ratio + 0.5);
+			rect.Height = 3;
+
 			const int color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
 			DSurface::Composite->FillRect(&rect, color);
 
@@ -1210,14 +1235,22 @@ void TacticalButtonsClass::HerosDraw()
 			}
 			else
 			{
-				ColorStruct fillColor { 20, 100, 50 };
-				DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 10);
+				RectangleStruct rect { (position.X + 3), (position.Y + 1), 54, 7 };
+				DSurface::Composite->DrawRect(&rect, 0x781F);
 
-				RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
+				++rect.X;
+				++rect.Y;
+				rect.Width = 52;
+				rect.Height = 5;
+
 				DSurface::Composite->FillRect(&rect, 0);
 
 				const double ratio = pTechno->GetHealthPercentage();
-				rect = RectangleStruct { (position.X + 5), (position.Y + 3), static_cast<int>(50 * ratio), 3 };
+
+				++rect.X;
+				++rect.Y;
+				rect.Width = static_cast<int>(50 * ratio + 0.5);
+				rect.Height = 3;
 
 				RulesClass* const pRules = RulesClass::Instance;
 				const int color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
