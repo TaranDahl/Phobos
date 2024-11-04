@@ -56,6 +56,7 @@ public:
 		WeaponTypeClass* LastWeaponType;
 		CoordStruct LastWeaponFLH;
 		int LastHurtFrame;
+		int LastBeLockedFrame;
 		int MyTargetingFrame;
 		int AccumulatedGattlingValue;
 		bool ShouldUpdateGattlingValue;
@@ -104,6 +105,7 @@ public:
 			, LastWeaponType {}
 			, LastWeaponFLH {}
 			, LastHurtFrame { 0 }
+			, LastBeLockedFrame { 0 }
 			, MyTargetingFrame { ScenarioClass::Instance->Random.RandomRanged(0,15) }
 			, AccumulatedGattlingValue { 0 }
 			, ShouldUpdateGattlingValue { false }

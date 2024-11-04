@@ -64,6 +64,7 @@ public:
 		Nullable<bool> CylinderRangefinding;
 		Nullable<bool> AttackIronCurtain;
 		Valueable<bool> Burst_NoDelay;
+		Valueable<int> NoRepeatFire;
 		Valueable<bool> UnlimboDetonate;
 		Valueable<bool> UnlimboDetonate_Force;
 		Valueable<bool> KickOutPassengers;
@@ -112,6 +113,7 @@ public:
 			, CylinderRangefinding {}
 			, AttackIronCurtain {}
 			, Burst_NoDelay { false }
+			, NoRepeatFire { 0 }
 			, UnlimboDetonate { false }
 			, UnlimboDetonate_Force { false }
 			, KickOutPassengers { true }
