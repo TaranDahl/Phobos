@@ -120,6 +120,7 @@ void WeaponTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->CylinderRangefinding.Read(exINI, pSection, "CylinderRangefinding");
 	this->AttackIronCurtain.Read(exINI, pSection, "AttackIronCurtain");
 	this->Burst_NoDelay.Read(exINI, pSection, "Burst.NoDelay");
+	this->NoRepeatFire.Read(exINI, pSection, "NoRepeatFire");
 	this->UnlimboDetonate.Read(exINI, pSection, "UnlimboDetonate");
 	this->UnlimboDetonate_Force.Read(exINI, pSection, "UnlimboDetonate.Force");
 	this->KickOutPassengers.Read(exINI, pSection, "KickOutPassengers");
@@ -172,6 +173,7 @@ void WeaponTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->CylinderRangefinding)
 		.Process(this->AttackIronCurtain)
 		.Process(this->Burst_NoDelay)
+		.Process(this->NoRepeatFire)
 		.Process(this->UnlimboDetonate)
 		.Process(this->UnlimboDetonate_Force)
 		.Process(this->KickOutPassengers)
