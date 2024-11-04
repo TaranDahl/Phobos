@@ -1,50 +1,61 @@
 #include "Body.h"
 #include <Ext/House/Body.h>
 
+// Ares hooked all of the function away, so we can only hook the ending of the function.
 DEFINE_HOOK(0x5F7A89, ObjectTypeClass_FindFactory_End, 0x5)
 {
-	GET(ObjectTypeClass* const, pType, ECX);
-	GET_STACK(bool, allowOccupied, STACK_OFFSET(0, 0x4));
+	GET(ObjectTypeClass* const, pObjectType, ECX);
+	// GET_STACK(bool, allowOccupied, STACK_OFFSET(0, 0x4));
 	GET_STACK(bool, requirePower, STACK_OFFSET(0, 0x8));
 	GET_STACK(bool, requireCanBuild, STACK_OFFSET(0, 0xC));
 	GET_STACK(HouseClass* const, pHouse, STACK_OFFSET(0, 0x10));
 
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find((TechnoTypeClass*)pObjectType);
 
+	if (!pTypeExt || !pTypeExt->ThisIsAJumpjet)
+	{
+		return 0;
+	}
 
+	auto const pType = (TechnoTypeClass*)pObjectType;
+
+	BuildingClass* pBuildingResult = nullptr;
+	BuildingClass* pBuilding;
+	unsigned int pOwnerHouse;
+
+	pOwnerHouse = pType->GetOwners();
+	int nBuildingCount = pHouse->Buildings.Count;
+
+	if (nBuildingCount <= 0)
+	{
+		return 0;
+	}
+
+	for (int i = 0; i != nBuildingCount; i++)
+	{
+		pBuilding = pHouse->Buildings.Items[i];
+
+		if (!pBuilding->InLimbo
+		  && pBuilding->Type->Factory == pType->WhatAmI()
+		  && (!requirePower || pBuilding->HasPower)
+		  && pBuilding->GetCurrentMission() != Mission::Selling
+		  && pBuilding->QueuedMission != Mission::Selling
+		  && (!requireCanBuild || (int)pBuilding->Owner->CanBuild(pType, true, true) > 0)
+		  && (pBuilding->Type->GetOwners() & pOwnerHouse) != 0)
+		{
+			pBuildingResult = pBuilding;
+
+			if (pBuilding->IsPrimaryFactory)
+			{
+				break;
+			}
+		}
+	}
+
+	R->EAX(pBuildingResult);
 	return 0;
 }
-/*
-{
-	GET(AircraftTypeClass* const, pType, EDI);
-	GET(BuildingClass* const, pBuilding, ESI);
 
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
-
-	if (pTypeExt && pTypeExt->ThisIsAJumpjet)
-	{
-		R->EAX(true);
-	}
-	else
-	{
-		R->EAX(pBuilding->HasFreeLink());
-	}
-
-	return 0x5F79F9;
-}
-
-DEFINE_HOOK(0x5F79C7, ObjectTypeClass_FindFactory_ThisIsAJumpjet2, 0x6)
-{
-	GET(TechnoTypeClass* const, pType, EDI);
-
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
-
-	if (pTypeExt && pTypeExt->ThisIsAJumpjet)
-	{
-		return 0x5F7A09;
-	}
-
-	return 0;
-}*/
 DEFINE_HOOK(0x443C71, BuildingClass_KickOutUnit_ThisIsAJumpjet, 0x6)
 {
 	GET(TechnoClass* const, pProduct, EDI);
