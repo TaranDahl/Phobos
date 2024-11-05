@@ -1,6 +1,7 @@
 #include <AircraftClass.h>
 #include "Body.h"
 
+#include <InputManagerClass.h>
 #include <ScenarioClass.h>
 #include <TunnelLocomotionClass.h>
 
@@ -475,3 +476,36 @@ DEFINE_HOOK(0x70EFE0, TechnoClass_GetMaxSpeed, 0x6)
 	return SkipGameCode;
 }
 
+// Just don't work. No idea why.
+/*
+namespace ForceMoveOnCellContext
+{
+	int TargetCell;
+}
+
+DEFINE_HOOK(0x4D809B, FootClass_CellClickedAction_ForceMoveOnCell1, 0x6)
+{
+	//enum { SkipGameCode = 0x4D80A6 };
+	GET(int, TargetCell, EDI);
+
+	if (InputManagerClass::Instance->IsForceMoveKeyPressed() && RulesExt::Global()->ForceMoveOnCell)
+	{
+		//R->EAX(0);
+		R->EDX(TargetCell);
+		ForceMoveOnCellContext::TargetCell = TargetCell;
+		//return SkipGameCode;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x4D80A7, FootClass_CellClickedAction_ForceMoveOnCell2, 0x5)
+{
+	if (InputManagerClass::Instance->IsForceMoveKeyPressed() && RulesExt::Global()->ForceMoveOnCell)
+	{
+		R->Stack(STACK_OFFSET(0x28, 0x10), ForceMoveOnCellContext::TargetCell);
+	}
+
+	return 0;
+}
+*/
