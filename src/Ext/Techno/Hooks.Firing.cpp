@@ -291,7 +291,7 @@ DEFINE_HOOK(0x6FC339, TechnoClass_CanFire, 0x6)
 		{
 			if (auto const pTargetTechnoExt = TechnoExt::ExtMap.Find(pTechno))
 			{
-				if ((Unsorted::CurrentFrame - pTargetTechnoExt->LastBeLockedFrame) <= pWeaponExt->NoRepeatFire)
+				if ((Unsorted::CurrentFrame - pTargetTechnoExt->LastBeLockedFrame) < pWeaponExt->NoRepeatFire)
 					return CannotFire;
 			}
 		}
