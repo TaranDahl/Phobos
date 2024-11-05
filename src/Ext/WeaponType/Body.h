@@ -2,6 +2,7 @@
 #include <BulletClass.h>
 #include <WeaponTypeClass.h>
 #include <DiskLaserClass.h>
+#include <EBolt.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
@@ -29,7 +30,7 @@ public:
 		Valueable<bool> Bolt_Disable3;
 		Valueable<int> Bolt_Arcs;
 		Nullable<bool> Strafing;
-		Valueable<int> Strafing_Shots;
+		Nullable<int> Strafing_Shots;
 		Valueable<bool> Strafing_SimulateBurst;
 		Valueable<bool> Strafing_UseAmmoPerShot;
 		Valueable<AffectedTarget> CanTarget;
@@ -69,7 +70,7 @@ public:
 			, Bolt_Disable3 { false }
 			, Bolt_Arcs { 8 }
 			, Strafing { }
-			, Strafing_Shots { 5 }
+			, Strafing_Shots {}
 			, Strafing_SimulateBurst { false }
 			, Strafing_UseAmmoPerShot { false }
 			, CanTarget { AffectedTarget::All }
@@ -134,6 +135,8 @@ public:
 	static bool SaveGlobals(PhobosStreamWriter& Stm);
 
 	static double OldRadius;
+	static PhobosMap<EBolt*, const WeaponTypeExt::ExtData*> BoltWeaponMap;
+	static const WeaponTypeExt::ExtData* BoltWeaponType;
 
 	static void DetonateAt(WeaponTypeClass* pThis, AbstractClass* pTarget, TechnoClass* pOwner, HouseClass* pFiringHouse = nullptr);
 	static void DetonateAt(WeaponTypeClass* pThis, AbstractClass* pTarget, TechnoClass* pOwner, int damage, HouseClass* pFiringHouse = nullptr);
