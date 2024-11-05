@@ -442,6 +442,37 @@ DEFINE_HOOK(0x5865E2, MapClass_IsLocationFogged_Check, 0x5)
 
 #pragma endregion
 
+#pragma region NewFactories
+
+// Disappear
+// 0x44EC3A
+// BeginProduction
+// 0x4FA39C
+// 0x4FA553
+// 0x4FA76D
+// SuspendProduction
+// 0x4FA942
+// AbandonProduction
+// 0x4FAA5C
+// 0x4FABCB
+// UnitFromFactory
+// 0x4FB11D
+// PointerExpired
+// 0x4FBC75
+// GetPrimaryFactory
+// 0x500510
+// SetPrimaryFactory
+// 0x500850
+// UpdateFactoriesQueues
+// 0x509149
+// ShouldDisableCameo
+// 0x50B3A0
+
+// FindFactory -> Ares hooks all of these away
+// 0x5F7900
+
+#pragma endregion
+
 #pragma region NewWaypoints
 
 bool __fastcall BuildingTypeClass_CanUseWaypoint(BuildingTypeClass* pThis)
