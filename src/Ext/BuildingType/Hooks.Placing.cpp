@@ -139,6 +139,7 @@ DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormalExtra, 0x9)
 		const short topY = topLeftY - buildingAdjacent;
 		const short rightX = bottomRightX + buildingAdjacent;
 		const short bottomY = bottomRightY + buildingAdjacent;
+		const bool unitBase = RulesExt::Global()->CheckUnitBaseNormal;
 
 		for (short curX = leftX; curX < rightX; ++curX)
 		{
@@ -175,7 +176,7 @@ DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormalExtra, 0x9)
 											{
 												if (pOwner->ArrayIndex == idxHouse && pCellBldType->BaseNormal)
 												{
-													if (CAN_USE_ARES && AresHelper::CanUseAres) // Restore Ares MapClass_CanBuildingTypeBePlacedHere_Ignore
+													if (AresHelper::CanUseAres) // Restore Ares MapClass_CanBuildingTypeBePlacedHere_Ignore
 													{
 														struct DummyAresBuildingExt // Temp Ares Building Ext
 														{
@@ -209,7 +210,7 @@ DEFINE_HOOK(0x4A8F21, MapClass_PassesProximityCheck_BaseNormalExtra, 0x9)
 								}
 							}
 						}
-						else if (RulesExt::Global()->CheckUnitBaseNormal && absType == AbstractType::Unit)
+						else if (unitBase && absType == AbstractType::Unit)
 						{
 							UnitClass* const pUnit = static_cast<UnitClass*>(pObject);
 
