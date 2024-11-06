@@ -373,8 +373,13 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 			pObject = pObject->NextObject;
 		}
 
-		if (!landFootOnly && !builtOnTechno && (pCell->OccupationFlags & 0xFF))
-			landFootOnly = true;
+		if (!landFootOnly && !builtOnTechno && (pCell->OccupationFlags & 0x3F))
+		{
+			if (expand)
+				landFootOnly = true;
+			else
+				return CanNotExistHere;
+		}
 	}
 	else if (pBuildingType->ToTile)
 	{
@@ -394,13 +399,6 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 				BuildingClass* const pBuilding = static_cast<BuildingClass*>(pObject);
 				BuildingTypeClass* const pType = pBuilding->Type;
 				auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
-
-				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
-					return CanNotExistHere;
-			}
-			else if (TerrainClass* const pTerrain = abstract_cast<TerrainClass*>(pObject))
-			{
-				auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type);
 
 				if (!pTypeExt || !pTypeExt->CanBeBuiltOn)
 					return CanNotExistHere;
@@ -455,8 +453,13 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 			pObject = pObject->NextObject;
 		}
 
-		if (!landFootOnly && !builtOnTechno && (pCell->OccupationFlags & 0xFF))
-			landFootOnly = true;
+		if (!landFootOnly && !builtOnTechno && (pCell->OccupationFlags & 0x3F))
+		{
+			if (expand)
+				landFootOnly = true;
+			else
+				return CanNotExistHere;
+		}
 	}
 
 	if (landFootOnly)
