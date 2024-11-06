@@ -119,6 +119,7 @@ void WeaponTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->KeepRange_AllowAI.Read(exINI, pSection, "KeepRange.AllowAI");
 	this->KeepRange_AllowPlayer.Read(exINI, pSection, "KeepRange.AllowPlayer");
 	this->Burst_NoDelay.Read(exINI, pSection, "Burst.NoDelay");
+	this->NoRepeatFire.Read(exINI, pSection, "NoRepeatFire");
 	this->KickOutPassengers.Read(exINI, pSection, "KickOutPassengers");
 }
 
@@ -168,6 +169,7 @@ void WeaponTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->KeepRange_AllowAI)
 		.Process(this->KeepRange_AllowPlayer)
 		.Process(this->Burst_NoDelay)
+		.Process(this->NoRepeatFire)
 		.Process(this->KickOutPassengers)
 		;
 };

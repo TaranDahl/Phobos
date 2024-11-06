@@ -64,6 +64,7 @@ public:
 		Valueable<bool> KeepRange_AllowAI;
 		Valueable<bool> KeepRange_AllowPlayer;
 		Valueable<bool> Burst_NoDelay;
+		Valueable<int> NoRepeatFire;
 		Valueable<bool> KickOutPassengers;
 
 		ExtData(WeaponTypeClass* OwnerObject) : Extension<WeaponTypeClass>(OwnerObject)
@@ -109,6 +110,7 @@ public:
 			, KeepRange_AllowAI { false }
 			, KeepRange_AllowPlayer { false }
 			, Burst_NoDelay { false }
+			, NoRepeatFire { 0 }
 			, KickOutPassengers { true }
 		{ }
 

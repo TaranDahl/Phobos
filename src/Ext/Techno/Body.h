@@ -57,6 +57,7 @@ public:
 		CDTimerClass UnitAutoDeployTimer;
 		WeaponTypeClass* LastWeaponType;
 		CoordStruct LastWeaponFLH;
+		int LastBeLockedFrame;
 		int LastHurtFrame;
 		int AccumulatedGattlingValue;
 		bool ShouldUpdateGattlingValue;
@@ -105,6 +106,7 @@ public:
 			, UnitAutoDeployTimer {}
 			, LastWeaponType {}
 			, LastWeaponFLH {}
+			, LastBeLockedFrame { 0 }
 			, LastHurtFrame { 0 }
 			, AccumulatedGattlingValue { 0 }
 			, ShouldUpdateGattlingValue { false }
