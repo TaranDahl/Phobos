@@ -627,6 +627,9 @@ bool BuildingTypeExt::AutoUpgradeBuilding(BuildingClass* pBuilding)
 {
 	BuildingTypeClass* const pBuildingType = pBuilding->Type;
 
+	if (!pBuildingType->PowersUpBuilding[0])
+		return false;
+
 	if (BuildingTypeExt::ExtData* const pTypeExt = BuildingTypeExt::ExtMap.Find(pBuildingType))
 	{
 		if (pTypeExt->AutoUpgrade)
@@ -868,7 +871,7 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Units_RepairRate.Read(exINI, pSection, "Units.RepairRate");
 	this->Units_RepairStep.Read(exINI, pSection, "Units.RepairStep");
 	this->Units_RepairPercent.Read(exINI, pSection, "Units.RepairPercent");
-	this->Units_DisableRepairCost.Read(exINI, pSection, "Units.DisableRepairCost");
+	this->Units_UseRepairCost.Read(exINI, pSection, "Units.UseRepairCost");
 
 	this->NoBuildAreaOnBuildup.Read(exINI, pSection, "NoBuildAreaOnBuildup");
 	this->Adjacent_Allowed.Read(exINI, pSection, "Adjacent.Allowed");
@@ -995,7 +998,7 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Units_RepairRate)
 		.Process(this->Units_RepairStep)
 		.Process(this->Units_RepairPercent)
-		.Process(this->Units_DisableRepairCost)
+		.Process(this->Units_UseRepairCost)
 		.Process(this->NoBuildAreaOnBuildup)
 		.Process(this->Adjacent_Allowed)
 		.Process(this->Adjacent_Disallowed)
