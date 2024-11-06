@@ -1030,7 +1030,7 @@ void TacticalButtonsClass::HerosDraw()
 				if (time < 20)
 				{
 					ColorStruct fillColor { 255, 255, 0 };
-					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, (40 - (time << 1)));
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 20 - time);
 				}
 
 				if (pTechno->TemporalTargetingMe)
@@ -1148,7 +1148,7 @@ void TacticalButtonsClass::HerosDraw()
 				if (time < 20)
 				{
 					ColorStruct fillColor { 255, 255, 0 };
-					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, (40 - (time << 1)));
+					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 20 - time);
 				}
 
 				if (pSelect->TemporalTargetingMe)
