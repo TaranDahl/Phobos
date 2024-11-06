@@ -1021,8 +1021,6 @@ DEFINE_HOOK(0x51AB5C, InfantryClass_SetDestination_JJInfFix, 0x6)
 	return 0;
 }
 
-DEFINE_JUMP(LJMP, 0x517FF5, 0x518016); // Warhead with InfDeath=9 versus infantry in air
-
 #pragma region End_Piggyback PowerOn
 
 // Auther: tyuah8
@@ -1067,6 +1065,8 @@ DEFINE_HOOK(0x719F17, TeleportLocomotionClass__End_Piggyback__PowerOn, 0x5)
 
 #pragma endregion
 
+DEFINE_JUMP(LJMP, 0x517FF5, 0x518016); // Warhead with InfDeath=9 versus infantry in air
+
 // Fixes docks not repairing docked aircraft unless they enter the dock first e.g just built ones.
 // Also potential edge cases with unusual docking offsets, original had a distance check for 64 leptons which is replaced with IsInAir here.
 DEFINE_HOOK(0x44985B, BuildingClass_Mission_Guard_UnitReload, 0x6)
@@ -1100,3 +1100,76 @@ DEFINE_HOOK(0x6FA467, TechnoClass_AI_AttackFriendlies, 0x5)
 
 	return 0;
 }
+
+// Starkku: These fix issues with follower train cars etc) indices being thrown off by preplaced vehicles not being created, having other vehicles as InitialPayload etc.
+// This fix basically works by not using the global UnitClass array at all for setting the followers, only a list of preplaced units, successfully created or not.
+#pragma region Follower
+
+namespace UnitParseTemp
+{
+	std::vector<UnitClass*> ParsedUnits;
+	bool WasCreated = false;
+}
+
+// Add vehicles successfully created to list of parsed vehicles.
+DEFINE_HOOK(0x7435DE, UnitClass_ReadFromINI_Follower1, 0x6)
+{
+	GET(UnitClass*, pUnit, ESI);
+
+	UnitParseTemp::ParsedUnits.push_back(pUnit);
+	UnitParseTemp::WasCreated = true;
+
+	return 0;
+}
+
+// Add vehicles that were not successfully created to list of parsed vehicles as well as to followers list.
+DEFINE_HOOK(0x74364C, UnitClass_ReadFromINI_Follower2, 0x8)
+{
+	REF_STACK(TypeList<int>, followers, STACK_OFFSET(0xD0, -0xC0));
+
+	if (!UnitParseTemp::WasCreated)
+	{
+		followers.AddItem(-1);
+		UnitParseTemp::ParsedUnits.push_back(nullptr);
+	}
+
+	UnitParseTemp::WasCreated = false;
+
+	return 0;
+}
+
+// Set followers based on parsed vehicles.
+DEFINE_HOOK(0x743664, UnitClass_ReadFromINI_Follower3, 0x6)
+{
+	enum { SkipGameCode = 0x7436AC };
+
+	REF_STACK(TypeList<int>, followers, STACK_OFFSET(0xCC, -0xC0));
+	auto& units = UnitParseTemp::ParsedUnits;
+
+	for (size_t i = 0; i < units.size(); i++)
+	{
+		auto const pUnit = units[i];
+
+		if (!pUnit)
+			continue;
+
+		int followerIndex = followers[i];
+
+		if (followerIndex < 0 || followerIndex >= static_cast<int>(units.size()))
+		{
+			pUnit->FollowerCar = nullptr;
+		}
+		else
+		{
+			auto const pFollower = units[followerIndex];
+			pUnit->FollowerCar = pFollower;
+			pFollower->IsFollowerCar = true;
+		}
+	}
+
+	units.clear();
+
+	return SkipGameCode;
+}
+
+#pragma endregion
