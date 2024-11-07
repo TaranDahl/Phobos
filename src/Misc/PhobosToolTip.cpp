@@ -238,8 +238,8 @@ DEFINE_HOOK(0x4AE511, DisplayClass_GetToolTip_SkipTacticalTip, 0x5)
 {
 	enum { UseButtonTip = 0x4AE5F8, SkipGameCode = 0x4AE69B };
 
-	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
-	const int buttonIndex = pButtons->GetButtonIndex();
+	const auto pButtons = &TacticalButtonsClass::Instance;
+	const auto buttonIndex = pButtons->GetButtonIndex();
 
 	if (buttonIndex < 0)
 		return 0;
