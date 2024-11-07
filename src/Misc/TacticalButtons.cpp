@@ -171,7 +171,7 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 		{
 			if (!Make_Global<int>(0xABCD40)) // Frame index in this second
 			{
-				for (TextLabelClass* pText = MessageListClass::Instance->MessageList; pText; pText = static_cast<TextLabelClass*>(pText->GetNext()))
+				for (auto pText = MessageListClass::Instance->MessageList; pText; pText = static_cast<TextLabelClass*>(pText->GetNext()))
 					pText->UserData1 = reinterpret_cast<void*>(reinterpret_cast<int>(pText->UserData1) + 60);
 			}
 
@@ -364,7 +364,7 @@ void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 {
 	this->ButtonIndex = this->CheckMouseOverButtons(pMousePosition);
 
-	CCToolTip* const toolTips = CCToolTip::Instance;
+	const auto pToolTips = CCToolTip::Instance.get();
 
 	// SW ToolTip
 	if (this->IndexInSWButtons()) // Button index 1-10 : Super weapons buttons
@@ -376,16 +376,16 @@ void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 			PhobosToolTip::Instance.HelpText_Super(superIndex);
 			this->RecordSuperIndex = superIndex;
 
-			if (toolTips->ToolTipDelay)
-				toolTips->LastToolTipDelay = toolTips->ToolTipDelay;
+			if (pToolTips->ToolTipDelay)
+				pToolTips->LastToolTipDelay = pToolTips->ToolTipDelay;
 
-			toolTips->ToolTipDelay = 0;
+			pToolTips->ToolTipDelay = 0;
 		}
 	}
 	else if (this->RecordSuperIndex != -1)
 	{
 		this->RecordSuperIndex = -1;
-		toolTips->ToolTipDelay = toolTips->LastToolTipDelay;
+		pToolTips->ToolTipDelay = pToolTips->LastToolTipDelay;
 	}
 
 	// TODO New buttons
@@ -429,9 +429,9 @@ void TacticalButtonsClass::PressDesignatedButton(int triggerIndex)
 		else if (triggerIndex == 2)
 			DisplayClass::Instance->CurrentSWTypeIndex = -1;
 
-		CCToolTip* const toolTips = CCToolTip::Instance;
+		const auto pToolTips = CCToolTip::Instance.get();
 		this->RecordSuperIndex = -1;
-		toolTips->ToolTipDelay = toolTips->LastToolTipDelay;
+		pToolTips->ToolTipDelay = pToolTips->LastToolTipDelay;
 	}
 	else if (this->IndexIsSWSwitch())
 	{
@@ -459,7 +459,7 @@ void TacticalButtonsClass::PressDesignatedButton(int triggerIndex)
 // Button index N/A : Message Lists
 bool TacticalButtonsClass::MouseIsOverMessageLists(const Point2D* pMousePosition)
 {
-	const MessageListClass* pMessages = &MessageListClass::Instance;
+	const auto pMessages = &MessageListClass::Instance.get();
 
 	if (TextLabelClass* pText = pMessages->MessageList)
 	{
@@ -493,8 +493,8 @@ void TacticalButtonsClass::SWSidebarDraw()
 	if (!currentCounts)
 		return;
 
-	HouseClass* const pHouse = HouseClass::CurrentPlayer;
-	SideExt::ExtData* const pSideExt = SideExt::ExtMap.Find(SideClass::Array->GetItem(pHouse->SideIndex));
+	const auto pHouse = HouseClass::CurrentPlayer.get();
+	const auto pSideExt = SideExt::ExtMap.Find(SideClass::Array->GetItem(pHouse->SideIndex));
 	const bool drawSWSidebarBackground = RulesExt::Global()->SWSidebarBackground && pSideExt;
 	const int height = DSurface::Composite->GetHeight() - 32;
 	const int color = Drawing::RGB_To_Int(Drawing::TooltipColor);
@@ -506,7 +506,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 		{
 			RectangleStruct drawRect { 80, (height / 2 - 25), 10, 50 };
 
-			if (BSurface* const CameoPCX = pSideExt->SWSidebarBackground_OnPCX.GetSurface())
+			if (const auto CameoPCX = pSideExt->SWSidebarBackground_OnPCX.GetSurface())
 				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
 			else
 				DSurface::Composite->FillRect(&drawRect, COLOR_BLUE);
@@ -524,7 +524,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 		{
 			RectangleStruct drawRect { 0, (height / 2 - 25), 10, 50 };
 
-			if (BSurface* const CameoPCX = pSideExt->SWSidebarBackground_OffPCX.GetSurface())
+			if (const auto CameoPCX = pSideExt->SWSidebarBackground_OffPCX.GetSurface())
 				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
 			else
 				DSurface::Composite->FillRect(&drawRect, COLOR_BLUE);
@@ -550,7 +550,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 	{
 		RectangleStruct drawRect { 0, backPosition.Y, 80, 20 };
 
-		if (BSurface* const CameoPCX = pSideExt->SWSidebarBackground_TopPCX.GetSurface())
+		if (const auto CameoPCX = pSideExt->SWSidebarBackground_TopPCX.GetSurface())
 			PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
 		else
 			DSurface::Composite->FillRect(&drawRect, COLOR_BLACK);
@@ -565,27 +565,27 @@ void TacticalButtonsClass::SWSidebarDraw()
 			backPosition.Y = position.Y - 1;
 			RectangleStruct drawRect { 0, backPosition.Y, 80, 50 };
 
-			if (BSurface* const CameoPCX = pSideExt->SWSidebarBackground_CenterPCX.GetSurface())
+			if (const auto CameoPCX = pSideExt->SWSidebarBackground_CenterPCX.GetSurface())
 				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
 			else
 				DSurface::Composite->FillRect(&drawRect, COLOR_BLACK);
 		}
 
 		// Get SW data
-		SuperClass* const pSuper = pHouse->Supers.Items[data[i]];
-		SuperWeaponTypeClass* const pSWType = pSuper->Type;
+		const auto pSuper = pHouse->Supers.Items[data[i]];
+		const auto pSWType = pSuper->Type;
 
 		// Draw cameo
-		if (SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pSWType))
+		if (const auto pTypeExt = SWTypeExt::ExtMap.Find(pSWType))
 		{
-			if (BSurface* const CameoPCX = pTypeExt->SidebarPCX.GetSurface())
+			if (const auto CameoPCX = pTypeExt->SidebarPCX.GetSurface())
 			{
 				RectangleStruct drawRect { position.X, position.Y, 60, 48 };
 				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
 			}
-			else if (SHPStruct* const pSHP = pSWType->SidebarImage)
+			else if (const auto pSHP = pSWType->SidebarImage)
 			{
-				SHPReference* const pCameoRef = pSHP->AsReference();
+				const auto pCameoRef = pSHP->AsReference();
 
 				char pFilename[0x20];
 				strcpy_s(pFilename, RulesExt::Global()->MissingCameo.data());
@@ -596,7 +596,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 					PCX::Instance->LoadFile(pFilename);
 					RectangleStruct drawRect { position.X, position.Y, 60, 48 };
 
-					if (BSurface* const MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
+					if (const auto MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
 						PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
 				}
 				else
@@ -633,10 +633,10 @@ void TacticalButtonsClass::SWSidebarDraw()
 		// SW status
 		if (ready && !this->KeyCodeText[i].empty())
 		{
-			const wchar_t* pKey = this->KeyCodeText[i].c_str();
+			const auto pKey = this->KeyCodeText[i].c_str();
 			Point2D textLocation { 35, position.Y + 1 };
 			const TextPrintType printType = TextPrintType::Center | TextPrintType::FullShadow | TextPrintType::Point8;
-			RectangleStruct textRect = Drawing::GetTextDimensions(pKey, textLocation, static_cast<WORD>(printType), 2, 1);
+			auto textRect = Drawing::GetTextDimensions(pKey, textLocation, static_cast<WORD>(printType), 2, 1);
 
 			// Text black background
 			reinterpret_cast<void(__fastcall*)(RectangleStruct*, DSurface*, unsigned short, unsigned char)>(0x621B80)(&textRect, DSurface::Composite, 0, 0xAFu);
@@ -646,7 +646,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 		{
 			Point2D textLocation { 35, position.Y + 1 };
 			const TextPrintType printType = TextPrintType::Center | TextPrintType::FullShadow | TextPrintType::Point8;
-			RectangleStruct textRect = Drawing::GetTextDimensions(pName, textLocation, static_cast<WORD>(printType), 2, 1);
+			auto textRect = Drawing::GetTextDimensions(pName, textLocation, static_cast<WORD>(printType), 2, 1);
 
 			// Text black background
 			reinterpret_cast<void(__fastcall*)(RectangleStruct*, DSurface*, unsigned short, unsigned char)>(0x621B80)(&textRect, DSurface::Composite, 0, 0xAFu);
@@ -663,7 +663,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 		backPosition.Y = position.Y - 1;
 		RectangleStruct drawRect { 0, backPosition.Y, 80, 20};
 
-		if (BSurface* const CameoPCX = pSideExt->SWSidebarBackground_BottomPCX.GetSurface())
+		if (const auto CameoPCX = pSideExt->SWSidebarBackground_BottomPCX.GetSurface())
 			PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
 		else
 			DSurface::Composite->FillRect(&drawRect, COLOR_BLACK);
@@ -682,7 +682,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 
 void TacticalButtonsClass::SWSidebarRecheck()
 {
-	HouseClass* const pHouse = HouseClass::CurrentPlayer;
+	const auto pHouse = HouseClass::CurrentPlayer.get();
 	auto& data = ScenarioExt::Global()->SWButtonData;
 
 	for (auto it = data.begin(); it != data.end();)
@@ -698,8 +698,8 @@ void TacticalButtonsClass::SWSidebarRecheck()
 
 bool TacticalButtonsClass::SWSidebarAdd(int& superIndex)
 {
-	SuperWeaponTypeClass* const pType = SuperWeaponTypeClass::Array->Items[superIndex];
-	SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pType);
+	const auto pType = SuperWeaponTypeClass::Array->Items[superIndex];
+	const auto pTypeExt = SWTypeExt::ExtMap.Find(pType);
 	bool overflow = true;
 
 	if (pTypeExt && pTypeExt->SW_InScreen_Show)
@@ -754,7 +754,7 @@ bool TacticalButtonsClass::SWSidebarAdd(int& superIndex)
 
 bool TacticalButtonsClass::SWSidebarSort(SuperWeaponTypeClass* pDataType, SuperWeaponTypeClass* pAddType, SWTypeExt::ExtData* pAddTypeExt, unsigned int ownerBits)
 {
-	SWTypeExt::ExtData* const pDataTypeExt = SWTypeExt::ExtMap.Find(pDataType);
+	const auto pDataTypeExt = SWTypeExt::ExtMap.Find(pDataType);
 
 	if (pDataTypeExt && pAddTypeExt)
 	{
@@ -790,7 +790,7 @@ void TacticalButtonsClass::SWSidebarTrigger(int buttonIndex)
 	if (static_cast<size_t>(buttonIndex) > data.size())
 		return;
 
-	SidebarClass* const pSidebar = SidebarClass::Instance;
+	const auto pSidebar = SidebarClass::Instance.get();
 	this->DummyAction = true;
 
 	DummySelectClass pButton;
@@ -848,7 +848,7 @@ void TacticalButtonsClass::SWSidebarSwitch()
 	if (ScenarioClass::Instance->UserInputLocked)
 		return;
 
-	HouseClass* const pHouse = HouseClass::CurrentPlayer;
+	const auto pHouse = HouseClass::CurrentPlayer.get();
 
 	if (pHouse->IsObserver())
 		return;
@@ -877,19 +877,20 @@ bool TacticalButtonsClass::SWQuickLaunch(int superIndex)
 		keyboardCall = true;
 	}
 
-	SuperWeaponTypeClass* const pType = SuperWeaponTypeClass::Array->Items[superIndex];
+	const auto pType = SuperWeaponTypeClass::Array->Items[superIndex];
 
-	if (SWTypeExt::ExtData* const pTypeExt = SWTypeExt::ExtMap.Find(pType))
+	if (const auto pTypeExt = SWTypeExt::ExtMap.Find(pType))
 	{
 		const int index = HouseClass::CurrentPlayer->ArrayIndex;
+		const auto pTactical = TacticalClass::Instance.get();
 
 		if (pTypeExt->SW_QuickFireAtMouse && keyboardCall)
 		{
-			const CoordStruct mouseCoords = TacticalClass::Instance->ClientToCoords(WWMouseClass::Instance->XY1);
+			const auto mouseCoords = pTactical->ClientToCoords(WWMouseClass::Instance->XY1);
 
 			if (mouseCoords != CoordStruct::Empty)
 			{
-				EventClass event
+				const EventClass event
 				(
 					index,
 					EventType::SpecialPlace,
@@ -906,12 +907,12 @@ bool TacticalButtonsClass::SWQuickLaunch(int superIndex)
 			return false;
 		}
 
-		EventClass event
+		const EventClass event
 		(
 			index,
 			EventType::SpecialPlace,
 			pType->ArrayIndex,
-			CellClass::Coord2Cell(TacticalClass::Instance->ClientToCoords(Point2D{ (DSurface::Composite->Width >> 1), (DSurface::Composite->Height >> 1) }))
+			CellClass::Coord2Cell(pTactical->ClientToCoords(Point2D{ (DSurface::Composite->Width >> 1), (DSurface::Composite->Height >> 1) }))
 		);
 		EventClass::AddEvent(event);
 
@@ -945,18 +946,18 @@ void TacticalButtonsClass::HerosDraw()
 
 	for (int i = 0; i < counts; ++i, position.Y += 50, drawRect.Y = position.Y)
 	{
-		TechnoExt::ExtData* const pExt = vec[i];
-		TechnoClass* const pTechno = pExt->OwnerObject();
-		TechnoTypeExt::ExtData* const pTypeExt = pExt->TypeExtData;
-		TechnoTypeClass* const pType = pTypeExt->OwnerObject();
+		const auto pExt = vec[i];
+		const auto pTechno = pExt->OwnerObject();
+		const auto pTypeExt = pExt->TypeExtData;
+		const auto pType = pTypeExt->OwnerObject();
 
-		if (BSurface* const CameoPCX = pTypeExt->CameoPCX.GetSurface())
+		if (const auto CameoPCX = pTypeExt->CameoPCX.GetSurface())
 		{
 			PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
 		}
-		else if (SHPStruct* const pSHP = pType->GetCameo())
+		else if (const auto pSHP = pType->GetCameo())
 		{
-			SHPReference* const pCameoRef = pSHP->AsReference();
+			const auto pCameoRef = pSHP->AsReference();
 
 			char pFilename[0x20];
 			strcpy_s(pFilename, RulesExt::Global()->MissingCameo.data());
@@ -966,7 +967,7 @@ void TacticalButtonsClass::HerosDraw()
 			{
 				PCX::Instance->LoadFile(pFilename);
 
-				if (BSurface* const MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
+				if (const auto MissingCameoPCX = PCX::Instance->GetSurface(pFilename))
 					PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, MissingCameoPCX);
 			}
 			else
@@ -979,8 +980,8 @@ void TacticalButtonsClass::HerosDraw()
 
 		if (!pTechno->InLimbo)
 		{
-			RulesClass* const pRules = RulesClass::Instance;
-			double ratio = pTechno->GetHealthPercentage();
+			const auto pRules = RulesClass::Instance.get();
+			auto ratio = pTechno->GetHealthPercentage();
 
 			if (pTechno->IsIronCurtained())
 			{
@@ -1072,7 +1073,7 @@ void TacticalButtonsClass::HerosDraw()
 			const int color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
 			DSurface::Composite->FillRect(&rect, color);
 
-			ShieldClass* const pShield = pExt->Shield.get();
+			const auto pShield = pExt->Shield.get();
 
 			if (pShield && !pShield->IsBrokenAndNonRespawning())
 			{
@@ -1084,21 +1085,21 @@ void TacticalButtonsClass::HerosDraw()
 
 			if (pTechno->IsIronCurtained())
 			{
-				const CDTimerClass* const timer = &pTechno->IronCurtainTimer;
+				const auto timer = &pTechno->IronCurtainTimer;
 				ratio = static_cast<double>(timer->GetTimeLeft()) / timer->TimeLeft;
 				rect.Width = static_cast<int>(50 * ratio + 0.5);
 				ColorStruct fillColor { 200, 50, 50 };
 				DSurface::Composite->FillRectTrans(&rect, &fillColor, 80);
 			}
 		}
-		else if (TechnoClass* pSelect = pTechno->Transporter)
+		else if (auto pSelect = pTechno->Transporter)
 		{
-			for (TechnoClass* pTrans = pSelect; pTrans; pTrans = pTrans->Transporter)
+			for (auto pTrans = pSelect; pTrans; pTrans = pTrans->Transporter)
 				pSelect = pTrans;
 
-			TechnoExt::ExtData* const pSelectExt = TechnoExt::ExtMap.Find(pSelect);
-			RulesClass* const pRules = RulesClass::Instance;
-			double ratio = pTechno->GetHealthPercentage();
+			const auto pSelectExt = TechnoExt::ExtMap.Find(pSelect);
+			const auto pRules = RulesClass::Instance.get();
+			auto ratio = pTechno->GetHealthPercentage();
 
 			if (pSelect->IsIronCurtained())
 			{
@@ -1196,7 +1197,7 @@ void TacticalButtonsClass::HerosDraw()
 			const int color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
 			DSurface::Composite->FillRect(&rect, color);
 
-			ShieldClass* const pShield = pSelectExt->Shield.get();
+			const auto pShield = pSelectExt->Shield.get();
 
 			if (pShield && !pShield->IsBrokenAndNonRespawning())
 			{
@@ -1208,7 +1209,7 @@ void TacticalButtonsClass::HerosDraw()
 
 			if (pSelect->IsIronCurtained())
 			{
-				const CDTimerClass* const timer = &pSelect->IronCurtainTimer;
+				const auto timer = &pSelect->IronCurtainTimer;
 				ratio = static_cast<double>(timer->GetTimeLeft()) / timer->TimeLeft;
 				rect.Width = static_cast<int>(50 * ratio + 0.5);
 				ColorStruct fillColor { 200, 50, 50 };
@@ -1217,9 +1218,9 @@ void TacticalButtonsClass::HerosDraw()
 		}
 		else
 		{
-			const AbstractType absType = pTechno->WhatAmI();
-			const BuildCat buildCat = (absType == AbstractType::Building) ? static_cast<BuildingClass*>(pTechno)->Type->BuildCat : BuildCat::DontCare;
-			FactoryClass* const pFactory = pTechno->Owner->GetPrimaryFactory(absType, pType->Naval, buildCat);
+			const auto absType = pTechno->WhatAmI();
+			const auto buildCat = (absType == AbstractType::Building) ? static_cast<BuildingClass*>(pTechno)->Type->BuildCat : BuildCat::DontCare;
+			const auto pFactory = pTechno->Owner->GetPrimaryFactory(absType, pType->Naval, buildCat);
 
 			if (pFactory && pFactory->Object == pTechno)
 			{
@@ -1229,7 +1230,7 @@ void TacticalButtonsClass::HerosDraw()
 				RectangleStruct rect { (position.X + 4), (position.Y + 2), 52, 5 };
 				DSurface::Composite->FillRect(&rect, 0);
 
-				const double ratio = static_cast<double>(pFactory->GetProgress()) / 54;
+				const auto ratio = static_cast<double>(pFactory->GetProgress()) / 54;
 				rect = RectangleStruct { (position.X + 5), (position.Y + 3), static_cast<int>(50 * ratio), 3 };
 				DSurface::Composite->FillRect(&rect, 0xFFFF);
 			}
@@ -1245,14 +1246,14 @@ void TacticalButtonsClass::HerosDraw()
 
 				DSurface::Composite->FillRect(&rect, 0);
 
-				const double ratio = pTechno->GetHealthPercentage();
+				const auto ratio = pTechno->GetHealthPercentage();
 
 				++rect.X;
 				++rect.Y;
 				rect.Width = static_cast<int>(50 * ratio + 0.5);
 				rect.Height = 3;
 
-				RulesClass* const pRules = RulesClass::Instance;
+				const auto pRules = RulesClass::Instance.get();
 				const int color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
 				DSurface::Composite->FillRect(&rect, color);
 			}
@@ -1277,13 +1278,13 @@ void TacticalButtonsClass::HeroSelect(int buttonIndex)
 	if (index >= static_cast<int>(vec.size()))
 		return;
 
-	TechnoClass* const pTechno = vec[index]->OwnerObject();
+	const auto pTechno = vec[index]->OwnerObject();
 
 	if (pTechno->IsAlive)
 	{
-		TechnoClass* pSelect = pTechno;
+		auto pSelect = pTechno;
 
-		for (TechnoClass* pTrans = pSelect->Transporter; pTrans; pTrans = pTrans->Transporter)
+		for (auto pTrans = pSelect->Transporter; pTrans; pTrans = pTrans->Transporter)
 			pSelect = pTrans;
 
 		if (pSelect->Location != CoordStruct::Empty && pSelect->IsOnMap)
@@ -1310,7 +1311,7 @@ inline bool TacticalButtonsClass::IndexInSelectButtons()
 
 inline void TacticalButtonsClass::AddToCurrentSelect(TechnoTypeExt::ExtData* pTypeExt, int count, int checkIndex)
 {
-	const char* groupID = pTypeExt->GetSelectionGroupID();
+	const auto groupID = pTypeExt->GetSelectionGroupID();
 	const int currentCounts = this->CurrentSelectCameo.size();
 
 	for (int i = checkIndex; i < currentCounts; ++i)
@@ -1336,9 +1337,9 @@ void TacticalButtonsClass::SelectedTrigger(int buttonIndex, bool select)
 	if (buttonIndex > (currentCounts + 70))
 		return;
 
-	TechnoTypeExt::ExtData* const pTypeExt = this->CurrentSelectCameo[buttonIndex - 71].TypeExt;
-	const char* groupID = pTypeExt->GetSelectionGroupID();
-	const bool shiftPressed = InputManagerClass::Instance->IsForceSelectKeyPressed();
+	const auto pTypeExt = this->CurrentSelectCameo[buttonIndex - 71].TypeExt;
+	const auto groupID = pTypeExt->GetSelectionGroupID();
+	const auto shiftPressed = InputManagerClass::Instance->IsForceSelectKeyPressed();
 
 	if (select)
 	{
@@ -1347,9 +1348,9 @@ void TacticalButtonsClass::SelectedTrigger(int buttonIndex, bool select)
 			std::vector<ObjectClass*> deselects;
 			deselects.reserve(ObjectClass::CurrentObjects->Count);
 
-			for (auto const& pCurrent : ObjectClass::CurrentObjects())
+			for (const auto& pCurrent : ObjectClass::CurrentObjects())
 			{
-				if (TechnoTypeExt::ExtData* const pCurrentTypeExt = TechnoTypeExt::ExtMap.Find(pCurrent->GetTechnoType()))
+				if (const auto pCurrentTypeExt = TechnoTypeExt::ExtMap.Find(pCurrent->GetTechnoType()))
 				{
 					if (pCurrentTypeExt->GetSelectionGroupID() == groupID)
 						continue;
@@ -1358,10 +1359,8 @@ void TacticalButtonsClass::SelectedTrigger(int buttonIndex, bool select)
 				deselects.push_back(pCurrent);
 			}
 
-			for (auto const& pDeselect : deselects)
-			{
+			for (const auto& pDeselect : deselects)
 				pDeselect->Deselect();
-			}
 		}
 		else
 		{
@@ -1371,9 +1370,9 @@ void TacticalButtonsClass::SelectedTrigger(int buttonIndex, bool select)
 			std::vector<ObjectClass*> deselects;
 			deselects.reserve(counts);
 
-			for (auto const& pCurrent : ObjectClass::CurrentObjects())
+			for (const auto& pCurrent : ObjectClass::CurrentObjects())
 			{
-				if (TechnoTypeExt::ExtData* const pCurrentTypeExt = TechnoTypeExt::ExtMap.Find(pCurrent->GetTechnoType()))
+				if (const auto pCurrentTypeExt = TechnoTypeExt::ExtMap.Find(pCurrent->GetTechnoType()))
 				{
 					if (pCurrentTypeExt->GetSelectionGroupID() == groupID)
 					{
@@ -1385,10 +1384,8 @@ void TacticalButtonsClass::SelectedTrigger(int buttonIndex, bool select)
 				deselects.push_back(pCurrent);
 			}
 
-			for (auto const& pDeselect : deselects)
-			{
+			for (const auto& pDeselect : deselects)
 				pDeselect->Deselect();
-			}
 
 			const int size = selects.size();
 			const int random = Unsorted::CurrentFrame % size;
@@ -1407,9 +1404,9 @@ void TacticalButtonsClass::SelectedTrigger(int buttonIndex, bool select)
 			std::vector<ObjectClass*> deselects;
 			deselects.reserve(ObjectClass::CurrentObjects->Count);
 
-			for (auto const& pCurrent : ObjectClass::CurrentObjects())
+			for (const auto& pCurrent : ObjectClass::CurrentObjects())
 			{
-				if (TechnoTypeExt::ExtData* const pCurrentTypeExt = TechnoTypeExt::ExtMap.Find(pCurrent->GetTechnoType()))
+				if (const auto pCurrentTypeExt = TechnoTypeExt::ExtMap.Find(pCurrent->GetTechnoType()))
 				{
 					if (pCurrentTypeExt->GetSelectionGroupID() != groupID)
 						continue;
@@ -1418,19 +1415,17 @@ void TacticalButtonsClass::SelectedTrigger(int buttonIndex, bool select)
 				deselects.push_back(pCurrent);
 			}
 
-			for (auto const& pDeselect : deselects)
-			{
+			for (const auto& pDeselect : deselects)
 				pDeselect->Deselect();
-			}
 		}
 		else
 		{
 			std::vector<ObjectClass*> selects;
 			selects.reserve(ObjectClass::CurrentObjects->Count);
 
-			for (auto const& pCurrent : ObjectClass::CurrentObjects())
+			for (const auto& pCurrent : ObjectClass::CurrentObjects())
 			{
-				if (TechnoTypeExt::ExtData* const pCurrentTypeExt = TechnoTypeExt::ExtMap.Find(pCurrent->GetTechnoType()))
+				if (const auto pCurrentTypeExt = TechnoTypeExt::ExtMap.Find(pCurrent->GetTechnoType()))
 				{
 					if (pCurrentTypeExt->GetSelectionGroupID() == groupID)
 						selects.push_back(pCurrent);
@@ -1462,9 +1457,9 @@ void TacticalButtonsClass::SelectedUpdate()
 	std::map<int, int> CurrentSelectAircraft;
 	std::map<int, int> CurrentSelectBuilding;
 
-	for (auto const& pCurrent : ObjectClass::CurrentObjects())
+	for (const auto& pCurrent : ObjectClass::CurrentObjects())
 	{
-		const AbstractType absType = pCurrent->WhatAmI();
+		const auto absType = pCurrent->WhatAmI();
 
 		if (absType == AbstractType::Infantry)
 			++CurrentSelectInfantry[static_cast<InfantryClass*>(pCurrent)->Type->ArrayIndex];
@@ -1478,9 +1473,9 @@ void TacticalButtonsClass::SelectedUpdate()
 
 	if (CurrentSelectInfantry.size())
 	{
-		for (auto const& [index, count] : CurrentSelectInfantry)
+		for (const auto& [index, count] : CurrentSelectInfantry)
 		{
-			if (TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(InfantryTypeClass::Array->Items[index]))
+			if (const auto pTypeExt = TechnoTypeExt::ExtMap.Find(InfantryTypeClass::Array->Items[index]))
 				this->AddToCurrentSelect(pTypeExt, count, 0);
 		}
 	}
@@ -1489,9 +1484,9 @@ void TacticalButtonsClass::SelectedUpdate()
 	{
 		const int checkStart = this->CurrentSelectCameo.size();
 
-		for (auto const& [index, count] : CurrentSelectUnit)
+		for (const auto& [index, count] : CurrentSelectUnit)
 		{
-			if (TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(UnitTypeClass::Array->Items[index]))
+			if (const auto pTypeExt = TechnoTypeExt::ExtMap.Find(UnitTypeClass::Array->Items[index]))
 				this->AddToCurrentSelect(pTypeExt, count, checkStart);
 		}
 	}
@@ -1500,9 +1495,9 @@ void TacticalButtonsClass::SelectedUpdate()
 	{
 		const int checkStart = this->CurrentSelectCameo.size();
 
-		for (auto const& [index, count] : CurrentSelectAircraft)
+		for (const auto& [index, count] : CurrentSelectAircraft)
 		{
-			if (TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(AircraftTypeClass::Array->Items[index]))
+			if (const auto pTypeExt = TechnoTypeExt::ExtMap.Find(AircraftTypeClass::Array->Items[index]))
 				this->AddToCurrentSelect(pTypeExt, count, checkStart);
 		}
 	}
@@ -1511,9 +1506,9 @@ void TacticalButtonsClass::SelectedUpdate()
 	{
 		const int checkStart = this->CurrentSelectCameo.size();
 
-		for (auto const& [index, count] : CurrentSelectBuilding)
+		for (const auto& [index, count] : CurrentSelectBuilding)
 		{
-			if (TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(BuildingTypeClass::Array->Items[index]))
+			if (const auto pTypeExt = TechnoTypeExt::ExtMap.Find(BuildingTypeClass::Array->Items[index]))
 				this->AddToCurrentSelect(pTypeExt, count, checkStart);
 		}
 	}
@@ -1533,7 +1528,7 @@ void TacticalButtonsClass::SelectedDraw()
 		this->SelectedUpdate();
 
 	const int currentCounts = Math::min(30, static_cast<int>(this->CurrentSelectCameo.size()));
-	RulesExt::ExtData* const pRulesExt = RulesExt::Global();
+	const auto pRulesExt = RulesExt::Global();
 
 	if (currentCounts > 1 || (currentCounts && this->CurrentSelectCameo[0].Count > 1)) // Mass
 	{
@@ -1550,25 +1545,25 @@ void TacticalButtonsClass::SelectedDraw()
 
 		for (int i = 71; i < this->RecordIndex && i <= maxIndex; ++i, position.X += gap, drawRect.X = position.X, textPosition.X += gap)
 		{
-			const SelectRecordStruct pSelect = this->CurrentSelectCameo[i - 71];
-			const TechnoTypeExt::ExtData* const pTypeExt = pSelect.TypeExt;
+			const auto pSelect = this->CurrentSelectCameo[i - 71];
+			const auto pTypeExt = pSelect.TypeExt;
 
-			if (BSurface* const CameoPCX = pTypeExt->CameoPCX.GetSurface())
+			if (const auto CameoPCX = pTypeExt->CameoPCX.GetSurface())
 			{
 				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
 			}
-			else if (SHPStruct* const pSHP = pTypeExt->OwnerObject()->GetCameo())
+			else if (const auto pSHP = pTypeExt->OwnerObject()->GetCameo())
 			{
 				do
 				{
-					SHPReference* const pCameoRef = pSHP->AsReference();
+					const auto pCameoRef = pSHP->AsReference();
 					char pFilename[0x20];
 					strcpy_s(pFilename, pRulesExt->MissingCameo.data());
 					_strlwr_s(pFilename);
 
 					if (!_stricmp(pCameoRef->Filename, GameStrings::XXICON_SHP))
 					{
-						const AbstractType absType = pTypeExt->OwnerObject()->WhatAmI();
+						const auto absType = pTypeExt->OwnerObject()->WhatAmI();
 						BSurface* MissingCameoPCX = nullptr;
 
 						if (absType == AbstractType::InfantryType && (MissingCameoPCX = pRulesExt->SelectedInfantryMissingPCX.GetSurface(), MissingCameoPCX))
@@ -1627,25 +1622,25 @@ void TacticalButtonsClass::SelectedDraw()
 
 		for (int i = maxIndex; i > this->RecordIndex; --i, position.X -= gap, drawRect.X = position.X, textPosition.X -= gap)
 		{
-			const SelectRecordStruct pSelect = this->CurrentSelectCameo[i - 71];
-			const TechnoTypeExt::ExtData* const pTypeExt = pSelect.TypeExt;
+			const auto pSelect = this->CurrentSelectCameo[i - 71];
+			const auto pTypeExt = pSelect.TypeExt;
 
-			if (BSurface* const CameoPCX = pTypeExt->CameoPCX.GetSurface())
+			if (const auto CameoPCX = pTypeExt->CameoPCX.GetSurface())
 			{
 				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
 			}
-			else if (SHPStruct* const pSHP = pTypeExt->OwnerObject()->GetCameo())
+			else if (const auto pSHP = pTypeExt->OwnerObject()->GetCameo())
 			{
 				do
 				{
-					SHPReference* const pCameoRef = pSHP->AsReference();
+					const auto pCameoRef = pSHP->AsReference();
 					char pFilename[0x20];
 					strcpy_s(pFilename, pRulesExt->MissingCameo.data());
 					_strlwr_s(pFilename);
 
 					if (!_stricmp(pCameoRef->Filename, GameStrings::XXICON_SHP))
 					{
-						const AbstractType absType = pTypeExt->OwnerObject()->WhatAmI();
+						const auto absType = pTypeExt->OwnerObject()->WhatAmI();
 						BSurface* MissingCameoPCX = nullptr;
 
 						if (absType == AbstractType::InfantryType && (MissingCameoPCX = pRulesExt->SelectedInfantryMissingPCX.GetSurface(), MissingCameoPCX))
@@ -1711,25 +1706,25 @@ void TacticalButtonsClass::SelectedDraw()
 
 		if (this->RecordIndex <= maxIndex)
 		{
-			const SelectRecordStruct pSelect = this->CurrentSelectCameo[this->RecordIndex - 71];
-			const TechnoTypeExt::ExtData* const pTypeExt = pSelect.TypeExt;
+			const auto pSelect = this->CurrentSelectCameo[this->RecordIndex - 71];
+			const auto pTypeExt = pSelect.TypeExt;
 
-			if (BSurface* const CameoPCX = pTypeExt->CameoPCX.GetSurface())
+			if (const auto CameoPCX = pTypeExt->CameoPCX.GetSurface())
 			{
 				PCX::Instance->BlitToSurface(&drawRect, DSurface::Composite, CameoPCX);
 			}
-			else if (SHPStruct* const pSHP = pTypeExt->OwnerObject()->GetCameo())
+			else if (const auto pSHP = pTypeExt->OwnerObject()->GetCameo())
 			{
 				do
 				{
-					SHPReference* const pCameoRef = pSHP->AsReference();
+					const auto pCameoRef = pSHP->AsReference();
 					char pFilename[0x20];
 					strcpy_s(pFilename, pRulesExt->MissingCameo.data());
 					_strlwr_s(pFilename);
 
 					if (!_stricmp(pCameoRef->Filename, GameStrings::XXICON_SHP))
 					{
-						const AbstractType absType = pTypeExt->OwnerObject()->WhatAmI();
+						const auto absType = pTypeExt->OwnerObject()->WhatAmI();
 						BSurface* MissingCameoPCX = nullptr;
 
 						if (absType == AbstractType::InfantryType && (MissingCameoPCX = pRulesExt->SelectedInfantryMissingPCX.GetSurface(), MissingCameoPCX))
@@ -1782,12 +1777,12 @@ void TacticalButtonsClass::SelectedDraw()
 	}
 	else if (currentCounts) // Only 1
 	{
-		for (auto const& pCurrent : ObjectClass::CurrentObjects())
+		for (const auto& pCurrent : ObjectClass::CurrentObjects())
 		{
-			if (TechnoClass* const pThis = abstract_cast<TechnoClass*>(pCurrent))
+			if (const auto pThis = abstract_cast<TechnoClass*>(pCurrent))
 			{
-				const TechnoTypeClass* const pType = pThis->GetTechnoType();
-				const TechnoTypeExt::ExtData* const pTypeExt = this->CurrentSelectCameo[0].TypeExt;
+				const auto pType = pThis->GetTechnoType();
+				const auto pTypeExt = this->CurrentSelectCameo[0].TypeExt;
 
 				if (pTypeExt->OwnerObject() == pType)
 				{
@@ -1805,37 +1800,37 @@ void TacticalButtonsClass::SelectedDraw()
 					Point2D position { 60, drawRect.Y };
 					RectangleStruct surfaceRect { 0, 0, 180, position.Y + 48 };
 
-					BSurface* CameoPCX = pTypeExt->CameoPCX.GetSurface();
-					SHPStruct* pSHP = pType->GetCameo();
-					ConvertClass* pPal = pTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL);
+					auto CameoPCX = pTypeExt->CameoPCX.GetSurface();
+					auto pSHP = pType->GetCameo();
+					auto pPal = pTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL);
 
 					position += Point2D { 60, 3 };
 					{
-						HouseClass* const pHouse = HouseClass::CurrentPlayer;
-						const wchar_t* name = pType->UIName;
+						const auto pHouse = HouseClass::CurrentPlayer.get();
+						auto name = pType->UIName;
 
 						if (!pHouse->IsAlliedWith(pThis) && !pHouse->IsObserver())
 						{
 							if (pThis->IsDisguised() && !pThis->GetCell()->DisguiseSensors_InclHouse(pHouse->ArrayIndex))
 							{
-								TechnoTypeClass* const pDisguiseType = TechnoTypeExt::GetTechnoType(pThis->Disguise);
+								const auto pDisguiseType = TechnoTypeExt::GetTechnoType(pThis->Disguise);
 
-								if (TechnoTypeExt::ExtData* const pDisguiseTypeExt = TechnoTypeExt::ExtMap.Find(pDisguiseType))
+								if (const auto pDisguiseTypeExt = TechnoTypeExt::ExtMap.Find(pDisguiseType))
 								{
-									if (TechnoTypeClass* const pFakeType = pDisguiseTypeExt->FakeOf)
+									if (const auto pFakeType = pDisguiseTypeExt->FakeOf)
 									{
-										if (TechnoTypeExt::ExtData* const pFakeTypeExt = TechnoTypeExt::ExtMap.Find(pFakeType))
+										if (const auto pFakeTypeExt = TechnoTypeExt::ExtMap.Find(pFakeType))
 										{
-											if (const wchar_t* fakeName = pFakeTypeExt->EnemyUIName.Get().Text)
+											if (const auto fakeName = pFakeTypeExt->EnemyUIName.Get().Text)
 												name = fakeName;
 											else
 												name = pFakeType->UIName;
 
-											if (BSurface* const FakeCameoPCX = pFakeTypeExt->CameoPCX.GetSurface())
+											if (const auto FakeCameoPCX = pFakeTypeExt->CameoPCX.GetSurface())
 											{
 												CameoPCX = FakeCameoPCX;
 											}
-											else if (SHPStruct* const pFakeSHP = pFakeType->GetCameo())
+											else if (const auto pFakeSHP = pFakeType->GetCameo())
 											{
 												pSHP = pFakeSHP;
 												pPal = pFakeTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL);
@@ -1850,16 +1845,16 @@ void TacticalButtonsClass::SelectedDraw()
 									}
 									else
 									{
-										if (const wchar_t* fakeName = pDisguiseTypeExt->EnemyUIName.Get().Text)
+										if (const auto fakeName = pDisguiseTypeExt->EnemyUIName.Get().Text)
 											name = fakeName;
 										else
 											name = pDisguiseType->UIName;
 
-										if (BSurface* const disguiseCameoPCX = pDisguiseTypeExt->CameoPCX.GetSurface())
+										if (const auto disguiseCameoPCX = pDisguiseTypeExt->CameoPCX.GetSurface())
 										{
 											CameoPCX = disguiseCameoPCX;
 										}
-										else if (SHPStruct* const pDisguiseSHP = pDisguiseType->GetCameo())
+										else if (const auto pDisguiseSHP = pDisguiseType->GetCameo())
 										{
 											pSHP = pDisguiseSHP;
 											pPal = pDisguiseTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL);
@@ -1873,20 +1868,20 @@ void TacticalButtonsClass::SelectedDraw()
 									pPal = FileSystem::CAMEO_PAL;
 								}
 							}
-							else if (TechnoTypeClass* const pFakeType = pTypeExt->FakeOf)
+							else if (const auto pFakeType = pTypeExt->FakeOf)
 							{
-								if (TechnoTypeExt::ExtData* const pFakeTypeExt = TechnoTypeExt::ExtMap.Find(pFakeType))
+								if (const auto pFakeTypeExt = TechnoTypeExt::ExtMap.Find(pFakeType))
 								{
-									if (const wchar_t* fakeName = pFakeTypeExt->EnemyUIName.Get().Text)
+									if (const auto fakeName = pFakeTypeExt->EnemyUIName.Get().Text)
 										name = fakeName;
 									else
 										name = pFakeType->UIName;
 
-									if (BSurface* const FakeCameoPCX = pFakeTypeExt->CameoPCX.GetSurface())
+									if (const auto FakeCameoPCX = pFakeTypeExt->CameoPCX.GetSurface())
 									{
 										CameoPCX = FakeCameoPCX;
 									}
-									else if (SHPStruct* const pFakeSHP = pFakeType->GetCameo())
+									else if (const auto pFakeSHP = pFakeType->GetCameo())
 									{
 										pSHP = pFakeSHP;
 										pPal = pFakeTypeExt->CameoPal.GetOrDefaultConvert(FileSystem::CAMEO_PAL);
@@ -1899,7 +1894,7 @@ void TacticalButtonsClass::SelectedDraw()
 									pPal = FileSystem::CAMEO_PAL;
 								}
 							}
-							else if (const wchar_t* enemyName = pTypeExt->EnemyUIName.Get().Text)
+							else if (const auto enemyName = pTypeExt->EnemyUIName.Get().Text)
 							{
 								name = enemyName;
 							}
@@ -1909,7 +1904,7 @@ void TacticalButtonsClass::SelectedDraw()
 						{
 							size_t length = Math::min(wcslen(name), static_cast<size_t>(31));
 
-							for (const wchar_t* check = name; *check != L'\0'; ++check)
+							for (auto check = name; *check != L'\0'; ++check)
 							{
 								if (*check == L'\n')
 								{
@@ -1934,8 +1929,8 @@ void TacticalButtonsClass::SelectedDraw()
 						{
 							if (pTypeExt->UpperSelectedInfoColor.Get() == ColorStruct{ 0, 0, 0 })
 							{
-								RulesClass* const pRules = RulesClass::Instance;
-								const double ratio = static_cast<double>(value) / maxValue;
+								const auto pRules = RulesClass::Instance.get();
+								const auto ratio = static_cast<double>(value) / maxValue;
 								color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
 							}
 							else
@@ -1975,8 +1970,8 @@ void TacticalButtonsClass::SelectedDraw()
 						{
 							if (pTypeExt->BelowSelectedInfoColor.Get() == ColorStruct{ 0, 0, 0 })
 							{
-								RulesClass* const pRules = RulesClass::Instance;
-								const double ratio = static_cast<double>(value) / maxValue;
+								const auto pRules = RulesClass::Instance.get();
+								const auto ratio = static_cast<double>(value) / maxValue;
 								color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
 							}
 							else
@@ -2013,14 +2008,14 @@ void TacticalButtonsClass::SelectedDraw()
 					}
 					else if (pSHP)
 					{
-						SHPReference* const pCameoRef = pSHP->AsReference();
+						const auto pCameoRef = pSHP->AsReference();
 						char pFilename[0x20];
 						strcpy_s(pFilename, pRulesExt->MissingCameo.data());
 						_strlwr_s(pFilename);
 
 						if (!_stricmp(pCameoRef->Filename, GameStrings::XXICON_SHP))
 						{
-							const AbstractType absType = pTypeExt->FakeOf ? pTypeExt->FakeOf->WhatAmI() : pType->WhatAmI();
+							const auto absType = pTypeExt->FakeOf ? pTypeExt->FakeOf->WhatAmI() : pType->WhatAmI();
 							BSurface* MissingCameoPCX = nullptr;
 
 							if (absType == AbstractType::InfantryType && (MissingCameoPCX = pRulesExt->SelectedInfantryMissingPCX.GetSurface(), MissingCameoPCX))
@@ -2103,7 +2098,7 @@ DEFINE_HOOK(0x6931A5, ScrollClass_WindowsProcedure_PressLeftMouseButton, 0x6)
 {
 	enum { SkipGameCode = 0x6931B4 };
 
-	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
+	const auto pButtons = &TacticalButtonsClass::Instance;
 
 	if (!pButtons->MouseIsOverTactical())
 	{
@@ -2122,7 +2117,7 @@ DEFINE_HOOK(0x693268, ScrollClass_WindowsProcedure_ReleaseLeftMouseButton, 0x5)
 {
 	enum { SkipGameCode = 0x693276 };
 
-	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
+	const auto pButtons = &TacticalButtonsClass::Instance;
 
 	if (pButtons->PressedInButtonsLayer)
 	{
@@ -2141,7 +2136,7 @@ DEFINE_HOOK(0x69330E, ScrollClass_WindowsProcedure_PressRightMouseButton, 0x6)
 {
 	enum { SkipGameCode = 0x69334A };
 
-	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
+	const auto pButtons = &TacticalButtonsClass::Instance;
 
 	if (!pButtons->MouseIsOverTactical())
 	{
@@ -2158,7 +2153,7 @@ DEFINE_HOOK(0x693397, ScrollClass_WindowsProcedure_ReleaseRightMouseButton, 0x6)
 {
 	enum { SkipGameCode = 0x6933CB };
 
-	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
+	const auto pButtons = &TacticalButtonsClass::Instance;
 
 	if (pButtons->PressedInButtonsLayer)
 	{
@@ -2186,8 +2181,8 @@ DEFINE_HOOK(0x69300B, ScrollClass_MouseUpdate_SkipMouseActionUpdate, 0x6)
 {
 	enum { SkipGameCode = 0x69301A };
 
-	const Point2D mousePosition = WWMouseClass::Instance->XY1;
-	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
+	const auto mousePosition = WWMouseClass::Instance->XY1;
+	const auto pButtons = &TacticalButtonsClass::Instance;
 	pButtons->SetMouseButtonIndex(&mousePosition);
 
 	if (pButtons->MouseIsOverTactical())
@@ -2201,14 +2196,12 @@ DEFINE_HOOK(0x69300B, ScrollClass_MouseUpdate_SkipMouseActionUpdate, 0x6)
 // Buttons display hooks
 DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 {
-	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
+	const auto pButtons = &TacticalButtonsClass::Instance;
 
 	// TODO New buttons (The later draw, the higher layer)
 
 	pButtons->SelectedDraw();
-
 	pButtons->HerosDraw();
-
 	pButtons->SWSidebarDraw();
 
 	return 0;
@@ -2264,7 +2257,7 @@ DEFINE_HOOK(0x6AB961, SelectClass_Action_ButtonClick3, 0x7)
 {
 	enum { SkipControlAction = 0x6AB975 };
 
-	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
+	const auto pButtons = &TacticalButtonsClass::Instance;
 
 	if (!pButtons->DummyAction)
 		return 0;
@@ -2280,11 +2273,11 @@ DEFINE_HOOK(0x7015C9, TechnoClass_SetOwningHouse_ChangeHeroOwner, 0x6)
 	GET(TechnoClass* const, pThis, ESI);
 	GET(HouseClass* const, pNewOwner, EBP);
 
-	TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis);
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
 
 	if (pExt->TypeExtData->UniqueTechno)
 	{
-		HouseClass* const pOldOwner = pThis->Owner;
+		const auto pOldOwner = pThis->Owner;
 
 		if (pOldOwner->IsControlledByCurrentPlayer())
 		{
@@ -2339,8 +2332,8 @@ DEFINE_HOOK(0x533E69, UnknownClass_sub_533D20_LoadKeyboardCodeFromINI, 0x6)
 	GET(CommandClass*, pCommand, ESI);
 	GET(int, key, EDI);
 
-	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
-	const char* name = pCommand->GetName();
+	const auto pButtons = &TacticalButtonsClass::Instance;
+	const auto name = pCommand->GetName();
 	char buffer[29];
 
 	for (int i = 1; i <= 10; ++i)
@@ -2359,8 +2352,8 @@ DEFINE_HOOK(0x5FB992, UnknownClass_sub_5FB320_SaveKeyboardCodeToINI, 0x6)
 	GET(CommandClass*, pCommand, ECX);
 	GET(int, key, EAX);
 
-	TacticalButtonsClass* const pButtons = &TacticalButtonsClass::Instance;
-	const char* name = pCommand->GetName();
+	const auto pButtons = &TacticalButtonsClass::Instance;
+	const auto name = pCommand->GetName();
 	char buffer[30];
 
 	for (int i = 1; i <= 10; ++i)

@@ -69,21 +69,21 @@ DEFINE_HOOK(0x6F5EE3, TechnoClass_DrawExtras_DrawAboveHealth, 0x9)
 	GET(TechnoClass*, pThis, EBP);
 	GET_STACK(RectangleStruct*, pBounds, STACK_OFFSET(0x98, 0x8));
 
-	CellClass* const pCell = MapClass::Instance->TryGetCellAt(pThis->GetCenterCoords());
+	const auto pCell = MapClass::Instance->TryGetCellAt(pThis->GetCenterCoords());
 
 	if ((pCell && !pCell->IsFogged() && !pCell->IsShrouded()) || pThis->IsSelected || pThis->IsMouseHovering)
 	{
-		const AbstractType absType = pThis->WhatAmI();
+		const auto absType = pThis->WhatAmI();
 
 		if (absType == AbstractType::Building)
 		{
-			BuildingClass* const pBuilding = static_cast<BuildingClass*>(pThis);
-			const Point2D basePosition = TechnoExt::GetBuildingSelectBracketPosition(pBuilding, BuildingSelectBracketPosition::Top);
+			const auto pBuilding = static_cast<BuildingClass*>(pThis);
+			const auto basePosition = TechnoExt::GetBuildingSelectBracketPosition(pBuilding, BuildingSelectBracketPosition::Top);
 
 			TechnoExt::DrawTemporalProgress(pThis, pBounds, basePosition, true, false);
 			TechnoExt::DrawIronCurtainProgress(pThis, pBounds, basePosition, true, false);
 
-			HouseClass* const pOwner = pThis->Owner;
+			const auto pOwner = pThis->Owner;
 
 			if (pOwner != HouseClass::FindSpecial() && pOwner != HouseClass::FindNeutral() && pOwner != HouseClass::FindCivilianSide())
 			{
@@ -94,7 +94,7 @@ DEFINE_HOOK(0x6F5EE3, TechnoClass_DrawExtras_DrawAboveHealth, 0x9)
 		else
 		{
 			const bool isInfantry = absType == AbstractType::Infantry;
-			const Point2D basePosition = TechnoExt::GetFootSelectBracketPosition(pThis, Anchor(HorizontalPosition::Left, VerticalPosition::Top));
+			const auto basePosition = TechnoExt::GetFootSelectBracketPosition(pThis, Anchor(HorizontalPosition::Left, VerticalPosition::Top));
 
 			TechnoExt::DrawTemporalProgress(pThis, pBounds, basePosition, false, isInfantry);
 			TechnoExt::DrawIronCurtainProgress(pThis, pBounds, basePosition, false, isInfantry);

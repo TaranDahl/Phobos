@@ -614,7 +614,7 @@ void TechnoExt::ExtData::UpdateMindControlAnim()
 
 void TechnoExt::ExtData::UpdateRearmInEMPState()
 {
-	TechnoClass* const pThis = this->OwnerObject();
+	const auto pThis = this->OwnerObject();
 
 	if (pThis->IsUnderEMP() && this->TypeExtData->NoRearmInEMPState.Get(RulesExt::Global()->NoRearmInEMPState))
 	{
@@ -628,7 +628,7 @@ void TechnoExt::ExtData::UpdateRearmInEMPState()
 
 void TechnoExt::ExtData::UpdateRearmInTemporal()
 {
-	TechnoClass* const pThis = this->OwnerObject();
+	const auto pThis = this->OwnerObject();
 
 	if (this->TypeExtData->NoRearmInTemporal.Get(RulesExt::Global()->NoRearmInTemporal))
 	{
@@ -642,16 +642,16 @@ void TechnoExt::ExtData::UpdateRearmInTemporal()
 
 void TechnoExt::ExtData::UpdateRecountBurst()
 {
-	TechnoClass* const pThis = this->OwnerObject();
+	const auto pThis = this->OwnerObject();
 
 	if (pThis->CurrentBurstIndex && !pThis->Target && this->TypeExtData->RecountBurst.Get(RulesExt::Global()->RecountBurst))
 	{
-		WeaponTypeClass* const pWeapon = this->LastWeaponType;
+		const auto pWeapon = this->LastWeaponType;
 
 		if (pWeapon && pWeapon->Burst && pThis->unknown_int_120 + std::max(pWeapon->ROF, 30) <= Unsorted::CurrentFrame)
 		{
-			const double ratio = static_cast<double>(pThis->CurrentBurstIndex) / pWeapon->Burst;
-			const int rof = static_cast<int>(ratio * pWeapon->ROF * this->AE.ROFMultiplier) - std::max(pWeapon->ROF, 30);
+			const auto ratio = static_cast<double>(pThis->CurrentBurstIndex) / pWeapon->Burst;
+			const auto rof = static_cast<int>(ratio * pWeapon->ROF * this->AE.ROFMultiplier) - std::max(pWeapon->ROF, 30);
 
 			if (rof > 0)
 			{
@@ -675,15 +675,15 @@ void TechnoExt::ExtData::StopIdleAction()
 	if (this->UnitIdleActionGapTimer.IsTicking())
 	{
 		this->UnitIdleActionGapTimer.Stop();
-		TechnoTypeExt::ExtData* const pTypeExt = this->TypeExtData;
+		const auto pTypeExt = this->TypeExtData;
 		this->StopRotateWithNewROT(pTypeExt->TurretROT.Get(pTypeExt->OwnerObject()->ROT));
 	}
 }
 
 void TechnoExt::ExtData::ApplyIdleAction()
 {
-	TechnoClass* const pThis = this->OwnerObject();
-	FacingClass* const turret = &pThis->SecondaryFacing;
+	const auto pThis = this->OwnerObject();
+	const auto turret = &pThis->SecondaryFacing;
 
 	if (this->UnitIdleActionTimer.Completed()) // Set first direction
 	{
@@ -691,12 +691,12 @@ void TechnoExt::ExtData::ApplyIdleAction()
 		this->UnitIdleActionGapTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionIntervalMin, RulesExt::Global()->UnitIdleActionIntervalMax));
 		bool noNeedTurnForward = false;
 
-		if (UnitClass* const pUnit = specific_cast<UnitClass*>(pThis))
+		if (const auto pUnit = abstract_cast<UnitClass*>(pThis))
 			noNeedTurnForward = pUnit->BunkerLinkedItem || (pUnit->Type->IsSimpleDeployer && pUnit->Deployed);
 		else if (pThis->WhatAmI() == AbstractType::Building)
 			noNeedTurnForward = true;
 
-		const double extraRadian = ScenarioClass::Instance->Random.RandomDouble() - 0.5;
+		const auto extraRadian = ScenarioClass::Instance->Random.RandomDouble() - 0.5;
 
 		DirStruct unitIdleFacingDirection;
 		unitIdleFacingDirection.SetRadian<32>(pThis->PrimaryFacing.Current().GetRadian<32>() + (noNeedTurnForward ? extraRadian * Math::TwoPi : extraRadian));
@@ -711,12 +711,12 @@ void TechnoExt::ExtData::ApplyIdleAction()
 			this->UnitIdleActionGapTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionIntervalMin, RulesExt::Global()->UnitIdleActionIntervalMax));
 			bool noNeedTurnForward = false;
 
-			if (UnitClass* const pUnit = specific_cast<UnitClass*>(pThis))
+			if (const auto pUnit = abstract_cast<UnitClass*>(pThis))
 				noNeedTurnForward = pUnit->BunkerLinkedItem || (pUnit->Type->IsSimpleDeployer && pUnit->Deployed);
 			else if (pThis->WhatAmI() == AbstractType::Building)
 				noNeedTurnForward = true;
 
-			const double extraRadian = ScenarioClass::Instance->Random.RandomDouble() - 0.5;
+			const auto extraRadian = ScenarioClass::Instance->Random.RandomDouble() - 0.5;
 
 			DirStruct unitIdleFacingDirection;
 			unitIdleFacingDirection.SetRadian<32>(pThis->PrimaryFacing.Current().GetRadian<32>() + (noNeedTurnForward ? extraRadian * Math::TwoPi : extraRadian));
@@ -730,7 +730,7 @@ void TechnoExt::ExtData::ApplyIdleAction()
 		this->UnitIdleActionTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionRestartMin, RulesExt::Global()->UnitIdleActionRestartMax));
 		bool noNeedTurnForward = false;
 
-		if (UnitClass* const pUnit = specific_cast<UnitClass*>(pThis))
+		if (const auto pUnit = abstract_cast<UnitClass*>(pThis))
 			noNeedTurnForward = pUnit->BunkerLinkedItem || (pUnit->Type->IsSimpleDeployer && pUnit->Deployed);
 		else if (pThis->WhatAmI() == AbstractType::Building)
 			noNeedTurnForward = true;
@@ -742,20 +742,20 @@ void TechnoExt::ExtData::ApplyIdleAction()
 
 void TechnoExt::ExtData::ManualIdleAction()
 {
-	TechnoClass* const pThis = this->OwnerObject();
-	FacingClass* const turret = &pThis->SecondaryFacing;
+	const auto pThis = this->OwnerObject();
+	const auto turret = &pThis->SecondaryFacing;
 
 	if (pThis->IsSelected)
 	{
 		this->StopIdleAction();
 		this->UnitIdleIsSelected = true;
-		const CoordStruct mouseCoords = TacticalClass::Instance->ClientToCoords(WWMouseClass::Instance->XY1);
+		const auto mouseCoords = TacticalClass::Instance->ClientToCoords(WWMouseClass::Instance->XY1);
 
 		if (mouseCoords != CoordStruct::Empty) // Mouse in tactical
 		{
-			CoordStruct technoCoords = this->OwnerObject()->GetCoords();
-			const int offset = -static_cast<int>(technoCoords.Z * 1.25);
-			const double nowRadian = Math::atan2(technoCoords.Y + offset - mouseCoords.Y, mouseCoords.X - technoCoords.X - offset) - 0.125;
+			const auto technoCoords = this->OwnerObject()->GetCoords();
+			const auto offset = -static_cast<int>(technoCoords.Z * 1.25);
+			const auto nowRadian = Math::atan2(technoCoords.Y + offset - mouseCoords.Y, mouseCoords.X - technoCoords.X - offset) - 0.125;
 			DirStruct unitIdleFacingDirection;
 			unitIdleFacingDirection.SetRadian<32>(nowRadian);
 			turret->SetDesired(unitIdleFacingDirection);
@@ -770,9 +770,9 @@ void TechnoExt::ExtData::ManualIdleAction()
 
 void TechnoExt::ExtData::StopRotateWithNewROT(int ROT)
 {
-	FacingClass* const turret = &this->OwnerObject()->SecondaryFacing;
+	const auto turret = &this->OwnerObject()->SecondaryFacing;
 
-	const DirStruct currentFacingDirection = turret->Current();
+	const auto currentFacingDirection = turret->Current();
 	turret->DesiredFacing = currentFacingDirection;
 	turret->StartFacing = currentFacingDirection;
 	turret->RotationTimer.Start(0);
