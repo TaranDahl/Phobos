@@ -160,7 +160,12 @@ DEFINE_HOOK(0x736B7E, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0xA)
 		if (!pExt->UnitIdleIsSelected)
 		{
 			const auto pDestination = pThis->Destination;
-
+			// Bugfix: Align jumpjet turret's facing with body's
+			// When jumpjets arrived at their FootClass::Destination, they seems stuck at the Move mission
+			// and therefore the turret facing was set to DirStruct{atan2(0,0)}==DirType::East at 0x736BBB
+			// that's why they will come back to normal when giving stop command explicitly
+			// so the best way is to fix the Mission if necessary, but I don't know how to do it
+			// so I skipped jumpjets check temporarily
 			if (!pDestination || locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor))
 			{
 				// Idle main
