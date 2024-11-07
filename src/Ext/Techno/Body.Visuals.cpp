@@ -5,7 +5,7 @@
 #include <FactoryClass.h>
 #include <SuperClass.h>
 #include <Ext/SWType/Body.h>
-
+#include <Ext/House/Body.h>
 #include <Utilities/EnumFunctions.h>
 
 void TechnoExt::DrawSelfHealPips(TechnoClass* pThis, Point2D* pLocation, RectangleStruct* pBounds)
@@ -722,7 +722,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 	}
 	case DisplayInfoType::Shield:
 	{
-		if (pExt->Shield == nullptr || pExt->Shield->IsBrokenAndNonRespawning())
+		if (!pExt->Shield || pExt->Shield->IsBrokenAndNonRespawning())
 			return;
 
 		value = pExt->Shield->GetHP();
@@ -740,7 +740,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 	}
 	case DisplayInfoType::MindControl:
 	{
-		if (pThis->CaptureManager == nullptr)
+		if (!pThis->CaptureManager)
 			return;
 
 		value = pThis->CaptureManager->ControlNodes.Count;
@@ -749,7 +749,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 	}
 	case DisplayInfoType::Spawns:
 	{
-		if (pThis->SpawnManager == nullptr || pType->Spawns == nullptr || pType->SpawnsNumber <= 0)
+		if (!pThis->SpawnManager || !pType->Spawns || pType->SpawnsNumber <= 0)
 			return;
 
 		value = pThis->SpawnManager->CountAliveSpawns();
@@ -785,8 +785,8 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 		if (pThis->WhatAmI() != AbstractType::Building)
 			return;
 
-		const auto pBuildingType = abstract_cast<BuildingTypeClass*>(pType);
-		const auto pBuilding = abstract_cast<BuildingClass*>(pThis);
+		const auto pBuildingType = static_cast<BuildingTypeClass*>(pType);
+		const auto pBuilding = static_cast<BuildingClass*>(pThis);
 
 		if (!pBuildingType->CanBeOccupied)
 			return;
@@ -834,7 +834,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 			if (pThis->SpawnManager->SpawnedNodes[i]->Status != SpawnNodeStatus::Dead)
 				continue;
 
-			const int thisValue = pThis->SpawnManager->SpawnedNodes[i]->SpawnTimer.GetTimeLeft();
+			const auto thisValue = pThis->SpawnManager->SpawnedNodes[i]->SpawnTimer.GetTimeLeft();
 
 			if (thisValue < value || !value)
 				value = thisValue;
@@ -848,8 +848,8 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 		if (!pType->IsGattling)
 			return;
 
-		const int thisStage = pThis->CurrentGattlingStage;
-		Point2D values = Point2D::Empty;
+		const auto thisStage = pThis->CurrentGattlingStage;
+		auto values = Point2D::Empty;
 
 		if (pThis->Veterancy.IsElite())
 		{
@@ -903,7 +903,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 		if (!pTypeExt || !pTypeExt->AutoDeath_Behavior.isset())
 			return;
 
-		Point2D values = Point2D::Empty;
+		auto values = Point2D::Empty;
 
 		if (pTypeExt->AutoDeath_AfterDelay > 0)
 			values = Point2D{ pExt->AutoDeathTimer.GetTimeLeft(), pExt->AutoDeathTimer.TimeLeft };
@@ -942,7 +942,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 		if (!pThis->IsIronCurtained())
 			return;
 
-		const CDTimerClass* const timer = &pThis->IronCurtainTimer;
+		const auto timer = &pThis->IronCurtainTimer;
 
 		value = timer->GetTimeLeft();
 		maxValue = timer->TimeLeft;
@@ -950,7 +950,7 @@ void TechnoExt::GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType
 	}
 	case DisplayInfoType::TemporalLife:
 	{
-		const TemporalClass* const pTemporal = pThis->TemporalTargetingMe;
+		const auto pTemporal = pThis->TemporalTargetingMe;
 
 		if (!pTemporal)
 			return;
