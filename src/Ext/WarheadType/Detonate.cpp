@@ -185,17 +185,17 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 
 void WarheadTypeExt::ExtData::ApplyBuildingUndeploy(TechnoClass* pTarget)
 {
-	BuildingClass* const pBuilding = abstract_cast<BuildingClass*>(pTarget);
+	const auto pBuilding = abstract_cast<BuildingClass*>(pTarget);
 
 	if (!pBuilding)
 		return;
 
-	BuildingTypeClass* const pType = pBuilding->Type;
+	const auto pType = pBuilding->Type;
 
 	if (!pType->UndeploysInto || (pType->ConstructionYard && !GameModeOptionsClass::Instance->MCVRedeploy))
 		return;
 
-	CellStruct cell = pBuilding->GetMapCoords();
+	auto cell = pBuilding->GetMapCoords();
 
 	if (pType->GetFoundationWidth() > 2 || pType->GetFoundationHeight(false) > 2)
 		cell += CellStruct { 1, 1 };
