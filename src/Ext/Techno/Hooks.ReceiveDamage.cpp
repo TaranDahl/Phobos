@@ -115,8 +115,6 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	}
 
 	//Shield Receive Damage
-	const auto pExt = TechnoExt::ExtMap.Find(pThis);
-
 	int nDamageLeft = *args->Damage;
 
 	if (!args->IgnoreDefenses)
