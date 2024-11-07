@@ -32,9 +32,8 @@ DEFINE_HOOK(0x7369D6, UnitClass_UpdateRotation_StopUnitIdleAction, 0xA)
 
 	TechnoTypeExt::ExtData* pTypeExt = nullptr;
 	const auto pTarget = pThis->Target; // pThis->Target have been checked
-	const auto weaponIndex = pThis->SelectWeapon(pTarget);
 
-	if (const auto pWeaponStruct = pThis->GetWeapon(weaponIndex)) // Vanilla is pThis->GetTurretWeapon()
+	if (const auto pWeaponStruct = pThis->GetWeapon(pThis->SelectWeapon(pTarget))) // Vanilla is pThis->GetTurretWeapon()
 	{
 		if (const auto pWeapon = pWeaponStruct->WeaponType)
 		{
