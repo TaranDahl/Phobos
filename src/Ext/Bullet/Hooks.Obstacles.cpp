@@ -93,7 +93,7 @@ public:
 		if (!subjectToGround)
 			return sourceCoords;
 
-		const int extraHeight = pTechno->GetHeight();
+		const auto extraHeight = pTechno->GetHeight();
 
 		if (extraHeight > Unsorted::CellHeight)
 		{
@@ -101,12 +101,12 @@ public:
 			return sourceCoords;
 		}
 
-		auto const pExt = TechnoExt::ExtMap.Find(pTechno);
+		const auto pExt = TechnoExt::ExtMap.Find(pTechno);
 
 		if (!pExt)
 			return sourceCoords;
 
-		auto const pFoot = abstract_cast<FootClass*>(pTechno);
+		const auto pFoot = abstract_cast<FootClass*>(pTechno);
 		Matrix3D matrixFLH;
 
 		if (pFoot && pFoot->Locomotor)
@@ -119,7 +119,7 @@ public:
 
 		matrixFLH.RotateZ(static_cast<float>(Math::atan2(targetCoords.Y - sourceCoords.Y , targetCoords.X - sourceCoords.X) - pTechno->PrimaryFacing.Current().GetRadian<32>()));
 		matrixFLH.Translate(static_cast<float>(pExt->LastWeaponFLH.X), static_cast<float>(0), static_cast<float>(pExt->LastWeaponFLH.Z));
-		auto const resultFLHCoords = matrixFLH.GetTranslation();
+		const auto resultFLHCoords = matrixFLH.GetTranslation();
 
 		return (sourceCoords + CoordStruct { static_cast<int>(resultFLHCoords.X), 0, static_cast<int>(resultFLHCoords.Z) + extraHeight });
 	}
@@ -202,7 +202,7 @@ DEFINE_HOOK(0x6F737F, TechnoClass_InRange_WeaponMinimumRange, 0x6)
 
 	auto pTechno = InRangeTemp::Techno;
 
-	if (const int keepRange = WeaponTypeExt::GetTechnoKeepRange(pWeapon, pTechno, true))
+	if (const auto keepRange = WeaponTypeExt::GetTechnoKeepRange(pWeapon, pTechno, true))
 		R->ECX(keepRange);
 	else
 		return 0;
@@ -223,8 +223,8 @@ DEFINE_HOOK(0x6F7647, TechnoClass_InRange_Obstacles, 0x5)
 
 	if (!pObstacleCell)
 	{
-		bool subjectToGround = BulletTypeExt::ExtMap.Find(pWeapon->Projectile)->SubjectToGround; //Only make AI search for suitable attack locations.
-		const CoordStruct newSourceCoords = BulletObstacleHelper::AddFLHToSourceCoords(*pSourceCoords, targetCoords, pTechno, pWeapon, subjectToGround);
+		auto subjectToGround = BulletTypeExt::ExtMap.Find(pWeapon->Projectile)->SubjectToGround.Get(); //Only make AI search for suitable attack locations.
+		const auto newSourceCoords = BulletObstacleHelper::AddFLHToSourceCoords(*pSourceCoords, targetCoords, pTechno, pWeapon, subjectToGround);
 		pObstacleCell = BulletObstacleHelper::FindFirstImpenetrableObstacle(newSourceCoords, targetCoords, pTechno, pTarget, pTechno->Owner, pWeapon, true, subjectToGround);
 	}
 

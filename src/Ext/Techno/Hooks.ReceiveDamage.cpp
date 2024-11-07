@@ -23,14 +23,14 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	if (!*args->Damage)
 		return 0;
 
-	auto const pRules = RulesExt::Global();
-	auto const pWHExt = WarheadTypeExt::ExtMap.Find(args->WH);
+	const auto pRules = RulesExt::Global();
+	const auto pWHExt = WarheadTypeExt::ExtMap.Find(args->WH);
 
 	//Calculate Damage Multiplier
 	if (pWHExt && !args->IgnoreDefenses)
 	{
-		auto const pFirerHouse = pThis->Owner;
-		auto const pTargetHouse = args->SourceHouse;
+		const auto pFirerHouse = pThis->Owner;
+		const auto pTargetHouse = args->SourceHouse;
 		double multiplier = 1.0;
 
 		if (!pFirerHouse || !pTargetHouse || !pFirerHouse->IsAlliedWith(pTargetHouse))
@@ -42,13 +42,13 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 
 		if (multiplier != 1.0)
 		{
-			const int sgnDamage = *args->Damage > 0 ? 1 : -1;
-			const int calculateDamage = static_cast<int>(*args->Damage * multiplier);
+			const auto sgnDamage = *args->Damage > 0 ? 1 : -1;
+			const auto calculateDamage = static_cast<int>(*args->Damage * multiplier);
 			*args->Damage = calculateDamage ? calculateDamage : sgnDamage;
 		}
 	}
 
-	auto const pType = pThis->GetTechnoType();
+	const auto pType = pThis->GetTechnoType();
 	const auto pExt = TechnoExt::ExtMap.Find(pThis);
 
 	if (pType && (MapClass::GetTotalDamage(*args->Damage, args->WH, pType->Armor, args->DistanceToEpicenter) > 0))
@@ -58,38 +58,38 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 			if (!pRules->CombatAlert || pWHExt->CombatAlert_Suppress.Get(!pWHExt->Malicious || pWHExt->Nonprovocative))
 				break;
 
-			auto const pHouse = pThis->Owner;
+			const auto pHouse = pThis->Owner;
 
 			if (!pHouse || !pHouse->IsControlledByCurrentPlayer() || !pThis->IsInPlayfield)
 				break;
 
-			auto const pSourceHouse = args->SourceHouse;
+			const auto pSourceHouse = args->SourceHouse;
 
 			if (pRules->CombatAlert_SuppressIfAllyDamage && pHouse->IsAlliedWith(pSourceHouse))
 				break;
 
-			auto const pHouseExt = HouseExt::ExtMap.Find(pHouse);
+			const auto pHouseExt = HouseExt::ExtMap.Find(pHouse);
 
 			if (pHouseExt->CombatAlertTimer.HasTimeLeft())
 				break;
 
-			auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+			const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
 
 			if (!pTypeExt || !pTypeExt->CombatAlert.Get(!pType->Insignificant && !pType->Spawned))
 				break;
 
-			auto const pBuilding = pThis->WhatAmI() == AbstractType::Building ? static_cast<BuildingClass*>(pThis) : nullptr;
+			const auto pBuilding = pThis->WhatAmI() == AbstractType::Building ? static_cast<BuildingClass*>(pThis) : nullptr;
 
 			if (pRules->CombatAlert_IgnoreBuilding && pBuilding && !pTypeExt->CombatAlert_NotBuilding.Get(pBuilding->Type->IsVehicle()))
 				break;
 
-			const CoordStruct coordInMap = pThis->GetCoords();
+			const auto coordInMap = pThis->GetCoords();
 
 			if (pRules->CombatAlert_SuppressIfInScreen)
 			{
 				TacticalClass* const pTactical = TacticalClass::Instance;
-				const Point2D coordInScreen = pTactical->CoordsToScreen(coordInMap) - pTactical->TacticalPos;
-				const RectangleStruct screenArea = DSurface::Composite->GetRect();
+				const auto coordInScreen = pTactical->CoordsToScreen(coordInMap) - pTactical->TacticalPos;
+				const auto screenArea = DSurface::Composite->GetRect();
 
 				if (screenArea.Width >= coordInScreen.X && screenArea.Height >= coordInScreen.Y && coordInScreen.X >= 0 && coordInScreen.Y >= 0) // check if the unit is in screen
 					break;

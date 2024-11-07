@@ -251,7 +251,7 @@ DEFINE_HOOK(0x4A8B9B, DisplayClass_Set_View_Dimensions, 0x6)
 	enum { SkipGameCode = 0x4A8BBD };
 
 	const RectangleStruct* const pRect = &DSurface::ViewBounds;
-	const int sideWidth = pRect->Width / 6;
+	const auto sideWidth = pRect->Width / 6;
 
 	MessageListClass::Instance->Init(pRect->X + sideWidth, (pRect->Height - pRect->Height / 8 - 120),
 		6, 98, 14, -1, -1, 0, 20, 98, pRect->Width - (sideWidth << 1));
@@ -267,7 +267,7 @@ DEFINE_HOOK(0x684A9A, UnknownClass_sub_684620_InitMessageList, 0x6)
 	enum { SkipGameCode = 0x684ACE };
 
 	const RectangleStruct* const pRect = &DSurface::ViewBounds;
-	const int sideWidth = pRect->Width / 6;
+	const auto sideWidth = pRect->Width / 6;
 
 	MessageListClass::Instance->Init(pRect->X + sideWidth, (pRect->Height - pRect->Height / 8 - 120),
 		6, 98, 14, -1, -1, 0, 20, 98, pRect->Width - (sideWidth << 1));
@@ -287,8 +287,8 @@ DEFINE_HOOK(0x623A9F, DSurface_sub_623880_DrawBitFontStrings, 0x5)
 	GET(const int, height, EBP);
 
 	pRect->Height = height;
-	ColorStruct black { 0, 0, 0 };
-	int trans = (TacticalButtonsClass::Instance.OnMessages || ScenarioClass::Instance->UserInputLocked) ? 80 : 40;
+	auto black = ColorStruct { 0, 0, 0 };
+	auto trans = (TacticalButtonsClass::Instance.OnMessages || ScenarioClass::Instance->UserInputLocked) ? 80 : 40;
 	pSurface->FillRectTrans(pRect, &black, trans);
 
 	return SkipGameCode;
