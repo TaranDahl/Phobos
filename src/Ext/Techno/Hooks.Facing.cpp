@@ -1,7 +1,7 @@
 #include "Body.h"
 
-#include <BulletTypeClass.h>
 #include <JumpjetLocomotionClass.h>
+#include <BulletTypeClass.h>
 
 #pragma region UnitsFacing
 
@@ -15,7 +15,7 @@ DEFINE_HOOK(0x7369A5, UnitClass_UpdateRotation_CheckTurnToTarget, 0x6)
 	if (!pThis->unknown_bool_6AF)
 		return ContinueGameCode;
 
-	if (TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis))
+	if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
 	{
 		if (pExt->UnitIdleActionTimer.IsTicking() || pExt->UnitIdleActionGapTimer.IsTicking() || pExt->UnitIdleIsSelected)
 			return ContinueGameCode;
@@ -31,14 +31,13 @@ DEFINE_HOOK(0x7369D6, UnitClass_UpdateRotation_StopUnitIdleAction, 0xA)
 	GET(UnitClass* const, pThis, ESI);
 
 	TechnoTypeExt::ExtData* pTypeExt = nullptr;
-	AbstractClass* const pTarget = pThis->Target; // pThis->Target have been checked
-	const int weaponIndex = pThis->SelectWeapon(pTarget);
+	const auto pTarget = pThis->Target; // pThis->Target have been checked
 
-	if (WeaponStruct* const pWeaponStruct = pThis->GetWeapon(weaponIndex)) // Vanilla is pThis->GetTurretWeapon()
+	if (const auto pWeaponStruct = pThis->GetWeapon(pThis->SelectWeapon(pTarget))) // Vanilla is pThis->GetTurretWeapon()
 	{
-		if (WeaponTypeClass* const pWeapon = pWeaponStruct->WeaponType)
+		if (const auto pWeapon = pWeaponStruct->WeaponType)
 		{
-			if (TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis))
+			if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
 				pExt->StopIdleAction();
 
 			if (!pWeapon->OmniFire)
@@ -49,20 +48,20 @@ DEFINE_HOOK(0x7369D6, UnitClass_UpdateRotation_StopUnitIdleAction, 0xA)
 				}
 				else
 				{
-					const CoordStruct source = pThis->Location;
-					const CoordStruct target = pTarget->GetCoords();
-					double radian = Math::atan2(source.Y - target.Y, target.X - source.X);
+					const auto source = pThis->Location;
+					const auto target = pTarget->GetCoords();
+					const auto radian = Math::atan2(source.Y - target.Y, target.X - source.X);
 					DirStruct tgtDir;
 
 					if (pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type), pTypeExt)
 					{
-						const double rotate = pTypeExt->Turret_SelfRotation_Angle * (Math::Pi / 180.0);
+						const auto rotate = pTypeExt->Turret_SelfRotation_Angle * (Math::Pi / 180.0);
 
 						if (pTypeExt->Turret_SelfRotation_Symmetric)
 						{
-							const DirStruct curDir = pThis->SecondaryFacing.Current();
-							const DirStruct rightDir = DirStruct { radian + rotate };
-							const DirStruct leftDir = DirStruct { radian - rotate };
+							const auto curDir = pThis->SecondaryFacing.Current();
+							const auto rightDir = DirStruct { radian + rotate };
+							const auto leftDir = DirStruct { radian - rotate };
 
 							if (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw)))
 								tgtDir = rightDir;
@@ -81,22 +80,22 @@ DEFINE_HOOK(0x7369D6, UnitClass_UpdateRotation_StopUnitIdleAction, 0xA)
 		}
 	}
 
-	if (!pThis->Destination && weaponIndex != -1 && pThis->IsCloseEnough(pTarget, weaponIndex))
+	if (!pThis->Locomotor->Is_Moving_Now())
 	{
 		if ((pTypeExt || (pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type), pTypeExt)) && pTypeExt->Turret_BodyRotation_Enable)
 		{
-			const double rotate = pTypeExt->Turret_BodyRotation_Angle * (Math::Pi / 180.0);
-			const DirStruct curDir = pThis->PrimaryFacing.Current();
+			const auto rotate = pTypeExt->Turret_BodyRotation_Angle * (Math::Pi / 180.0);
+			const auto curDir = pThis->PrimaryFacing.Current();
 
-			const CoordStruct source = pThis->Location;
-			const CoordStruct target = pTarget->GetCoords();
-			double radian = Math::atan2(source.Y - target.Y, target.X - source.X);
+			const auto source = pThis->Location;
+			const auto target = pTarget->GetCoords();
+			const auto radian = Math::atan2(source.Y - target.Y, target.X - source.X);
 			DirStruct tgtDir;
 
 			if (pTypeExt->Turret_BodyRotation_Symmetric)
 			{
-				const DirStruct rightDir = DirStruct { radian + rotate };
-				const DirStruct leftDir = DirStruct { radian - rotate };
+				const auto rightDir = DirStruct { radian + rotate };
+				const auto leftDir = DirStruct { radian - rotate };
 
 				if (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw)))
 					tgtDir = rightDir;
@@ -125,7 +124,7 @@ DEFINE_HOOK(0x736AFB, UnitClass_UpdateRotation_CheckTurnToForward, 0x6)
 	// Repeatedly judging TurretSpins and IsRotating() is unnecessary
 	pThis->unknown_bool_6AF = true;
 
-	if (TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis))
+	if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
 	{
 		if (pExt->UnitIdleActionTimer.IsTicking() || pExt->UnitIdleActionGapTimer.IsTicking() || pExt->UnitIdleIsSelected)
 			return ContinueGameCode;
@@ -140,9 +139,9 @@ DEFINE_HOOK(0x736B7E, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0xA)
 
 	GET(UnitClass* const, pThis, ESI);
 
-	WeaponStruct* const pWeaponStruct = pThis->GetTurretWeapon();
-	TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis);
-	const Mission currentMission = pThis->CurrentMission;
+	const auto pWeaponStruct = pThis->GetTurretWeapon();
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+	const auto currentMission = pThis->CurrentMission;
 
 	if ((pWeaponStruct && pWeaponStruct->WeaponType && pWeaponStruct->TurretLocked) || (currentMission == Mission::Harmless && pThis->Owner == HouseClass::FindSpecial()))
 	{
@@ -160,13 +159,14 @@ DEFINE_HOOK(0x736B7E, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0xA)
 
 		if (!pExt->UnitIdleIsSelected)
 		{
+			const auto pDestination = pThis->Destination;
 			// Bugfix: Align jumpjet turret's facing with body's
 			// When jumpjets arrived at their FootClass::Destination, they seems stuck at the Move mission
 			// and therefore the turret facing was set to DirStruct{atan2(0,0)}==DirType::East at 0x736BBB
 			// that's why they will come back to normal when giving stop command explicitly
 			// so the best way is to fix the Mission if necessary, but I don't know how to do it
 			// so I skipped jumpjets check temporarily
-			if (!pThis->Destination || locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor))
+			if (!pDestination || locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor))
 			{
 				// Idle main
 				if (pExt && pExt->UnitIdleAction && (currentMission == Mission::Guard || currentMission == Mission::Sticky))
@@ -180,10 +180,10 @@ DEFINE_HOOK(0x736B7E, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0xA)
 				if (pExt)
 					pExt->StopIdleAction();
 
-				const CoordStruct source = pThis->Location;
-				const CoordStruct target = pThis->Destination->GetCoords();
-				const DirStruct tgtDir { Math::atan2(source.Y - target.Y, target.X - source.X) };
-				pThis->SecondaryFacing.SetDesired(pThis->GetTargetDirection(pThis->Destination));
+				const auto source = pThis->Location;
+				const auto target = pDestination->GetCoords();
+				const auto tgtDir = DirStruct { Math::atan2(source.Y - target.Y, target.X - source.X) };
+				pThis->SecondaryFacing.SetDesired(pThis->GetTargetDirection(pDestination));
 			}
 		}
 	}
@@ -219,20 +219,20 @@ DEFINE_HOOK(0x7412BB, UnitClass_GetFireError_CheckFacingDeviation, 0x7)
 	GET(DirStruct, curDir, EDI);
 	GET(DirStruct*, pTargetDir, EAX);
 
-	const CoordStruct source = pThis->Location;
-	const CoordStruct target = pTarget->GetCoords();
-	double radian = Math::atan2(source.Y - target.Y, target.X - source.X);
+	const auto source = pThis->Location;
+	const auto target = pTarget->GetCoords();
+	const auto radian = Math::atan2(source.Y - target.Y, target.X - source.X);
 
 	if (pThis->Type->Turret)
 	{
-		if (TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type))
+		if (const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type))
 		{
-			const double rotate = pTypeExt->Turret_SelfRotation_Angle * (Math::Pi / 180.0);
+			const auto rotate = pTypeExt->Turret_SelfRotation_Angle * (Math::Pi / 180.0);
 
 			if (pTypeExt->Turret_SelfRotation_Symmetric)
 			{
-				const DirStruct rightDir = DirStruct { radian + rotate };
-				const DirStruct leftDir = DirStruct { radian - rotate };
+				const auto rightDir = DirStruct { radian + rotate };
+				const auto leftDir = DirStruct { radian - rotate };
 
 				if (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw)))
 					*pTargetDir = rightDir;
