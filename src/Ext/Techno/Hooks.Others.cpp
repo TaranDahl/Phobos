@@ -17,11 +17,11 @@ DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstNoDelay, 0x5)
 	GET(const int, wpIdx, ESI);
 	GET(AbstractClass* const, pTarget, EAX);
 
-	if (const WeaponTypeClass* const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType)
+	if (const auto pWeapon = pThis->GetWeapon(wpIdx)->WeaponType)
 	{
 		if (pWeapon->Burst > 1)
 		{
-			if (const WeaponTypeExt::ExtData* const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
+			if (const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
 			{
 				if (pWeaponExt->Burst_NoDelay)
 				{
@@ -30,10 +30,10 @@ DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstNoDelay, 0x5)
 						if (!pThis->CurrentBurstIndex)
 							return SkipVanillaFire;
 
-						int rof = pThis->RearmTimer.TimeLeft;
+						auto rof = pThis->RearmTimer.TimeLeft;
 						pThis->RearmTimer.Start(0);
 
-						for (int i = pThis->CurrentBurstIndex; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
+						for (auto i = pThis->CurrentBurstIndex; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
 						{
 							rof = pThis->RearmTimer.TimeLeft;
 							pThis->RearmTimer.Start(0);
@@ -60,11 +60,11 @@ DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 	GET(const int, wpIdx, EDI);
 	GET(AbstractClass* const, pTarget, EAX);
 
-	if (const WeaponTypeClass* const pWeapon = pThis->GetWeapon(wpIdx)->WeaponType)
+	if (const auto pWeapon = pThis->GetWeapon(wpIdx)->WeaponType)
 	{
 		if (pWeapon->Burst > 1)
 		{
-			if (const WeaponTypeExt::ExtData* const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
+			if (const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
 			{
 				if (pWeaponExt->Burst_NoDelay)
 				{
@@ -73,10 +73,10 @@ DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 						if (!pThis->CurrentBurstIndex)
 							return SkipVanillaFire;
 
-						int rof = pThis->RearmTimer.TimeLeft;
+						auto rof = pThis->RearmTimer.TimeLeft;
 						pThis->RearmTimer.Start(0);
 
-						for (int i = pThis->CurrentBurstIndex; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
+						for (auto i = pThis->CurrentBurstIndex; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
 						{
 							rof = pThis->RearmTimer.TimeLeft;
 							pThis->RearmTimer.Start(0);
@@ -123,23 +123,23 @@ DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
 	{
 		GET(HouseClass*, pAI, EBX);
 
-		if (const int count = pAI->ConYards.Count)
+		if (const auto count = pAI->ConYards.Count)
 		{
-			const int wayPoint = pAI->GetSpawnPosition();
+			const auto wayPoint = pAI->GetSpawnPosition();
 
 			if (wayPoint != -1)
 			{
-				const CellStruct center = ScenarioClass::Instance->GetWaypointCoords(wayPoint);
-				CellStruct newCenter = center;
+				const auto center = ScenarioClass::Instance->GetWaypointCoords(wayPoint);
+				auto newCenter = center;
 				double distanceSquared = 131072.0;
 
 				for (int i = 0; i < count; ++i)
 				{
-					if (BuildingClass* const pBuilding = pAI->ConYards.GetItem(i))
+					if (const auto pBuilding = pAI->ConYards.GetItem(i))
 					{
 						if (pBuilding->IsAlive && pBuilding->Health && !pBuilding->InLimbo)
 						{
-							const double newDistanceSquared = pBuilding->GetMapCoords().DistanceFromSquared(center);
+							const auto newDistanceSquared = pBuilding->GetMapCoords().DistanceFromSquared(center);
 
 							if (newDistanceSquared < distanceSquared)
 							{
@@ -213,17 +213,17 @@ DEFINE_HOOK(0x70DE40, BuildingClass_sub_70DE40_GattlingRateDownDelay, 0xA)
 
 	do
 	{
-		int newValue = pThis->GattlingValue;
+		auto newValue = pThis->GattlingValue;
 
-		if (TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis))
+		if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
 		{
-			TechnoTypeExt::ExtData* const pTypeExt = pExt->TypeExtData;
+			const auto pTypeExt = pExt->TypeExtData;
 
 			if (pTypeExt->RateDown_Delay < 0)
 				return Return;
 
 			pExt->AccumulatedGattlingValue++;
-			int remain = pExt->AccumulatedGattlingValue;
+			auto remain = pExt->AccumulatedGattlingValue;
 
 			if (!pExt->ShouldUpdateGattlingValue)
 				remain -= pTypeExt->RateDown_Delay;
@@ -269,7 +269,7 @@ DEFINE_HOOK(0x70DE70, TechnoClass_sub_70DE70_GattlingRateDownReset, 0x5)
 {
 	GET(TechnoClass* const, pThis, ECX);
 
-	if (TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis))
+	if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
 	{
 		pExt->AccumulatedGattlingValue = 0;
 		pExt->ShouldUpdateGattlingValue = false;
@@ -287,17 +287,17 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 
 	do
 	{
-		int newValue = pThis->GattlingValue;
+		auto newValue = pThis->GattlingValue;
 
-		if (TechnoExt::ExtData* const pExt = TechnoExt::ExtMap.Find(pThis))
+		if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
 		{
-			TechnoTypeExt::ExtData* const pTypeExt = pExt->TypeExtData;
+			const auto pTypeExt = pExt->TypeExtData;
 
 			if (pTypeExt->RateDown_Delay < 0)
 				return SkipGameCode;
 
 			pExt->AccumulatedGattlingValue += rateMult;
-			int remain = pExt->AccumulatedGattlingValue;
+			auto remain = pExt->AccumulatedGattlingValue;
 
 			if (!pExt->ShouldUpdateGattlingValue)
 				remain -= pTypeExt->RateDown_Delay;
@@ -309,7 +309,7 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 			pExt->AccumulatedGattlingValue = 0;
 			pExt->ShouldUpdateGattlingValue = true;
 
-			const int rateDown = (pThis->Ammo <= pTypeExt->RateDown_Ammo) ? pTypeExt->RateDown_Cover : pTypeExt->OwnerObject()->RateDown;
+			const auto rateDown = (pThis->Ammo <= pTypeExt->RateDown_Ammo) ? pTypeExt->RateDown_Cover.Get() : pTypeExt->OwnerObject()->RateDown;
 
 			if (!rateDown)
 				break;
@@ -318,7 +318,7 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 		}
 		else
 		{
-			const int rateDown = pThis->GetTechnoType()->RateDown;
+			const auto rateDown = pThis->GetTechnoType()->RateDown;
 
 			if (!rateDown)
 				break;
@@ -346,19 +346,19 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 
 DEFINE_HOOK(0x55B4E1, LogicClass_Update_UnmarkCellOccupationFlags, 0x5)
 {
-	const int delay = RulesExt::Global()->CleanUpAirBarrier;
+	const auto delay = RulesExt::Global()->CleanUpAirBarrier.Get();
 
 	if (delay > 0 && !(Unsorted::CurrentFrame % delay))
 	{
 		MapClass* const pMap = MapClass::Instance;
 		pMap->CellIteratorReset();
 
-		for (CellClass* pCell = pMap->CellIteratorNext(); pCell; pCell = pMap->CellIteratorNext())
+		for (auto pCell = pMap->CellIteratorNext(); pCell; pCell = pMap->CellIteratorNext())
 		{
 			if ((0xFF & pCell->OccupationFlags) && !pCell->FirstObject)
 			{
 				pCell->OccupationFlags &= 0x3F; // ~(Aircraft | Building)
-				const DWORD flagO = pCell->OccupationFlags;
+				const auto flagO = pCell->OccupationFlags;
 				pCell->OccupationFlags = 0;
 
 				for (int i = 0; i < 8; ++i)
@@ -374,7 +374,7 @@ DEFINE_HOOK(0x55B4E1, LogicClass_Update_UnmarkCellOccupationFlags, 0x5)
 			if ((0xFF & pCell->AltOccupationFlags) && !pCell->AltObject)
 			{
 				pCell->AltOccupationFlags &= 0x3F; // ~(Aircraft | Building)
-				const DWORD flagA = pCell->AltOccupationFlags;
+				const auto flagA = pCell->AltOccupationFlags;
 				pCell->AltOccupationFlags = 0;
 
 				for (int i = 0; i < 8; ++i)

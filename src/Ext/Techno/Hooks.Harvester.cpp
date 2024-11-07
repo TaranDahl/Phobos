@@ -15,7 +15,7 @@ void __fastcall ArrivingRefineryNearBy(UnitClass* pThis, BuildingClass* pDock)
 	reinterpret_cast<int(__thiscall*)(BuildingClass*, int, int, bool, int)>(0x451750)(pDock, 7, !pDock->IsGreenHP(), 0, 0); //BuildingClass::PlayAnimByIdx
 	reinterpret_cast<int(__thiscall*)(BuildingClass*, int, int, bool, int)>(0x451750)(pDock, 8, !pDock->IsGreenHP(), 0, 0);
 
-	HouseClass* const pOwner = pDock->GetOwningHouse();
+	const auto pOwner = pDock->GetOwningHouse();
 
 	if (pThis->Type->Weeder)
 	{
@@ -23,12 +23,12 @@ void __fastcall ArrivingRefineryNearBy(UnitClass* pThis, BuildingClass* pDock)
 
 		while (true)
 		{
-			const int idx = reinterpret_cast<int(__fastcall*)(StorageClass*)>(0x6C9820)(&pThis->Tiberium);
+			const auto idx = reinterpret_cast<int(__fastcall*)(StorageClass*)>(0x6C9820)(&pThis->Tiberium);
 
 			if (idx == -1)
 				break;
 
-			float amount = pThis->Tiberium.GetAmount(idx);
+			auto amount = pThis->Tiberium.GetAmount(idx);
 			amount = pThis->Tiberium.RemoveAmount(amount, idx);
 
 			if (amount <= 0.0)
@@ -39,35 +39,33 @@ void __fastcall ArrivingRefineryNearBy(UnitClass* pThis, BuildingClass* pDock)
 		}
 
 		if (playAnim && pDock->Anims[10])
-		{
 			pDock->DestroyNthAnim(BuildingAnimSlot::Special);
-		}
 	}
 	else
 	{
-		int numPurifier = pOwner->NumOrePurifiers;
+		auto numPurifier = pOwner->NumOrePurifiers;
 
 		if (!pOwner->IsHumanPlayer && SessionClass::Instance->GameMode != GameMode::Campaign)
 			numPurifier = RulesClass::Instance->AIVirtualPurifiers.Items[static_cast<int>(pOwner->AIDifficulty)] + numPurifier;
 
-		const float multiplier = numPurifier * RulesClass::Instance->PurifierBonus;
+		const auto multiplier = numPurifier * RulesClass::Instance->PurifierBonus;
 		int money = 0;
 
 		while (true)
 		{
-			const int idx = reinterpret_cast<int(__fastcall*)(StorageClass*)>(0x6C9820)(&pThis->Tiberium);
+			const auto idx = reinterpret_cast<int(__fastcall*)(StorageClass*)>(0x6C9820)(&pThis->Tiberium);
 
 			if (idx == -1)
 				break;
 
-			float amount = pThis->Tiberium.GetAmount(idx);
+			auto amount = pThis->Tiberium.GetAmount(idx);
 			amount = pThis->Tiberium.RemoveAmount(amount, idx);
 
 			if (amount <= 0.0)
 				continue;
 
 			money += static_cast<int>(amount * TiberiumClass::Array->Items[idx]->Value);
-			const float amountFromPurifier = amount * multiplier;
+			const auto amountFromPurifier = amount * multiplier;
 
 			if (amountFromPurifier > 0.0)
 				money += static_cast<int>(amountFromPurifier * TiberiumClass::Array->Items[idx]->Value);
@@ -77,12 +75,11 @@ void __fastcall ArrivingRefineryNearBy(UnitClass* pThis, BuildingClass* pDock)
 		{
 			pOwner->GiveMoney(money);
 
-			if (BuildingTypeExt::ExtData* const pDockTypeExt = BuildingTypeExt::ExtMap.Find(pDock->Type))
+			if (const auto pDockTypeExt = BuildingTypeExt::ExtMap.Find(pDock->Type))
 			{
-				RulesExt::ExtData* const pRulesExt = RulesExt::Global();
+				const auto pRulesExt = RulesExt::Global();
 
-				if ((pRulesExt->DisplayIncome_AllowAI || pDock->Owner->IsControlledByHuman())
-					&& pDockTypeExt->DisplayIncome.Get(pRulesExt->DisplayIncome))
+				if ((pRulesExt->DisplayIncome_AllowAI || pDock->Owner->IsControlledByHuman()) && pDockTypeExt->DisplayIncome.Get(pRulesExt->DisplayIncome))
 				{
 					FlyingStrings::AddMoneyString(
 						money,
@@ -113,19 +110,19 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 
 	GET(UnitClass* const, pThis, EBP);
 
-	UnitTypeClass* const pType = pThis->Type;
-	TechnoTypeExt::ExtData* const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+	const auto pType = pThis->Type;
+	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
 
 	if (!pTypeExt || !pTypeExt->HarvesterQuickUnloader)
 		return 0;
 
 	std::vector<BuildingTypeClass*> docks;
 
-	if (const int dockCount = pType->Dock.Count)
+	if (const auto dockCount = pType->Dock.Count)
 	{
 		docks.reserve(dockCount);
 
-		for (auto const& pBuildingType : pType->Dock)
+		for (const auto& pBuildingType : pType->Dock)
 		{
 			if (pBuildingType)
 				docks.push_back(pBuildingType);
@@ -136,15 +133,15 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 		return SkipGameCode;
 
 	// Check arrived
-	CellClass* const pThisCell = pThis->GetCell();
+	const auto pThisCell = pThis->GetCell();
 
 	for (int i = 0; i < 8; ++i)
 	{
-		if (BuildingClass* const pBuilding = pThisCell->GetNeighbourCell(static_cast<FacingType>(i))->GetBuilding())
+		if (const auto pBuilding = pThisCell->GetNeighbourCell(static_cast<FacingType>(i))->GetBuilding())
 		{
-			BuildingTypeClass* const pCellBuildingType = pBuilding->Type;
+			const auto pCellBuildingType = pBuilding->Type;
 
-			for (auto const& pBuildingType : docks)
+			for (const auto& pBuildingType : docks)
 			{
 				if (pCellBuildingType == pBuildingType)
 				{
@@ -155,23 +152,23 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 		}
 	}
 
-	HouseClass* const pHouse = pThis->Owner;
+	const auto pHouse = pThis->Owner;
 
 	// Check destination
-	if (AbstractClass* const pDestination = pThis->Destination)
+	if (const auto pDestination = pThis->Destination)
 	{
 		if (Unsorted::CurrentFrame - HouseExt::ExtMap.Find(pHouse)->LastRefineryBuildFrame >= pThis->UpdateTimer.TimeLeft)
 		{
-			CellClass* const pDestinationCell = (pDestination->WhatAmI() == AbstractType::Cell) ?
+			const auto pDestinationCell = (pDestination->WhatAmI() == AbstractType::Cell) ?
 				static_cast<CellClass*>(pDestination) : MapClass::Instance->GetCellAt(pDestination->GetCoords());
 
 			for (int i = 0; i < 8; ++i)
 			{
-				if (BuildingClass* const pBuilding = pDestinationCell->GetNeighbourCell(static_cast<FacingType>(i))->GetBuilding())
+				if (const auto pBuilding = pDestinationCell->GetNeighbourCell(static_cast<FacingType>(i))->GetBuilding())
 				{
-					BuildingTypeClass* const pCellBuildingType = pBuilding->Type;
+					const auto pCellBuildingType = pBuilding->Type;
 
-					for (auto const& pBuildingType : docks)
+					for (const auto& pBuildingType : docks)
 					{
 						if (pCellBuildingType == pBuildingType)
 							return SkipGameCode;
@@ -182,34 +179,34 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	}
 
 	// Find nearest dock
-	const CoordStruct thisLocation = pThis->GetCoords();
-	const Point2D thisPosition { (thisLocation.X >> 4), (thisLocation.Y >> 4) };
+	const auto thisLocation = pThis->GetCoords();
+	const auto thisPosition = Point2D { (thisLocation.X >> 4), (thisLocation.Y >> 4) };
 
-	MovementZone move = pType->MovementZone;
+	auto move = pType->MovementZone;
 
 	if (pType->Teleporter && (move == MovementZone::AmphibiousCrusher || move == MovementZone::AmphibiousDestroyer))
 		move = MovementZone::Amphibious;
 
-	const CoordStruct destLocation = pThis->GetDestination();
-	CellStruct destCell { static_cast<short>(destLocation.X >> 8), static_cast<short>(destLocation.Y >> 8) };
+	const auto destLocation = pThis->GetDestination();
+	auto destCell = CellStruct { static_cast<short>(destLocation.X >> 8), static_cast<short>(destLocation.Y >> 8) };
 
 	int distanceSquared = INT_MAX;
 	BuildingClass* pDock = nullptr;
 
-	for (auto const& pBuildingType : docks)
+	for (const auto& pBuildingType : docks)
 	{
-		for (auto const& pBuilding : pHouse->Buildings)
+		for (const auto& pBuilding : pHouse->Buildings)
 		{
 			if (pBuilding && pBuilding->Type == pBuildingType && !pBuilding->InLimbo) // Prevent check radio links
 			{
-				const CoordStruct dockLocation = pBuilding->GetCoords();
-				CellStruct dockCell { static_cast<short>(dockLocation.X >> 8), static_cast<short>(dockLocation.Y >> 8) };
+				const auto dockLocation = pBuilding->GetCoords();
+				auto dockCell = CellStruct { static_cast<short>(dockLocation.X >> 8), static_cast<short>(dockLocation.Y >> 8) };
 
 				if (reinterpret_cast<bool(__thiscall*)(DisplayClass*, CellStruct*, CellStruct*, MovementZone, bool, bool, bool)>(0x56D100)
 					(DisplayClass::Instance, &destCell, &dockCell, move, pThis->IsOnBridge(), false ,false)) // Prevent send command
 				{
-					const Point2D difference { (thisPosition.X - (dockLocation.X >> 4)), (thisPosition.Y - (dockLocation.Y >> 4)) };
-					const int newDistanceSquared = (difference.X * difference.X) + (difference.Y * difference.Y);
+					const auto difference = Point2D { (thisPosition.X - (dockLocation.X >> 4)), (thisPosition.Y - (dockLocation.Y >> 4)) };
+					const auto newDistanceSquared = (difference.X * difference.X) + (difference.Y * difference.Y);
 
 					if (newDistanceSquared < distanceSquared) // No check for primary building
 					{
@@ -228,7 +225,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	}
 
 	// Find a final destination
-	const CoordStruct dockLocation = pDock->GetCoords();
+	const auto dockLocation = pDock->GetCoords();
 	destCell = CellClass::Coord2Cell(dockLocation);
 
 	if (thisLocation.X < dockLocation.X && !(pDock->Type->GetFoundationWidth() & 1))
@@ -237,7 +234,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	if (thisLocation.Y < dockLocation.Y && !(pDock->Type->GetFoundationHeight(false) & 1))
 		destCell.Y--;
 
-	CellStruct closeTo = CellStruct::Empty;
+	auto closeTo = CellStruct::Empty;
 
 	if (distanceSquared > 6400)
 		closeTo = CellClass::Coord2Cell(thisLocation);
@@ -250,7 +247,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 		return SkipGameCode;
 	}
 
-	CellClass* const pDestCell = MapClass::Instance->TryGetCellAt(destCell);
+	const auto pDestCell = MapClass::Instance->TryGetCellAt(destCell);
 
 	if (!pDestCell || !pType->Teleporter)
 	{
@@ -259,16 +256,16 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	}
 
 	// Teleporters
-	if (FootClass* const ParasiteEatingMe = pThis->ParasiteEatingMe)
+	if (const auto ParasiteEatingMe = pThis->ParasiteEatingMe)
 		ParasiteEatingMe->ParasiteImUsing->ExitUnit();
 
 	pThis->Mark(MarkType::Up);
-	int sound = pType->ChronoOutSound;
+	auto sound = pType->ChronoOutSound;
 
 	if (sound != -1 || (sound = RulesClass::Instance->ChronoOutSound, sound != -1))
 		VocClass::PlayAt(sound, thisLocation, 0);
 
-	if (AnimTypeClass* const pWarpIn = pTypeExt->WarpIn.Get(RulesClass::Instance->WarpIn))
+	if (const auto pWarpIn = pTypeExt->WarpIn.Get(RulesClass::Instance->WarpIn))
 		GameCreate<AnimClass>(pWarpIn, pThis->Location, 0, 1)->Owner = pHouse;
 
 	pThis->SetLocation(pDestCell->GetCoords());
@@ -284,7 +281,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	if ((sound = pType->ChronoInSound, sound != -1) || (sound = RulesClass::Instance->ChronoInSound, sound != -1))
 		VocClass::PlayAt(sound, pThis->Location, 0);
 
-	if (AnimTypeClass* const pWarpOut = pTypeExt->WarpOut.Get(RulesClass::Instance->WarpOut))
+	if (const auto pWarpOut = pTypeExt->WarpOut.Get(RulesClass::Instance->WarpOut))
 		GameCreate<AnimClass>(pWarpOut, pThis->Location, 0, 1)->Owner = pHouse;
 
 	return SkipGameCode;
@@ -296,7 +293,7 @@ DEFINE_HOOK(0x441226, BuildingClass_Unlimbo_RecheckRefinery, 0x6)
 
 	if (pThis->Type->Refinery)
 	{
-		if (HouseExt::ExtData* const pHouseExt = HouseExt::ExtMap.Find(pThis->Owner))
+		if (const auto pHouseExt = HouseExt::ExtMap.Find(pThis->Owner))
 			pHouseExt->LastRefineryBuildFrame = Unsorted::CurrentFrame;
 	}
 

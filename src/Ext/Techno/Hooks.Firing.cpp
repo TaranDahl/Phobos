@@ -276,7 +276,7 @@ DEFINE_HOOK(0x6FC339, TechnoClass_CanFire, 0x6)
 
 		if (pWeaponExt->NoRepeatFire > 0)
 		{
-			if (auto const pTargetTechnoExt = TechnoExt::ExtMap.Find(pTechno))
+			if (const auto pTargetTechnoExt = TechnoExt::ExtMap.Find(pTechno))
 			{
 				if ((Unsorted::CurrentFrame - pTargetTechnoExt->LastBeLockedFrame) < pWeaponExt->NoRepeatFire)
 					return CannotFire;
@@ -461,7 +461,7 @@ DEFINE_HOOK(0x6FDDC0, TechnoClass_FireAt_DiscardAEOnFire, 0x6)
 	GET(AbstractClass* const, pTarget, EDI);
 	GET(WeaponTypeClass* const, pWeapon, EBX);
 
-	auto const pExt = TechnoExt::ExtMap.Find(pThis);
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
 
 	if (pExt->AE.HasOnFireDiscardables)
 	{
@@ -472,11 +472,11 @@ DEFINE_HOOK(0x6FDDC0, TechnoClass_FireAt_DiscardAEOnFire, 0x6)
 		}
 	}
 
-	if (auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
+	if (const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
 	{
 		if (pWeaponExt->NoRepeatFire > 0)
 		{
-			if (auto const pTargetTechnoExt = TechnoExt::ExtMap.Find(abstract_cast<TechnoClass*>(pTarget)))
+			if (const auto pTargetTechnoExt = TechnoExt::ExtMap.Find(abstract_cast<TechnoClass*>(pTarget)))
 				pTargetTechnoExt->LastBeLockedFrame = Unsorted::CurrentFrame;
 		}
 	}
