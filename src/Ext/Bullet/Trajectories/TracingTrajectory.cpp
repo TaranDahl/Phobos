@@ -57,16 +57,16 @@ bool TracingTrajectory::Save(PhobosStreamWriter& Stm) const
 
 void TracingTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, BulletVelocity* pVelocity)
 {
-	const TracingTrajectoryType* const pType = this->Type;
+	const auto pType = this->Type;
 	this->InitializeDuration(pBullet, pType->TheDuration);
 }
 
 bool TracingTrajectory::OnAI(BulletClass* pBullet)
 {
-	if (auto const pTechno = pBullet->Owner)
+	if (const auto pTechno = pBullet->Owner)
 		pBullet->Target = pTechno->Target;
 
-	if (auto const pTarget = pBullet->Target)
+	if (const auto pTarget = pBullet->Target)
 		pBullet->TargetCoords = pTarget->GetCoords();
 
 	this->ChangeVelocity(pBullet);
@@ -101,7 +101,7 @@ void TracingTrajectory::InitializeDuration(BulletClass* pBullet, int duration)
 {
 	if (duration <= 0)
 	{
-		if (const WeaponTypeClass* const pWeapon = pBullet->WeaponType)
+		if (const auto pWeapon = pBullet->WeaponType)
 			duration = (pWeapon->ROF > 10) ? pWeapon->ROF - 10 : 1;
 		else
 			duration = 120;
@@ -112,9 +112,9 @@ void TracingTrajectory::InitializeDuration(BulletClass* pBullet, int duration)
 
 void TracingTrajectory::ChangeVelocity(BulletClass* pBullet)
 {
-	const TracingTrajectoryType* const pType = this->Type;
-	const CoordStruct distanceCoords = pBullet->TargetCoords - pBullet->Location;
-	const double distance = distanceCoords.Magnitude();
+	const auto pType = this->Type;
+	const auto distanceCoords = pBullet->TargetCoords - pBullet->Location;
+	const auto distance = distanceCoords.Magnitude();
 
 	pBullet->Velocity.X = static_cast<double>(distanceCoords.X);
 	pBullet->Velocity.Y = static_cast<double>(distanceCoords.Y);
