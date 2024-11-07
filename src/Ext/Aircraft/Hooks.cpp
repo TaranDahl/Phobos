@@ -357,7 +357,7 @@ DEFINE_HOOK(0x41A96C, AircraftClass_Mission_AreaGuard, 0x6)
 
 	if (!pThis->Team && pThis->Ammo && pThis->IsArmed())
 	{
-		CoordStruct coords = pThis->GetCoords();
+		auto coords = pThis->GetCoords();
 
 		if (pThis->TargetAndEstimateDamage(coords, ThreatType::Normal))
 		{
@@ -433,7 +433,7 @@ DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 
 	if (!pThis->Ammo && !SessionClass::IsCampaign())
 	{
-		if (TeamClass* const pTeam = pThis->Team)
+		if (const auto pTeam = pThis->Team)
 			pTeam->LiberateMember(pThis);
 
 		return ClearTarget;
@@ -462,10 +462,10 @@ DEFINE_HOOK(0x4C762A, EventClass_RespondToEvent_StopAircraftAction, 0x6)
 // GreatestThreat: for all the mission that should let the aircraft auto select a target
 AbstractClass* __fastcall AircraftClass_GreatestThreat(AircraftClass* pThis, void* _, ThreatType threatType, CoordStruct* pSelectCoords, bool onlyTargetHouseEnemy)
 {
-	if (WeaponTypeClass* const pPrimaryWeapon = pThis->GetWeapon(0)->WeaponType)
+	if (const auto pPrimaryWeapon = pThis->GetWeapon(0)->WeaponType)
 		threatType |= pPrimaryWeapon->AllowedThreats();
 
-	if (WeaponTypeClass* const pSecondaryWeapon = pThis->GetWeapon(1)->WeaponType)
+	if (const auto pSecondaryWeapon = pThis->GetWeapon(1)->WeaponType)
 		threatType |= pSecondaryWeapon->AllowedThreats();
 
 	return reinterpret_cast<AbstractClass*(__thiscall*)(TechnoClass*, ThreatType, CoordStruct*, bool)>(0x4D9920)(pThis, threatType, pSelectCoords, onlyTargetHouseEnemy); // FootClass_GreatestThreat (Prevent circular calls)
