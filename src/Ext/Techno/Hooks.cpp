@@ -702,10 +702,15 @@ DEFINE_HOOK(0x455DA0, BuildingClass_IsUnitFactory_JustHasRallyPoint, 0x6)
 // Handle the rally of infantry.
 DEFINE_HOOK(0x444CA3, BuildingClass_KickOutUnit_RallyPointAreaGuard1, 0x6)
 {
-	enum { SkipQueueMove = 0x444D11, NotSkip = 0 };
+	enum { SkipQueueMove = 0x444D11 };
 
 	GET(BuildingClass*, pThis, ESI);
 	GET(FootClass*, pProduct, EDI);
+
+	if (!pThis->Owner->IsControlledByHuman() || !pProduct->Owner->IsControlledByHuman())
+	{
+		return 0;
+	}
 
 	if (RulesExt::Global()->RallyPointAreaGuard)
 	{
@@ -714,7 +719,7 @@ DEFINE_HOOK(0x444CA3, BuildingClass_KickOutUnit_RallyPointAreaGuard1, 0x6)
 		return SkipQueueMove;
 	}
 
-	return NotSkip;
+	return 0;
 }
 
 // Vehicle but without BuildingClass::Unload calling, e.g. the building has WeaponsFactory = no set.
@@ -726,6 +731,11 @@ DEFINE_HOOK(0x4448CE, BuildingClass_KickOutUnit_RallyPointAreaGuard2, 0x6)
 
 	GET(FootClass*, pProduct, EDI);
 	GET(BuildingClass*, pThis, ESI);
+
+	if (!pThis->Owner->IsControlledByHuman() || !pProduct->Owner->IsControlledByHuman())
+	{
+		return 0;
+	}
 
 	auto const pFocus = pThis->Focus;
 	auto const pUnit = abstract_cast<UnitClass*>(pProduct);
@@ -790,10 +800,15 @@ DEFINE_HOOK(0x4448B0, BuildingClass_KickOutUnit_ExitCoords, 0x6)
 // Ships.
 DEFINE_HOOK(0x444424, BuildingClass_KickOutUnit_RallyPointAreaGuard3, 0x5)
 {
-	enum { SkipQueueMove = 0x44443F, NotSkip = 0 };
+	enum { SkipQueueMove = 0x44443F };
 
 	GET(FootClass*, pProduct, EDI);
 	GET(AbstractClass*, pFocus, ESI);
+
+	if (!pProduct->Owner->IsControlledByHuman())
+	{
+		return 0;
+	}
 
 	auto const pUnit = abstract_cast<UnitClass*>(pProduct);
 	bool isHarvester = pUnit ? pUnit->Type->Harvester : false;
@@ -805,7 +820,7 @@ DEFINE_HOOK(0x444424, BuildingClass_KickOutUnit_RallyPointAreaGuard3, 0x5)
 		return SkipQueueMove;
 	}
 
-	return NotSkip;
+	return 0;
 }
 
 // For common aircrafts.
@@ -816,6 +831,11 @@ DEFINE_HOOK(0x444061, BuildingClass_KickOutUnit_RallyPointAreaGuard4, 0x6)
 
 	GET(FootClass*, pProduct, EBP);
 	GET(AbstractClass*, pFocus, ESI);
+
+	if (!pProduct->Owner->IsControlledByHuman())
+	{
+		return 0;
+	}
 
 	if (RulesExt::Global()->RallyPointAreaGuard)
 	{
@@ -831,10 +851,15 @@ DEFINE_HOOK(0x444061, BuildingClass_KickOutUnit_RallyPointAreaGuard4, 0x6)
 // Still some other bug in it.
 DEFINE_HOOK(0x443EB8, BuildingClass_KickOutUnit_RallyPointAreaGuard5, 0x5)
 {
-	enum { SkipQueueMove = 0x443ED3, NotSkip = 0 };
+	enum { SkipQueueMove = 0x443ED3 };
 
 	GET(FootClass*, pProduct, EBP);
 	GET(AbstractClass*, pFocus, EAX);
+
+	if (!pProduct->Owner->IsControlledByHuman())
+	{
+		return 0;
+	}
 
 	if (RulesExt::Global()->RallyPointAreaGuard)
 	{
@@ -843,16 +868,21 @@ DEFINE_HOOK(0x443EB8, BuildingClass_KickOutUnit_RallyPointAreaGuard5, 0x5)
 		return SkipQueueMove;
 	}
 
-	return NotSkip;
+	return 0;
 }
 
 // For unloaded units.
 DEFINE_HOOK(0x73AAB3, UnitClass_UpdateMoving_RallyPointAreaGuard, 0x5)
 {
-	enum { SkipQueueMove = 0x73AAC1, NotSkip = 0 };
+	enum { SkipQueueMove = 0x73AAC1 };
 
 	GET(UnitClass*, pThis, EBP);
 	GET(AbstractClass*, pFocus, EAX);
+
+	if (!pThis->Owner->IsControlledByHuman())
+	{
+		return 0;
+	}
 
 	bool isHarvester = pThis->Type->Harvester;
 
@@ -863,5 +893,5 @@ DEFINE_HOOK(0x73AAB3, UnitClass_UpdateMoving_RallyPointAreaGuard, 0x5)
 		return SkipQueueMove;
 	}
 
-	return NotSkip;
+	return 0;
 }
