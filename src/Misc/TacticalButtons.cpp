@@ -219,7 +219,7 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 
 	// TODO New buttons
 
-	if (Phobos::Config::UniqueDisplay_Enable) // Button index 61-68 : Heros buttons
+	if (this->HeroVisible) // Button index 61-68 : Heros buttons
 	{
 		auto& vec = ScenarioExt::Global()->OwnedHeros;
 
@@ -930,7 +930,7 @@ inline bool TacticalButtonsClass::IndexInHerosButtons()
 
 void TacticalButtonsClass::HerosDraw()
 {
-	if (!Phobos::Config::UniqueDisplay_Enable || HouseClass::CurrentPlayer->IsObserver())
+	if (!this->HeroVisible || HouseClass::CurrentPlayer->IsObserver())
 		return;
 
 	auto& vec = ScenarioExt::Global()->OwnedHeros;
@@ -1269,7 +1269,7 @@ void TacticalButtonsClass::HerosDraw()
 
 void TacticalButtonsClass::HeroSelect(int buttonIndex)
 {
-	if (ScenarioClass::Instance->UserInputLocked || !Phobos::Config::UniqueDisplay_Enable)
+	if (ScenarioClass::Instance->UserInputLocked || !this->HeroVisible)
 		return;
 
 	auto& vec = ScenarioExt::Global()->OwnedHeros;
@@ -1301,6 +1301,21 @@ void TacticalButtonsClass::HeroSelect(int buttonIndex)
 			}
 		}
 	}
+}
+
+void TacticalButtonsClass::HeroSwitch()
+{
+	this->HeroVisible = !this->HeroVisible;
+
+	MessageListClass::Instance->PrintMessage
+	(
+		(this->HeroVisible ?
+			GeneralUtils::LoadStringUnlessMissing("TXT_HEROS_VISIBLE", L"Set heros info visible.") :
+			GeneralUtils::LoadStringUnlessMissing("TXT_HEROS_INVISIBLE", L"Set heros info invisible.")),
+		RulesClass::Instance->MessageDelay,
+		HouseClass::CurrentPlayer->ColorSchemeIndex,
+		true
+	);
 }
 
 // Button index 71-100 : Select buttons
