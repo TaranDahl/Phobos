@@ -124,6 +124,9 @@ void WeaponTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoRepeatFire.Read(exINI, pSection, "NoRepeatFire");
 	this->UnlimboDetonate.Read(exINI, pSection, "UnlimboDetonate");
 	this->UnlimboDetonate_Force.Read(exINI, pSection, "UnlimboDetonate.Force");
+	this->ResetGattlingValue.Read(exINI, pSection, "ResetGattlingValue");
+	this->AddtionalDamage_GattlingValue.Read(exINI, pSection, "AddtionalDamage.GattlingValue");
+	this->AddtionalDamage_GattlingValue_Mult.Read(exINI, pSection, "AddtionalDamage.GattlingValue.Mult");
 	this->KickOutPassengers.Read(exINI, pSection, "KickOutPassengers");
 }
 
@@ -178,6 +181,9 @@ void WeaponTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->NoRepeatFire)
 		.Process(this->UnlimboDetonate)
 		.Process(this->UnlimboDetonate_Force)
+		.Process(this->ResetGattlingValue)
+		.Process(this->AddtionalDamage_GattlingValue)
+		.Process(this->AddtionalDamage_GattlingValue_Mult)
 		.Process(this->KickOutPassengers)
 		;
 };

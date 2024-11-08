@@ -474,6 +474,38 @@ DEFINE_HOOK(0x6FC749, TechnoClass_GetFireError_AntiUnderground, 0x5)
 #pragma endregion
 
 #pragma region TechnoClass_Fire
+
+DEFINE_HOOK(0x6FE312, TechnoClass_FireAt_InitialDamage, 0x6)
+{
+	GET(TechnoClass* const, pThis, ESI);
+	GET(WeaponTypeClass* const, pWeapon, EBX);
+	GET(int, damage, EDI);
+
+	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
+
+	if (pWeaponExt && pWeaponExt->AddtionalDamage_GattlingValue)
+		damage += pThis->GattlingValue * pWeaponExt->AddtionalDamage_GattlingValue_Mult;
+
+	R->EDI(damage);
+	return 0;
+}
+
+DEFINE_HOOK(0x6FF8F1, TechnoClass_FireAt_AfterFire, 0x6)
+{
+	GET(TechnoClass* const, pThis, ESI);
+	GET(WeaponTypeClass* const, pWeapon, EBX);
+
+	if (pThis->GetTechnoType()->IsGattling)
+	{
+		auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
+
+		if (pWeaponExt && pWeaponExt->ResetGattlingValue)
+			reinterpret_cast<void(__thiscall*)(TechnoClass*, int)>(0x70E000)(pThis, 0); // TechnoClass::UpdateGattlingValueDecrease
+	}
+
+	return 0;
+}
+
 DEFINE_HOOK(0x6FDD7D, TechnoClass_FireAt_UpdateWeaponType, 0x5)
 {
 	enum { CanNotFire = 0x6FDE03 };

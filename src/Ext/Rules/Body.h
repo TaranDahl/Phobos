@@ -241,7 +241,6 @@ public:
 		Valueable<bool> RallyPointOnTechno;
 		Valueable<bool> RallyPointForceMove;
 		Valueable<bool> RallyPointAreaGuard;
-		Valueable<bool> EnableEnhancedExitCoords;
 		Valueable<bool> PlayerDestroyWalls;
 		Valueable<bool> DestroyOwnerlessWalls;
 		Valueable<bool> AIAngerOnAlly;
@@ -467,7 +466,6 @@ public:
 			, RallyPointOnTechno { false }
 			, RallyPointForceMove { false }
 			, RallyPointAreaGuard { false }
-			, EnableEnhancedExitCoords { false }
 			, PlayerDestroyWalls { false }
 			, DestroyOwnerlessWalls { false }
 			, AIAngerOnAlly { true }

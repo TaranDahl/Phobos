@@ -40,7 +40,6 @@ DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstNoDelay, 0x5)
 						}
 
 						pThis->RearmTimer.Start(rof);
-						pThis->ChargeTurretDelay = rof;
 					}
 
 					return SkipVanillaFire;
@@ -83,7 +82,6 @@ DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 						}
 
 						pThis->RearmTimer.Start(rof);
-						pThis->ChargeTurretDelay = rof;
 					}
 
 					return SkipVanillaFire;
@@ -251,7 +249,7 @@ DEFINE_HOOK(0x70DE40, BuildingClass_sub_70DE40_GattlingRateDownDelay, 0xA)
 			if (pTypeExt->RateDown_Delay < 0)
 				return Return;
 
-			pExt->AccumulatedGattlingValue++;
+			++pExt->AccumulatedGattlingValue;
 			auto remain = pExt->AccumulatedGattlingValue;
 
 			if (!pExt->ShouldUpdateGattlingValue)
@@ -331,12 +329,15 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 			if (!pExt->ShouldUpdateGattlingValue)
 				remain -= pTypeExt->RateDown_Delay;
 
-			if (remain <= 0)
+			if (remain <= 0 && rateMult)
 				return SkipGameCode;
 
 			// Time's up
 			pExt->AccumulatedGattlingValue = 0;
 			pExt->ShouldUpdateGattlingValue = true;
+
+			if (!rateMult)
+				break;
 
 			const auto rateDown = (pThis->Ammo <= pTypeExt->RateDown_Ammo) ? pTypeExt->RateDown_Cover.Get() : pTypeExt->OwnerObject()->RateDown;
 
@@ -347,6 +348,9 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 		}
 		else
 		{
+			if (!rateMult)
+				break;
+
 			const auto rateDown = pThis->GetTechnoType()->RateDown;
 
 			if (!rateDown)
@@ -1067,9 +1071,13 @@ DEFINE_HOOK(0x444CA3, BuildingClass_KickOutUnit_RallyPointAreaGuard1, 0x6)
 	GET(BuildingClass*, pThis, ESI);
 	GET(FootClass*, pProduct, EDI);
 
+	if (!pThis->Owner->IsControlledByHuman() || !pProduct->Owner->IsControlledByHuman())
+		return 0;
+
 	if (RulesExt::Global()->RallyPointAreaGuard)
 	{
 		pProduct->SetArchiveTarget(pThis->ArchiveTarget);
+		pProduct->SetDestination(pThis->ArchiveTarget, true);
 		pProduct->QueueMission(Mission::Area_Guard, true);
 		return SkipQueueMove;
 	}
@@ -1088,6 +1096,9 @@ DEFINE_HOOK(0x4448CE, BuildingClass_KickOutUnit_RallyPointAreaGuard2, 0x6)
 	GET(FootClass*, pProduct, EDI);
 	GET(BuildingClass*, pThis, ESI);
 
+	if (!pThis->Owner->IsControlledByHuman() || !pProduct->Owner->IsControlledByHuman())
+		return 0;
+
 	auto const pFocus = pThis->ArchiveTarget;
 	auto const pUnit = abstract_cast<UnitClass*>(pProduct);
 	bool isHarvester = pUnit ? pUnit->Type->Harvester : false;
@@ -1100,6 +1111,7 @@ DEFINE_HOOK(0x4448CE, BuildingClass_KickOutUnit_RallyPointAreaGuard2, 0x6)
 	else if (RulesExt::Global()->RallyPointAreaGuard)
 	{
 		pProduct->SetArchiveTarget(pFocus);
+		pProduct->SetDestination(pFocus, true);
 		pProduct->QueueMission(Mission::Area_Guard, true);
 	}
 	else
@@ -1118,9 +1130,6 @@ DEFINE_HOOK(0x4448CE, BuildingClass_KickOutUnit_RallyPointAreaGuard2, 0x6)
 // Also enhanced the ExitCoord.
 DEFINE_HOOK(0x4448B0, BuildingClass_KickOutUnit_ExitCoords, 0x6)
 {
-	if (!RulesExt::Global()->EnableEnhancedExitCoords)
-		return 0;
-
 	GET(FootClass*, pProduct, EDI);
 	GET(BuildingClass*, pThis, ESI);
 	GET(CoordStruct*, pCrd, ECX);
@@ -1159,12 +1168,16 @@ DEFINE_HOOK(0x444424, BuildingClass_KickOutUnit_RallyPointAreaGuard3, 0x5)
 	GET(FootClass*, pProduct, EDI);
 	GET(AbstractClass*, pFocus, ESI);
 
+	if (!pProduct->Owner->IsControlledByHuman())
+		return 0;
+
 	auto const pUnit = abstract_cast<UnitClass*>(pProduct);
-	bool isHarvester = pUnit ? pUnit->Type->Harvester : false;
+	const bool isHarvester = pUnit ? pUnit->Type->Harvester : false;
 
 	if (RulesExt::Global()->RallyPointAreaGuard && !isHarvester)
 	{
 		pProduct->SetArchiveTarget(pFocus);
+		pProduct->SetDestination(pFocus, true);
 		pProduct->QueueMission(Mission::Area_Guard, true);
 		return SkipQueueMove;
 	}
@@ -1181,9 +1194,18 @@ DEFINE_HOOK(0x444061, BuildingClass_KickOutUnit_RallyPointAreaGuard4, 0x6)
 	GET(FootClass*, pProduct, EBP);
 	GET(AbstractClass*, pFocus, ESI);
 
+	if (!pProduct->Owner->IsControlledByHuman())
+		return 0;
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pProduct->GetTechnoType());
+
+	if (pTypeExt && pTypeExt->IgnoreRallyPoint)
+		return SkipQueueMove;
+
 	if (RulesExt::Global()->RallyPointAreaGuard)
 	{
 		pProduct->SetArchiveTarget(pFocus);
+		pProduct->SetDestination(pFocus, true);
 		pProduct->QueueMission(Mission::Area_Guard, true);
 		return SkipQueueMove;
 	}
@@ -1200,9 +1222,18 @@ DEFINE_HOOK(0x443EB8, BuildingClass_KickOutUnit_RallyPointAreaGuard5, 0x5)
 	GET(FootClass*, pProduct, EBP);
 	GET(AbstractClass*, pFocus, EAX);
 
+	if (!pProduct->Owner->IsControlledByHuman())
+		return 0;
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pProduct->GetTechnoType());
+
+	if (pTypeExt && pTypeExt->IgnoreRallyPoint)
+		return SkipQueueMove;
+
 	if (RulesExt::Global()->RallyPointAreaGuard)
 	{
 		pProduct->SetArchiveTarget(pFocus);
+		pProduct->SetDestination(pFocus, true);
 		pProduct->QueueMission(Mission::Area_Guard, true);
 		return SkipQueueMove;
 	}
@@ -1218,10 +1249,13 @@ DEFINE_HOOK(0x73AAB3, UnitClass_UpdateMoving_RallyPointAreaGuard, 0x5)
 	GET(UnitClass*, pThis, EBP);
 	GET(AbstractClass*, pFocus, EAX);
 
-	bool isHarvester = pThis->Type->Harvester;
-	if (RulesExt::Global()->RallyPointAreaGuard && !isHarvester)
+	if (!pThis->Owner->IsControlledByHuman())
+		return 0;
+
+	if (RulesExt::Global()->RallyPointAreaGuard && !pThis->Type->Harvester)
 	{
 		pThis->SetArchiveTarget(pFocus);
+		pThis->SetDestination(pFocus, true);
 		pThis->QueueMission(Mission::Area_Guard, true);
 		return SkipQueueMove;
 	}
@@ -1293,6 +1327,40 @@ DEFINE_HOOK(0x4D9620, FootClass_SetDestination_FollowTargetSelf, 0x5)
 }
 
 #pragma endregion
+
+#pragma region Sink
+
+DEFINE_HOOK(0x7364DC, UnitClass_Update_SinkSpeed, 0x7)
+{
+	GET(UnitClass* const, pThis, ESI);
+
+	GET(int, CoordZ, EDX);
+
+	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type))
+		R->EDX(CoordZ - (pTypeExt->SinkSpeed - 5));
+
+	return 0;
+}
+
+DEFINE_HOOK(0x737DE2, UnitClass_ReceiveDamage_Sinkable, 0x6)
+{
+	enum { GoOtherChecks = 0x737E18, NoSink = 0x737E63 };
+
+	GET(UnitTypeClass*, pType, EAX);
+
+	bool ShouldSink = pType->Weight > RulesClass::Instance->ShipSinkingWeight && pType->Naval && !pType->Underwater && !pType->Organic;
+
+	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType))
+		ShouldSink = pTypeExt->Sinkable.Get(ShouldSink);
+
+	return ShouldSink ? GoOtherChecks : NoSink;
+}
+
+#pragma endregion
+
+
+
+
 
 #pragma region KeepTargetOnMove
 
