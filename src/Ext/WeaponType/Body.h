@@ -69,6 +69,9 @@ public:
 		Valueable<int> NoRepeatFire;
 		Valueable<bool> UnlimboDetonate;
 		Valueable<bool> UnlimboDetonate_Force;
+		Valueable<bool> ResetGattlingValue;
+		Valueable<bool> AddtionalDamage_GattlingValue;
+		Valueable<double> AddtionalDamage_GattlingValue_Mult;
 		Valueable<bool> KickOutPassengers;
 
 		ExtData(WeaponTypeClass* OwnerObject) : Extension<WeaponTypeClass>(OwnerObject)
@@ -119,6 +122,9 @@ public:
 			, NoRepeatFire { 0 }
 			, UnlimboDetonate { false }
 			, UnlimboDetonate_Force { false }
+			, ResetGattlingValue { false }
+			, AddtionalDamage_GattlingValue { false }
+			, AddtionalDamage_GattlingValue_Mult { 1.0 }
 			, KickOutPassengers { true }
 		{ }
 

@@ -530,6 +530,11 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->HarvesterQuickUnloader.Read(exINI, pSection, "HarvesterQuickUnloader");
 	this->DistributeTargetingFrame.Read(exINI, pSection, "DistributeTargetingFrame");
 	this->AttackMove_StopWhenTargetAcquired.Read(exINI, pSection, "AttackMove.StopWhenTargetAcquired");
+	this->ThisIsAJumpjet.Read(exINI, pSection, "ThisIsAJumpjet");
+	this->ImAJumpjetFromAirport.Read(exINI, pSection, "ImAJumpjetFromAirport");
+	this->IgnoreRallyPoint.Read(exINI, pSection, "IgnoreRallyPoint");
+	this->Sinkable.Read(exINI, pSection, "Sinkable");
+	this->SinkSpeed.Read(exINI, pSection, "SinkSpeed");
 
 	this->InitialPayload_Types.Read(exINI, pSection, "InitialPayload.Types");
 	this->InitialPayload_Nums.Read(exINI, pSection, "InitialPayload.Nums");
@@ -989,6 +994,12 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->HarvesterQuickUnloader)
 		.Process(this->DistributeTargetingFrame)
 		.Process(this->AttackMove_StopWhenTargetAcquired)
+		.Process(this->ThisIsAJumpjet)
+		.Process(this->ImAJumpjetFromAirport)
+		.Process(this->IgnoreRallyPoint)
+		.Process(this->Sinkable)
+		.Process(this->SinkSpeed)
+
 		.Process(this->KeepAlive)
 
 		.Process(this->InitialPayload_Types)

@@ -300,6 +300,12 @@ public:
 		Valueable<bool> HarvesterQuickUnloader;
 		Nullable<bool> DistributeTargetingFrame;
 		Nullable<bool> AttackMove_StopWhenTargetAcquired;
+		Valueable<TechnoTypeClass*> ThisIsAJumpjet;
+		Valueable<bool> ImAJumpjetFromAirport;
+		Valueable<bool> IgnoreRallyPoint;
+		Nullable<bool> Sinkable;
+		Valueable<int> SinkSpeed;
+
 		Nullable<bool> KeepAlive;
 
 		ValueableVector<TechnoTypeClass*> InitialPayload_Types;
@@ -605,6 +611,12 @@ public:
 			, HarvesterQuickUnloader { false }
 			, DistributeTargetingFrame {}
 			, AttackMove_StopWhenTargetAcquired {}
+			, ThisIsAJumpjet { nullptr }
+			, ImAJumpjetFromAirport { false }
+			, IgnoreRallyPoint { false }
+			, Sinkable { }
+			, SinkSpeed { 5 }
+
 			, KeepAlive {}
 
 			, InitialPayload_Types {}
