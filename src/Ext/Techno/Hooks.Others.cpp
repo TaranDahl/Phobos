@@ -40,7 +40,6 @@ DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstNoDelay, 0x5)
 						}
 
 						pThis->RearmTimer.Start(rof);
-						pThis->ChargeTurretDelay = rof;
 					}
 
 					return SkipVanillaFire;
@@ -83,7 +82,6 @@ DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 						}
 
 						pThis->RearmTimer.Start(rof);
-						pThis->ChargeTurretDelay = rof;
 					}
 
 					return SkipVanillaFire;
@@ -222,7 +220,7 @@ DEFINE_HOOK(0x70DE40, BuildingClass_sub_70DE40_GattlingRateDownDelay, 0xA)
 			if (pTypeExt->RateDown_Delay < 0)
 				return Return;
 
-			pExt->AccumulatedGattlingValue++;
+			++pExt->AccumulatedGattlingValue;
 			auto remain = pExt->AccumulatedGattlingValue;
 
 			if (!pExt->ShouldUpdateGattlingValue)
@@ -302,12 +300,15 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 			if (!pExt->ShouldUpdateGattlingValue)
 				remain -= pTypeExt->RateDown_Delay;
 
-			if (remain <= 0)
+			if (remain <= 0 && rateMult)
 				return SkipGameCode;
 
 			// Time's up
 			pExt->AccumulatedGattlingValue = 0;
 			pExt->ShouldUpdateGattlingValue = true;
+
+			if (!rateMult)
+				break;
 
 			const auto rateDown = (pThis->Ammo <= pTypeExt->RateDown_Ammo) ? pTypeExt->RateDown_Cover.Get() : pTypeExt->OwnerObject()->RateDown;
 
@@ -318,6 +319,9 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 		}
 		else
 		{
+			if (!rateMult)
+				break;
+
 			const auto rateDown = pThis->GetTechnoType()->RateDown;
 
 			if (!rateDown)
