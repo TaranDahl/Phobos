@@ -484,7 +484,7 @@ DEFINE_HOOK(0x6FE312, TechnoClass_FireAt_InitialDamage, 0x6)
 	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
 
 	if (pWeaponExt && pWeaponExt->AddtionalDamage_GattlingValue)
-		damage += pThis->GattlingValue * pWeaponExt->AddtionalDamage_GattlingValue_Mult;
+		damage += static_cast<int>(pThis->GattlingValue * pWeaponExt->AddtionalDamage_GattlingValue_Mult);
 
 	R->EDI(damage);
 	return 0;
