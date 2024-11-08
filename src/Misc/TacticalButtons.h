@@ -55,6 +55,7 @@ public:
 	inline bool IndexInHerosButtons();
 	void HerosDraw();
 	void HeroSelect(int buttonIndex);
+	void HeroSwitch();
 
 	// Button index 71-100 : Select buttons
 	inline bool IndexInSelectButtons();
@@ -89,6 +90,7 @@ public:
 	// TODO New buttons
 
 	// Button index 61-68 : Heros buttons
+	bool HeroVisible { true };
 
 	// Button index 71-100 : Select buttons
 	bool UpdateSelect { false };
