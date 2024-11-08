@@ -1,7 +1,6 @@
 #include "HerosInfo.h"
 
-#include <HouseClass.h>
-#include <Utilities/GeneralUtils.h>
+#include <Misc/TacticalButtons.h>
 
 const char* HerosInfoCommandClass::GetName() const
 {
@@ -25,15 +24,5 @@ const wchar_t* HerosInfoCommandClass::GetUIDescription() const
 
 void HerosInfoCommandClass::Execute(WWKey eInput) const
 {
-	Phobos::Config::UniqueDisplay_Enable = !Phobos::Config::UniqueDisplay_Enable;
-
-	MessageListClass::Instance->PrintMessage
-	(
-		(Phobos::Config::UniqueDisplay_Enable ?
-			GeneralUtils::LoadStringUnlessMissing("TXT_HEROS_VISIBLE", L"Set heros info visible.") :
-			GeneralUtils::LoadStringUnlessMissing("TXT_HEROS_INVISIBLE", L"Set heros info invisible.")),
-		RulesClass::Instance->MessageDelay,
-		HouseClass::CurrentPlayer->ColorSchemeIndex,
-		true
-	);
+	TacticalButtonsClass::Instance.HeroSwitch();
 }
