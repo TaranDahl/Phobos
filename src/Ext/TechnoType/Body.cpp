@@ -471,14 +471,15 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Turret_BodyRotation_Symmetric.Read(exINI, pSection, "Turret.BodyRotation.Symmetric");
 	this->CanBeBuiltOn.Read(exINI, pSection, "CanBeBuiltOn");
 	this->UnitBaseNormal.Read(exINI, pSection, "UnitBaseNormal");
-	this->AlwaysExistTheCameo.Read(exINI, pSection, "AlwaysExistTheCameo");
-	this->PrerequisiteForCameo.Read(exINI, pSection, "PrerequisiteForCameo");
 	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
-	this->UIExtraDescription.Read(exINI, pSection, "UIExtraDescription");
-	this->UpperSelectedInfoType.Read(exINI, pSection, "UpperSelectedInfoType");
-	this->UpperSelectedInfoColor.Read(exINI, pSection, "UpperSelectedInfoColor");
-	this->BelowSelectedInfoType.Read(exINI, pSection, "BelowSelectedInfoType");
-	this->BelowSelectedInfoColor.Read(exINI, pSection, "BelowSelectedInfoColor");
+	this->Cameo_AlwaysExist.Read(exINI, pSection, "Cameo.AlwaysExist");
+	this->Cameo_AuxTechno.Read(exINI, pSection, "Cameo.AuxTechno");
+	this->Cameo_NegTechno.Read(exINI, pSection, "Cameo.NegTechno");
+	this->UIDescription_Unbuildable.Read(exINI, pSection, "UIDescription.Unbuildable");
+	this->SelectedInfo_UpperType.Read(exINI, pSection, "SelectedInfo.UpperType");
+	this->SelectedInfo_UpperColor.Read(exINI, pSection, "SelectedInfo.UpperColor");
+	this->SelectedInfo_BelowType.Read(exINI, pSection, "SelectedInfo.BelowType");
+	this->SelectedInfo_BelowColor.Read(exINI, pSection, "SelectedInfo.BelowColor");
 	this->FakeOf.Read(exINI, pSection, "FakeOf");
 	this->NoRearmInEMPState.Read(exINI, pSection, "NoRearmInEMPState");
 	this->NoRearmInTemporal.Read(exINI, pSection, "NoRearmInTemporal");
@@ -932,16 +933,17 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->CanBeBuiltOn)
 		.Process(this->UnitBaseNormal)
 		.Process(this->UnitBaseForAllyBuilding)
-		.Process(this->AlwaysExistTheCameo)
-		.Process(this->PrerequisiteForCameo)
+		.Process(this->Cameo_AlwaysExist)
+		.Process(this->Cameo_AuxTechno)
+		.Process(this->Cameo_NegTechno)
 		.Process(this->CameoCheckMutex)
-		.Process(this->UIExtraDescription)
+		.Process(this->UIDescription_Unbuildable)
 		.Process(this->CameoPCX)
 		.Process(this->GreyCameoPCX)
-		.Process(this->UpperSelectedInfoType)
-		.Process(this->UpperSelectedInfoColor)
-		.Process(this->BelowSelectedInfoType)
-		.Process(this->BelowSelectedInfoColor)
+		.Process(this->SelectedInfo_UpperType)
+		.Process(this->SelectedInfo_UpperColor)
+		.Process(this->SelectedInfo_BelowType)
+		.Process(this->SelectedInfo_BelowColor)
 		.Process(this->FakeOf)
 		.Process(this->CameoPal)
 		.Process(this->NoRearmInEMPState)

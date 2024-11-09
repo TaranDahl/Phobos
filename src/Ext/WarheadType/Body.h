@@ -138,11 +138,6 @@ public:
 		Valueable<bool> InflictLocomotor;
 		Valueable<bool> RemoveInflictedLocomotor;
 
-		Valueable<bool> BuildingUndeploy;
-		Nullable<double> DamageOwnerMultiplier;
-		Nullable<double> DamageAlliesMultiplier;
-		Nullable<double> DamageEnemiesMultiplier;
-
 		Nullable<bool> CombatAlert_Suppress;
 		Valueable<bool> AffectsOnFloor;
 		Valueable<bool> AffectsInAir;
@@ -163,6 +158,11 @@ public:
 		Valueable<double> CombatLightChance;
 		Valueable<bool> CLIsBlack;
 		Nullable<bool> Particle_AlphaImageIsLightFlash;
+
+		Valueable<bool> BuildingUndeploy;
+		Nullable<double> DamageOwnerMultiplier;
+		Nullable<double> DamageAlliesMultiplier;
+		Nullable<double> DamageEnemiesMultiplier;
 
 		Valueable<bool> SuppressRevengeWeapons;
 		ValueableVector<WeaponTypeClass*> SuppressRevengeWeapons_Types;
@@ -310,11 +310,6 @@ public:
 			, InflictLocomotor { false }
 			, RemoveInflictedLocomotor { false }
 
-			, BuildingUndeploy { false }
-			, DamageOwnerMultiplier {}
-			, DamageAlliesMultiplier {}
-			, DamageEnemiesMultiplier {}
-
 			, CombatAlert_Suppress {}
 			, AffectsOnFloor { true }
 			, AffectsInAir { true }
@@ -335,6 +330,11 @@ public:
 			, CombatLightChance { 1.0 }
 		    , CLIsBlack { false }
 			, Particle_AlphaImageIsLightFlash {}
+
+			, BuildingUndeploy { false }
+			, DamageOwnerMultiplier {}
+			, DamageAlliesMultiplier {}
+			, DamageEnemiesMultiplier {}
 
 			, SuppressRevengeWeapons { false }
 			, SuppressRevengeWeapons_Types {}

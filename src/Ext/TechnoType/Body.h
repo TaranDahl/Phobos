@@ -238,16 +238,17 @@ public:
 		Valueable<bool> CanBeBuiltOn;
 		Valueable<bool> UnitBaseNormal;
 		Valueable<bool> UnitBaseForAllyBuilding;
-		Nullable<bool> AlwaysExistTheCameo;
-		Valueable<TechnoTypeClass*> PrerequisiteForCameo;
+		Nullable<bool> Cameo_AlwaysExist;
+		Valueable<TechnoTypeClass*> Cameo_AuxTechno;
+		Valueable<TechnoTypeClass*> Cameo_NegTechno;
 		bool CameoCheckMutex; // Not read from ini
-		Valueable<CSFText> UIExtraDescription;
+		Valueable<CSFText> UIDescription_Unbuildable;
 		PhobosPCXFile CameoPCX;
 		PhobosPCXFile GreyCameoPCX;
-		Valueable<DisplayInfoType> UpperSelectedInfoType;
-		Valueable<ColorStruct> UpperSelectedInfoColor;
-		Valueable<DisplayInfoType> BelowSelectedInfoType;
-		Valueable<ColorStruct> BelowSelectedInfoColor;
+		Valueable<DisplayInfoType> SelectedInfo_UpperType;
+		Valueable<ColorStruct> SelectedInfo_UpperColor;
+		Valueable<DisplayInfoType> SelectedInfo_BelowType;
+		Valueable<ColorStruct> SelectedInfo_BelowColor;
 		Valueable<TechnoTypeClass*> FakeOf;
 		CustomPalette CameoPal;
 		Nullable<bool> NoRearmInEMPState;
@@ -549,16 +550,17 @@ public:
 			, CanBeBuiltOn { false }
 			, UnitBaseNormal { false }
 			, UnitBaseForAllyBuilding { false }
-			, AlwaysExistTheCameo {}
-			, PrerequisiteForCameo {}
+			, Cameo_AlwaysExist {}
+			, Cameo_AuxTechno {}
+			, Cameo_NegTechno {}
 			, CameoCheckMutex { false }
-			, UIExtraDescription {}
+			, UIDescription_Unbuildable {}
 			, CameoPCX {}
 			, GreyCameoPCX {}
-			, UpperSelectedInfoType { DisplayInfoType::Shield }
-			, UpperSelectedInfoColor { { 153, 153, 255 } }
-			, BelowSelectedInfoType { DisplayInfoType::Health }
-			, BelowSelectedInfoColor { { 0, 0, 0 } }
+			, SelectedInfo_UpperType { DisplayInfoType::Shield }
+			, SelectedInfo_UpperColor { { 153, 153, 255 } }
+			, SelectedInfo_BelowType { DisplayInfoType::Health }
+			, SelectedInfo_BelowColor { { 0, 0, 0 } }
 			, FakeOf {}
 			, CameoPal {}
 			, NoRearmInEMPState {}
