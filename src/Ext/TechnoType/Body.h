@@ -245,10 +245,10 @@ public:
 		Valueable<CSFText> UIDescription_Unbuildable;
 		PhobosPCXFile CameoPCX;
 		PhobosPCXFile GreyCameoPCX;
-		Valueable<DisplayInfoType> UpperSelectedInfoType;
-		Valueable<ColorStruct> UpperSelectedInfoColor;
-		Valueable<DisplayInfoType> BelowSelectedInfoType;
-		Valueable<ColorStruct> BelowSelectedInfoColor;
+		Valueable<DisplayInfoType> SelectedInfo_UpperType;
+		Valueable<ColorStruct> SelectedInfo_UpperColor;
+		Valueable<DisplayInfoType> SelectedInfo_BelowType;
+		Valueable<ColorStruct> SelectedInfo_BelowColor;
 		Valueable<TechnoTypeClass*> FakeOf;
 		CustomPalette CameoPal;
 		Nullable<bool> NoRearmInEMPState;
@@ -501,10 +501,10 @@ public:
 			, UIDescription_Unbuildable {}
 			, CameoPCX {}
 			, GreyCameoPCX {}
-			, UpperSelectedInfoType { DisplayInfoType::Shield }
-			, UpperSelectedInfoColor { { 153, 153, 255 } }
-			, BelowSelectedInfoType { DisplayInfoType::Health }
-			, BelowSelectedInfoColor { { 0, 0, 0 } }
+			, SelectedInfo_UpperType { DisplayInfoType::Shield }
+			, SelectedInfo_UpperColor { { 153, 153, 255 } }
+			, SelectedInfo_BelowType { DisplayInfoType::Health }
+			, SelectedInfo_BelowColor { { 0, 0, 0 } }
 			, FakeOf {}
 			, CameoPal {}
 			, NoRearmInEMPState {}

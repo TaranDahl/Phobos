@@ -1938,11 +1938,11 @@ void TacticalButtonsClass::SelectedDraw()
 					position.Y += 15;
 					{
 						int value = -1, maxValue = 0;
-						TechnoExt::GetValuesForDisplay(pThis, pTypeExt->UpperSelectedInfoType, value, maxValue);
+						TechnoExt::GetValuesForDisplay(pThis, pTypeExt->SelectedInfo_UpperType, value, maxValue);
 
 						if (value >= 0 && maxValue > 0)
 						{
-							if (pTypeExt->UpperSelectedInfoColor.Get() == ColorStruct{ 0, 0, 0 })
+							if (pTypeExt->SelectedInfo_UpperColor.Get() == ColorStruct{ 0, 0, 0 })
 							{
 								const auto pRules = RulesClass::Instance.get();
 								const auto ratio = static_cast<double>(value) / maxValue;
@@ -1950,7 +1950,7 @@ void TacticalButtonsClass::SelectedDraw()
 							}
 							else
 							{
-								color = Drawing::RGB_To_Int(pTypeExt->UpperSelectedInfoColor);
+								color = Drawing::RGB_To_Int(pTypeExt->SelectedInfo_UpperColor);
 							}
 
 							wchar_t text2[0x20] = {0};
@@ -1979,11 +1979,11 @@ void TacticalButtonsClass::SelectedDraw()
 					position.Y += 13;
 					{
 						int value = -1, maxValue = 0;
-						TechnoExt::GetValuesForDisplay(pThis, pTypeExt->BelowSelectedInfoType, value, maxValue);
+						TechnoExt::GetValuesForDisplay(pThis, pTypeExt->SelectedInfo_BelowType, value, maxValue);
 
 						if (value >= 0 && maxValue > 0)
 						{
-							if (pTypeExt->BelowSelectedInfoColor.Get() == ColorStruct{ 0, 0, 0 })
+							if (pTypeExt->SelectedInfo_BelowColor.Get() == ColorStruct{ 0, 0, 0 })
 							{
 								const auto pRules = RulesClass::Instance.get();
 								const auto ratio = static_cast<double>(value) / maxValue;
@@ -1991,7 +1991,7 @@ void TacticalButtonsClass::SelectedDraw()
 							}
 							else
 							{
-								color = Drawing::RGB_To_Int(pTypeExt->BelowSelectedInfoColor);
+								color = Drawing::RGB_To_Int(pTypeExt->SelectedInfo_BelowColor);
 							}
 
 							wchar_t text3[0x20] = {0};

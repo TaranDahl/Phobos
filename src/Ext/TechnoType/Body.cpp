@@ -476,10 +476,10 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Cameo_AuxTechno.Read(exINI, pSection, "Cameo.AuxTechno");
 	this->Cameo_NegTechno.Read(exINI, pSection, "Cameo.NegTechno");
 	this->UIDescription_Unbuildable.Read(exINI, pSection, "UIDescription.Unbuildable");
-	this->UpperSelectedInfoType.Read(exINI, pSection, "UpperSelectedInfoType");
-	this->UpperSelectedInfoColor.Read(exINI, pSection, "UpperSelectedInfoColor");
-	this->BelowSelectedInfoType.Read(exINI, pSection, "BelowSelectedInfoType");
-	this->BelowSelectedInfoColor.Read(exINI, pSection, "BelowSelectedInfoColor");
+	this->SelectedInfo_UpperType.Read(exINI, pSection, "SelectedInfo.UpperType");
+	this->SelectedInfo_UpperColor.Read(exINI, pSection, "SelectedInfo.UpperColor");
+	this->SelectedInfo_BelowType.Read(exINI, pSection, "SelectedInfo.BelowType");
+	this->SelectedInfo_BelowColor.Read(exINI, pSection, "SelectedInfo.BelowColor");
 	this->FakeOf.Read(exINI, pSection, "FakeOf");
 	this->NoRearmInEMPState.Read(exINI, pSection, "NoRearmInEMPState");
 	this->NoRearmInTemporal.Read(exINI, pSection, "NoRearmInTemporal");
@@ -883,10 +883,10 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->UIDescription_Unbuildable)
 		.Process(this->CameoPCX)
 		.Process(this->GreyCameoPCX)
-		.Process(this->UpperSelectedInfoType)
-		.Process(this->UpperSelectedInfoColor)
-		.Process(this->BelowSelectedInfoType)
-		.Process(this->BelowSelectedInfoColor)
+		.Process(this->SelectedInfo_UpperType)
+		.Process(this->SelectedInfo_UpperColor)
+		.Process(this->SelectedInfo_BelowType)
+		.Process(this->SelectedInfo_BelowColor)
 		.Process(this->FakeOf)
 		.Process(this->CameoPal)
 		.Process(this->NoRearmInEMPState)
