@@ -25,7 +25,7 @@ bool Phobos::IsLoadingSaveGame = false;
 #ifdef STR_GIT_COMMIT
 const wchar_t* Phobos::VersionDescription = L"Phobos nightly build (" STR_GIT_COMMIT L" @ " STR_GIT_BRANCH L"). DO NOT SHIP IN MODS!";
 #elif !defined(IS_RELEASE_VER)
-const wchar_t* Phobos::VersionDescription = L" Phobos special merge build #" _STR(BUILD_NUMBER) L"+" _STR(MERGE_NUMBER) L"_" _STR(MERGE_PATCH) L". Please test the build before shipping.";
+const wchar_t* Phobos::VersionDescription = L"Phobos development build #" _STR(BUILD_NUMBER) L". Please test the build before shipping.";
 #else
 //const wchar_t* Phobos::VersionDescription = L"Phobos release build v" FILE_VERSION_STR L".";
 #endif
@@ -206,13 +206,20 @@ DEFINE_HOOK(0x4F4583, GScreenClass_DrawText, 0x6)
 	if (!HideWarning)
 #endif // !STR_GIT_COMMIT
 	{
-		RectangleStruct wanted = Drawing::GetTextDimensions(Phobos::VersionDescription, Point2D::Empty, 0, 2, 0);
-		RectangleStruct rect { (DSurface::Composite->GetWidth() - wanted.Width - 10), 0, (wanted.Width + 10), (wanted.Height + 10) };
+		auto wanted = Drawing::GetTextDimensions(Phobos::VersionDescription, { 0,0 }, 0, 2, 0);
+
+		RectangleStruct rect = {
+			DSurface::Composite->GetWidth() - wanted.Width - 10,
+			0,
+			wanted.Width + 10,
+			wanted.Height + 10
+		};
+
 		Point2D location { rect.X + 5,5 };
-		ColorStruct color { 0, 0, 0 };
-		DSurface::Composite->FillRectTrans(&rect, &color, 40);
-		DSurface::Composite->DrawRect(&rect, 0x061C);
-		DSurface::Composite->DrawText(Phobos::VersionDescription, &location, 0x061C);
+
+		DSurface::Composite->FillRect(&rect, COLOR_BLACK);
+		DSurface::Composite->DrawText(Phobos::VersionDescription, &location, COLOR_RED);
+
 	}
 	return 0;
 }

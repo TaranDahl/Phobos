@@ -138,11 +138,6 @@ public:
 		Valueable<bool> InflictLocomotor;
 		Valueable<bool> RemoveInflictedLocomotor;
 
-		Valueable<bool> BuildingUndeploy;
-		Nullable<double> DamageOwnerMultiplier;
-		Nullable<double> DamageAlliesMultiplier;
-		Nullable<double> DamageEnemiesMultiplier;
-
 		Nullable<bool> CombatAlert_Suppress;
 		Valueable<bool> AffectsOnFloor;
 		Valueable<bool> AffectsInAir;
@@ -314,11 +309,6 @@ public:
 
 			, InflictLocomotor { false }
 			, RemoveInflictedLocomotor { false }
-
-			, BuildingUndeploy { false }
-			, DamageOwnerMultiplier {}
-			, DamageAlliesMultiplier {}
-			, DamageEnemiesMultiplier {}
 
 			, CombatAlert_Suppress {}
 			, AffectsOnFloor { true }

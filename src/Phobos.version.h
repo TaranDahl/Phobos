@@ -25,12 +25,6 @@
 // Build number. Incremented on each released build.
 #define BUILD_NUMBER 44
 
-// Merge number. Counted main merge contributors.
-#define MERGE_NUMBER 1
-
-// Indicates Merge-related bugfixes only.
-#define MERGE_PATCH 15
-
 // Nightly defines GIT_COMMIT and GIT_BRANCH in GH Actions
 
 #ifdef IS_RELEASE_VER // Release build metadata
@@ -49,11 +43,11 @@
 	#define FILE_VERSION 0
 	#define PRODUCT_VERSION "Nightly Build " STR_GIT_COMMIT " @ " STR_GIT_BRANCH
 #else // Regular devbuild metadata
-	#define SAVEGAME_ID ((BUILD_NUMBER << 24) | (MERGE_NUMBER << 12) | (MERGE_PATCH))
-	#define FILE_DESCRIPTION "Special merge build of Phobos engine extension"
-	#define FILE_VERSION_STR "Build #" _STR(BUILD_NUMBER) "+" _STR(MERGE_NUMBER) "_" _STR(MERGE_PATCH)
-	#define FILE_VERSION 0, BUILD_NUMBER, MERGE_NUMBER, MERGE_PATCH
-	#define PRODUCT_VERSION "Special merge Build #" _STR(BUILD_NUMBER) "+" _STR(MERGE_NUMBER) "_" _STR(MERGE_PATCH)
+	#define SAVEGAME_ID ((BUILD_NUMBER << 24) | (BUILD_NUMBER << 12) | (BUILD_NUMBER))
+	#define FILE_DESCRIPTION "Development build of Phobos engine extension"
+	#define FILE_VERSION_STR "Build #" _STR(BUILD_NUMBER)
+	#define FILE_VERSION 0,0,0,BUILD_NUMBER
+	#define PRODUCT_VERSION "Development Build #" _STR(BUILD_NUMBER)
 #endif
 
 #endif // VERSION_H

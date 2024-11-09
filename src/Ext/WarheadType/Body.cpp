@@ -254,11 +254,6 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->DetonateOnAllMapObjects_AffectTypes.Read(exINI, pSection, "DetonateOnAllMapObjects.AffectTypes");
 	this->DetonateOnAllMapObjects_IgnoreTypes.Read(exINI, pSection, "DetonateOnAllMapObjects.IgnoreTypes");
 
-	this->BuildingUndeploy.Read(exINI, pSection, "BuildingUndeploy");
-	this->DamageOwnerMultiplier.Read(exINI, pSection, "DamageOwnerMultiplier");
-	this->DamageAlliesMultiplier.Read(exINI, pSection, "DamageAlliesMultiplier");
-	this->DamageEnemiesMultiplier.Read(exINI, pSection, "DamageEnemiesMultiplier");
-
 	this->CombatAlert_Suppress.Read(exINI, pSection, "CombatAlert.Suppress");
 	this->AffectsOnFloor.Read(exINI, pSection, "AffectsOnFloor");
 	this->AffectsInAir.Read(exINI, pSection, "AffectsInAir");
@@ -337,7 +332,6 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 		|| this->Shield_AttachTypes.size() > 0
 		|| this->Shield_RemoveTypes.size() > 0
 		|| this->Shield_RemoveAll
-		|| this->BuildingUndeploy
 		|| this->Convert_Pairs.size() > 0
 		|| this->BuildingUndeploy
 		|| this->InflictLocomotor
@@ -497,11 +491,6 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->DetonateOnAllMapObjects_AffectHouses)
 		.Process(this->DetonateOnAllMapObjects_AffectTypes)
 		.Process(this->DetonateOnAllMapObjects_IgnoreTypes)
-
-		.Process(this->BuildingUndeploy)
-		.Process(this->DamageOwnerMultiplier)
-		.Process(this->DamageAlliesMultiplier)
-		.Process(this->DamageEnemiesMultiplier)
 
 		.Process(this->CombatAlert_Suppress)
 		.Process(this->AffectsOnFloor)
