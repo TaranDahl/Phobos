@@ -471,10 +471,11 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Turret_BodyRotation_Symmetric.Read(exINI, pSection, "Turret.BodyRotation.Symmetric");
 	this->CanBeBuiltOn.Read(exINI, pSection, "CanBeBuiltOn");
 	this->UnitBaseNormal.Read(exINI, pSection, "UnitBaseNormal");
-	this->AlwaysExistTheCameo.Read(exINI, pSection, "AlwaysExistTheCameo");
-	this->PrerequisiteForCameo.Read(exINI, pSection, "PrerequisiteForCameo");
 	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
-	this->UIExtraDescription.Read(exINI, pSection, "UIExtraDescription");
+	this->Cameo_AlwaysExist.Read(exINI, pSection, "Cameo.AlwaysExist");
+	this->Cameo_AuxTechno.Read(exINI, pSection, "Cameo.AuxTechno");
+	this->Cameo_NegTechno.Read(exINI, pSection, "Cameo.NegTechno");
+	this->UIDescription_Unbuildable.Read(exINI, pSection, "UIDescription.Unbuildable");
 	this->UpperSelectedInfoType.Read(exINI, pSection, "UpperSelectedInfoType");
 	this->UpperSelectedInfoColor.Read(exINI, pSection, "UpperSelectedInfoColor");
 	this->BelowSelectedInfoType.Read(exINI, pSection, "BelowSelectedInfoType");
@@ -875,10 +876,11 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->CanBeBuiltOn)
 		.Process(this->UnitBaseNormal)
 		.Process(this->UnitBaseForAllyBuilding)
-		.Process(this->AlwaysExistTheCameo)
-		.Process(this->PrerequisiteForCameo)
+		.Process(this->Cameo_AlwaysExist)
+		.Process(this->Cameo_AuxTechno)
+		.Process(this->Cameo_NegTechno)
 		.Process(this->CameoCheckMutex)
-		.Process(this->UIExtraDescription)
+		.Process(this->UIDescription_Unbuildable)
 		.Process(this->CameoPCX)
 		.Process(this->GreyCameoPCX)
 		.Process(this->UpperSelectedInfoType)
