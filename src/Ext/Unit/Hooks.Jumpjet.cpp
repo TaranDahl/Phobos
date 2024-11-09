@@ -2,6 +2,7 @@
 #include <UnitClass.h>
 #include <BuildingClass.h>
 #include <Utilities/Macro.h>
+#include <Ext/Techno/Body.h>
 #include <Ext/TechnoType/Body.h>
 #include <Ext/WeaponType/Body.h>
 

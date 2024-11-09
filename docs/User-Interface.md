@@ -82,6 +82,7 @@ Text.Background=false                   ; boolean
 Shape=                                  ; filename with .shp extension, if not present, game-drawn text will be used instead
 Palette=palette.pal                     ; filename with .pal extension
 Shape.Spacing=                          ; integers - horizontal, vertical spacing between digits
+Shape.PercentageFrame=false             ; boolean
 
 [SOMETECHNOTYPE]
 DigitalDisplay.Disable=false            ; boolean
@@ -278,29 +279,6 @@ In `rulesmd.ini`:
 SelectionFlashDuration=0  ; integer, number of frames
 ```
 
-### Units Rotate Turret When in Idle Action
-
-- Now unit with turret without `TurretSpins=true` can looks more vivid when it is in idle.
-  - `UnitIdleRotateTurret` controls whether units can rotate their turrets when in idle. Defaults to `[AudioVisual]` -> `UnitIdleRotateTurret`.
-  - `UnitIdlePointToMouse` controls whether units will turn their turrets to your mouse when in idle. Defaults to `[AudioVisual]` -> `UnitIdlePointToMouse`.
-  - `UnitIdleActionRestartMin` and `UnitIdleActionRestartMax` control the delay from idle to action occurrence together.
-  - `UnitIdleActionIntervalMin` and `UnitIdleActionIntervalMax` control the delay between every idle actions together.
-
-In `rulesmd.ini`:
-```ini
-[AudioVisual]
-UnitIdleRotateTurret=false      ; boolean
-UnitIdlePointToMouse=false      ; boolean
-UnitIdleActionRestartMin=150    ; integer, number of frames
-UnitIdleActionRestartMax=300    ; integer, number of frames
-UnitIdleActionIntervalMin=150   ; integer, number of frames
-UnitIdleActionIntervalMax=450   ; integer, number of frames
-
-[SOMETECHNO]                    ; TechnoType
-UnitIdleRotateTurret=           ; boolean
-UnitIdlePointToMouse=           ; boolean
-```
-
 ### Show Some Progress
 
 - You can now let the buildings with factories draw an extra bar below HP bar to show the progress of production by setting `FactoryProgressDisplay=true`, and buildings with main superweapon to show the progress of the superweapon by setting `MainSWProgressDisplay=true`. Besides, you can also let the technos draw its invulnerable timer when Iron Curtain or Force Shield is applied on by setting `InvulnerableDisplay=true`, and draw its temporal life timer when temporal weapon is targeting on it by setting `TemporalLifeDisplay=true`. Note that though you can select a SHP file for these displays to draw the pips, the background of the non-buildings' bar and the buildings' empty pip will always draw like the vanilla game, and the palette is always use the PALETTE.pal .
@@ -328,24 +306,47 @@ ProgressDisplay.Others.PipsShape=PIPS.shp     ; filename - including the .shp ex
 ProgressDisplay.Buildings.PipsShape=PIPS.shp  ; filename - including the .shp extension
 ```
 
+### Units Rotate Turret When in Idle Action
+
+- Now unit with turret without `TurretSpins=true` can looks more vivid when it is in idle.
+  - `UnitIdleRotateTurret` controls whether units can rotate their turrets when in idle. Defaults to `[AudioVisual]` -> `UnitIdleRotateTurret`.
+  - `UnitIdlePointToMouse` controls whether units will turn their turrets to your mouse when in idle. Defaults to `[AudioVisual]` -> `UnitIdlePointToMouse`.
+  - `UnitIdleActionRestartMin` and `UnitIdleActionRestartMax` control the delay from idle to action occurrence together.
+  - `UnitIdleActionIntervalMin` and `UnitIdleActionIntervalMax` control the delay between every idle actions together.
+
+In `rulesmd.ini`:
+```ini
+[AudioVisual]
+UnitIdleRotateTurret=false      ; boolean
+UnitIdlePointToMouse=false      ; boolean
+UnitIdleActionRestartMin=150    ; integer, number of frames
+UnitIdleActionRestartMax=300    ; integer, number of frames
+UnitIdleActionIntervalMin=150   ; integer, number of frames
+UnitIdleActionIntervalMax=450   ; integer, number of frames
+
+[SOMETECHNO]                    ; TechnoType
+UnitIdleRotateTurret=           ; boolean
+UnitIdlePointToMouse=           ; boolean
+```
+
 ### More display styles for placing grids
 
-- This feature is highly compatible with `ExpandBuildingPlace`. If set `DrawAdjacentBoundary` to true, it will display the four corners of the `Adjacent` boundary. If set `CheckExpandPlaceGrid` to true, it will display the placing grids with `place.shp` and following corresponding frame number.
-  - `ExpandLandGridFrames` controls the placing grids frames on non-water cell. The three numbers respectively represent "Some technos that can command departure have occupied this area", "This cell is actually beyond the scope, but there is still at least one cell inside the entire region" and "Here is no problem, everything is OK".
-  - `ExpandWaterGridFrames` controls the placing grids frames on water cell. Each item corresponds to the same as above.
+- This feature is highly compatible with `ExpandBuildingPlace`. If set `DrawAdjacentBoundary` to true, it will display the four corners of the `Adjacent` boundary. If set `PlacementGrid.Expand` to true, it will display the placing grids with `place.shp` and following corresponding frame number.
+  - `PlacementGrid.LandFrames` controls the placing grids frames on non-water cell. The three numbers respectively represent "Some technos that can command departure have occupied this area", "This cell is actually beyond the scope, but there is still at least one cell inside the entire region" and "Here is no problem, everything is OK".
+  - `PlacementGrid.WaterFrames` controls the placing grids frames on water cell. Each item corresponds to the same as above.
 
 In `ra2md.ini`:
 ```ini
 [Phobos]
-DrawAdjacentBoundary=false     ; boolean
+DrawAdjacentBoundary=false       ; boolean
 ```
 
 In `rulesmd.ini`:
 ```ini
 [AudioVisual]
-CheckExpandPlaceGrid=false     ; boolean
-ExpandLandGridFrames=1,0,0     ; integer, zero-based frame index - have technos, near boundary, is normal
-ExpandWaterGridFrames=1,0,0    ; integer, zero-based frame index - have technos, near boundary, is normal
+PlacementGrid.Expand=false       ; boolean
+PlacementGrid.LandFrames=1,0,0   ; integer, zero-based frame index - have technos, near boundary, is normal
+PlacementGrid.WaterFrames=1,0,0  ; integer, zero-based frame index - have technos, near boundary, is normal
 ```
 
 ## Hotkey Commands
@@ -453,68 +454,40 @@ MissingCameo=XXICON.SHP  ; filename - including the .shp/.pcx extension
 ### Show cameo when unbuildable
 
 - A setting that allows you to preview information. This feature can be used as before, playing "new construction options" and clearing the specific production queue when prerequisites loss.
-  - `AlwaysExistTheCameo` controls whether you can see the cameo when the prerequisite have not satisfied (`TechnoLevel`, `Owner`, `RequiredHouses` and `ForbiddenHouses` should be satisfied). Defaults to `[AudioVisual]` -> `AlwaysExistTheCameo`.
-  - `BuildingStatisticsCameo` controls whether the number of buildings of this type that you currently own needs to be displayed in the upper right corner of the building cameo (requires the cameo exist).
-  - `CameoOverlayShapes` controls the drawn image file.
-  - `CameoOverlayFrames` controls which frame in `CameoOverlayShapes` to draw in three different situations: currently owned this building type, grey cameo and have its prerequisite, grey cameo but have no prerequisite (The last situation requires `AlwaysExistTheCameo` to be true). When set to a negative number, it means that there is no need to draw under the corresponding conditions.
-  - `CameoOverlayPalette` the color palette used when drawing `CameoOverlayShapes`.
-  - If `PrerequisiteForCameo` is not set, the grey cameo will only show when `AIBasePlanningSide` is satisfied. If set a techno type, the grey cameo will show if you have a techno in this type or this type's `TechnoLevel`, `Owner`, `RequiredHouses`, `ForbiddenHouses` and `PrerequisiteForCameo` is satisfied.
-  - The `UIExtraDescription` is like `UIDescription`, but this only appearing when the techno is truly unbuildable.
+  - `Cameo.AlwaysExist` controls whether you can see the cameo when the prerequisite have not satisfied (`TechnoLevel`, `Owner`, `RequiredHouses` and `ForbiddenHouses` should be satisfied). Defaults to `[AudioVisual]` -> `Cameo.AlwaysExist`.
+  - `ShowBuildingStatistics` controls whether the number of buildings of this type that you currently own needs to be displayed in the upper right corner of the building cameo (requires the cameo exist).
+  - `Cameo.OverlayShapes` controls the drawn image file.
+  - `Cameo.OverlayFrames` controls which frame in `Cameo.OverlayShapes` to draw in three different situations: currently owned this building type, grey cameo and have its prerequisite, grey cameo but have no prerequisite (The last situation requires `Cameo.AlwaysExist` to be true). When set to a negative number, it means that there is no need to draw under the corresponding conditions.
+  - `Cameo.OverlayPalette` the color palette used when drawing `Cameo.OverlayShapes`.
+  - If `Cameo.AuxTechno` is not set, the grey cameo will only show when `AIBasePlanningSide` is satisfied. If set a techno type, the grey cameo will show if you have a techno in this type **or** this type's `TechnoLevel`, `Owner`, `RequiredHouses`, `ForbiddenHouses`, `Cameo.AuxTechno` (if set, otherwise use `AIBasePlanningSide`) and `Cameo.NegTechno` (if set) is satisfied.
+  - If `Cameo.NegTechno` is set, the grey cameo will not show when you have a techno in this type.
+  - The `UIDescription.Unbuildable` is like `UIDescription`, but this only appearing when the techno is truly unbuildable.
 
 In `ra2md.ini`:
 ```ini
 [Phobos]
-BuildingStatisticsCameo=false    ; boolean
+ShowBuildingStatistics=false     ; boolean
 ```
 
 In `rulesmd.ini`:
 ```ini
 [AudioVisual]
-AlwaysExistTheCameo=false        ; boolean
-CameoOverlayShapes=pips.shp      ; filename - including the .shp extension
-CameoOverlayFrames=-1,-1,-1      ; integer - owned this building, grey and have its prerequisite, grey but have no prerequisite
-CameoOverlayPalette=palette.pal  ; filename - including the .pal extension
+Cameo.AlwaysExist=false          ; boolean
+Cameo.OverlayShapes=pips.shp     ; filename - including the .shp extension
+Cameo.OverlayFrames=-1,-1,-1     ; integer - owned this building, grey and have its prerequisite, grey but have no prerequisite
+Cameo.OverlayPalette=palette.pal ; filename - including the .pal extension
 
 [SOMETECHNO]                     ; TechnoType
-AlwaysExistTheCameo=             ; boolean
-PrerequisiteForCameo=            ; TechnoType
-UIExtraDescription=              ; CSF entry key
+Cameo.AlwaysExist=               ; boolean
+Cameo.AuxTechno=                 ; TechnoType
+Cameo.NegTechno=                 ; TechnoType
+UIDescription.Unbuildable=       ; CSF entry key
 ```
 
-### Exclusive sidebar for superweapons
-
-- Now, you can display a sidebar exclusive to superweapons through a series of settings. At the same time, you can specify the shortcuts for these buttons in the shortcut key settings.
-  - `SWSidebarBackground` controls whether to draw the background shape of the exclusive sidebar.
-  - `SWSidebarBackground.OnPCX` and `SWSidebarBackground.OffPCX` controlled the shapes of this exclusive sidebar's switch displaying, respectively used in non-hidden and hidden. Required sizes are all `10 * 50`.
-  - `SWSidebarBackground.TopPCX`, `SWSidebarBackground.CenterPCX` and `SWSidebarBackground.BottomPCX` controlled the materials that were combined to create the entire exclusive sidebar background shape. Their required sizes are respectively `80 * 20`, `80 * 50` and `80 * 20`. In `SWSidebarBackground.CenterPCX`, the position of the superweapon's `SidebarPCX` is 5 pixels away from the left contour of this background, 15 pixels away from the right contour, and 1 pixel away from both the upper and lower contours.
-  - `SW.InScreen.Show` controls whether the superweapon should be displayed first in the exclusive sidebar. If the exclusive sidebar is full (up to 10 are displayed), the overflowing superweapon's cameo will be added back to the original sidebar. If there is an empty space in the exclusive sidebar afterwards, it will no longer return to the exclusive sidebar, unless the permission to use the superweapon is regained (lost and gained again). Therefore, it is not recommended to place all superweapons in the exclusive sidebar.
-  - `SW.InScreen.PriorityHouses` controls if the superweapon is displayed first in the exclusive sidebar, players belonging to these houses will have priority in placing the superweapon cameo in the exclusive sidebar.
-  - `SW.InScreen.RequiredHouses` controls if the superweapon is displayed first in the exclusive sidebar, players must belong to these houses in order to have superweapon a real chance of being displayed in the exclusive sidebar. The default is empty, which means this condition will always be met.
-  - `SW.QuickFireAtMouse` controls whether the superweapon which is command by keyboards will forcibly launch to the mouse position without all Ares conditions check except charging and funds. If the mouse is not in the tactical map now, the superweapon will launch like `SW.QuickFireInScreen=true` do.
-  - `SW.QuickFireInScreen` controls whether the superweapon will forcibly launch to the center position of the current screen without all Ares conditions check except charging and funds.
-
-In `rulesmd.ini`:
+In `artmd.ini`:
 ```ini
-[AudioVisual]
-SWSidebarBackground=true         ; boolean
-
-[SOMESIDE]                       ; Side
-SWSidebarBackground.OnPCX=       ; filename - including the .pcx extension
-SWSidebarBackground.OffPCX=      ; filename - including the .pcx extension
-SWSidebarBackground.TopPCX=      ; filename - including the .pcx extension
-SWSidebarBackground.CenterPCX=   ; filename - including the .pcx extension
-SWSidebarBackground.BottomPCX=   ; filename - including the .pcx extension
-
-[SOMESW]                         ; SuperWeapon
-SW.InScreen.Show=false           ; boolean
-SW.InScreen.PriorityHouses=      ; list of house types
-SW.InScreen.RequiredHouses=      ; list of house types
-SW.QuickFireAtMouse=false        ; boolean
-SW.QuickFireInScreen=false       ; boolean
-```
-
-```{note}
-If you want to change the printing message of switch on/off, for localization add `TXT_EX_SW_BAR_VISIBLE` and `TXT_EX_SW_BAR_INVISIBLE` into your `.csf` file.
+[SOMETECHNO]                     ; TechnoType
+GreyCameoPCX=                    ; PCX filename - including the .pcx extension
 ```
 
 ### Harvester counter

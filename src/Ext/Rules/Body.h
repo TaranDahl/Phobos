@@ -124,14 +124,14 @@ public:
 		Valueable<double> DamageEnemiesMultiplier;
 		Valueable<bool> ExpandAircraftMission;
 		Valueable<bool> CheckUnitBaseNormal;
-		Valueable<bool> AlwaysExistTheCameo;
-		Valueable<SHPStruct*> CameoOverlayShapes;
-		Valueable<Vector3D<int>> CameoOverlayFrames;
-		CustomPalette CameoOverlayPalette;
+		Valueable<bool> Cameo_AlwaysExist;
+		Valueable<SHPStruct*> Cameo_OverlayShapes;
+		Valueable<Vector3D<int>> Cameo_OverlayFrames;
+		CustomPalette Cameo_OverlayPalette;
 		Valueable<bool> ExpandBuildingPlace;
-		Valueable<bool> CheckExpandPlaceGrid;
-		Valueable<Vector3D<int>> ExpandLandGridFrames;
-		Valueable<Vector3D<int>> ExpandWaterGridFrames;
+		Valueable<bool> PlacementGrid_Expand;
+		Valueable<Vector3D<int>> PlacementGrid_LandFrames;
+		Valueable<Vector3D<int>> PlacementGrid_WaterFrames;
 		Valueable<bool> SWSidebarBackground;
 		PhobosPCXFile SelectedInfantryMissingPCX;
 		PhobosPCXFile SelectedVehicleMissingPCX;
@@ -356,14 +356,14 @@ public:
 			, DamageEnemiesMultiplier { 1.0 }
 			, ExpandAircraftMission { false }
 			, CheckUnitBaseNormal { false }
-			, AlwaysExistTheCameo { false }
-			, CameoOverlayShapes { FileSystem::PIPS_SHP }
-			, CameoOverlayFrames { { -1, -1, -1 } }
-			, CameoOverlayPalette {}
+			, Cameo_AlwaysExist { false }
+			, Cameo_OverlayShapes { FileSystem::PIPS_SHP }
+			, Cameo_OverlayFrames { { -1, -1, -1 } }
+			, Cameo_OverlayPalette {}
 			, ExpandBuildingPlace { false }
-			, CheckExpandPlaceGrid { false }
-			, ExpandLandGridFrames { { 1, 0, 0 } }
-			, ExpandWaterGridFrames { { 1, 0, 0 } }
+			, PlacementGrid_Expand { false }
+			, PlacementGrid_LandFrames { { 1, 0, 0 } }
+			, PlacementGrid_WaterFrames { { 1, 0, 0 } }
 			, SWSidebarBackground { true }
 			, AINonAutoDeploy { false }
 			, AISetBaseCenter { false }

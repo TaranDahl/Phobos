@@ -164,6 +164,11 @@ public:
 		Valueable<bool> CLIsBlack;
 		Nullable<bool> Particle_AlphaImageIsLightFlash;
 
+		Valueable<bool> BuildingUndeploy;
+		Nullable<double> DamageOwnerMultiplier;
+		Nullable<double> DamageAlliesMultiplier;
+		Nullable<double> DamageEnemiesMultiplier;
+
 		Valueable<bool> SuppressRevengeWeapons;
 		ValueableVector<WeaponTypeClass*> SuppressRevengeWeapons_Types;
 		Valueable<bool> SuppressReflectDamage;
@@ -335,6 +340,11 @@ public:
 			, CombatLightChance { 1.0 }
 		    , CLIsBlack { false }
 			, Particle_AlphaImageIsLightFlash {}
+
+			, BuildingUndeploy { false }
+			, DamageOwnerMultiplier {}
+			, DamageAlliesMultiplier {}
+			, DamageEnemiesMultiplier {}
 
 			, SuppressRevengeWeapons { false }
 			, SuppressRevengeWeapons_Types {}

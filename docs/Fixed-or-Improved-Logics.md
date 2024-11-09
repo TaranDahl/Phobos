@@ -178,6 +178,7 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Projectiles created from `AirburstWeapon` now remember the WeaponType and can apply radiation etc.
 - Fixed damaged aircraft not repairing on `UnitReload=true` docks unless they land on the dock first.
 - Certain global tileset indices (`ShorePieces`, `WaterSet`, `CliffSet`, `WaterCliffs`, `WaterBridge`, `BridgeSet` and `WoodBridgeSet`) are now correctly parsed for Lunar theater.
+- Enable the observer data panel, which could only be displayed in multiplayer games, to also be displayed in skirmish games.
 - Fixed infantry `SecondaryFire` / `SecondaryProne` sequences being displayed in water instead of `WetAttack`.
 - Fixed objects with ally target and `AttackFriendlies=true` having their target reset every frame, particularly AI-owned buildings.
 - `<Player @ X>` can now be used as owner for pre-placed objects on skirmish and multiplayer maps.
@@ -1066,7 +1067,7 @@ In `rulesmd.ini`:
 [General]
 CheckUnitBaseNormal=false      ; boolean
 
-[SOMETECHNO]                   ; UnitType
+[SOMEUNIT]                     ; UnitType
 UnitBaseNormal=false           ; boolean
 UnitBaseForAllyBuilding=false  ; boolean
 ```

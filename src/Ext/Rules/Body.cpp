@@ -167,14 +167,14 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->DamageEnemiesMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageEnemiesMultiplier");
 	this->ExpandAircraftMission.Read(exINI, GameStrings::General, "ExpandAircraftMission");
 	this->CheckUnitBaseNormal.Read(exINI, GameStrings::General, "CheckUnitBaseNormal");
-	this->AlwaysExistTheCameo.Read(exINI, GameStrings::AudioVisual, "AlwaysExistTheCameo");
-	this->CameoOverlayShapes.Read(exINI, GameStrings::AudioVisual, "CameoOverlayShapes");
-	this->CameoOverlayFrames.Read(exINI, GameStrings::AudioVisual, "CameoOverlayFrames");
-	this->CameoOverlayPalette.LoadFromINI(pINI, GameStrings::AudioVisual, "CameoOverlayPalette");
+	this->Cameo_AlwaysExist.Read(exINI, GameStrings::AudioVisual, "Cameo.AlwaysExist");
+	this->Cameo_OverlayShapes.Read(exINI, GameStrings::AudioVisual, "Cameo.OverlayShapes");
+	this->Cameo_OverlayFrames.Read(exINI, GameStrings::AudioVisual, "Cameo.OverlayFrames");
+	this->Cameo_OverlayPalette.LoadFromINI(pINI, GameStrings::AudioVisual, "Cameo.OverlayPalette");
 	this->ExpandBuildingPlace.Read(exINI, GameStrings::General, "ExpandBuildingPlace");
-	this->CheckExpandPlaceGrid.Read(exINI, GameStrings::AudioVisual, "CheckExpandPlaceGrid");
-	this->ExpandLandGridFrames.Read(exINI, GameStrings::AudioVisual, "ExpandLandGridFrames");
-	this->ExpandWaterGridFrames.Read(exINI, GameStrings::AudioVisual, "ExpandWaterGridFrames");
+	this->PlacementGrid_Expand.Read(exINI, GameStrings::AudioVisual, "PlacementGrid.Expand");
+	this->PlacementGrid_LandFrames.Read(exINI, GameStrings::AudioVisual, "PlacementGrid.LandFrames");
+	this->PlacementGrid_WaterFrames.Read(exINI, GameStrings::AudioVisual, "PlacementGrid.WaterFrames");
 	this->SWSidebarBackground.Read(exINI, GameStrings::AudioVisual, "SWSidebarBackground");
 	this->SelectedInfantryMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedInfantryMissingPCX");
 	this->SelectedVehicleMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedVehicleMissingPCX");
@@ -462,14 +462,14 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->DamageEnemiesMultiplier)
 		.Process(this->ExpandAircraftMission)
 		.Process(this->CheckUnitBaseNormal)
-		.Process(this->AlwaysExistTheCameo)
-		.Process(this->CameoOverlayShapes)
-		.Process(this->CameoOverlayFrames)
-		.Process(this->CameoOverlayPalette)
+		.Process(this->Cameo_AlwaysExist)
+		.Process(this->Cameo_OverlayShapes)
+		.Process(this->Cameo_OverlayFrames)
+		.Process(this->Cameo_OverlayPalette)
 		.Process(this->ExpandBuildingPlace)
-		.Process(this->CheckExpandPlaceGrid)
-		.Process(this->ExpandLandGridFrames)
-		.Process(this->ExpandWaterGridFrames)
+		.Process(this->PlacementGrid_Expand)
+		.Process(this->PlacementGrid_LandFrames)
+		.Process(this->PlacementGrid_WaterFrames)
 		.Process(this->SWSidebarBackground)
 		.Process(this->SelectedInfantryMissingPCX)
 		.Process(this->SelectedVehicleMissingPCX)

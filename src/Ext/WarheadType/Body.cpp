@@ -280,6 +280,11 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->CLIsBlack.Read(exINI, pSection, "CLIsBlack");
 	this->Particle_AlphaImageIsLightFlash.Read(exINI, pSection, "Particle.AlphaImageIsLightFlash");
 
+	this->BuildingUndeploy.Read(exINI, pSection, "BuildingUndeploy");
+	this->DamageOwnerMultiplier.Read(exINI, pSection, "DamageOwnerMultiplier");
+	this->DamageAlliesMultiplier.Read(exINI, pSection, "DamageAlliesMultiplier");
+	this->DamageEnemiesMultiplier.Read(exINI, pSection, "DamageEnemiesMultiplier");
+
 	this->SuppressRevengeWeapons.Read(exINI, pSection, "SuppressRevengeWeapons");
 	this->SuppressRevengeWeapons_Types.Read(exINI, pSection, "SuppressRevengeWeapons.Types");
 	this->SuppressReflectDamage.Read(exINI, pSection, "SuppressReflectDamage");
@@ -334,6 +339,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 		|| this->Shield_RemoveAll
 		|| this->BuildingUndeploy
 		|| this->Convert_Pairs.size() > 0
+		|| this->BuildingUndeploy
 		|| this->InflictLocomotor
 		|| this->RemoveInflictedLocomotor
 		|| this->AttachEffects.AttachTypes.size() > 0
@@ -522,6 +528,11 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 
 		.Process(this->InflictLocomotor)
 		.Process(this->RemoveInflictedLocomotor)
+
+		.Process(this->BuildingUndeploy)
+		.Process(this->DamageOwnerMultiplier)
+		.Process(this->DamageAlliesMultiplier)
+		.Process(this->DamageEnemiesMultiplier)
 
 		.Process(this->Nonprovocative)
 
