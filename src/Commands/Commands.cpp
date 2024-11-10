@@ -13,6 +13,7 @@
 #include "SWShortcuts.h"
 #include "SelectedInfo.h"
 #include "HerosInfo.h"
+#include "FPSNewCounter.h"
 
 DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 {
@@ -35,6 +36,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<SWShortcutsCommandClass<10>>();
 	MakeCommand<SelectedInfoCommandClass>();
 	MakeCommand<HerosInfoCommandClass>();
+	MakeCommand<FPSNewCounterCommandClass>();
 
 	if (Phobos::Config::DevelopmentCommands)
 	{

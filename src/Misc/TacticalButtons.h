@@ -24,6 +24,9 @@ public:
 	// Button index N/A : Message Lists
 	bool MouseIsOverMessageLists(const Point2D* pMousePosition);
 
+	// Button index N/A : FPS Counter
+	void FPSCounterDraw();
+
 	// Button index 1-10 : Super weapons buttons
 	inline bool IndexInSWButtons();
 	void SWSidebarDraw();
@@ -76,6 +79,8 @@ public:
 
 	// Button index N/A : Message Lists
 	bool OnMessages { false };
+
+	// Button index N/A : FPS Counter
 
 	// Button index 1-10 : Super weapons buttons
 	bool DummyAction { false };
