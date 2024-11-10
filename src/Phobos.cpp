@@ -1,6 +1,8 @@
 #include "Phobos.h"
 
 #include <Drawing.h>
+#include <FPSCounter.h>
+#include <GameOptionsClass.h>
 
 #include <Utilities/Debug.h>
 #include <Utilities/Patch.h>
@@ -206,12 +208,57 @@ DEFINE_HOOK(0x4F4583, GScreenClass_DrawText, 0x6)
 	if (!HideWarning)
 #endif // !STR_GIT_COMMIT
 	{
-		RectangleStruct wanted = Drawing::GetTextDimensions(Phobos::VersionDescription, Point2D::Empty, 0, 2, 0);
-		RectangleStruct rect { (DSurface::Composite->GetWidth() - wanted.Width - 10), 0, (wanted.Width + 10), (wanted.Height + 10) };
-		Point2D location { rect.X + 5,5 };
-		ColorStruct color { 0, 0, 0 };
-		DSurface::Composite->FillRectTrans(&rect, &color, 40);
+		const auto fps = FPSCounter::CurrentFrameRate.get();
+		wchar_t fpsBuffer[0x20];
+		swprintf_s(fpsBuffer, L"FPS: %-4u", fps);
+		RectangleStruct fpsDim = Drawing::GetTextDimensions(fpsBuffer, Point2D::Empty, 0, 2, 0);
+
+		const auto avg = FPSCounter::GetAverageFrameRate();
+		wchar_t avgBuffer[0x20];
+		swprintf_s(avgBuffer, L"Avg: %.2f", avg);
+		RectangleStruct avgDim = Drawing::GetTextDimensions(avgBuffer, Point2D::Empty, 0, 2, 0);
+
+		RectangleStruct verDim = Drawing::GetTextDimensions(Phobos::VersionDescription, Point2D::Empty, 0, 2, 0);
+
+		const auto width = verDim.Width + avgDim.Width + fpsDim.Width + 20;
+		RectangleStruct rect
+		{
+			(DSurface::Composite->GetWidth() - width),
+			0,
+			width,
+			(std::max(verDim.Height, fpsDim.Height) + 10)
+		};
+
+		ColorStruct fillColor { 0, 0, 0 };
+		DSurface::Composite->FillRectTrans(&rect, &fillColor, 40);
 		DSurface::Composite->DrawRect(&rect, 0x061C);
+
+		COLORREF color = 0x67EC;
+		const auto gameSpeed = GameOptionsClass::Instance->GameSpeed;
+
+		if (!gameSpeed || fps < (60 / gameSpeed))
+		{
+			if (gameSpeed < 10)
+				color = 0xF986;
+			else if (gameSpeed < 20)
+				color = 0xFC05;
+			else if (gameSpeed < 30)
+				color = 0xFCE5;
+			else if (gameSpeed < 40)
+				color = 0xFFEC;
+			else if (gameSpeed < 50)
+				color = 0x9FEC;
+			else if (gameSpeed < 60)
+				color = 0x67EC;
+		}
+
+		auto location = Point2D { (rect.X + 5), 5 };
+		DSurface::Composite->DrawText(fpsBuffer, &location, color);
+
+		location.X += (fpsDim.Width + 5);
+		DSurface::Composite->DrawText(avgBuffer, &location, COLOR_WHITE);
+
+		location.X += (avgDim.Width + 5);
 		DSurface::Composite->DrawText(Phobos::VersionDescription, &location, 0x061C);
 	}
 	return 0;
