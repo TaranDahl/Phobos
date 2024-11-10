@@ -506,24 +506,22 @@ void TacticalButtonsClass::FPSCounterDraw()
 			color = 0xFC05;
 		else if (fps < 30)
 			color = 0xFCE5;
-		else if (fps < 40)
+		else if (fps < 45)
 			color = 0xFFEC;
-		else if (fps < 50)
-			color = 0x9FEC;
 		else if (fps < 60)
-			color = 0x67EC;
+			color = 0x9FEC;
 	}
 
 	const auto height = DSurface::Composite->GetHeight() - ((Phobos::Config::SelectedDisplay_Enable && this->CurrentSelectCameo.size()) ? 80 : 32);
 	const auto avgHeight = avgDim.Height;
-	RectangleStruct rect { 0, (height - avgHeight), avgDim.Width, avgHeight };
+	RectangleStruct rect { 0, (height - avgHeight), avgDim.Width + 4, avgHeight };
 	DSurface::Composite->FillRect(&rect, COLOR_BLACK);
 
-	auto location = Point2D { 0, rect.Y };
+	auto location = Point2D { 2, rect.Y };
 	DSurface::Composite->DrawText(avgBuffer, &location, color);
 
 	rect.Y -= fpsDim.Height;
-	rect.Width = fpsDim.Width;
+	rect.Width = fpsDim.Width + 4;
 	rect.Height = fpsDim.Height;
 	DSurface::Composite->FillRect(&rect, COLOR_BLACK);
 
