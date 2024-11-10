@@ -10,6 +10,7 @@
 #include <WWMouseClass.h>
 #include <CCToolTip.h>
 #include <InputManagerClass.h>
+#include <FPSCounter.h>
 
 #include <Ext/Side/Body.h>
 #include <Ext/House/Body.h>
@@ -477,6 +478,57 @@ bool TacticalButtonsClass::MouseIsOverMessageLists(const Point2D* pMousePosition
 	}
 
 	return false;
+}
+
+// Button index N/A : FPS Counter
+void TacticalButtonsClass::FPSCounterDraw()
+{
+	if (!Phobos::Config::FPSCounter_Enable)
+		return;
+
+	const auto fps = FPSCounter::CurrentFrameRate.get();
+	wchar_t fpsBuffer[0x20];
+	swprintf_s(fpsBuffer, L" FPS: %-5u ", fps);
+	RectangleStruct fpsDim = Drawing::GetTextDimensions(fpsBuffer, Point2D::Empty, 0, 2, 0);
+
+	wchar_t avgBuffer[0x20];
+	swprintf_s(avgBuffer, L" Avg: %-7.2lf ", FPSCounter::GetAverageFrameRate());
+	RectangleStruct avgDim = Drawing::GetTextDimensions(avgBuffer, Point2D::Empty, 0, 2, 0);
+
+	const auto gameSpeed = GameOptionsClass::Instance->GameSpeed;
+	COLORREF color = 0x67EC;
+
+	if (!gameSpeed || fps < static_cast<unsigned int>(60 / gameSpeed))
+	{
+		if (fps < 10)
+			color = 0xF986;
+		else if (fps < 20)
+			color = 0xFC05;
+		else if (fps < 30)
+			color = 0xFCE5;
+		else if (fps < 40)
+			color = 0xFFEC;
+		else if (fps < 50)
+			color = 0x9FEC;
+		else if (fps < 60)
+			color = 0x67EC;
+	}
+
+	const auto height = DSurface::Composite->GetHeight() - ((Phobos::Config::SelectedDisplay_Enable && this->CurrentSelectCameo.size()) ? 80 : 32);
+	const auto avgHeight = avgDim.Height + 4;
+	RectangleStruct rect { 0, (height - avgHeight), (avgDim.Width + 4), avgHeight };
+	DSurface::Composite->FillRect(&rect, COLOR_BLACK);
+
+	auto location = Point2D { 2, (rect.Y + 2) };
+	DSurface::Composite->DrawText(avgBuffer, &location, color);
+
+	rect.Width = fpsDim.Width + 4;
+	rect.Height = fpsDim.Height + 4;
+	rect.Y -= rect.Height;
+	DSurface::Composite->FillRect(&rect, COLOR_BLACK);
+
+	location.Y = rect.Y + 2;
+	DSurface::Composite->DrawText(fpsBuffer, &location, color);
 }
 
 // Button index 1-10 : Super weapons buttons
@@ -2103,7 +2155,6 @@ void TacticalButtonsClass::SelectedSwitch()
 			true
 		);
 	}
-
 }
 
 // Hooks
@@ -2212,6 +2263,7 @@ DEFINE_HOOK(0x69300B, ScrollClass_MouseUpdate_SkipMouseActionUpdate, 0x6)
 DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 {
 	const auto pButtons = &TacticalButtonsClass::Instance;
+	pButtons->FPSCounterDraw();
 
 	// TODO New buttons (The later draw, the higher layer)
 

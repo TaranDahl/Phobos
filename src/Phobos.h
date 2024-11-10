@@ -78,6 +78,7 @@ public:
 		static bool EnableBuildingPlacementPreview;
 		static bool DigitalDisplay_Enable;
 		static bool SelectedDisplay_Enable;
+		static bool FPSCounter_Enable;
 		static bool MessageDisplayInCenter;
 		static bool ShowBuildingStatistics;
 		static bool DrawAdjacentBoundary;
