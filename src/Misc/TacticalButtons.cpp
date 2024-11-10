@@ -488,12 +488,12 @@ void TacticalButtonsClass::FPSCounterDraw()
 
 	const auto fps = FPSCounter::CurrentFrameRate.get();
 	wchar_t fpsBuffer[0x20];
-	swprintf_s(fpsBuffer, L" FPS: %-5u ", fps);
-	RectangleStruct fpsDim = Drawing::GetTextDimensions(fpsBuffer, Point2D::Empty, 0, 2, 0);
+	swprintf_s(fpsBuffer, L"FPS: %u", fps);
+	RectangleStruct fpsDim = Drawing::GetTextDimensions(fpsBuffer, Point2D::Empty, 0);
 
 	wchar_t avgBuffer[0x20];
-	swprintf_s(avgBuffer, L" Avg: %-7.2lf ", FPSCounter::GetAverageFrameRate());
-	RectangleStruct avgDim = Drawing::GetTextDimensions(avgBuffer, Point2D::Empty, 0, 2, 0);
+	swprintf_s(avgBuffer, L"Avg: %.2lf", FPSCounter::GetAverageFrameRate());
+	RectangleStruct avgDim = Drawing::GetTextDimensions(avgBuffer, Point2D::Empty, 0);
 
 	const auto gameSpeed = GameOptionsClass::Instance->GameSpeed;
 	COLORREF color = 0x67EC;
@@ -515,19 +515,19 @@ void TacticalButtonsClass::FPSCounterDraw()
 	}
 
 	const auto height = DSurface::Composite->GetHeight() - ((Phobos::Config::SelectedDisplay_Enable && this->CurrentSelectCameo.size()) ? 80 : 32);
-	const auto avgHeight = avgDim.Height + 4;
-	RectangleStruct rect { 0, (height - avgHeight), (avgDim.Width + 4), avgHeight };
+	const auto avgHeight = avgDim.Height;
+	RectangleStruct rect { 0, (height - avgHeight), avgDim.Width, avgHeight };
 	DSurface::Composite->FillRect(&rect, COLOR_BLACK);
 
-	auto location = Point2D { 2, (rect.Y + 2) };
+	auto location = Point2D { 0, rect.Y };
 	DSurface::Composite->DrawText(avgBuffer, &location, color);
 
-	rect.Width = fpsDim.Width + 4;
-	rect.Height = fpsDim.Height + 4;
-	rect.Y -= rect.Height;
+	rect.Y -= fpsDim.Height;
+	rect.Width = fpsDim.Width;
+	rect.Height = fpsDim.Height;
 	DSurface::Composite->FillRect(&rect, COLOR_BLACK);
 
-	location.Y = rect.Y + 2;
+	location.Y = rect.Y;
 	DSurface::Composite->DrawText(fpsBuffer, &location, color);
 }
 
