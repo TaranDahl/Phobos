@@ -31,6 +31,7 @@
     <ClCompile Include="src\Commands\SWShortcuts.cpp" />
     <ClCompile Include="src\Commands\SelectedInfo.cpp" />
     <ClCompile Include="src\Commands\HerosInfo.cpp" />
+    <ClCompile Include="src\Commands\FPSNewCounter.cpp" />
     <ClCompile Include="src\Commands\ToggleDesignatorRange.cpp" />
     <ClCompile Include="src\Commands\ToggleDigitalDisplay.cpp" />
     <ClCompile Include="src\Commands\SaveVariablesToFile.cpp" />
@@ -212,6 +213,7 @@
     <ClInclude Include="src\Commands\SWShortcuts.h" />
     <ClInclude Include="src\Commands\SelectedInfo.h" />
     <ClInclude Include="src\Commands\HerosInfo.h" />
+    <ClInclude Include="src\Commands\FPSNewCounter.h" />
     <ClInclude Include="src\Commands\ToggleDesignatorRange.h" />
     <ClInclude Include="src\Commands\ToggleDigitalDisplay.h" />
     <ClInclude Include="src\Commands\SaveVariablesToFile.h" />
