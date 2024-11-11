@@ -11,6 +11,7 @@
 #include <Ext/Scenario/Body.h>
 #include <Utilities/EnumFunctions.h>
 #include <Utilities/AresFunctions.h>
+#include <Misc/TacticalButtons.h>
 
 #include <WWMouseClass.h>
 #include <TacticalClass.h>
@@ -415,6 +416,9 @@ void TechnoExt::ExtData::UpdateTypeData(TechnoTypeClass* pCurrentType)
 	auto const pThis = this->OwnerObject();
 	auto const pOldTypeExt = this->TypeExtData;
 	auto const pOldType = this->TypeExtData->OwnerObject();
+
+	// Update select data
+	TacticalButtonsClass::Instance.UpdateSelect = true;
 
 	if (this->LaserTrails.size())
 		this->LaserTrails.clear();
