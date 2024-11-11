@@ -311,6 +311,8 @@ public:
 
 		ValueableVector<TechnoTypeClass*> InitialPayload_Types;
 		ValueableVector<int> InitialPayload_Nums;
+		Valueable<double> FallingDownDamage;
+		Nullable<double> FallingDownDamage_Water;
 
 		Valueable<bool> KeepTargetOnMove;
 		Valueable<Leptons> KeepTargetOnMove_ExtraDistance;
@@ -623,6 +625,8 @@ public:
 
 			, InitialPayload_Types {}
 			, InitialPayload_Nums {}
+			, FallingDownDamage { 1.0 }
+			, FallingDownDamage_Water {}
 
 			, KeepTargetOnMove { false }
 			, KeepTargetOnMove_ExtraDistance { Leptons(0) }

@@ -539,6 +539,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->InitialPayload_Types.Read(exINI, pSection, "InitialPayload.Types");
 	this->InitialPayload_Nums.Read(exINI, pSection, "InitialPayload.Nums");
+	this->FallingDownDamage.Read(exINI, pSection, "FallingDownDamage");
+	this->FallingDownDamage_Water.Read(exINI, pSection, "FallingDownDamage.Water");
 
 	this->KeepTargetOnMove.Read(exINI, pSection, "KeepTargetOnMove");
 	this->KeepTargetOnMove_ExtraDistance.Read(exINI, pSection, "KeepTargetOnMove.ExtraDistance");
@@ -1006,6 +1008,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 
 		.Process(this->InitialPayload_Types)
 		.Process(this->InitialPayload_Nums)
+		.Process(this->FallingDownDamage)
+		.Process(this->FallingDownDamage_Water)
 
 		.Process(this->KeepTargetOnMove)
 		.Process(this->KeepTargetOnMove_ExtraDistance)
