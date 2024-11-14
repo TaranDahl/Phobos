@@ -160,6 +160,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 
 	// Check arrived
 	const auto pThisCell = pThis->GetCell();
+	const auto pHouse = pThis->Owner;
 
 	for (int i = 0; i < 8; ++i)
 	{
@@ -169,7 +170,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 
 			for (const auto& pBuildingType : docks)
 			{
-				if (pCellBuildingType == pBuildingType)
+				if (pCellBuildingType == pBuildingType && pBuilding->Owner == pHouse)
 				{
 					ArrivingRefineryNearBy(pThis, pBuilding);
 					return SkipGameCode;
@@ -177,8 +178,6 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 			}
 		}
 	}
-
-	const auto pHouse = pThis->Owner;
 
 	// Check destination
 	if (const auto pDestination = pThis->Destination)
@@ -196,7 +195,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 
 					for (const auto& pBuildingType : docks)
 					{
-						if (pCellBuildingType == pBuildingType)
+						if (pCellBuildingType == pBuildingType && pBuilding->Owner == pHouse)
 							return SkipGameCode;
 					}
 				}
