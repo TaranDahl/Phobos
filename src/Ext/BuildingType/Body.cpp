@@ -888,6 +888,7 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->AutoUpgrade.Read(exINI, pSection, "AutoUpgrade");
 	this->LimboBuild.Read(exINI, pSection, "LimboBuild");
 	this->LimboBuildID.Read(exINI, pSection, "LimboBuildID");
+	this->LaserFencePost_Fence.Read(exINI, pSection, "LaserFencePost.Fence");
 
 	this->FactoryPlant_AllowTypes.Read(exINI, pSection, "FactoryPlant.AllowTypes");
 	this->FactoryPlant_DisallowTypes.Read(exINI, pSection, "FactoryPlant.DisallowTypes");
@@ -1020,6 +1021,7 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AutoUpgrade)
 		.Process(this->LimboBuild)
 		.Process(this->LimboBuildID)
+		.Process(this->LaserFencePost_Fence)
 		.Process(this->AircraftDockingDirs)
 		.Process(this->FactoryPlant_AllowTypes)
 		.Process(this->FactoryPlant_DisallowTypes)

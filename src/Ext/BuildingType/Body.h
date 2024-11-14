@@ -72,6 +72,7 @@ public:
 		Valueable<bool> AutoUpgrade;
 		Valueable<bool> LimboBuild;
 		Valueable<int> LimboBuildID;
+		Valueable<BuildingTypeClass*> LaserFencePost_Fence;
 
 		std::vector<std::optional<DirType>> AircraftDockingDirs;
 
@@ -130,6 +131,7 @@ public:
 			, AutoUpgrade { false }
 			, LimboBuild { false }
 			, LimboBuildID { -1 }
+			, LaserFencePost_Fence {}
 			, AircraftDockingDirs {}
 			, FactoryPlant_AllowTypes {}
 			, FactoryPlant_DisallowTypes {}
