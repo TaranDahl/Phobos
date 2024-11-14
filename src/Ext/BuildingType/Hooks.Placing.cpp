@@ -274,6 +274,7 @@ namespace BuildOnOccupiersHelpers
 
 // Buildable-upon TerrainTypes Hook #1 -> sub_47C620 - Allow placing buildings on top of them
 // Buildable-upon TechnoTypes Hook #1 -> sub_47C620 - Rewrite and check whether allow placing buildings on top of them
+// Customized Laser Fence Hook #1 -> sub_47C620 - Forbid placing laser fence post on inappropriate laser fence
 DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 {
 	enum { CanNotExistHere = 0x47C6D1, CanExistHere = 0x47C6A0 };
@@ -344,9 +345,38 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 				const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
 
 				if (pTypeExt && pTypeExt->CanBeBuiltOn)
+				{
 					builtOnTechno = true;
+				}
 				else if (pOwner != pBuilding->Owner || !pType->LaserFence)
+				{
 					return CanNotExistHere;
+				}
+				else if (pBuildingType->LaserFencePost)
+				{
+					if (const auto pFenceType = BuildingTypeExt::ExtMap.Find(pBuildingType)->LaserFencePost_Fence.Get())
+					{
+						if (pFenceType != pType)
+							return CanNotExistHere;
+					}
+					else // Vanilla search
+					{
+						const auto count = BuildingTypeClass::Array->Count;
+
+						for (int i = 0; i < count; ++i)
+						{
+							const auto pSearchType = BuildingTypeClass::Array->Items[i];
+
+							if (pSearchType->LaserFence)
+							{
+								if (pSearchType != pType)
+									return CanNotExistHere;
+								else
+									break;
+							}
+						}
+					}
+				}
 			}
 			else if (absType == AbstractType::Infantry || absType == AbstractType::Unit)
 			{
@@ -1325,4 +1355,104 @@ DEFINE_HOOK(0x42EB8E, BaseClass_GetBaseNodeIndex_CheckValidBaseNode, 0x6)
 	}
 
 	return reinterpret_cast<bool(__thiscall*)(HouseClass*, BaseNodeClass*)>(0x50CAD0)(pBase->Owner, pBaseNode) ? Valid : Invalid;
+}
+
+// Customized Laser Fence Hook #2 -> sub_453060 - Select the specific laser fence type
+DEFINE_HOOK(0x452E2C, BuildingClass_CreateLaserFence_FindSpecificIndex, 0x5)
+{
+	enum { SkipGameCode = 0x452E50 };
+
+	GET(BuildingClass* const, pThis, EDI);
+
+	if (const auto pExt = BuildingTypeExt::ExtMap.Find(pThis->Type))
+	{
+		if (const auto pFenceType = pExt->LaserFencePost_Fence.Get())
+		{
+			if (pFenceType->LaserFence)
+			{
+				R->EBP(pFenceType->ArrayIndex);
+				R->EAX(BuildingTypeClass::Array->Count);
+				return SkipGameCode;
+			}
+		}
+	}
+
+	return 0;
+}
+
+// Customized Laser Fence Hook #3 -> sub_440580 - Skip uninit inappropriate laser fence
+DEFINE_HOOK(0x440AE9, BuildingClass_Unlimbo_SkipUninitFence, 0x7)
+{
+	enum { SkipGameCode = 0x440B07 };
+
+	GET(BuildingClass* const, pFence, EDI);
+	GET(BuildingClass* const, pThis, ESI);
+
+	if (const auto pExt = BuildingTypeExt::ExtMap.Find(pThis->Type))
+	{
+		if (const auto pFenceType = pExt->LaserFencePost_Fence.Get())
+		{
+			if (pFenceType != pFence->Type)
+				return SkipGameCode;
+		}
+		else // Vanilla search
+		{
+			const auto count = BuildingTypeClass::Array->Count;
+
+			for (int i = 0; i < count; ++i)
+			{
+				const auto pSearchType = BuildingTypeClass::Array->Items[i];
+
+				if (pSearchType->LaserFence)
+				{
+					if (pSearchType != pFence->Type)
+						return SkipGameCode;
+					else
+						break;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+// Customized Laser Fence Hook #4 -> sub_452BB0 - Only accept specific fence post
+DEFINE_HOOK(0x452CB4, BuildingClass_FindLaserFencePost_CheckLaserFencePost, 0x7)
+{
+	enum { SkipGameCode = 0x452D2C };
+
+	GET(BuildingClass* const, pPost, ESI);
+	GET(BuildingClass* const, pThis, EDI);
+
+	if (const auto pThisTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type))
+	{
+		if (const auto pPostTypeExt = BuildingTypeExt::ExtMap.Find(pPost->Type))
+		{
+			if (pThisTypeExt->LaserFencePost_Fence.Get() != pPostTypeExt->LaserFencePost_Fence.Get())
+				return SkipGameCode;
+		}
+	}
+
+	return 0;
+}
+
+// Customized Laser Fence Hook #5 -> sub_6D5730 - Break draw inappropriate laser fence grids
+DEFINE_HOOK(0x6D5815, TacticalClass_DrawLaserFenceGrid_SkipDrawLaserFence, 0x6)
+{
+	enum { SkipGameCode = 0x6D59A6 };
+
+	GET(BuildingTypeClass* const, pPostType, ECX);
+
+	// Have used CurrentBuilding->Type yet, so simply use static_cast
+	if (const auto pPlaceTypeExt = BuildingTypeExt::ExtMap.Find(static_cast<BuildingClass*>(DisplayClass::Instance->CurrentBuilding)->Type))
+	{
+		if (const auto pPostTypeExt = BuildingTypeExt::ExtMap.Find(pPostType))
+		{
+			if (pPlaceTypeExt->LaserFencePost_Fence.Get() != pPostTypeExt->LaserFencePost_Fence.Get())
+				return SkipGameCode;
+		}
+	}
+
+	return 0;
 }
