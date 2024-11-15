@@ -377,13 +377,135 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 
 #pragma region AirBarrier
 
+void __fastcall FindMovingInfOrVeh(CellClass* const pCell, const AbstractType findType)
+{
+	const auto flag = pCell->OccupationFlags;
+	pCell->OccupationFlags = 0;
+
+	for (int i = 0; i < 8; ++i)
+	{
+		for (auto pObject = pCell->GetNeighbourCell(static_cast<FacingType>(i))->FirstObject; pObject; pObject = pObject->NextObject)
+		{
+			const auto absType = pObject->WhatAmI();
+
+			if (absType == findType && static_cast<FootClass*>(pObject)->Locomotor->Is_Moving_Now())
+			{
+				pCell->OccupationFlags = flag;
+				return;
+			}
+		}
+	}
+}
+
+void __fastcall FindMovingInfAndVeh(CellClass* const pCell)
+{
+	const auto flag = pCell->OccupationFlags;
+	pCell->OccupationFlags = 0;
+	bool inf = false;
+	bool veh = false;
+
+	for (int i = 0; i < 8; ++i)
+	{
+		for (auto pObject = pCell->GetNeighbourCell(static_cast<FacingType>(i))->FirstObject; pObject; pObject = pObject->NextObject)
+		{
+			const auto absType = pObject->WhatAmI();
+
+			if (absType == AbstractType::Infantry)
+			{
+				if (!inf && static_cast<InfantryClass*>(pObject)->Locomotor->Is_Moving_Now())
+				{
+					pCell->OccupationFlags |= (flag & 0x1F);
+
+					if (veh)
+						return;
+
+					inf = true;
+				}
+			}
+			else if (absType == AbstractType::Unit)
+			{
+				if (!veh && static_cast<UnitClass*>(pObject)->Locomotor->Is_Moving_Now())
+				{
+					pCell->OccupationFlags |= (flag & 0x20);
+
+					if (inf)
+						return;
+
+					veh = true;
+				}
+			}
+		}
+	}
+}
+
+void __fastcall FindAltMovingInfOrVeh(CellClass* const pCell, const AbstractType findType)
+{
+	const auto flag = pCell->AltOccupationFlags;
+	pCell->AltOccupationFlags = 0;
+
+	for (int i = 0; i < 8; ++i)
+	{
+		for (auto pObject = pCell->GetNeighbourCell(static_cast<FacingType>(i))->AltObject; pObject; pObject = pObject->NextObject)
+		{
+			const auto absType = pObject->WhatAmI();
+
+			if (absType == findType && static_cast<FootClass*>(pObject)->Locomotor->Is_Moving_Now())
+			{
+				pCell->AltOccupationFlags = flag;
+				return;
+			}
+		}
+	}
+}
+
+void __fastcall FindAltMovingInfAndVeh(CellClass* const pCell)
+{
+	const auto flag = pCell->AltOccupationFlags;
+	pCell->AltOccupationFlags = 0;
+	bool inf = false;
+	bool veh = false;
+
+	for (int i = 0; i < 8; ++i)
+	{
+		for (auto pObject = pCell->GetNeighbourCell(static_cast<FacingType>(i))->AltObject; pObject; pObject = pObject->NextObject)
+		{
+			const auto absType = pObject->WhatAmI();
+
+			if (absType == AbstractType::Infantry)
+			{
+				if (!inf && static_cast<InfantryClass*>(pObject)->Locomotor->Is_Moving_Now())
+				{
+					pCell->AltOccupationFlags |= (flag & 0x1F);
+
+					if (veh)
+						return;
+
+					inf = true;
+				}
+			}
+			else if (absType == AbstractType::Unit)
+			{
+				if (!veh && static_cast<UnitClass*>(pObject)->Locomotor->Is_Moving_Now())
+				{
+					pCell->AltOccupationFlags |= (flag & 0x20);
+
+					if (inf)
+						return;
+
+					veh = true;
+				}
+			}
+		}
+	}
+}
+
 DEFINE_HOOK(0x55B4E1, LogicClass_Update_UnmarkCellOccupationFlags, 0x5)
 {
 	const auto delay = RulesExt::Global()->CleanUpAirBarrier.Get();
 
 	if (delay > 0 && !(Unsorted::CurrentFrame % delay))
 	{
-		MapClass* const pMap = MapClass::Instance;
+		const auto pMap = MapClass::Instance.get();
 		pMap->CellIteratorReset();
 
 		for (auto pCell = pMap->CellIteratorNext(); pCell; pCell = pMap->CellIteratorNext())
@@ -391,32 +513,200 @@ DEFINE_HOOK(0x55B4E1, LogicClass_Update_UnmarkCellOccupationFlags, 0x5)
 			if ((0xFF & pCell->OccupationFlags) && !pCell->FirstObject)
 			{
 				pCell->OccupationFlags &= 0x3F; // ~(Aircraft | Building)
-				const auto flagO = pCell->OccupationFlags;
-				pCell->OccupationFlags = 0;
 
-				for (int i = 0; i < 8; ++i)
+				if (pCell->OccupationFlags & 0x1F)
 				{
-					if (abstract_cast<FootClass*>(pCell->GetNeighbourCell(static_cast<FacingType>(i))->FirstObject))
-					{
-						pCell->OccupationFlags = flagO;
-						break;
-					}
+					if (pCell->OccupationFlags & 0x20)
+						FindMovingInfAndVeh(pCell);
+					else
+						FindMovingInfOrVeh(pCell, AbstractType::Infantry);
+				}
+				else if (pCell->OccupationFlags & 0x20)
+				{
+					FindMovingInfOrVeh(pCell, AbstractType::Unit);
 				}
 			}
 
 			if ((0xFF & pCell->AltOccupationFlags) && !pCell->AltObject)
 			{
 				pCell->AltOccupationFlags &= 0x3F; // ~(Aircraft | Building)
-				const auto flagA = pCell->AltOccupationFlags;
-				pCell->AltOccupationFlags = 0;
 
-				for (int i = 0; i < 8; ++i)
+				if (pCell->AltOccupationFlags & 0x1F)
 				{
-					if (abstract_cast<FootClass*>(pCell->GetNeighbourCell(static_cast<FacingType>(i))->AltObject))
+					if (pCell->AltOccupationFlags & 0x20)
+						FindAltMovingInfAndVeh(pCell);
+					else
+						FindAltMovingInfOrVeh(pCell, AbstractType::Infantry);
+				}
+				else if (pCell->AltOccupationFlags & 0x20)
+				{
+					FindAltMovingInfOrVeh(pCell, AbstractType::Unit);
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+#pragma endregion
+
+#pragma region NoQueueUpToEnter
+
+bool __fastcall CanEnterNow(UnitClass* pTransport, FootClass* pPassenger)
+{
+	const auto pOwner = pTransport->Owner;
+
+	if (!pOwner || !pOwner->IsAlliedWith(pPassenger) || pTransport->IsBeingWarpedOut())
+		return false;
+
+	if (pPassenger->IsMindControlled() || pPassenger->ParasiteEatingMe)
+		return false;
+
+	const auto pManager = pPassenger->CaptureManager;
+
+	if (pManager && pManager->IsControllingSomething())
+		return false;
+
+	const auto passengerSize = pPassenger->GetTechnoType()->Size;
+	const auto pTransportType = pTransport->Type;
+
+	if (passengerSize > pTransportType->SizeLimit)
+		return false;
+
+	const auto maxSize = pTransportType->Passengers;
+	const auto predictSize = pTransport->Passengers.GetTotalSize() + static_cast<int>(passengerSize);
+	const auto pLink = pTransport->GetNthLink();
+	const auto needCalculate = pLink && pLink != pPassenger;
+
+	if (needCalculate)
+	{
+		const auto linkCell = pLink->GetCoords();
+		const auto tranCell = pTransport->GetCoords();
+
+		if (abs(linkCell.X - tranCell.X) <= 384 && abs(linkCell.Y - tranCell.Y) <= 384)
+			return (predictSize <= (maxSize - pLink->GetTechnoType()->Size));
+	}
+
+	const auto remain = maxSize - predictSize;
+
+	if (remain < 0)
+		return false;
+
+	if (needCalculate && remain < static_cast<int>(pLink->GetTechnoType()->Size))
+	{
+		pLink->SendToFirstLink(RadioCommand::NotifyUnlink);
+		pLink->SetDestination(nullptr, true);
+		pLink->QueueMission(Mission::Guard, false);
+		pLink->EnterIdleMode(false, true);
+	}
+
+	return true;
+}
+
+DEFINE_HOOK(0x51A0D4, InfantryClass_UpdatePosition_NoQueueUpToEnter, 0x6)
+{
+	enum { EnteredThenReturn = 0x51A47E };
+
+	GET(InfantryClass* const, pThis, ESI);
+
+	if (!RulesExt::Global()->NoQueueUpToEnter)
+		return 0;
+
+	if (const auto pDest = abstract_cast<UnitClass*>(pThis->CurrentMission == Mission::Enter ? pThis->Destination : pThis->unknown_500))
+	{
+		if (pDest->Type->Passengers > 0)
+		{
+			const auto thisCell = pThis->GetCoords();
+			const auto destCell = pDest->GetCoords();
+
+			if (abs(thisCell.X - destCell.X) <= 384 && abs(thisCell.Y - destCell.Y) <= 384)
+			{
+				if (CanEnterNow(pDest, pThis)) // Replace send radio command: QueryCanEnter
+				{
+					if (const auto pTag = pDest->AttachedTag)
+						pTag->RaiseEvent(TriggerEvent::EnteredBy, pThis, CellStruct::Empty);
+
+					pThis->ArchiveTarget = nullptr;
+					pThis->OnBridge = false;
+					pThis->unknown_C4 = 0;
+					pThis->GattlingValue = 0;
+					pThis->CurrentGattlingStage = 0;
+
+					if (const auto pMind = pThis->MindControlledBy)
 					{
-						pCell->AltOccupationFlags = flagA;
-						break;
+						if (const auto pManager = pMind->CaptureManager)
+							pManager->FreeUnit(pThis);
 					}
+
+					pThis->unknown_500 = nullptr; // Added
+					pThis->Limbo();
+
+					if (pDest->Type->OpenTopped)
+						pDest->EnteredOpenTopped(pThis);
+
+					pThis->Transporter = pDest;
+					pDest->AddPassenger(pThis);
+					pThis->Undiscover();
+
+					return EnteredThenReturn;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
+{
+	enum { EnteredThenReturn = 0x73A78C };
+
+	GET(UnitClass* const, pThis, EBP);
+
+	if (!RulesExt::Global()->NoQueueUpToEnter)
+		return 0;
+
+	if (const auto pDest = abstract_cast<UnitClass*>(pThis->CurrentMission == Mission::Enter ? pThis->Destination : pThis->unknown_500))
+	{
+		if (pDest->Type->Passengers > 0)
+		{
+			const auto thisCell = pThis->GetCoords();
+			const auto destCell = pDest->GetCoords();
+
+			if (abs(thisCell.X - destCell.X) <= 384 && abs(thisCell.Y - destCell.Y) <= 384)
+			{
+				if (CanEnterNow(pDest, pThis)) // Replace send radio command: QueryCanEnter
+				{
+					// I don't know why units have no trigger
+
+					pThis->ArchiveTarget = nullptr;
+					pThis->OnBridge = false;
+					pThis->unknown_C4 = 0;
+					pThis->GattlingValue = 0;
+					pThis->CurrentGattlingStage = 0;
+
+					if (const auto pMind = pThis->MindControlledBy)
+					{
+						if (const auto pManager = pMind->CaptureManager)
+							pManager->FreeUnit(pThis);
+					}
+
+					pThis->unknown_500 = nullptr; // Added
+					pThis->Limbo();
+					pDest->AddPassenger(pThis);
+
+					if (pDest->Type->OpenTopped)
+						pDest->EnteredOpenTopped(pThis);
+
+					pThis->Transporter = pDest;
+
+					if (pThis->Type->OpenTopped)
+						pThis->SetTargetForPassengers(nullptr);
+
+					pThis->Undiscover();
+
+					return EnteredThenReturn;
 				}
 			}
 		}
@@ -558,8 +848,14 @@ DEFINE_HOOK(0x6F8BB2, TechnoClass_TryAutoTargetObject_Engineer2, 0x6)
 
 DEFINE_HOOK(0x6F8C18, TechnoClass_ScanToAttackWall_PlayerDestroyWall, 0x6)
 {
-	enum { SkipIsAIChecks = 0x6F8C52 };
-	return RulesExt::Global()->PlayerDestroyWalls ? SkipIsAIChecks : 0;
+	enum { SkipIsAIChecks = 0x6F8C52, FuncRetZero = 0x6F8DE3 };
+
+	GET(TechnoClass*, pThis, ESI);
+
+	if (!pThis->Owner->IsControlledByHuman())
+		return 0;
+
+	return RulesExt::Global()->PlayerDestroyWalls ? SkipIsAIChecks : FuncRetZero;
 }
 
 DEFINE_HOOK(0x6F8D32, TechnoClass_ScanToAttackWall_DestroyOwnerlessWalls, 0x9)
@@ -682,6 +978,7 @@ DEFINE_HOOK(0x481778, CellClass_ScatterContent_Fix, 0x6)
 
 #pragma endregion
 
+// Using plan waypoint to "enter" a fully loaded transport will create air barrier
 #pragma region PlanWaypoint
 
 DEFINE_HOOK(0x63745D, UnknownClass_PlanWaypoint_ContinuePlanningOnEnter, 0x6)

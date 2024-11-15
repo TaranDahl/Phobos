@@ -140,6 +140,24 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 			append("Destination = %s, Distance = %d, Location = (%d, %d)\n", ID, distance, mapCoords.X, mapCoords.Y);
 		}
 
+		if (pFoot->unknown_500)
+		{
+			auto mapCoords = CellStruct::Empty;
+			auto ID = "N/A";
+			int distance = 0;
+			getTargetInfo(pFoot, pFoot->unknown_500, distance, ID, mapCoords);
+			append("QueueUpToEnter = %s, Distance = %d, Location = (%d, %d)\n", ID, distance, mapCoords.X, mapCoords.Y);
+		}
+
+		if (auto const pLink = pFoot->GetNthLink())
+		{
+			auto mapCoords = CellStruct::Empty;
+			auto ID = "N/A";
+			int distance = 0;
+			getTargetInfo(pFoot, pLink, distance, ID, mapCoords);
+			append("NearestLink = %s, Distance = %d, Location = (%d, %d)\n", ID, distance, mapCoords.X, mapCoords.Y);
+		}
+
 		append("Current HP = (%d / %d)", pFoot->Health, pType->Strength);
 
 		auto pTechnoExt = TechnoExt::ExtMap.Find(pFoot);
