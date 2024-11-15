@@ -558,8 +558,14 @@ DEFINE_HOOK(0x6F8BB2, TechnoClass_TryAutoTargetObject_Engineer2, 0x6)
 
 DEFINE_HOOK(0x6F8C18, TechnoClass_ScanToAttackWall_PlayerDestroyWall, 0x6)
 {
-	enum { SkipIsAIChecks = 0x6F8C52 };
-	return RulesExt::Global()->PlayerDestroyWalls ? SkipIsAIChecks : 0;
+	enum { SkipIsAIChecks = 0x6F8C52, FuncRetZero = 0x6F8DE3 };
+
+	GET(TechnoClass*, pThis, ESI);
+
+	if (!pThis->Owner->IsControlledByHuman())
+		return 0;
+
+	return RulesExt::Global()->PlayerDestroyWalls ? SkipIsAIChecks : FuncRetZero;
 }
 
 DEFINE_HOOK(0x6F8D32, TechnoClass_ScanToAttackWall_DestroyOwnerlessWalls, 0x9)
@@ -682,6 +688,7 @@ DEFINE_HOOK(0x481778, CellClass_ScatterContent_Fix, 0x6)
 
 #pragma endregion
 
+// Using plan waypoint to "enter" a fully loaded transport will create air barrier
 #pragma region PlanWaypoint
 
 DEFINE_HOOK(0x63745D, UnknownClass_PlanWaypoint_ContinuePlanningOnEnter, 0x6)
