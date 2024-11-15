@@ -144,6 +144,7 @@ public:
 		Valueable<bool> NoRearmInEMPState;
 		Valueable<bool> NoRearmInTemporal;
 		Valueable<int> CleanUpAirBarrier;
+		Valueable<bool> NoQueueUpToEnter;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -326,6 +327,7 @@ public:
 			, NoRearmInEMPState { false }
 			, NoRearmInTemporal { false }
 			, CleanUpAirBarrier { 0 }
+			, NoQueueUpToEnter { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
