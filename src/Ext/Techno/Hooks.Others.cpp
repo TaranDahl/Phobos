@@ -505,7 +505,7 @@ DEFINE_HOOK(0x55B4E1, LogicClass_Update_UnmarkCellOccupationFlags, 0x5)
 
 	if (delay > 0 && !(Unsorted::CurrentFrame % delay))
 	{
-		const auto pMap = MapClass::Instance.get();
+		const auto pMap = MapClass::Instance();
 		pMap->CellIteratorReset();
 
 		for (auto pCell = pMap->CellIteratorNext(); pCell; pCell = pMap->CellIteratorNext())

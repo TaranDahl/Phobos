@@ -365,7 +365,7 @@ void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 {
 	this->ButtonIndex = this->CheckMouseOverButtons(pMousePosition);
 
-	const auto pToolTips = CCToolTip::Instance.get();
+	const auto pToolTips = CCToolTip::Instance();
 
 	// SW ToolTip
 	if (this->IndexInSWButtons()) // Button index 1-10 : Super weapons buttons
@@ -430,7 +430,7 @@ void TacticalButtonsClass::PressDesignatedButton(int triggerIndex)
 		else if (triggerIndex == 2)
 			DisplayClass::Instance->CurrentSWTypeIndex = -1;
 
-		const auto pToolTips = CCToolTip::Instance.get();
+		const auto pToolTips = CCToolTip::Instance();
 		this->RecordSuperIndex = -1;
 		pToolTips->ToolTipDelay = pToolTips->LastToolTipDelay;
 	}
@@ -460,7 +460,7 @@ void TacticalButtonsClass::PressDesignatedButton(int triggerIndex)
 // Button index N/A : Message Lists
 bool TacticalButtonsClass::MouseIsOverMessageLists(const Point2D* pMousePosition)
 {
-	const auto pMessages = &MessageListClass::Instance.get();
+	const auto pMessages = &MessageListClass::Instance();
 
 	if (TextLabelClass* pText = pMessages->MessageList)
 	{
@@ -486,7 +486,7 @@ void TacticalButtonsClass::FPSCounterDraw()
 	if (!Phobos::Config::FPSCounter_Enable)
 		return;
 
-	const auto fps = FPSCounter::CurrentFrameRate.get();
+	const auto fps = FPSCounter::CurrentFrameRate();
 	wchar_t fpsBuffer[0x20];
 	swprintf_s(fpsBuffer, L"FPS: %u", fps);
 	RectangleStruct fpsDim = Drawing::GetTextDimensions(fpsBuffer, Point2D::Empty, 0);
@@ -543,7 +543,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 	if (!currentCounts)
 		return;
 
-	const auto pHouse = HouseClass::CurrentPlayer.get();
+	const auto pHouse = HouseClass::CurrentPlayer();
 	const auto pSideExt = SideExt::ExtMap.Find(SideClass::Array->GetItem(pHouse->SideIndex));
 	const bool drawSWSidebarBackground = RulesExt::Global()->SWSidebarBackground && pSideExt;
 	const int height = DSurface::Composite->GetHeight() - 32;
@@ -732,7 +732,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 
 void TacticalButtonsClass::SWSidebarRecheck()
 {
-	const auto pHouse = HouseClass::CurrentPlayer.get();
+	const auto pHouse = HouseClass::CurrentPlayer();
 	auto& data = ScenarioExt::Global()->SWButtonData;
 
 	for (auto it = data.begin(); it != data.end();)
@@ -840,7 +840,7 @@ void TacticalButtonsClass::SWSidebarTrigger(int buttonIndex)
 	if (static_cast<size_t>(buttonIndex) > data.size())
 		return;
 
-	const auto pSidebar = SidebarClass::Instance.get();
+	const auto pSidebar = SidebarClass::Instance();
 	this->DummyAction = true;
 
 	DummySelectClass pButton;
@@ -898,7 +898,7 @@ void TacticalButtonsClass::SWSidebarSwitch()
 	if (ScenarioClass::Instance->UserInputLocked)
 		return;
 
-	const auto pHouse = HouseClass::CurrentPlayer.get();
+	const auto pHouse = HouseClass::CurrentPlayer();
 
 	if (pHouse->IsObserver())
 		return;
@@ -932,7 +932,7 @@ bool TacticalButtonsClass::SWQuickLaunch(int superIndex)
 	if (const auto pTypeExt = SWTypeExt::ExtMap.Find(pType))
 	{
 		const int index = HouseClass::CurrentPlayer->ArrayIndex;
-		const auto pTactical = TacticalClass::Instance.get();
+		const auto pTactical = TacticalClass::Instance();
 
 		if (pTypeExt->SW_QuickFireAtMouse && keyboardCall)
 		{
@@ -1030,7 +1030,7 @@ void TacticalButtonsClass::HerosDraw()
 
 		if (!pTechno->InLimbo)
 		{
-			const auto pRules = RulesClass::Instance.get();
+			const auto pRules = RulesClass::Instance();
 			auto ratio = pTechno->GetHealthPercentage();
 
 			if (pTechno->IsIronCurtained())
@@ -1148,7 +1148,7 @@ void TacticalButtonsClass::HerosDraw()
 				pSelect = pTrans;
 
 			const auto pSelectExt = TechnoExt::ExtMap.Find(pSelect);
-			const auto pRules = RulesClass::Instance.get();
+			const auto pRules = RulesClass::Instance();
 			auto ratio = pTechno->GetHealthPercentage();
 
 			if (pSelect->IsIronCurtained())
@@ -1303,7 +1303,7 @@ void TacticalButtonsClass::HerosDraw()
 				rect.Width = static_cast<int>(50 * ratio + 0.5);
 				rect.Height = 3;
 
-				const auto pRules = RulesClass::Instance.get();
+				const auto pRules = RulesClass::Instance();
 				const int color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
 				DSurface::Composite->FillRect(&rect, color);
 			}
@@ -1871,7 +1871,7 @@ void TacticalButtonsClass::SelectedDraw()
 
 					position += Point2D { 60, 3 };
 					{
-						const auto pHouse = HouseClass::CurrentPlayer.get();
+						const auto pHouse = HouseClass::CurrentPlayer();
 						auto name = pType->UIName;
 
 						if (!pHouse->IsAlliedWith(pThis) && !pHouse->IsObserver())
@@ -1994,7 +1994,7 @@ void TacticalButtonsClass::SelectedDraw()
 						{
 							if (pTypeExt->SelectedInfo_UpperColor.Get() == ColorStruct{ 0, 0, 0 })
 							{
-								const auto pRules = RulesClass::Instance.get();
+								const auto pRules = RulesClass::Instance();
 								const auto ratio = static_cast<double>(value) / maxValue;
 								color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
 							}
@@ -2035,7 +2035,7 @@ void TacticalButtonsClass::SelectedDraw()
 						{
 							if (pTypeExt->SelectedInfo_BelowColor.Get() == ColorStruct{ 0, 0, 0 })
 							{
-								const auto pRules = RulesClass::Instance.get();
+								const auto pRules = RulesClass::Instance();
 								const auto ratio = static_cast<double>(value) / maxValue;
 								color = (ratio > pRules->ConditionYellow) ? 0x67EC : (ratio > pRules->ConditionRed ? 0xFFEC : 0xF986);
 							}
