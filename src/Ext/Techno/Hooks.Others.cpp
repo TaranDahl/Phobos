@@ -1632,7 +1632,7 @@ DEFINE_HOOK(0x4D9620, FootClass_SetDestination_FollowTargetSelf, 0x5)
 
 	GET(AbstractClass*, pDestination, ECX);
 
-	if (RulesExt::Global()->FollowTargetSelf)
+	if (RulesExt::Global()->FollowTargetSelf && pDestination->WhatAmI() != AbstractType::Building)
 	{
 		auto crd = pDestination->GetCoords();
 		R->EAX(&crd);
