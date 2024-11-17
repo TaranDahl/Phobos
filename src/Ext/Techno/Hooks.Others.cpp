@@ -978,8 +978,27 @@ DEFINE_HOOK(0x481778, CellClass_ScatterContent_Fix, 0x6)
 
 #pragma endregion
 
-// Using plan waypoint to "enter" a fully loaded transport will create air barrier
 #pragma region PlanWaypoint
+
+DEFINE_HOOK(0x5229F4, InfantryClass_OccupyOrAssault_ClearPlanningTokens, 0x6)
+{
+	GET(InfantryClass* const, pThis, ESI);
+
+	pThis->ClearPlanningTokens(nullptr);
+	pThis->ClearNavQueue();
+
+	return 0;
+}
+
+DEFINE_HOOK(0x71068B, TechnoClass_AddPassenger_ClearPlanningTokens, 0xA)
+{
+	GET(FootClass* const, pPassenger, EDI);
+
+	pPassenger->ClearPlanningTokens(nullptr);
+	pPassenger->ClearNavQueue();
+
+	return 0;
+}
 
 DEFINE_HOOK(0x63745D, UnknownClass_PlanWaypoint_ContinuePlanningOnEnter, 0x6)
 {
