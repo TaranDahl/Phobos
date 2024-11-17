@@ -624,6 +624,9 @@ DEFINE_HOOK(0x51A0D4, InfantryClass_UpdatePosition_NoQueueUpToEnter, 0x6)
 			{
 				if (CanEnterNow(pDest, pThis)) // Replace send radio command: QueryCanEnter
 				{
+					pThis->unknown_500 = nullptr; // Added, to prevent passengers from wanting to get on after getting off
+					pThis->EnterIdleMode(false, true); // Added, to stop the passengers and let OpenTopped work normally
+
 					if (const auto pTag = pDest->AttachedTag)
 						pTag->RaiseEvent(TriggerEvent::EnteredBy, pThis, CellStruct::Empty);
 
@@ -639,7 +642,6 @@ DEFINE_HOOK(0x51A0D4, InfantryClass_UpdatePosition_NoQueueUpToEnter, 0x6)
 							pManager->FreeUnit(pThis);
 					}
 
-					pThis->unknown_500 = nullptr; // Added
 					pThis->Limbo();
 
 					if (pDest->Type->OpenTopped)
@@ -678,6 +680,9 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 			{
 				if (CanEnterNow(pDest, pThis)) // Replace send radio command: QueryCanEnter
 				{
+					pThis->unknown_500 = nullptr; // Added, to prevent passengers from wanting to get on after getting off
+					pThis->EnterIdleMode(false, true); // Added, to stop the passengers and let OpenTopped work normally
+
 					// I don't know why units have no trigger
 
 					pThis->ArchiveTarget = nullptr;
@@ -692,7 +697,6 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 							pManager->FreeUnit(pThis);
 					}
 
-					pThis->unknown_500 = nullptr; // Added
 					pThis->Limbo();
 					pDest->AddPassenger(pThis);
 
