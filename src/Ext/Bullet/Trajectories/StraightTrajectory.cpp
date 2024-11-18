@@ -801,7 +801,7 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 	//Step 2: Find valid targets in the air within range if necessary.
 	if (pType->ProximityFlight)
 	{
-		const auto airTracker = &AircraftTrackerClass::Instance.get();
+		const auto airTracker = &AircraftTrackerClass::Instance;
 		airTracker->FillCurrentVector(MapClass::Instance->GetCellAt(pBullet->Location + velocityCrd * 0.5), static_cast<int>((pType->ProximityRadius.Get() + pType->Trajectory_Speed / 2) / Unsorted::LeptonsPerCell));
 
 		for (auto pTechno = airTracker->Get(); pTechno; pTechno = airTracker->Get())
@@ -864,10 +864,10 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 
 	for (const auto& pTechno : validTechnos)
 	{
-		if (this->TheCasualty.contains(pTechno))
-			this->TheCasualty[pTechno] = 20;
-		else
+		if (!this->TheCasualty.contains(pTechno))
 			casualtyChecked.push_back(pTechno);
+
+		this->TheCasualty[pTechno] = 20;
 	}
 
 	//Step 4: Detonate warheads in sequence based on distance.
@@ -882,7 +882,6 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 
 	for (const auto& pTechno : casualtyChecked)
 	{
-		this->TheCasualty[pTechno] = 20;
 		auto damage = this->GetTheTrueDamage(this->ProximityDamage, pBullet, pType->ProximityMedial ? nullptr : pTechno, false);
 
 		if (pType->ProximityDirect)
