@@ -56,6 +56,11 @@ DEFINE_HOOK(0x5F7A89, ObjectTypeClass_FindFactory_End, 0x5)
 	return 0;
 }
 
+namespace KickOutJumpjetFromAirport
+{
+	bool Processing = false;
+}
+
 DEFINE_HOOK(0x443C71, BuildingClass_KickOutUnit_ThisIsAJumpjet, 0x6)
 {
 	GET(TechnoClass* const, pProduct, EDI);
@@ -66,6 +71,7 @@ DEFINE_HOOK(0x443C71, BuildingClass_KickOutUnit_ThisIsAJumpjet, 0x6)
 	{
 		R->EDI(pTypeExt->ThisIsAJumpjet->CreateObject(pProduct->Owner));
 		pProduct->UnInit();
+		KickOutJumpjetFromAirport::Processing = true;
 	}
 
 	return 0;
@@ -77,8 +83,9 @@ DEFINE_HOOK(0x44409C, BuildingClass_KickOutUnit_ImAJumpjetFromAirport1, 0x6)
 
 	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pProduct->GetTechnoType());
 
-	if (pTypeExt && pTypeExt->ImAJumpjetFromAirport)
+	if (pTypeExt && pTypeExt->ImAJumpjetFromAirport && KickOutJumpjetFromAirport::Processing)
 	{
+		KickOutJumpjetFromAirport::Processing = false;
 		return 0x444159;
 	}
 
