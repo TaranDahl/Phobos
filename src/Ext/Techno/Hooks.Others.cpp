@@ -1236,7 +1236,7 @@ DEFINE_HOOK(0x4D6D34, FootClass_MissionAreaGuard_Miner, 0x5)
 
 	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
 
-	return (pTypeExt && pTypeExt->Harvester_CanGuardArea) ? GuardArea : 0;
+	return (pThis->Owner->IsControlledByHuman() && pTypeExt && pTypeExt->Harvester_CanGuardArea) ? GuardArea : 0;
 }
 
 #pragma endregion
@@ -1406,7 +1406,6 @@ DEFINE_HOOK(0x444CA3, BuildingClass_KickOutUnit_RallyPointAreaGuard1, 0x6)
 }
 
 // Vehicle but without BuildingClass::Unload calling, e.g. the building has WeaponsFactory = no set.
-// Currently I have no idea about how to deal with the normally unloaded vehicles.
 // Also fix the bug that WeaponsFactory = no will make the product ignore the rally point.
 // Also fix the bug that WeaponsFactory = no will make the Jumpjet product park on the ground.
 DEFINE_HOOK(0x4448CE, BuildingClass_KickOutUnit_RallyPointAreaGuard2, 0x6)
