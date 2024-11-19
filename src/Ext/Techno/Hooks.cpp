@@ -543,3 +543,39 @@ DEFINE_HOOK(0x70EFE0, TechnoClass_GetMaxSpeed, 0x6)
 	return SkipGameCode;
 }
 
+#pragma region JumpjetSpeedType
+
+namespace JumpjetSpeedType
+{
+	int speedType;
+}
+
+DEFINE_HOOK(0x54B2DE, JumpjetLocomotionClass_MoveTo_JumpjetSpeedType, 0x6)
+{
+	GET(ILocomotionPtr, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(locomotion_cast<JumpjetLocomotionClass*>(pThis)->LinkedTo->GetTechnoType());
+
+	if (pTypeExt)
+	{
+		JumpjetSpeedType::speedType = pTypeExt->JumpjetSpeedType;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x56DC20, MapClass_NearByLocation_JumpjetSpeedType, 0x6)
+{
+	enum { Ret_in_JJLoco_MoveTo = 0x54B374 };
+
+	GET(int*, esp, ESP);
+
+	if (*esp == Ret_in_JJLoco_MoveTo)
+	{
+		R->Stack(STACK_OFFSET(0, 0xC), JumpjetSpeedType::speedType);
+	}
+
+	return 0;
+}
+
+#pragma endregion
