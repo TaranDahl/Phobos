@@ -1894,9 +1894,9 @@ DEFINE_HOOK(0x4DF3A6, FootClass_UpdateAttackMove_Follow, 0x6)
 
 	if (pTypeExt && pTypeExt->AttackMove_Follow)
 	{
-		auto pTechnoVectors = Helpers::Alex::getCellSpreadItems(pThis->GetCoords(), pThis->GetGuardRange(2), pTypeExt->AttackMove_Follow_IncludeAir);
+		auto pTechnoVectors = Helpers::Alex::getCellSpreadItems(pThis->GetCoords(), (double)pThis->GetGuardRange(2) / 256, pTypeExt->AttackMove_Follow_IncludeAir);
 		TechnoClass* pClosestTarget = nullptr;
-		double closestRange = 1024;
+		int closestRange = 256 * 256;
 
 		for (auto pTechno : pTechnoVectors)
 		{
@@ -1906,8 +1906,9 @@ DEFINE_HOOK(0x4DF3A6, FootClass_UpdateAttackMove_Follow, 0x6)
 				pTechno->vt_entry_4C4()) // MegaMissionIsAttackMove)
 			{
 				auto dist = pTechno->DistanceFrom(pThis);
+				auto const pTargetTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType());
 
-				if (dist < closestRange)
+				if (dist < closestRange && pTargetTypeExt && !pTargetTypeExt->AttackMove_Follow)
 				{
 					pClosestTarget = pTechno;
 					closestRange = dist;
@@ -1917,11 +1918,27 @@ DEFINE_HOOK(0x4DF3A6, FootClass_UpdateAttackMove_Follow, 0x6)
 
 		if (pClosestTarget)
 		{
-			pThis->vt_entry_4A8(); // ClearMegaMission
 			pThis->SetDestination(pClosestTarget, false);
 			pThis->SetArchiveTarget(pClosestTarget);
 			pThis->QueueMission(Mission::Area_Guard, true);
 		}
+		else
+		{
+			if (pThis->unknown_5CC)
+			{
+				pThis->SetDestination((AbstractClass*)pThis->unknown_5CC, false);
+			}
+			else if (pThis->unknown_5C8)
+			{
+				pThis->SetDestination((AbstractClass*)pThis->unknown_5C8, false);
+			}
+			else
+			{
+				pThis->SetDestination(nullptr, false);
+			}
+		}
+
+		pThis->vt_entry_4A8(); // ClearMegaMission
 
 		R->EAX(pClosestTarget);
 		return FuncRet;
