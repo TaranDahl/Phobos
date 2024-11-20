@@ -268,6 +268,9 @@ public:
 		Valueable<int> CombatLightDetailLevel;
 		Valueable<int> LightFlashAlphaImageDetailLevel;
 
+		Valueable<bool> AttackMove_IgnoreWeaponCheck;
+		Valueable<bool> AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -489,6 +492,8 @@ public:
 			, WarheadParticleAlphaImageIsLightFlash { false }
 			, CombatLightDetailLevel { 0 }
 			, LightFlashAlphaImageDetailLevel { 0 }
+			, AttackMove_IgnoreWeaponCheck { false }
+			, AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault { false }
 		{ }
 
 		virtual ~ExtData() = default;

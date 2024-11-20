@@ -309,6 +309,9 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->CombatLightDetailLevel.Read(exINI, GameStrings::AudioVisual, "CombatLightDetailLevel");
 	this->LightFlashAlphaImageDetailLevel.Read(exINI, GameStrings::AudioVisual, "LightFlashAlphaImageDetailLevel");
 
+	this->AttackMove_IgnoreWeaponCheck.Read(exINI, GameStrings::General, "AttackMove.IgnoreWeaponCheck");
+
+	this->AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault.Read(exINI, GameStrings::General, "AttackMove.StopWhenTargetAcquired.UseOpportunityFireAsDefault");
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
 	for (int i = 0; i < itemsCount; ++i)
@@ -592,6 +595,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->WarheadParticleAlphaImageIsLightFlash)
 		.Process(this->CombatLightDetailLevel)
 		.Process(this->LightFlashAlphaImageDetailLevel)
+		.Process(this->AttackMove_IgnoreWeaponCheck)
+		.Process(this->AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault)
 		;
 }
 
