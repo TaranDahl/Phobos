@@ -1014,8 +1014,27 @@ DEFINE_HOOK(0x51AB5C, InfantryClass_SetDestination_JJInfFix, 0x6)
 
 	if (pThis->Type->BalloonHover && !pDest && pThis->Destination && locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor) && pThis->Target)
 	{
+		if (pThis->IsCloseEnoughToAttack(pThis->Target))
+		{
+			pThis->StopMoving();
+			pThis->AbortMotion();
+		}
+
 		pThis->ForceMission(Mission::Attack);
 		return FuncRet;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x741A66, UnitClass_SetDestination_JJVehFix, 0x5)
+{
+	GET(UnitClass* const, pThis, EBP);
+
+	if (pThis->IsCloseEnoughToAttack(pThis->Target))
+	{
+		pThis->StopMoving();
+		pThis->AbortMotion();
 	}
 
 	return 0;

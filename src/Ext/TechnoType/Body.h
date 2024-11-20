@@ -300,12 +300,15 @@ public:
 		Valueable<bool> MissileSpawnUseOtherFLHs;
 		Valueable<bool> HarvesterQuickUnloader;
 		Nullable<bool> DistributeTargetingFrame;
+		Valueable<bool> AttackMove_Follow;
+		Valueable<bool> AttackMove_Follow_IncludeAir;
 		Nullable<bool> AttackMove_StopWhenTargetAcquired;
 		Valueable<TechnoTypeClass*> ThisIsAJumpjet;
 		Valueable<bool> ImAJumpjetFromAirport;
 		Valueable<bool> IgnoreRallyPoint;
 		Nullable<bool> Sinkable;
 		Valueable<int> SinkSpeed;
+		Valueable<int> JumpjetSpeedType;
 
 		Nullable<bool> KeepAlive;
 
@@ -614,12 +617,15 @@ public:
 			, MissileSpawnUseOtherFLHs { false }
 			, HarvesterQuickUnloader { false }
 			, DistributeTargetingFrame {}
+			, AttackMove_Follow { false }
+			, AttackMove_Follow_IncludeAir { false }
 			, AttackMove_StopWhenTargetAcquired {}
 			, ThisIsAJumpjet { nullptr }
 			, ImAJumpjetFromAirport { false }
 			, IgnoreRallyPoint { false }
 			, Sinkable { }
 			, SinkSpeed { 5 }
+			, JumpjetSpeedType { 3 }
 
 			, KeepAlive {}
 

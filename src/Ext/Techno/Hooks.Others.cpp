@@ -2,10 +2,12 @@
 
 #include <EventClass.h>
 #include <SpawnManagerClass.h>
+#include <JumpjetLocomotionClass.h>
 
 #include <Ext/Building/Body.h>
 #include <Ext/WeaponType/Body.h>
 #include "Ext/BulletType/Body.h"
+#include <Utilities/Helpers.Alex.h>
 
 #pragma region NoBurstDelay
 
@@ -1673,6 +1675,110 @@ DEFINE_HOOK(0x737DE2, UnitClass_ReceiveDamage_Sinkable, 0x6)
 		ShouldSink = pTypeExt->Sinkable.Get(ShouldSink);
 
 	return ShouldSink ? GoOtherChecks : NoSink;
+}
+
+#pragma endregion
+
+#pragma region JumpjetSpeedType
+
+namespace JumpjetSpeedType
+{
+	int speedType;
+}
+
+DEFINE_HOOK(0x54B2DE, JumpjetLocomotionClass_MoveTo_JumpjetSpeedType, 0x6)
+{
+	GET(ILocomotionPtr, pThis, ESI);
+
+	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(locomotion_cast<JumpjetLocomotionClass*>(pThis)->LinkedTo->GetTechnoType()))
+		JumpjetSpeedType::speedType = pTypeExt->JumpjetSpeedType;
+
+	return 0;
+}
+
+DEFINE_HOOK(0x56DC20, MapClass_NearByLocation_JumpjetSpeedType, 0x6)
+{
+	enum { Ret_in_JJLoco_MoveTo = 0x54B374 };
+
+	GET(int*, esp, ESP);
+
+	if (*esp == Ret_in_JJLoco_MoveTo)
+		R->Stack(STACK_OFFSET(0, 0xC), JumpjetSpeedType::speedType);
+
+	return 0;
+}
+
+#pragma endregion
+
+#pragma region AttackMove
+
+DEFINE_HOOK(0x4DF410, FootClass_UpdateAttackMove_TargetAcquired, 0x6)
+{
+	GET(FootClass* const, pThis, ESI);
+
+	auto const pType = pThis->GetTechnoType();
+
+	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType))
+	{
+		if (pTypeExt->AttackMove_StopWhenTargetAcquired.Get(RulesExt::Global()->AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault && !pType->OpportunityFire))
+		{
+			pThis->StopMoving();
+			pThis->AbortMotion();
+		}
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x711E90, TechnoTypeClass_CanAttackMove_IgnoreWeapon, 0x6)
+{
+	enum { SkipGameCode = 0x711E9A };
+	return RulesExt::Global()->AttackMove_IgnoreWeaponCheck ? SkipGameCode : 0;
+}
+
+DEFINE_HOOK(0x4DF3A6, FootClass_UpdateAttackMove_Follow, 0x6)
+{
+	enum { FuncRet = 0x4DF425 };
+
+	GET(FootClass* const, pThis, ESI);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	if (pTypeExt && pTypeExt->AttackMove_Follow)
+	{
+		auto pTechnoVectors = Helpers::Alex::getCellSpreadItems(pThis->GetCoords(), pThis->GetGuardRange(2), pTypeExt->AttackMove_Follow_IncludeAir);
+		TechnoClass* pClosestTarget = nullptr;
+		double closestRange = 1024;
+
+		for (auto pTechno : pTechnoVectors)
+		{
+			if ((pTechno->AbstractFlags & AbstractFlags::Foot) != AbstractFlags::None &&
+				pTechno != pThis && pTechno->Owner == pThis->Owner &&
+				pTechno->vt_entry_4C4()) // MegaMissionIsAttackMove()
+			{
+				auto dist = pTechno->DistanceFrom(pThis);
+
+				if (dist < closestRange)
+				{
+					pClosestTarget = pTechno;
+					closestRange = dist;
+				}
+			}
+		}
+
+		if (pClosestTarget)
+		{
+			pThis->vt_entry_4A8(); // ClearMegaMission()
+			pThis->SetDestination(pClosestTarget, false);
+			pThis->SetArchiveTarget(pClosestTarget);
+			pThis->QueueMission(Mission::Area_Guard, true);
+		}
+
+		R->EAX(pClosestTarget);
+		return FuncRet;
+	}
+
+	return 0;
 }
 
 #pragma endregion

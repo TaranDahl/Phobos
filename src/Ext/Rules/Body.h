@@ -249,6 +249,7 @@ public:
 		Valueable<bool> HarvesterScanAfterUnload;
 		Valueable<bool> DistributeTargetingFrame;
 		Valueable<bool> DistributeTargetingFrame_AIOnly;
+		Valueable<bool> AttackMove_IgnoreWeaponCheck;
 		Valueable<bool> AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault;
 
 		Valueable<double> AircraftLevelLightMultiplier;
@@ -475,6 +476,7 @@ public:
 			, HarvesterScanAfterUnload { false }
 			, DistributeTargetingFrame { false }
 			, DistributeTargetingFrame_AIOnly { true }
+			, AttackMove_IgnoreWeaponCheck { false }
 			, AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault { false }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
