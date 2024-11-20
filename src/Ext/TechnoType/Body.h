@@ -300,6 +300,8 @@ public:
 		Valueable<bool> MissileSpawnUseOtherFLHs;
 		Valueable<bool> HarvesterQuickUnloader;
 		Nullable<bool> DistributeTargetingFrame;
+		Valueable<bool> AttackMove_Follow;
+		Valueable<bool> AttackMove_Follow_IncludeAir;
 		Nullable<bool> AttackMove_StopWhenTargetAcquired;
 		Valueable<TechnoTypeClass*> ThisIsAJumpjet;
 		Valueable<bool> ImAJumpjetFromAirport;
@@ -322,10 +324,6 @@ public:
 		Nullable<AnimTypeClass*> Wake_Grapple;
 		Nullable<AnimTypeClass*> Wake_Sinking;
 
-		Valueable<bool> AttackMove_Follow;
-		Valueable<bool> AttackMove_Follow_IncludeAir;
-		Nullable<bool> AttackMove_StopWhenTargetAcquired;
-
 		struct LaserTrailDataEntry
 		{
 			ValueableIdx<LaserTrailTypeClass> idxType;
@@ -344,6 +342,7 @@ public:
 		std::vector<std::vector<CoordStruct>> EliteCrouchedWeaponBurstFLHs;
 		std::vector<std::vector<CoordStruct>> DeployedWeaponBurstFLHs;
 		std::vector<std::vector<CoordStruct>> EliteDeployedWeaponBurstFLHs;
+
 
 		ExtData(TechnoTypeClass* OwnerObject) : Extension<TechnoTypeClass>(OwnerObject)
 			, HealthBar_Hide { false }
@@ -618,6 +617,8 @@ public:
 			, MissileSpawnUseOtherFLHs { false }
 			, HarvesterQuickUnloader { false }
 			, DistributeTargetingFrame {}
+			, AttackMove_Follow { false }
+			, AttackMove_Follow_IncludeAir { false }
 			, AttackMove_StopWhenTargetAcquired {}
 			, ThisIsAJumpjet { nullptr }
 			, ImAJumpjetFromAirport { false }
@@ -639,10 +640,6 @@ public:
 			, Wake { }
 			, Wake_Grapple { }
 			, Wake_Sinking { }
-
-			, AttackMove_Follow { false }
-			, AttackMove_Follow_IncludeAir { false }
-			, AttackMove_StopWhenTargetAcquired { }
 		{ }
 
 		virtual ~ExtData() = default;

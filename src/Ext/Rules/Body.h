@@ -249,6 +249,7 @@ public:
 		Valueable<bool> HarvesterScanAfterUnload;
 		Valueable<bool> DistributeTargetingFrame;
 		Valueable<bool> DistributeTargetingFrame_AIOnly;
+		Valueable<bool> AttackMove_IgnoreWeaponCheck;
 		Valueable<bool> AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault;
 
 		Valueable<double> AircraftLevelLightMultiplier;
@@ -267,9 +268,6 @@ public:
 		Valueable<bool> WarheadParticleAlphaImageIsLightFlash;
 		Valueable<int> CombatLightDetailLevel;
 		Valueable<int> LightFlashAlphaImageDetailLevel;
-
-		Valueable<bool> AttackMove_IgnoreWeaponCheck;
-		Valueable<bool> AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault;
 
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
@@ -478,6 +476,7 @@ public:
 			, HarvesterScanAfterUnload { false }
 			, DistributeTargetingFrame { false }
 			, DistributeTargetingFrame_AIOnly { true }
+			, AttackMove_IgnoreWeaponCheck { false }
 			, AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault { false }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
@@ -492,8 +491,6 @@ public:
 			, WarheadParticleAlphaImageIsLightFlash { false }
 			, CombatLightDetailLevel { 0 }
 			, LightFlashAlphaImageDetailLevel { 0 }
-			, AttackMove_IgnoreWeaponCheck { false }
-			, AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault { false }
 		{ }
 
 		virtual ~ExtData() = default;

@@ -79,21 +79,3 @@ DEFINE_HOOK(0x6FA67D, TechnoClass_Update_DistributeTargetingFrame, 0xA)
 	R->EAX(pThis->vt_entry_4C4());
 	return Targeting;
 }
-
-DEFINE_HOOK(0x4DF410, FootClass_UpdateAttackMove_TargetAcquired, 0x6)
-{
-	GET(FootClass* const, pThis, ESI);
-
-	auto const pType = pThis->GetTechnoType();
-
-	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType))
-	{
-		if (pTypeExt->AttackMove_StopWhenTargetAcquired.Get(!pType->OpportunityFire && RulesExt::Global()->AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault))
-		{
-			pThis->StopMoving();
-			pThis->AbortMotion();
-		}
-	}
-
-	return 0;
-}
