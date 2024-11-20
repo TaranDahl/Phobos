@@ -972,23 +972,36 @@ DEFINE_JUMP(LJMP, 0x517FF5, 0x518016); // Warhead with InfDeath=9 versus infantr
 // Jumpjet infantry will no longer acts stupid when assigned a attack mission.
 DEFINE_HOOK(0x51AB5C, InfantryClass_SetDestination_JJInfFix, 0x6)
 {
-	enum { VanillaCode = 0, FuncRet = 0x51B1D7 };
+	enum { FuncRet = 0x51B1D7 };
 
 	GET(InfantryClass* const, pThis, EBP);
 	GET(AbstractClass* const, pDest, EBX);
 
-	if (pThis->Type->BalloonHover && !pDest)
+	if (pThis->Type->BalloonHover && !pDest && pThis->Destination && locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor) && pThis->Target)
 	{
-		auto const pDestNow = pThis->Destination;
-		auto const pTarget = pThis->Target;
-		auto const JJLoco = locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor);
-
-		if (pDestNow && JJLoco && pTarget)
+		if (pThis->IsCloseEnough(pThis->Target, pThis->SelectWeapon(pThis->Target))) // if in range, then stop.
 		{
-			pThis->ForceMission(Mission::Attack);
-			return FuncRet;
+			pThis->StopMoving();
+			pThis->AbortMotion();
 		}
+
+		pThis->ForceMission(Mission::Attack);
+		return FuncRet;
 	}
 
-	return VanillaCode;
+	return 0;
+}
+
+// For vehicles. If in range, then stop.
+DEFINE_HOOK(0x741A66, UnitClass_SetDestination_JJVehFix, 0x5)
+{
+	GET(UnitClass* const, pThis, EBP);
+
+	if (pThis->IsCloseEnough(pThis->Target, pThis->SelectWeapon(pThis->Target)))
+	{
+		pThis->StopMoving();
+		pThis->AbortMotion();
+	}
+
+	return 0;
 }
