@@ -117,7 +117,7 @@ DEFINE_HOOK(0x739889, UnitClass_TryToDeploy_AISetBaseCenter, 0x6)
 
 DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
 {
-	if (RulesExt::Global()->AIBiasSpawnCell && SessionClass::Instance->GameMode != GameMode::Campaign)
+	if (RulesExt::Global()->AIBiasSpawnCell && !SessionClass::IsCampaign())
 	{
 		GET(HouseClass*, pAI, EBX);
 
