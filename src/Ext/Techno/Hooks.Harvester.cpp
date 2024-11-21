@@ -71,7 +71,7 @@ void __fastcall ArrivingRefineryNearBy(UnitClass* pThis, BuildingClass* pDock)
 	{
 		auto numPurifier = pOwner->NumOrePurifiers;
 
-		if (!pOwner->IsHumanPlayer && SessionClass::Instance->GameMode != GameMode::Campaign)
+		if (!pOwner->IsHumanPlayer && !SessionClass::IsCampaign())
 			numPurifier = RulesClass::Instance->AIVirtualPurifiers.Items[static_cast<int>(pOwner->AIDifficulty)] + numPurifier;
 
 		const auto multiplier = numPurifier * RulesClass::Instance->PurifierBonus;

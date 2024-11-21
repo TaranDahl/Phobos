@@ -130,7 +130,7 @@ DEFINE_HOOK(0x739889, UnitClass_TryToDeploy_AISetBaseCenter, 0x6)
 
 DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
 {
-	if (RulesExt::Global()->AIBiasSpawnCell && SessionClass::Instance->GameMode != GameMode::Campaign)
+	if (RulesExt::Global()->AIBiasSpawnCell && !SessionClass::IsCampaign())
 	{
 		GET(HouseClass*, pAI, EBX);
 
@@ -1746,9 +1746,9 @@ DEFINE_HOOK(0x4DF3A6, FootClass_UpdateAttackMove_Follow, 0x6)
 
 	if (pTypeExt && pTypeExt->AttackMove_Follow)
 	{
-		auto pTechnoVectors = Helpers::Alex::getCellSpreadItems(pThis->GetCoords(), pThis->GetGuardRange(2), pTypeExt->AttackMove_Follow_IncludeAir);
+		auto pTechnoVectors = Helpers::Alex::getCellSpreadItems(pThis->GetCoords(), pThis->GetGuardRange(2) / 256.0, pTypeExt->AttackMove_Follow_IncludeAir);
 		TechnoClass* pClosestTarget = nullptr;
-		double closestRange = 1024;
+		int closestRange = 65536;
 
 		for (auto pTechno : pTechnoVectors)
 		{
@@ -1756,23 +1756,38 @@ DEFINE_HOOK(0x4DF3A6, FootClass_UpdateAttackMove_Follow, 0x6)
 				pTechno != pThis && pTechno->Owner == pThis->Owner &&
 				pTechno->vt_entry_4C4()) // MegaMissionIsAttackMove()
 			{
-				auto dist = pTechno->DistanceFrom(pThis);
+				auto const pTargetTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType());
 
-				if (dist < closestRange)
+				if (pTargetTypeExt && !pTargetTypeExt->AttackMove_Follow)
 				{
-					pClosestTarget = pTechno;
-					closestRange = dist;
+					auto const dist = pTechno->DistanceFrom(pThis);
+
+					if (dist < closestRange)
+					{
+						pClosestTarget = pTechno;
+						closestRange = dist;
+					}
 				}
 			}
 		}
 
 		if (pClosestTarget)
 		{
-			pThis->vt_entry_4A8(); // ClearMegaMission()
 			pThis->SetDestination(pClosestTarget, false);
 			pThis->SetArchiveTarget(pClosestTarget);
 			pThis->QueueMission(Mission::Area_Guard, true);
 		}
+		else
+		{
+			if (pThis->unknown_5CC) // MegaTarget
+				pThis->SetDestination(reinterpret_cast<AbstractClass*>(pThis->unknown_5CC), false);
+			else if (pThis->unknown_5C8) // MegaDestination
+				pThis->SetDestination(reinterpret_cast<AbstractClass*>(pThis->unknown_5C8), false);
+			else
+				pThis->SetDestination(nullptr, false);
+		}
+
+		pThis->vt_entry_4A8(); // ClearMegaMission
 
 		R->EAX(pClosestTarget);
 		return FuncRet;
@@ -1782,6 +1797,96 @@ DEFINE_HOOK(0x4DF3A6, FootClass_UpdateAttackMove_Follow, 0x6)
 }
 
 #pragma endregion
+
+#pragma region BuildingTypeSelectable
+
+namespace BuildingTypeSelectable
+{
+	bool ProcessingIDMatches = false;
+}
+
+DEFINE_HOOK(0x732A85, TypeSelectExecute_SetContext1, 0x7)
+{
+	BuildingTypeSelectable::ProcessingIDMatches = true;
+	return 0;
+}
+
+DEFINE_HOOK(0x732B28, TypeSelectExecute_SetContext2, 0x6)
+{
+	BuildingTypeSelectable::ProcessingIDMatches = true;
+	return 0;
+}
+/*
+DEFINE_HOOK(0x732C97, TechnoClass_IDMatches_ResetContext, 0x5)
+{
+	BuildingTypeSelectable::ProcessingIDMatches = false;
+	return 0;
+}
+*/
+DEFINE_HOOK(0x465D40, BuildingClass_IsVehicle_BuildingTypeSelectable, 0x6)
+{
+	enum { ReturnFromFunction = 0x465D6A };
+
+	if (BuildingTypeSelectable::ProcessingIDMatches)
+	{
+		BuildingTypeSelectable::ProcessingIDMatches = false;
+
+		if (RulesExt::Global()->BuildingTypeSelectable)
+		{
+			R->EAX(true);
+			return ReturnFromFunction;
+		}
+	}
+
+	return 0;
+}
+
+#pragma endregion
+
+// TODO Self-made impl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1919,3 +2024,5 @@ DEFINE_HOOK(0x736480, UnitClass_AI_KeepTargetOnMove, 0x6)
 }
 
 #pragma endregion
+
+// TODO Other contributors' impl

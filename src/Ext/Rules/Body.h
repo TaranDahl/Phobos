@@ -251,6 +251,7 @@ public:
 		Valueable<bool> DistributeTargetingFrame_AIOnly;
 		Valueable<bool> AttackMove_IgnoreWeaponCheck;
 		Valueable<bool> AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault;
+		Valueable<bool> BuildingTypeSelectable;
 
 		Valueable<double> AircraftLevelLightMultiplier;
 		Valueable<double> JumpjetLevelLightMultiplier;
@@ -478,6 +479,7 @@ public:
 			, DistributeTargetingFrame_AIOnly { true }
 			, AttackMove_IgnoreWeaponCheck { false }
 			, AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault { false }
+			, BuildingTypeSelectable { false }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
 			, VoxelLightSource { }
