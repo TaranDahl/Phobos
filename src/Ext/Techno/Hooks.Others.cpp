@@ -1844,7 +1844,7 @@ DEFINE_HOOK(0x465D40, BuildingClass_IsVehicle_BuildingTypeSelectable, 0x6)
 
 #pragma endregion
 
-#pragma region AddEvent
+#pragma region EventListOverflow
 
 DEFINE_HOOK(0x6FFE55, TechnoClass_ClickedEvent_AddEvent, 0xA)
 {
@@ -1907,6 +1907,33 @@ DEFINE_HOOK(0x646EF5, EventClass_AddMegaMissionEvent, 0xA)
 			EventClass::DoList->Tail = (LOWORD(EventClass::DoList->Tail) + 1) & 0x3FFF;
 			EventClass::DoList->Count++;
 		}
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x64C739, Game_ProcessDoList_AddMegaMissionEvent, 0xA)
+{
+	if (EventClass::MegaMissionList->Count == 256 && SessionClass::IsSingleplayer() && (Game::RecordingFlag & RecordFlag::Read) == static_cast<RecordFlag>(0))
+	{
+		reinterpret_cast<void(__fastcall*)(int, int)>(0x64CDA0)(0, 256); // Game::ProcessMegaMissionList
+		auto Head = EventClass::MegaMissionList->Head;
+
+		while (true)
+		{
+			reinterpret_cast<void(__thiscall*)(EventClass*)>(0x4C6CB0)(&EventClass::MegaMissionList->List[Head]); // EventClass::RespondToEvent
+
+			if (!EventClass::MegaMissionList->Count)
+				break;
+
+			Head = (LOBYTE(EventClass::MegaMissionList->Head) + 1);
+			EventClass::MegaMissionList->Head = Head;
+
+			if (!--EventClass::MegaMissionList->Count)
+				break;
+		}
+
+		reinterpret_cast<EventClass*(__fastcall*)()>(0x4E7F00)(); // EventClass::ClearMegaMissionList
 	}
 
 	return 0;
