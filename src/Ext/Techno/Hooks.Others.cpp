@@ -8,6 +8,7 @@
 #include <Ext/WeaponType/Body.h>
 #include "Ext/BulletType/Body.h"
 #include <Utilities/Helpers.Alex.h>
+#include <Helpers/Macro.h>
 
 #pragma region NoBurstDelay
 
@@ -1835,6 +1836,76 @@ DEFINE_HOOK(0x465D40, BuildingClass_IsVehicle_BuildingTypeSelectable, 0x6)
 		{
 			R->EAX(true);
 			return ReturnFromFunction;
+		}
+	}
+
+	return 0;
+}
+
+#pragma endregion
+
+#pragma region AddEvent
+
+DEFINE_HOOK(0x6FFE55, TechnoClass_ClickedEvent_AddEvent, 0xA)
+{
+	LEA_STACK(EventClass*, pEvent, STACK_OFFSET(0x80, -0x70));
+
+	if (EventClass::OutList->Count >= 128 && SessionClass::IsSingleplayer() && (Game::RecordingFlag & RecordFlag::Read) == static_cast<RecordFlag>(0))
+	{
+		if (EventClass::DoList->Count < 0x4000)
+		{
+			auto pDoListTail = &EventClass::DoList->List[EventClass::DoList->Tail];
+			memcpy(pDoListTail, pEvent, 0x6Cu);
+			pDoListTail += 0x6C;
+			pDoListTail->Type = pEvent->Type;
+			pDoListTail->HouseIndex = pEvent->HouseIndex;
+			EventClass::DoList->Timings[EventClass::DoList->Tail] = timeGetTime();
+			EventClass::DoList->Tail = (LOWORD(EventClass::DoList->Tail) + 1) & 0x3FFF;
+			EventClass::DoList->Count++;
+		}
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x6521CE, EventClass_AddEvent, 0x5)
+{
+	LEA_STACK(EventClass*, pEvent, STACK_OFFSET(0x0, 0x4));
+
+	if (EventClass::OutList->Count >= 128 && SessionClass::IsSingleplayer() && (Game::RecordingFlag & RecordFlag::Read) == static_cast<RecordFlag>(0))
+	{
+		if (EventClass::DoList->Count < 0x4000)
+		{
+			auto pDoListTail = &EventClass::DoList->List[EventClass::DoList->Tail];
+			memcpy(pDoListTail, pEvent, 0x6Cu);
+			pDoListTail += 0x6C;
+			pDoListTail->Type = pEvent->Type;
+			pDoListTail->HouseIndex = pEvent->HouseIndex;
+			EventClass::DoList->Timings[EventClass::DoList->Tail] = timeGetTime();
+			EventClass::DoList->Tail = (LOWORD(EventClass::DoList->Tail) + 1) & 0x3FFF;
+			EventClass::DoList->Count++;
+		}
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x646EF5, EventClass_AddMegaMissionEvent, 0xA)
+{
+	GET(EventClass*, pEvent, EAX);
+
+	if (EventClass::OutList->Count >= 128 && SessionClass::IsSingleplayer() && (Game::RecordingFlag & RecordFlag::Read) == static_cast<RecordFlag>(0))
+	{
+		if (EventClass::DoList->Count < 0x4000)
+		{
+			auto pDoListTail = &EventClass::DoList->List[EventClass::DoList->Tail];
+			memcpy(pDoListTail, pEvent, 0x6Cu);
+			pDoListTail += 0x6C;
+			pDoListTail->Type = pEvent->Type;
+			pDoListTail->HouseIndex = pEvent->HouseIndex;
+			EventClass::DoList->Timings[EventClass::DoList->Tail] = timeGetTime();
+			EventClass::DoList->Tail = (LOWORD(EventClass::DoList->Tail) + 1) & 0x3FFF;
+			EventClass::DoList->Count++;
 		}
 	}
 
