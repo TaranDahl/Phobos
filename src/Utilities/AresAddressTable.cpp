@@ -17,6 +17,9 @@ void AresFunctions::InitAres3_0()
 	}
 	else
 		NOTE_ARES_FUN(SpawnSurvivors, 0x0464C0);
+
+	if constexpr (AresFunctions::AresWasWrongAboutAduction)
+		Patch::Apply_LJMP(AresHelper::AresBaseAddress + 0x54CDF, AresHelper::AresBaseAddress + 0x54D3C);
 }
 
 void AresFunctions::InitAres3_0p1()
@@ -29,6 +32,9 @@ void AresFunctions::InitAres3_0p1()
 	}
 	else
 		NOTE_ARES_FUN(SpawnSurvivors, 0x047030);
+
+	if constexpr (AresFunctions::AresWasWrongAboutAduction)
+		Patch::Apply_LJMP(AresHelper::AresBaseAddress + 0x5598F, AresHelper::AresBaseAddress + 0x559EC);
 }
 
 #undef NOTE_ARES_FUN
