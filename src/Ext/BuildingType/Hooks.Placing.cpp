@@ -821,10 +821,13 @@ DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)
 	GET(BuildingClass* const, pFactory, ESI);
 	GET(const CellStruct, topLeftCell, EDX);
 
+	const auto pBuildingType = pBuilding->Type;
+
+	if (RulesExt::Global()->AIForbidConYard && pBuildingType->ConstructionYard)
+		return CanNotBuild;
+
 	if (!RulesExt::Global()->ExpandBuildingPlace)
 		return 0;
-
-	const auto pBuildingType = pBuilding->Type;
 
 	if (topLeftCell != CellStruct::Empty && !pBuildingType->PlaceAnywhere)
 	{
