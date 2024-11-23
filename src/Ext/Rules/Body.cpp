@@ -187,6 +187,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->NoRearmInEMPState.Read(exINI, GameStrings::General, "NoRearmInEMPState");
 	this->NoRearmInTemporal.Read(exINI, GameStrings::General, "NoRearmInTemporal");
 	this->CleanUpAirBarrier.Read(exINI, GameStrings::General, "CleanUpAirBarrier");
+	this->AttackMindControlledDelay.Read(exINI, GameStrings::General, "AttackMindControlledDelay");
 	this->NoQueueUpToEnter.Read(exINI, GameStrings::General, "NoQueueUpToEnter");
 
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
@@ -433,6 +434,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->NoRearmInEMPState)
 		.Process(this->NoRearmInTemporal)
 		.Process(this->CleanUpAirBarrier)
+		.Process(this->AttackMindControlledDelay)
 		.Process(this->NoQueueUpToEnter)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)

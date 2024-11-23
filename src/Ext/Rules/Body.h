@@ -144,6 +144,7 @@ public:
 		Valueable<bool> NoRearmInEMPState;
 		Valueable<bool> NoRearmInTemporal;
 		Valueable<int> CleanUpAirBarrier;
+		Valueable<int> AttackMindControlledDelay;
 		Valueable<bool> NoQueueUpToEnter;
 
 		Valueable<bool> AllowParallelAIQueues;
@@ -327,6 +328,7 @@ public:
 			, NoRearmInEMPState { false }
 			, NoRearmInTemporal { false }
 			, CleanUpAirBarrier { 0 }
+			, AttackMindControlledDelay { 0 }
 			, NoQueueUpToEnter { false }
 
 			, AllowParallelAIQueues { true }

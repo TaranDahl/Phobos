@@ -57,8 +57,9 @@ public:
 		CDTimerClass UnitAutoDeployTimer;
 		WeaponTypeClass* LastWeaponType;
 		CoordStruct LastWeaponFLH;
-		int LastBeLockedFrame;
 		int LastHurtFrame;
+		int LastBeLockedFrame;
+		int LastBeControlledFrame;
 		int AccumulatedGattlingValue;
 		bool ShouldUpdateGattlingValue;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
@@ -106,8 +107,9 @@ public:
 			, UnitAutoDeployTimer {}
 			, LastWeaponType {}
 			, LastWeaponFLH {}
-			, LastBeLockedFrame { 0 }
 			, LastHurtFrame { 0 }
+			, LastBeLockedFrame { 0 }
+			, LastBeControlledFrame { 0 }
 			, AccumulatedGattlingValue { 0 }
 			, ShouldUpdateGattlingValue { false }
 			, FiringObstacleCell {}
