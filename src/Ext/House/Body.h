@@ -29,6 +29,7 @@ public:
 		CellStruct CurrentBuildingTopLeft;
 		CDTimerClass CurrentBuildingTimer;
 		int CurrentBuildingTimes;
+		int LastRefineryBuildFrame;
 
 		CounterClass LimboAircraft;  // Currently owned aircraft in limbo
 		CounterClass LimboBuildings; // Currently owned buildings in limbo
@@ -43,12 +44,6 @@ public:
 
 		CDTimerClass AISuperWeaponDelayTimer;
 		CDTimerClass AIFireSaleDelayTimer;
-
-		BuildingTypeClass* CurrentBuildingType;
-		CellStruct CurrentBuildingTopLeft;
-		CDTimerClass CurrentBuildingTimer;
-		int CurrentBuildingTimes;
-		int LastRefineryBuildFrame;
 
 		//Read from INI
 		Nullable<bool> RepairBaseNodes[3];
@@ -82,6 +77,7 @@ public:
 			, CurrentBuildingTopLeft {}
 			, CurrentBuildingTimer {}
 			, CurrentBuildingTimes { 0 }
+			, LastRefineryBuildFrame { 0 }
 			, LimboAircraft {}
 			, LimboBuildings {}
 			, LimboInfantry {}
@@ -91,7 +87,6 @@ public:
 			, Factory_VehicleType { nullptr }
 			, Factory_NavyType { nullptr }
 			, Factory_AircraftType { nullptr }
-			, LastRefineryBuildFrame { 0 }
 			, AISuperWeaponDelayTimer {}
 			, RepairBaseNodes { }
 			, RestrictedFactoryPlants {}
