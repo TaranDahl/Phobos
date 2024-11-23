@@ -1754,11 +1754,7 @@ DEFINE_HOOK(0x54B2DE, JumpjetLocomotionClass_MoveTo_JumpjetSpeedType, 0x6)
 
 DEFINE_HOOK(0x56DC20, MapClass_NearByLocation_JumpjetSpeedType, 0x6)
 {
-	enum { Ret_in_JJLoco_MoveTo = 0x54B374 };
-
-	GET(int*, esp, ESP);
-
-	if (*esp == Ret_in_JJLoco_MoveTo)
+	if (*R->ESP<int*>() == 0x54B374) // Ret_in_JJLoco_MoveTo
 		R->Stack(STACK_OFFSET(0, 0xC), JumpjetSpeedType::speedType);
 
 	return 0;
