@@ -59,9 +59,10 @@ public:
 		CoordStruct LastWeaponFLH;
 		int LastHurtFrame;
 		int LastBeLockedFrame;
-		int MyTargetingFrame;
+		int LastBeControlledFrame;
 		int AccumulatedGattlingValue;
 		bool ShouldUpdateGattlingValue;
+		int MyTargetingFrame;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 		bool KeepTargetOnMove;
 		bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
@@ -110,9 +111,10 @@ public:
 			, LastWeaponFLH {}
 			, LastHurtFrame { 0 }
 			, LastBeLockedFrame { 0 }
-			, MyTargetingFrame { ScenarioClass::Instance->Random.RandomRanged(0,15) }
+			, LastBeControlledFrame { 0 }
 			, AccumulatedGattlingValue { 0 }
 			, ShouldUpdateGattlingValue { false }
+			, MyTargetingFrame { ScenarioClass::Instance->Random.RandomRanged(0,15) }
 			, FiringObstacleCell {}
 			, KeepTargetOnMove { false }
 			, IsDetachingForCloak { false }
