@@ -66,6 +66,7 @@ public:
 
 		void UpdateAutoDeathObjectsInLimbo();
 		void UpdateTransportReloaders();
+		void UpdateUI(int NewSideIndex);
 	private:
 		template <typename T>
 		void Serialize(T& Stm);

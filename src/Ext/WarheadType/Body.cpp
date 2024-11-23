@@ -285,6 +285,9 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SuppressReflectDamage.Read(exINI, pSection, "SuppressReflectDamage");
 	this->SuppressReflectDamage_Types.Read(exINI, pSection, "SuppressReflectDamage.Types");
 
+	exINI.ReadString(pSection, "CountryConvert.To");
+	this->CountryConvert_To_Index = HouseTypeClass::FindIndexOfName(exINI.value());
+
 	// Convert.From & Convert.To
 	TypeConvertGroup::Parse(this->Convert_Pairs, exINI, pSection, AffectedHouse::All);
 
@@ -529,6 +532,8 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->CombatLightChance)
 		.Process(this->CLIsBlack)
 		.Process(this->Particle_AlphaImageIsLightFlash)
+
+		.Process(this->CountryConvert_To_Index)
 
 		// Ares tags
 		.Process(this->AffectsEnemies)

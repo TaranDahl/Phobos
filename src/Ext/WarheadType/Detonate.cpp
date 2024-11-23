@@ -13,8 +13,10 @@
 #include <Ext/Bullet/Body.h>
 #include <Ext/BulletType/Body.h>
 #include <Ext/SWType/Body.h>
+#include <Ext/Scenario/Body.h>
 #include <Misc/FlyingStrings.h>
 #include <Utilities/Helpers.Alex.h>
+#include <Utilities/Debug.h>
 #include <Utilities/EnumFunctions.h>
 
 void WarheadTypeExt::ExtData::Detonate(TechnoClass* pOwner, HouseClass* pHouse, BulletExt::ExtData* pBulletExt, CoordStruct coords)
@@ -99,6 +101,17 @@ void WarheadTypeExt::ExtData::Detonate(TechnoClass* pOwner, HouseClass* pHouse, 
 						}
 					}
 				}
+			}
+		}
+		
+		if (this->CountryConvert_To_Index >= 0 && this->CountryConvert_To_Index != pHouse->Type->ArrayIndex)
+		{
+			pHouse->Type = HouseTypeClass::Array->Items[this->CountryConvert_To_Index];
+			pHouse->RecheckTechTree = true;
+
+			if (HouseClass::CurrentPlayer == pHouse)
+			{
+				// ScenarioExt::Global()->UpdateUI(pHouse->Type->SideIndex);
 			}
 		}
 	}

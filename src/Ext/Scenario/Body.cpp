@@ -115,6 +115,25 @@ void ScenarioExt::ExtData::UpdateTransportReloaders()
 	}
 }
 
+void ScenarioExt::ExtData::UpdateUI(int NewSideIndex)
+{
+	if (ScenarioClass::Instance->PlayerSideIndex == NewSideIndex)
+	{
+		return;
+	}
+
+	ScenarioClass::Instance->PlayerSideIndex = NewSideIndex;
+	SidebarClass::Instance->SidebarBackgroundNeedsRedraw = true;
+	SidebarClass::Instance->SidebarNeedsRedraw = true;
+	/*
+	FileSystem::GCLOCK2_SHP = FileSystem::LoadSHPFile("ButtonProcess.shp");
+	static constexpr reference<SHPStruct*, 0xB0B468u> SIDE1SHP;
+	SIDE1SHP = FileSystem::LoadSHPFile("SIDE1ALLIED.shp");
+	FileSystem::SIDEBAR_PAL = FileSystem::LoadPALFile("SIDEBARALLIED.pal", DSurface::Sidebar);
+	*/
+	SidebarClass::Instance->Draw(1);
+}
+
 // =============================
 // load / save
 
