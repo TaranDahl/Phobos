@@ -50,10 +50,10 @@
 	#define PRODUCT_VERSION "Nightly Build " STR_GIT_COMMIT " @ " STR_GIT_BRANCH
 #else // Regular devbuild metadata
 	#define SAVEGAME_ID ((BUILD_NUMBER << 24) | (MERGE_NUMBER << 12) | (MERGE_PATCH))
-	#define FILE_DESCRIPTION "Special merge build of Phobos engine extension"
+	#define FILE_DESCRIPTION "Testing merge build of Phobos engine extension"
 	#define FILE_VERSION_STR "Build #" _STR(BUILD_NUMBER) "+" _STR(MERGE_NUMBER) "_" _STR(MERGE_PATCH)
 	#define FILE_VERSION 0, BUILD_NUMBER, MERGE_NUMBER, MERGE_PATCH
-	#define PRODUCT_VERSION "Special merge Build #" _STR(BUILD_NUMBER) "+" _STR(MERGE_NUMBER) "_" _STR(MERGE_PATCH)
+	#define PRODUCT_VERSION "Testing merge Build #" _STR(BUILD_NUMBER) "+" _STR(MERGE_NUMBER) "_" _STR(MERGE_PATCH)
 #endif
 
 #endif // VERSION_H
