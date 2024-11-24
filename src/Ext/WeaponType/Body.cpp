@@ -121,6 +121,12 @@ void WeaponTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Burst_NoDelay.Read(exINI, pSection, "Burst.NoDelay");
 	this->NoRepeatFire.Read(exINI, pSection, "NoRepeatFire");
 	this->KickOutPassengers.Read(exINI, pSection, "KickOutPassengers");
+
+	this->Beam_Color.Read(exINI, pSection, "Beam.Color");
+	this->Beam_Duration.Read(exINI, pSection, "Beam.Duration");
+	this->Beam_Amplitude.Read(exINI, pSection, "Beam.Amplitude");
+	this->Beam_IsHouseColor.Read(exINI, pSection, "Beam.IsHouseColor");
+	this->LaserThickness.Read(exINI, pSection, "LaserThickness");
 }
 
 template <typename T>
@@ -171,6 +177,11 @@ void WeaponTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Burst_NoDelay)
 		.Process(this->NoRepeatFire)
 		.Process(this->KickOutPassengers)
+		.Process(this->Beam_Color)
+		.Process(this->Beam_Duration)
+		.Process(this->Beam_Amplitude)
+		.Process(this->Beam_IsHouseColor)
+		.Process(this->LaserThickness)
 		;
 };
 

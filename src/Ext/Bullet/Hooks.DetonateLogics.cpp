@@ -533,7 +533,8 @@ DEFINE_HOOK(0x469EC0, BulletClass_Logics_AirburstWeapon, 0x6)
 			}
 		}
 
-		int projectileRange = WeaponTypeExt::ExtMap.Find(pWeapon)->ProjectileRange.Get();
+		auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
+		int projectileRange = pWeaponExt->ProjectileRange.Get();
 		auto const pTypeSplits = pWeapon->Projectile;
 		int damage = pWeapon->Damage;
 
@@ -590,6 +591,52 @@ DEFINE_HOOK(0x469EC0, BulletClass_Logics_AirburstWeapon, 0x6)
 
 					pBullet->MoveTo(pThis->Location, velocity);
 				}
+
+				if (pWeapon->IsLaser)
+				{
+					if (pWeapon->IsHouseColor || pWeaponExt->Laser_IsSingleColor)
+					{
+						auto const pLaser = GameCreate<LaserDrawClass>(pThis->Location, pTarget->GetCoords(), (pWeapon->IsHouseColor ? pOwner->LaserColor : pWeapon->LaserInnerColor), ColorStruct { 0, 0, 0 }, ColorStruct { 0, 0, 0 }, pWeapon->LaserDuration);
+						pLaser->IsHouseColor = true;
+						pLaser->Thickness = pWeaponExt->LaserThickness;
+						pLaser->IsSupported = (pLaser->Thickness > 3);
+					}
+					else
+					{
+						auto const pLaser = GameCreate<LaserDrawClass>(pThis->Location, pTarget->GetCoords(), pWeapon->LaserInnerColor, pWeapon->LaserOuterColor, pWeapon->LaserOuterSpread, pWeapon->LaserDuration);
+						pLaser->IsHouseColor = false;
+						pLaser->Thickness = 3;
+						pLaser->IsSupported = false;
+					}
+				}
+
+				if (pWeapon->IsElectricBolt)
+				{
+					if (auto const pEBolt = GameCreate<EBolt>())
+					{
+						pEBolt->AlternateColor = pWeapon->IsAlternateColor;
+						//TODO Weapon's Bolt.Color1, Bolt.Color2, Bolt.Color3(Ares)
+						WeaponTypeExt::BoltWeaponMap[pEBolt] = pWeaponExt;
+						pEBolt->Fire(pThis->Location, pTarget->GetCoords(), 0);
+					}
+				}
+
+				if (pWeapon->IsRadBeam)
+				{
+					const bool isTemporal = pWeapon->Warhead && pWeapon->Warhead->Temporal;
+
+					if (const auto pRadBeam = RadBeam::Allocate(isTemporal ? RadBeamType::Temporal : RadBeamType::RadBeam))
+					{
+						pRadBeam->SetCoordsSource(pThis->Location);
+						pRadBeam->SetCoordsTarget(pTarget->GetCoords());
+						pRadBeam->Color = pWeaponExt->Beam_IsHouseColor ? pOwner->LaserColor : pWeaponExt->Beam_Color.Get(isTemporal ? RulesClass::Instance->ChronoBeamColor : RulesClass::Instance->RadColor);
+						pRadBeam->Period = pWeaponExt->Beam_Duration;
+						pRadBeam->Amplitude = pWeaponExt->Beam_Amplitude;
+					}
+				}
+
+				if (const auto pPSType = pWeapon->AttachedParticleSystem)
+					GameCreate<ParticleSystemClass>(pPSType, pThis->Location, pTarget, pThis->Owner, pTarget->GetCoords(), pOwner);
 			}
 		}
 	}
