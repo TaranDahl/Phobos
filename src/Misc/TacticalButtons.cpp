@@ -1337,19 +1337,11 @@ void TacticalButtonsClass::HeroSelect(int buttonIndex)
 		for (auto pTrans = pSelect->Transporter; pTrans; pTrans = pTrans->Transporter)
 			pSelect = pTrans;
 
-		if (pSelect->Location != CoordStruct::Empty && pSelect->IsOnMap)
-		{
-			if (ObjectClass::CurrentObjects->Count == 1 && pSelect->IsSelected)
-			{
-				MapClass::Instance->CenterMap();
-				MapClass::Instance->MarkNeedsRedraw(1);
-			}
-			else
-			{
-				MapClass::UnselectAll();
-				pSelect->Select();
-			}
-		}
+		if (ObjectClass::CurrentObjects->Count != 1 || !pSelect->IsSelected)
+			MapClass::UnselectAll();
+
+		if (!pSelect->Select())
+			TacticalClass::Instance->SetTacticalPosition(&pSelect->Location);
 	}
 }
 
