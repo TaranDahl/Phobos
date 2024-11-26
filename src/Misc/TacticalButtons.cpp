@@ -513,9 +513,9 @@ void TacticalButtonsClass::FPSCounterDraw()
 	}
 
 	const auto height = DSurface::Composite->GetHeight() - ((Phobos::Config::SelectedDisplay_Enable && this->CurrentSelectCameo.size()) ? 80 : 32);
-	const auto avgHeight = avgDim.Height;
-	RectangleStruct rect { 0, (height - avgHeight), avgDim.Width + 4, avgHeight };
-	DSurface::Composite->FillRect(&rect, COLOR_BLACK);
+	ColorStruct fillColor { 0, 0, 0 };
+	RectangleStruct rect { 0, (height - avgDim.Height), avgDim.Width + 4, avgDim.Height };
+	DSurface::Composite->FillRectTrans(&rect, &fillColor, 40);
 
 	auto location = Point2D { 2, rect.Y };
 	DSurface::Composite->DrawText(avgBuffer, &location, color);
@@ -523,7 +523,7 @@ void TacticalButtonsClass::FPSCounterDraw()
 	rect.Y -= fpsDim.Height;
 	rect.Width = fpsDim.Width + 4;
 	rect.Height = fpsDim.Height;
-	DSurface::Composite->FillRect(&rect, COLOR_BLACK);
+	DSurface::Composite->FillRectTrans(&rect, &fillColor, 40);
 
 	location.Y = rect.Y;
 	DSurface::Composite->DrawText(fpsBuffer, &location, color);
@@ -685,7 +685,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 		{
 			const auto pKey = this->KeyCodeText[i].c_str();
 			Point2D textLocation { 35, position.Y + 1 };
-			const TextPrintType printType = TextPrintType::Center | TextPrintType::FullShadow | TextPrintType::Point8;
+			constexpr TextPrintType printType = TextPrintType::Center | TextPrintType::FullShadow | TextPrintType::Point8;
 			auto textRect = Drawing::GetTextDimensions(pKey, textLocation, static_cast<WORD>(printType), 2, 1);
 
 			// Text black background
@@ -695,7 +695,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 		else if (const wchar_t* pName = pSuper->NameReadiness())
 		{
 			Point2D textLocation { 35, position.Y + 1 };
-			const TextPrintType printType = TextPrintType::Center | TextPrintType::FullShadow | TextPrintType::Point8;
+			constexpr TextPrintType printType = TextPrintType::Center | TextPrintType::FullShadow | TextPrintType::Point8;
 			auto textRect = Drawing::GetTextDimensions(pName, textLocation, static_cast<WORD>(printType), 2, 1);
 
 			// Text black background

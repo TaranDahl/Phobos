@@ -98,8 +98,8 @@ DEFINE_HOOK(0x6D4CE6, PrintTimerOnTactical_RectTrans, 0x6)
 	RectangleStruct rect { (location.X - width), location.Y, width, lineSpace };
 	DSurface::Composite->FillRectTrans(&rect, &fillColor, 40);
 
-	Point2D top { rect.X, rect.Y };
-	Point2D bot { rect.X, rect.Y + lineSpace };
+	Point2D top { rect.X - 1, rect.Y };
+	Point2D bot { top.X, top.Y + lineSpace - 1 };
 	DSurface::Composite->DrawLine(&top, &bot, COLOR_BLACK);
 
 	location.X -= 3;
