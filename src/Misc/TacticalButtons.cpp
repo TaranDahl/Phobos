@@ -490,7 +490,6 @@ void TacticalButtonsClass::FPSCounterDraw()
 	wchar_t fpsBuffer[0x20];
 	swprintf_s(fpsBuffer, L"FPS: %u", fps);
 	RectangleStruct fpsDim = Drawing::GetTextDimensions(fpsBuffer, Point2D::Empty, 0);
-
 	wchar_t avgBuffer[0x20];
 	swprintf_s(avgBuffer, L"Avg: %.2lf", FPSCounter::GetAverageFrameRate());
 	RectangleStruct avgDim = Drawing::GetTextDimensions(avgBuffer, Point2D::Empty, 0);
@@ -512,19 +511,18 @@ void TacticalButtonsClass::FPSCounterDraw()
 			color = 0x9FEC;
 	}
 
+	const int trans = InputManagerClass::Instance->IsForceMoveKeyPressed() ? 90 : 40;
 	const auto height = DSurface::Composite->GetHeight() - ((Phobos::Config::SelectedDisplay_Enable && this->CurrentSelectCameo.size()) ? 80 : 32);
 	ColorStruct fillColor { 0, 0, 0 };
 	RectangleStruct rect { 0, (height - avgDim.Height), avgDim.Width + 4, avgDim.Height };
-	DSurface::Composite->FillRectTrans(&rect, &fillColor, 40);
-
+	DSurface::Composite->FillRectTrans(&rect, &fillColor, trans);
 	auto location = Point2D { 2, rect.Y };
 	DSurface::Composite->DrawText(avgBuffer, &location, color);
 
 	rect.Y -= fpsDim.Height;
 	rect.Width = fpsDim.Width + 4;
 	rect.Height = fpsDim.Height;
-	DSurface::Composite->FillRectTrans(&rect, &fillColor, 40);
-
+	DSurface::Composite->FillRectTrans(&rect, &fillColor, trans);
 	location.Y = rect.Y;
 	DSurface::Composite->DrawText(fpsBuffer, &location, color);
 }
