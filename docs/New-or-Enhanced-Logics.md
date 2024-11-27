@@ -35,7 +35,7 @@ This page describes all the engine features that are either new and introduced b
     - `Tint.VisibleToHouses` can be used to control which houses can see the tint effect.
   - `FirepowerMultiplier`, `ArmorMultiplier`, `SpeedMultiplier` and `ROFMultiplier` can be used to modify the object's firepower, armor strength, movement speed and weapon reload rate, respectively.
     - `ArmorMultiplier.AllowWarheads` and `ArmorMultiplier.DisallowWarheads` can be used to restrict which Warheads the armor multiplier is applied to when dealing damage.
-    - If `ROFMultiplier.ApplyOnCurrentTimer` is set to true, `ROFMultiplier` is applied on currently running reload timer (if any) when the effect is first applied.  
+    - If `ROFMultiplier.ApplyOnCurrentTimer` is set to true, `ROFMultiplier` is applied on currently running reload timer (if any) when the effect is first applied.
   - If `Cloakable` is set to true, the object the effect is attached to is granted ability to cloak itself for duration of the effect.
   - `ForceDecloak`, if set to true, will uncloak and make the object the effect is attached to unable to cloak itself for duration of the effect.
   - `WeaponRange.Multiplier` and `WeaponRange.ExtraRange` can be used to multiply the weapon firing range of the object the effect is attached to, or give it an increase / decrease (measured in cells), respectively. `ExtraRange` is cumulatively applied from all attached effects after all `Multiplier` values have been applied.
@@ -877,6 +877,8 @@ Trajectory.Bombard.TurningPointAnim=      ; Animation
     - `Trajectory.Disperse.WeaponRetarget` controls whether the dispersed weapons will find new targets on their own. Using the `Range`, `CanTarget`, required `AttachedEffects` of weapons to search new targets.
     - `Trajectory.Disperse.WeaponLocation` controls whether the dispersed weapons will search for new targets at the center of the spreading position, otherwise they will focus on the original target.
     - `Trajectory.Disperse.WeaponTendency` controls whether the dispersed weapons will choose the original target as the first new target in each group of weapons.
+    - `Trajectory.Disperse.WeaponHolistic` controls whether the dispersed weapons will choose targets that are in different states from the original target (in air and on ground).
+    - `Trajectory.Disperse.WeaponMarginal` controls whether the dispersed weapons will choose unimportant items such as trees and streetlights as secondary targets.
     - `Trajectory.Disperse.WeaponToAllies` controls whether the dispersed weapons will choose allies as targets when searching for new targets.
     - `Trajectory.Disperse.WeaponDoRepeat` controls whether the dispersed weapons will select duplicate targets when the number of targets is insufficient. If it is set to true and the weapon can select both the technos and the ground as targets, the technos will be prioritized, then if all non-repeating technos have been selected and the weapon can still be launched at this time (in each round of salvo), it will start selecting duplicate technos. If it is set to false and the weapon can select both the technos and the ground as targets, the technos will be prioritized, followed by the ground cells, then if all non-repeating technos have been selected and the weapon can still be launched at this time (in each round of salvo), it will stop firing remaining bursts.
 
@@ -914,6 +916,8 @@ Trajectory.Disperse.WeaponSeparate=false        ; boolean
 Trajectory.Disperse.WeaponRetarget=false        ; boolean
 Trajectory.Disperse.WeaponLocation=false        ; boolean
 Trajectory.Disperse.WeaponTendency=false        ; boolean
+Trajectory.Disperse.WeaponHolistic=false        ; boolean
+Trajectory.Disperse.WeaponMarginal=false        ; boolean
 Trajectory.Disperse.WeaponToAllies=false        ; boolean
 Trajectory.Disperse.WeaponDoRepeat=false        ; boolean
 ```
@@ -922,7 +926,7 @@ Trajectory.Disperse.WeaponDoRepeat=false        ; boolean
 - Make sure you set a low `Trajectory.Disperse.RetargetRadius` value unless necessary. If you set `Trajectory.Disperse.WeaponRetarget=true`, also make sure you set `Trajectory.Disperse.Weapons` a low `Range` value unless necessary.
 - This does not properly support `Arcing=true` projectiles.
 - Note that the listed Weapons in `Trajectory.Disperse.Weapons` must be listed in `[WeaponTypes]` for them to work.
-- `Trajectory.Disperse.Weapons` now not support customized `LaserThickness`, `Bolt.ColorN`, `Beam.Color`, `Beam.Duration`  and `Beam.Amplitude`.
+- `Trajectory.Disperse.Weapons` now not support customized `Bolt.ColorN`.
 ```
 
 #### Engrave trajectory
