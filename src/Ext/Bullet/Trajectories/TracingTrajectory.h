@@ -9,6 +9,7 @@ public:
 		, TheDuration { 0 }
 		, NoDetonation { false }
 		, CreateAtTarget { false }
+		, TolerantTime { -1 }
 		, WeaponType {}
 		, WeaponCount { 0 }
 		, WeaponDelay { 1 }
@@ -24,6 +25,7 @@ public:
 	Valueable<int> TheDuration;
 	Valueable<bool> NoDetonation;
 	Valueable<bool> CreateAtTarget;
+	Valueable<int> TolerantTime;
 	Valueable<WeaponTypeClass*> WeaponType;
 	Valueable<int> WeaponCount;
 	Valueable<int> WeaponDelay;
@@ -43,6 +45,8 @@ public:
 		, WeaponCount { trajType->WeaponCount }
 		, ExistTimer {}
 		, WeaponTimer {}
+		, TolerantTimer {}
+		, TechnoInTransport { false }
 		, NotMainWeapon { false }
 		, FLHCoord {}
 		, BuildingCoord {}
@@ -63,6 +67,8 @@ public:
 	int WeaponCount;
 	CDTimerClass ExistTimer;
 	CDTimerClass WeaponTimer;
+	CDTimerClass TolerantTimer;
+	bool TechnoInTransport;
 	bool NotMainWeapon;
 	CoordStruct FLHCoord;
 	CoordStruct BuildingCoord;
@@ -74,6 +80,7 @@ private:
 
 	void GetTechnoFLHCoord(BulletClass* pBullet, TechnoClass* pTechno);
 	void InitializeDuration(BulletClass* pBullet, int duration);
+	bool ChangeBulletTarget(BulletClass* pBullet);
 	void ChangeVelocity(BulletClass* pBullet);
 	void FireTracingWeapon(BulletClass* pBullet);
 };

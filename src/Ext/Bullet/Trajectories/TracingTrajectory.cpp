@@ -24,6 +24,7 @@ void TracingTrajectoryType::Serialize(T& Stm)
 		.Process(this->TheDuration)
 		.Process(this->NoDetonation)
 		.Process(this->CreateAtTarget)
+		.Process(this->TolerantTime)
 		.Process(this->WeaponType)
 		.Process(this->WeaponCount)
 		.Process(this->WeaponDelay)
@@ -51,6 +52,7 @@ void TracingTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 	this->TheDuration.Read(exINI, pSection, "Trajectory.Tracing.TheDuration");
 	this->NoDetonation.Read(exINI, pSection, "Trajectory.Tracing.NoDetonation");
 	this->CreateAtTarget.Read(exINI, pSection, "Trajectory.Tracing.CreateAtTarget");
+	this->TolerantTime.Read(exINI, pSection, "Trajectory.Tracing.TolerantTime");
 	this->WeaponType.Read<true>(exINI, pSection, "Trajectory.Tracing.WeaponType");
 	this->WeaponCount.Read(exINI, pSection, "Trajectory.Tracing.WeaponCount");
 	this->WeaponDelay.Read(exINI, pSection, "Trajectory.Tracing.WeaponDelay");
@@ -71,6 +73,7 @@ void TracingTrajectory::Serialize(T& Stm)
 		.Process(this->Type)
 		.Process(this->ExistTimer)
 		.Process(this->WeaponTimer)
+		.Process(this->TechnoInTransport)
 		.Process(this->NotMainWeapon)
 		.Process(this->FLHCoord)
 		.Process(this->BuildingCoord)
@@ -94,13 +97,14 @@ void TracingTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 {
 	const auto pType = this->Type;
 
-	if (this->WeaponCount > 0)
+	if (this->WeaponCount)
 		this->WeaponTimer.Start(pType->WeaponTimer);
 
 	this->FLHCoord = pBullet->SourceCoords;
 
 	if (const auto pFirer = pBullet->Owner)
 	{
+		this->TechnoInTransport = static_cast<bool>(pFirer->Transporter);
 		this->FirepowerMult = pFirer->FirepowerMultiplier;
 
 		if (const auto pExt = TechnoExt::ExtMap.Find(pFirer))
@@ -110,6 +114,7 @@ void TracingTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 	}
 	else
 	{
+		this->TechnoInTransport = false;
 		this->NotMainWeapon = true;
 	}
 
@@ -126,11 +131,13 @@ void TracingTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 
 bool TracingTrajectory::OnAI(BulletClass* pBullet)
 {
-	if (const auto pTechno = pBullet->Owner)
-		pBullet->Target = pTechno->Target;
+	const auto pTechno = pBullet->Owner;
 
-	if (const auto pTarget = pBullet->Target)
-		pBullet->TargetCoords = pTarget->GetCoords();
+	if (!this->NotMainWeapon && (!pTechno || this->TechnoInTransport != static_cast<bool>(pTechno->Transporter)))
+		return true;
+
+	if (this->ChangeBulletTarget(pBullet))
+		return true;
 
 	this->ChangeVelocity(pBullet);
 
@@ -206,6 +213,34 @@ void TracingTrajectory::InitializeDuration(BulletClass* pBullet, int duration)
 	this->ExistTimer.Start(duration);
 }
 
+bool TracingTrajectory::ChangeBulletTarget(BulletClass* pBullet)
+{
+	const auto pType = this->Type;
+
+	if (const auto pTechno = pBullet->Owner)
+	{
+		if (pBullet->Target != pTechno->Target && !pType->TolerantTime)
+			return true;
+
+		pBullet->Target = pTechno->Target;
+	}
+
+	if (const auto pTarget = pBullet->Target)
+	{
+		pBullet->TargetCoords = pTarget->GetCoords();
+		this->TolerantTimer.Stop();
+	}
+	else if (pType->TolerantTime > 0)
+	{
+		if (this->TolerantTimer.Completed())
+			return true;
+		else if (!this->TolerantTimer.IsTicking())
+			this->TolerantTimer.Start(pType->TolerantTime);
+	}
+
+	return false;
+}
+
 void TracingTrajectory::ChangeVelocity(BulletClass* pBullet)
 {
 	const auto pType = this->Type;
@@ -224,14 +259,14 @@ void TracingTrajectory::FireTracingWeapon(BulletClass* pBullet)
 {
 	const auto pType = this->Type;
 
-	if (--this->WeaponCount > 0)
+	if (this->WeaponCount < 0 || --this->WeaponCount > 0)
 		this->WeaponTimer.Start(pType->WeaponDelay);
 	else
 		this->WeaponTimer.Stop();
 
 	const auto pTechno = pBullet->Owner;
 	const auto pOwner = pTechno ? pTechno->Owner : BulletExt::ExtMap.Find(pBullet)->FirerHouse;
-	const auto pTarget = pBullet->Target ? pBullet->Target : pBullet;
+	const auto pTarget = pBullet;
 
 	const auto pTransporter = pTechno->Transporter;
 	auto fireCoord = pBullet->SourceCoords;
