@@ -23,6 +23,7 @@ void TracingTrajectoryType::Serialize(T& Stm)
 	Stm
 		.Process(this->TheDuration)
 		.Process(this->Synchronize)
+		.Process(this->NoOutOfRange)
 		.Process(this->NoDetonation)
 		.Process(this->CreateAtTarget)
 		.Process(this->TolerantTime)
@@ -53,6 +54,7 @@ void TracingTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 
 	this->TheDuration.Read(exINI, pSection, "Trajectory.Tracing.TheDuration");
 	this->Synchronize.Read(exINI, pSection, "Trajectory.Tracing.Synchronize");
+	this->NoOutOfRange.Read(exINI, pSection, "Trajectory.Tracing.NoOutOfRange");
 	this->NoDetonation.Read(exINI, pSection, "Trajectory.Tracing.NoDetonation");
 	this->CreateAtTarget.Read(exINI, pSection, "Trajectory.Tracing.CreateAtTarget");
 	this->TolerantTime.Read(exINI, pSection, "Trajectory.Tracing.TolerantTime");
@@ -141,7 +143,7 @@ bool TracingTrajectory::OnAI(BulletClass* pBullet)
 	if (!this->NotMainWeapon && this->InvalidFireCondition(pTechno))
 		return true;
 
-	if (this->ChangeBulletTarget(pBullet))
+	if (this->BulletDetonatePreCheck(pBullet))
 		return true;
 
 	this->ChangeVelocity(pBullet);
@@ -222,8 +224,7 @@ bool TracingTrajectory::InvalidFireCondition(TechnoClass* pTechno)
 {
 	return (!pTechno
 		|| !pTechno->IsAlive
-		|| !pTechno->IsOnMap
-		|| pTechno->InLimbo
+		|| (pTechno->InLimbo && !pTechno->Transporter)
 		|| pTechno->IsSinking
 		|| pTechno->Health <= 0
 		|| this->TechnoInTransport != static_cast<bool>(pTechno->Transporter)
@@ -233,16 +234,18 @@ bool TracingTrajectory::InvalidFireCondition(TechnoClass* pTechno)
 		|| pTechno->IsUnderEMP());
 }
 
-bool TracingTrajectory::ChangeBulletTarget(BulletClass* pBullet)
+bool TracingTrajectory::BulletDetonatePreCheck(BulletClass* pBullet)
 {
 	const auto pType = this->Type;
 
 	if (!pBullet->Target && !pType->TolerantTime)
 		return true;
 
+	const auto pTechno = pBullet->Owner;
+
 	if (pType->Synchronize)
 	{
-		if (const auto pTechno = pBullet->Owner)
+		if (pTechno)
 		{
 			if (pBullet->Target != pTechno->Target && !pType->TolerantTime)
 				return true;
@@ -251,7 +254,9 @@ bool TracingTrajectory::ChangeBulletTarget(BulletClass* pBullet)
 		}
 	}
 
-	if (const auto pTarget = pBullet->Target)
+	const auto pTarget = pBullet->Target;
+
+	if (pTarget)
 	{
 		pBullet->TargetCoords = pTarget->GetCoords();
 		this->TolerantTimer.Stop();
@@ -262,6 +267,24 @@ bool TracingTrajectory::ChangeBulletTarget(BulletClass* pBullet)
 			return true;
 		else if (!this->TolerantTimer.IsTicking())
 			this->TolerantTimer.Start(pType->TolerantTime);
+	}
+
+	if (pType->NoOutOfRange && pTechno && !this->NotMainWeapon)
+	{
+		if (const auto pWeapon = pBullet->WeaponType)
+		{
+			auto source = pTechno->GetCoords();
+			auto target = pBullet->TargetCoords;
+
+			if (pTechno->IsInAir())
+			{
+				source.Z = 0;
+				target.Z = 0;
+			}
+
+			if (static_cast<int>(source.DistanceFrom(target)) > pWeapon->Range)
+				return true;
+		}
 	}
 
 	return false;
