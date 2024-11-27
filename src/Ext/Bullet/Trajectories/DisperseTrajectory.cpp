@@ -1270,6 +1270,12 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 					}
 				}
 			}
+			else if (flag == TrajectoryFlag::Tracing)
+			{
+				const auto pTrajectory = static_cast<TracingTrajectory*>(pBulletExt->Trajectory.get());
+				pTrajectory->FirepowerMult = this->FirepowerMult;
+				pTrajectory->NotMainWeapon = true;
+			}
 		}
 
 		const auto animCounts = pWeapon->Anim.Count;
