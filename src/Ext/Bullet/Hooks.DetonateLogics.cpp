@@ -596,7 +596,7 @@ DEFINE_HOOK(0x469EC0, BulletClass_Logics_AirburstWeapon, 0x6)
 				{
 					if (pWeapon->IsHouseColor || pWeaponExt->Laser_IsSingleColor)
 					{
-						auto const pLaser = GameCreate<LaserDrawClass>(pThis->Location, pTarget->GetCoords(), (pWeapon->IsHouseColor ? pOwner->LaserColor : pWeapon->LaserInnerColor), ColorStruct { 0, 0, 0 }, ColorStruct { 0, 0, 0 }, pWeapon->LaserDuration);
+						auto const pLaser = GameCreate<LaserDrawClass>(pThis->Location, pTarget->GetCoords(), ((pWeapon->IsHouseColor && pOwner) ? pOwner->LaserColor : pWeapon->LaserInnerColor), ColorStruct { 0, 0, 0 }, ColorStruct { 0, 0, 0 }, pWeapon->LaserDuration);
 						pLaser->IsHouseColor = true;
 						pLaser->Thickness = pWeaponExt->LaserThickness;
 						pLaser->IsSupported = (pLaser->Thickness > 3);
@@ -629,7 +629,7 @@ DEFINE_HOOK(0x469EC0, BulletClass_Logics_AirburstWeapon, 0x6)
 					{
 						pRadBeam->SetCoordsSource(pThis->Location);
 						pRadBeam->SetCoordsTarget(pTarget->GetCoords());
-						pRadBeam->Color = pWeaponExt->Beam_IsHouseColor ? pOwner->LaserColor : pWeaponExt->Beam_Color.Get(isTemporal ? RulesClass::Instance->ChronoBeamColor : RulesClass::Instance->RadColor);
+						pRadBeam->Color = (pWeaponExt->Beam_IsHouseColor && pOwner) ? pOwner->LaserColor : pWeaponExt->Beam_Color.Get(isTemporal ? RulesClass::Instance->ChronoBeamColor : RulesClass::Instance->RadColor);
 						pRadBeam->Period = pWeaponExt->Beam_Duration;
 						pRadBeam->Amplitude = pWeaponExt->Beam_Amplitude;
 					}
