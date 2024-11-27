@@ -8,6 +8,7 @@ public:
 	TracingTrajectoryType() : PhobosTrajectoryType()
 		, TheDuration { 0 }
 		, Synchronize { true }
+		, NoOutOfRange { false }
 		, NoDetonation { false }
 		, CreateAtTarget { false }
 		, TolerantTime { -1 }
@@ -25,6 +26,7 @@ public:
 
 	Valueable<int> TheDuration;
 	Valueable<bool> Synchronize;
+	Valueable<bool> NoOutOfRange;
 	Valueable<bool> NoDetonation;
 	Valueable<bool> CreateAtTarget;
 	Valueable<int> TolerantTime;
@@ -83,7 +85,7 @@ private:
 	void GetTechnoFLHCoord(BulletClass* pBullet, TechnoClass* pTechno);
 	void InitializeDuration(BulletClass* pBullet, int duration);
 	bool InvalidFireCondition(TechnoClass* pTechno);
-	bool ChangeBulletTarget(BulletClass* pBullet);
+	bool BulletDetonatePreCheck(BulletClass* pBullet);
 	void ChangeVelocity(BulletClass* pBullet);
 	void FireTracingWeapon(BulletClass* pBullet);
 };
