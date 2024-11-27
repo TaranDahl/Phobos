@@ -7,6 +7,12 @@ class TracingTrajectoryType final : public PhobosTrajectoryType
 public:
 	TracingTrajectoryType() : PhobosTrajectoryType()
 		, TheDuration { 0 }
+		, NoDetonation { false }
+		, CreateAtTarget { false }
+		, WeaponType {}
+		, WeaponCount { 0 }
+		, WeaponDelay { 1 }
+		, WeaponTimer { 0 }
 	{ }
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -16,6 +22,12 @@ public:
 	virtual TrajectoryFlag Flag() const override { return TrajectoryFlag::Tracing; }
 
 	Valueable<int> TheDuration;
+	Valueable<bool> NoDetonation;
+	Valueable<bool> CreateAtTarget;
+	Valueable<WeaponTypeClass*> WeaponType;
+	Valueable<int> WeaponCount;
+	Valueable<int> WeaponDelay;
+	Valueable<int> WeaponTimer;
 
 private:
 	template <typename T>
@@ -28,7 +40,13 @@ public:
 	TracingTrajectory(noinit_t) { }
 
 	TracingTrajectory(TracingTrajectoryType const* trajType) : Type { trajType }
+		, WeaponCount { trajType->WeaponCount }
 		, ExistTimer {}
+		, WeaponTimer {}
+		, NotMainWeapon { false }
+		, FLHCoord {}
+		, BuildingCoord {}
+		, FirepowerMult { 1.0 }
 	{ }
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -42,12 +60,20 @@ public:
 	virtual TrajectoryCheckReturnType OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno) override;
 
 	const TracingTrajectoryType* Type;
+	int WeaponCount;
 	CDTimerClass ExistTimer;
+	CDTimerClass WeaponTimer;
+	bool NotMainWeapon;
+	CoordStruct FLHCoord;
+	CoordStruct BuildingCoord;
+	double FirepowerMult;
 
 private:
 	template <typename T>
 	void Serialize(T& Stm);
 
+	void GetTechnoFLHCoord(BulletClass* pBullet, TechnoClass* pTechno);
 	void InitializeDuration(BulletClass* pBullet, int duration);
 	void ChangeVelocity(BulletClass* pBullet);
+	void FireTracingWeapon(BulletClass* pBullet);
 };
