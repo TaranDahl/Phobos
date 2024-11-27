@@ -22,6 +22,7 @@ void TracingTrajectoryType::Serialize(T& Stm)
 {
 	Stm
 		.Process(this->TheDuration)
+		.Process(this->Synchronize)
 		.Process(this->NoDetonation)
 		.Process(this->CreateAtTarget)
 		.Process(this->TolerantTime)
@@ -49,7 +50,9 @@ bool TracingTrajectoryType::Save(PhobosStreamWriter& Stm) const
 void TracingTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 {
 	INI_EX exINI(pINI);
+
 	this->TheDuration.Read(exINI, pSection, "Trajectory.Tracing.TheDuration");
+	this->Synchronize.Read(exINI, pSection, "Trajectory.Tracing.Synchronize");
 	this->NoDetonation.Read(exINI, pSection, "Trajectory.Tracing.NoDetonation");
 	this->CreateAtTarget.Read(exINI, pSection, "Trajectory.Tracing.CreateAtTarget");
 	this->TolerantTime.Read(exINI, pSection, "Trajectory.Tracing.TolerantTime");
@@ -71,8 +74,10 @@ void TracingTrajectory::Serialize(T& Stm)
 {
 	Stm
 		.Process(this->Type)
+		.Process(this->WeaponCount)
 		.Process(this->ExistTimer)
 		.Process(this->WeaponTimer)
+		.Process(this->TolerantTimer)
 		.Process(this->TechnoInTransport)
 		.Process(this->NotMainWeapon)
 		.Process(this->FLHCoord)
@@ -133,7 +138,7 @@ bool TracingTrajectory::OnAI(BulletClass* pBullet)
 {
 	const auto pTechno = pBullet->Owner;
 
-	if (!this->NotMainWeapon && (!pTechno || this->TechnoInTransport != static_cast<bool>(pTechno->Transporter)))
+	if (!this->NotMainWeapon && this->InvalidFireCondition(pTechno))
 		return true;
 
 	if (this->ChangeBulletTarget(pBullet))
@@ -144,10 +149,10 @@ bool TracingTrajectory::OnAI(BulletClass* pBullet)
 	if (this->WeaponTimer.Completed())
 		this->FireTracingWeapon(pBullet);
 
-	if (!this->ExistTimer.Completed())
-		return false;
+	if (this->ExistTimer.Completed())
+		return true;
 
-	return true;
+	return false;
 }
 
 void TracingTrajectory::OnAIPreDetonate(BulletClass* pBullet)
@@ -213,16 +218,37 @@ void TracingTrajectory::InitializeDuration(BulletClass* pBullet, int duration)
 	this->ExistTimer.Start(duration);
 }
 
+bool TracingTrajectory::InvalidFireCondition(TechnoClass* pTechno)
+{
+	return (!pTechno
+		|| !pTechno->IsAlive
+		|| !pTechno->IsOnMap
+		|| pTechno->InLimbo
+		|| pTechno->IsSinking
+		|| pTechno->Health <= 0
+		|| this->TechnoInTransport != static_cast<bool>(pTechno->Transporter)
+		|| pTechno->Deactivated
+		|| pTechno->TemporalTargetingMe
+		|| pTechno->BeingWarpedOut
+		|| pTechno->IsUnderEMP());
+}
+
 bool TracingTrajectory::ChangeBulletTarget(BulletClass* pBullet)
 {
 	const auto pType = this->Type;
 
-	if (const auto pTechno = pBullet->Owner)
-	{
-		if (pBullet->Target != pTechno->Target && !pType->TolerantTime)
-			return true;
+	if (!pBullet->Target && !pType->TolerantTime)
+		return true;
 
-		pBullet->Target = pTechno->Target;
+	if (pType->Synchronize)
+	{
+		if (const auto pTechno = pBullet->Owner)
+		{
+			if (pBullet->Target != pTechno->Target && !pType->TolerantTime)
+				return true;
+
+			pBullet->Target = pTechno->Target;
+		}
 	}
 
 	if (const auto pTarget = pBullet->Target)
@@ -251,7 +277,7 @@ void TracingTrajectory::ChangeVelocity(BulletClass* pBullet)
 	pBullet->Velocity.Y = static_cast<double>(distanceCoords.Y);
 	pBullet->Velocity.Z = static_cast<double>(distanceCoords.Z);
 
-	if (distance > pType->Trajectory_Speed)
+	if (pType->Trajectory_Speed > 0 && distance > pType->Trajectory_Speed)
 		pBullet->Velocity *= pType->Trajectory_Speed / distance;
 }
 

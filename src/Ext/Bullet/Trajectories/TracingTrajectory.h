@@ -7,6 +7,7 @@ class TracingTrajectoryType final : public PhobosTrajectoryType
 public:
 	TracingTrajectoryType() : PhobosTrajectoryType()
 		, TheDuration { 0 }
+		, Synchronize { true }
 		, NoDetonation { false }
 		, CreateAtTarget { false }
 		, TolerantTime { -1 }
@@ -23,6 +24,7 @@ public:
 	virtual TrajectoryFlag Flag() const override { return TrajectoryFlag::Tracing; }
 
 	Valueable<int> TheDuration;
+	Valueable<bool> Synchronize;
 	Valueable<bool> NoDetonation;
 	Valueable<bool> CreateAtTarget;
 	Valueable<int> TolerantTime;
@@ -80,6 +82,7 @@ private:
 
 	void GetTechnoFLHCoord(BulletClass* pBullet, TechnoClass* pTechno);
 	void InitializeDuration(BulletClass* pBullet, int duration);
+	bool InvalidFireCondition(TechnoClass* pTechno);
 	bool ChangeBulletTarget(BulletClass* pBullet);
 	void ChangeVelocity(BulletClass* pBullet);
 	void FireTracingWeapon(BulletClass* pBullet);
