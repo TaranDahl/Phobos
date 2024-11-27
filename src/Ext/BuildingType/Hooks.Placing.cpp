@@ -817,7 +817,7 @@ DEFINE_HOOK(0x4CA05B, FactoryClass_AbandonProduction_AbandonCurrentBuilding, 0x5
 // Buildable-upon TechnoTypes Hook #6 -> sub_443C60 - Try to clean up the building space when AI is building
 DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)
 {
-	enum { CanBuild = 0x4452F0, TemporarilyCanNotBuild = 0x445237, CanNotBuild = 0x4454E6, BuildSucceeded = 0x4454D4 };
+	enum { CanBuild = 0x4452F0, TemporarilyCanNotBuild = 0x445237, CanNotBuild = 0x4454E6, BuildSucceeded = 0x4454D4, BuildFailed = 0x445696 };
 
 	GET(BaseNodeClass* const, pBaseNode, EBX);
 	GET(BuildingClass* const, pBuilding, EDI);
@@ -827,7 +827,15 @@ DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)
 	const auto pBuildingType = pBuilding->Type;
 
 	if (RulesExt::Global()->AIForbidConYard && pBuildingType->ConstructionYard)
-		return CanNotBuild;
+	{
+		if (pBaseNode)
+		{
+			pBaseNode->Placed = true;
+			pBaseNode->Attempts = 0;
+		}
+
+		return BuildFailed;
+	}
 
 	if (!RulesExt::Global()->ExpandBuildingPlace)
 		return 0;
@@ -1371,8 +1379,13 @@ DEFINE_HOOK(0x42EB8E, BaseClass_GetBaseNodeIndex_CheckValidBaseNode, 0x6)
 	{
 		const auto index = pBaseNode->BuildingTypeIndex;
 
-		if (index >= 0 && index < BuildingTypeClass::Array->Count && BuildingTypeExt::ExtMap.Find(BuildingTypeClass::Array->Items[index])->LimboBuild)
-			return Invalid;
+		if (index >= 0 && index < BuildingTypeClass::Array->Count)
+		{
+			const auto pType = BuildingTypeClass::Array->Items[index];
+
+			if ((pType->ConstructionYard && RulesExt::Global()->AIForbidConYard) || BuildingTypeExt::ExtMap.Find(pType)->LimboBuild)
+				return Invalid;
+		}
 	}
 
 	return reinterpret_cast<bool(__thiscall*)(HouseClass*, BaseNodeClass*)>(0x50CAD0)(pBase->Owner, pBaseNode) ? Valid : Invalid;
