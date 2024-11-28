@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PhobosTrajectory.h"
+#include <Ext/WeaponType/Body.h>
 
 enum class TraceTargetMode
 {
