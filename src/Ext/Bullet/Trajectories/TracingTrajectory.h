@@ -2,20 +2,34 @@
 
 #include "PhobosTrajectory.h"
 
+enum class TraceTargetMode
+{
+	Connection = 0,
+	Map = 1,
+	Body = 2,
+	Turret = 3,
+	Rotate = 4,
+};
+
 class TracingTrajectoryType final : public PhobosTrajectoryType
 {
 public:
 	TracingTrajectoryType() : PhobosTrajectoryType()
+		, TraceMode { TraceTargetMode::Connection }
 		, TheDuration { 0 }
-		, Synchronize { true }
-		, NoOutOfRange { false }
-		, NoDetonation { false }
-		, CreateAtTarget { false }
 		, TolerantTime { -1 }
-		, WeaponType {}
-		, WeaponCount { 0 }
-		, WeaponDelay { 1 }
+		, AboveWeaponRange { true }
+		, PeacefullyVanish { false }
+		, TraceTheTarget { true }
+		, CreateAtTarget { false }
+		, CreateCoord { { 0, 0, 0 } }
+		, OffsetCoord { { 0, 0, 0 } }
+		, Weapons {}
+		, WeaponCount {}
+		, WeaponDelay {}
 		, WeaponTimer { 0 }
+		, WeaponCycle { -1 }
+		, Synchronize { true }
 	{ }
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -24,16 +38,21 @@ public:
 	virtual void Read(CCINIClass* const pINI, const char* pSection) override;
 	virtual TrajectoryFlag Flag() const override { return TrajectoryFlag::Tracing; }
 
+	Valueable<TraceTargetMode> TraceMode;
 	Valueable<int> TheDuration;
-	Valueable<bool> Synchronize;
-	Valueable<bool> NoOutOfRange;
-	Valueable<bool> NoDetonation;
-	Valueable<bool> CreateAtTarget;
 	Valueable<int> TolerantTime;
-	Valueable<WeaponTypeClass*> WeaponType;
-	Valueable<int> WeaponCount;
-	Valueable<int> WeaponDelay;
+	Valueable<bool> AboveWeaponRange;
+	Valueable<bool> PeacefullyVanish;
+	Valueable<bool> TraceTheTarget;
+	Valueable<bool> CreateAtTarget;
+	Valueable<CoordStruct> CreateCoord;
+	Valueable<CoordStruct> OffsetCoord;
+	ValueableVector<WeaponTypeClass*> Weapons;
+	ValueableVector<int> WeaponCount;
+	ValueableVector<int> WeaponDelay;
 	Valueable<int> WeaponTimer;
+	Valueable<int> WeaponCycle;
+	Valueable<bool> Synchronize;
 
 private:
 	template <typename T>
@@ -46,7 +65,9 @@ public:
 	TracingTrajectory(noinit_t) { }
 
 	TracingTrajectory(TracingTrajectoryType const* trajType) : Type { trajType }
-		, WeaponCount { trajType->WeaponCount }
+		, WeaponIndex { 0 }
+		, WeaponCount { 0 }
+		, WeaponCycle { trajType->WeaponCycle }
 		, ExistTimer {}
 		, WeaponTimer {}
 		, TolerantTimer {}
@@ -55,6 +76,7 @@ public:
 		, FLHCoord {}
 		, BuildingCoord {}
 		, FirepowerMult { 1.0 }
+		, RotateRadian { 0.0 }
 	{ }
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -68,7 +90,9 @@ public:
 	virtual TrajectoryCheckReturnType OnAITechnoCheck(BulletClass* pBullet, TechnoClass* pTechno) override;
 
 	const TracingTrajectoryType* Type;
+	int WeaponIndex;
 	int WeaponCount;
+	int WeaponCycle;
 	CDTimerClass ExistTimer;
 	CDTimerClass WeaponTimer;
 	CDTimerClass TolerantTimer;
@@ -77,6 +101,7 @@ public:
 	CoordStruct FLHCoord;
 	CoordStruct BuildingCoord;
 	double FirepowerMult;
+	double RotateRadian;
 
 private:
 	template <typename T>

@@ -396,12 +396,13 @@ bool DisperseTrajectory::BulletRetargetTechno(BulletClass* pBullet, HouseClass* 
 	const auto pType = this->Type;
 	bool check = false;
 
-	if (!pBullet->Target)
-		check = true;
-	else if (const auto pTargetTechno = abstract_cast<TechnoClass*>(pBullet->Target))
-		check = this->CheckTechnoIsInvalid(pTargetTechno);
-	else if (this->TargetIsTechno)
-		check = true;
+	if (this->TargetIsTechno)
+	{
+		if (!pBullet->Target)
+			check = true;
+		else if (const auto pTargetTechno = abstract_cast<TechnoClass*>(pBullet->Target))
+			check = this->CheckTechnoIsInvalid(pTargetTechno);
+	}
 
 	if (!check)
 		return false;
@@ -570,12 +571,13 @@ bool DisperseTrajectory::CheckWeaponCanTarget(WeaponTypeExt::ExtData* pWeaponExt
 
 bool DisperseTrajectory::CurveVelocityChange(BulletClass* pBullet)
 {
-	const auto pTargetTechno = abstract_cast<TechnoClass*>(pBullet->Target);
-	const bool checkValid = pTargetTechno && !CheckTechnoIsInvalid(pTargetTechno);
+	const auto pTarget = pBullet->Target;
+	const auto pTargetTechno = abstract_cast<TechnoClass*>(pTarget);
+	const bool checkValid = (pTarget && pTarget->WhatAmI() == AbstractType::Bullet) || (pTargetTechno && !CheckTechnoIsInvalid(pTargetTechno));
 	auto targetLocation = pBullet->TargetCoords;
 
 	if (checkValid)
-		targetLocation = pTargetTechno->GetCoords();
+		targetLocation = pTarget->GetCoords();
 
 	pBullet->TargetCoords = targetLocation;
 
@@ -699,12 +701,13 @@ bool DisperseTrajectory::NotCurveVelocityChange(BulletClass* pBullet, HouseClass
 bool DisperseTrajectory::StandardVelocityChange(BulletClass* pBullet)
 {
 	const auto pType = this->Type;
-	const auto pTargetTechno = abstract_cast<TechnoClass*>(pBullet->Target);
-	const bool checkValid = pTargetTechno && !this->CheckTechnoIsInvalid(pTargetTechno);
+	const auto pTarget = pBullet->Target;
+	const auto pTargetTechno = abstract_cast<TechnoClass*>(pTarget);
+	const bool checkValid = (pTarget && pTarget->WhatAmI() == AbstractType::Bullet) || (pTargetTechno && !CheckTechnoIsInvalid(pTargetTechno));
 	auto targetLocation = pBullet->TargetCoords;
 
 	if (checkValid)
-		targetLocation = pTargetTechno->GetCoords();
+		targetLocation = pTarget->GetCoords();
 
 	pBullet->TargetCoords = targetLocation;
 
@@ -783,7 +786,7 @@ bool DisperseTrajectory::ChangeBulletVelocity(BulletClass* pBullet, CoordStruct 
 
 			const auto reviseLength = reviseVelocity.Magnitude();
 
-			if (!curve && this->Type->SuicideShortOfROT && reviseMult < 0 && this->LastReviseMult > 0 && this->LastTargetCoord == pBullet->TargetCoords)
+			if (!curve && this->Type->SuicideShortOfROT && reviseMult < 0 && this->LastReviseMult > 0 && (this->InStraight || this->LastTargetCoord == pBullet->TargetCoords))
 				return true;
 
 			if (turningRadius < reviseLength)
@@ -1199,7 +1202,7 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 		pBulletExt->FirerHouse = pOwner;
 		pCreateBullet->MoveTo(pBullet->Location, BulletVelocity::Empty);
 
-		if (pBulletExt->Trajectory && curBurst >= 0)
+		if (pBulletExt->Trajectory)
 		{
 			const auto flag = pBulletExt->Trajectory->Flag();
 
@@ -1210,7 +1213,7 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 				pTrajectory->FirepowerMult = this->FirepowerMult;
 
 				//The created bullet's velocity calculation has been completed, so we should stack the calculations.
-				if (pTrajectory->UseDisperseBurst && abs(pTrajType->RotateCoord) > 1e-10 && maxBurst > 1 && !pTrajType->UniqueCurve && pTrajectory->PreAimCoord != CoordStruct::Empty)
+				if (pTrajectory->UseDisperseBurst && abs(pTrajType->RotateCoord) > 1e-10 && curBurst >= 0 && maxBurst > 1 && !pTrajType->UniqueCurve && pTrajectory->PreAimCoord != CoordStruct::Empty)
 					this->DisperseBurstSubstitution(pCreateBullet, pTrajType->AxisOfRotation.Get(), pTrajType->RotateCoord, curBurst, maxBurst, pTrajType->MirrorCoord);
 			}
 			else if (flag == TrajectoryFlag::Straight)
@@ -1220,7 +1223,7 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 				pTrajectory->FirepowerMult = this->FirepowerMult;
 
 				//The straight trajectory bullets has LeadTimeCalculate=true are not calculate its velocity yet.
-				if (pTrajectory->UseDisperseBurst && abs(pTrajType->RotateCoord) > 1e-10 && maxBurst > 1)
+				if (pTrajectory->UseDisperseBurst && abs(pTrajType->RotateCoord) > 1e-10 && curBurst >= 0 && maxBurst > 1)
 				{
 					if (pTrajType->LeadTimeCalculate && abstract_cast<FootClass*>(pTarget))
 					{
@@ -1240,7 +1243,7 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 				const auto pTrajType = pTrajectory->Type;
 
 				//The bombard trajectory bullets without NoLaunch and FreeFallOnTarget can change the velocity.
-				if (pTrajectory->UseDisperseBurst && abs(pTrajType->RotateCoord) > 1e-10 && maxBurst > 1 && (!pTrajType->NoLaunch || !pTrajType->FreeFallOnTarget))
+				if (pTrajectory->UseDisperseBurst && abs(pTrajType->RotateCoord) > 1e-10 && curBurst >= 0 && maxBurst > 1 && (!pTrajType->NoLaunch || !pTrajType->FreeFallOnTarget))
 				{
 					pTrajectory->CurrentBurst = curBurst;
 					pTrajectory->CountOfBurst = maxBurst;
@@ -1261,7 +1264,7 @@ void DisperseTrajectory::CreateDisperseBullets(BulletClass* pBullet, WeaponTypeC
 				const auto pTrajType = pTrajectory->Type;
 
 				//The parabola trajectory bullets has LeadTimeCalculate=true are not calculate its velocity yet.
-				if (pTrajectory->UseDisperseBurst && abs(pTrajType->RotateCoord) > 1e-10 && maxBurst > 1)
+				if (pTrajectory->UseDisperseBurst && abs(pTrajType->RotateCoord) > 1e-10 && curBurst >= 0 && maxBurst > 1)
 				{
 					if (pTrajType->LeadTimeCalculate && abstract_cast<FootClass*>(pTarget))
 					{
