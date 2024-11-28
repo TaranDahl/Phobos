@@ -103,6 +103,7 @@ public:
 		Valueable<WeaponTypeClass*> WarpOutWeapon;
 		Valueable<bool> WarpInWeapon_UseDistanceAsDamage;
 
+		int SubterraneanSpeed;
 		Nullable<int> SubterraneanHeight;
 
 		ValueableVector<AnimTypeClass*> OreGathering_Anims;
@@ -289,7 +290,6 @@ public:
 		Valueable<bool> Harvester_CanGuardArea;
 		Valueable<int> DigStartROT;
 		Valueable<int> DigInSpeed;
-		Valueable<int> DiggingSpeed;
 		Valueable<int> DigOutSpeed;
 		Valueable<int> DigEndROT;
 		Valueable<int> FlightClimb;
@@ -392,6 +392,7 @@ public:
 			, WarpOutWeapon {}
 			, WarpInWeapon_UseDistanceAsDamage { false }
 
+			, SubterraneanSpeed { -1 }
 			, SubterraneanHeight {}
 
 			, OreGathering_Anims {}
@@ -606,7 +607,6 @@ public:
 			, Harvester_CanGuardArea { false }
 			, DigStartROT { -1 }
 			, DigInSpeed { -1 }
-			, DiggingSpeed { 19 }
 			, DigOutSpeed { -1 }
 			, DigEndROT { -1 }
 			, FlightClimb { -1 }
