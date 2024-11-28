@@ -290,7 +290,6 @@ public:
 		Valueable<bool> Harvester_CanGuardArea;
 		Valueable<int> DigStartROT;
 		Valueable<int> DigInSpeed;
-		Valueable<int> DiggingSpeed;
 		Valueable<int> DigOutSpeed;
 		Valueable<int> DigEndROT;
 		Valueable<int> FlightClimb;
@@ -608,7 +607,6 @@ public:
 			, Harvester_CanGuardArea { false }
 			, DigStartROT { -1 }
 			, DigInSpeed { -1 }
-			, DiggingSpeed { 19 }
 			, DigOutSpeed { -1 }
 			, DigEndROT { -1 }
 			, FlightClimb { -1 }

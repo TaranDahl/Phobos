@@ -306,31 +306,6 @@ DEFINE_HOOK(0x7295E2, TunnelLocomotionClass_ProcessStateDigging_SubterraneanHeig
 	return SkipGameCode;
 }
 
-DEFINE_HOOK(0x7295C5, TunnelLocomotionClass_ProcessDigging_DiggingSpeed, 0x9)
-{
-	enum { Move = 0x7298C7, ShouldStop = 0x7295CE };
-
-	GET(int, deltaRange, EAX);
-	GET(TunnelLocomotionClass* const, pThis, ESI);
-
-	auto const pTechno = pThis->LinkedTo;
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType());
-	const double speed = TechnoExt::GetCurrentSpeedMultiplier(pTechno) * (pTypeExt ? pTypeExt->DiggingSpeed : 19.0);
-
-	if (deltaRange < static_cast<int>(speed) + 1)
-		return ShouldStop;
-
-	CoordStruct currentCrd = pTechno->Location;
-	CoordStruct targetCrd = pThis->Coords;
-	int newCrdX = (int)(currentCrd.X + speed * (targetCrd.X - currentCrd.X) / (double)deltaRange);
-	int newCrdY = (int)(currentCrd.Y + speed * (targetCrd.Y - currentCrd.Y) / (double)deltaRange);
-
-	R->EAX(newCrdX);
-	R->EDX(newCrdY);
-	R->EDI(currentCrd.Z);
-	return Move;
-}
-
 DEFINE_HOOK(0x7292BF, TunnelLocomotionClass_ProcessPreDigIn_DigStartROT, 0x6)
 {
 	GET(TunnelLocomotionClass* const, pThis, ESI);

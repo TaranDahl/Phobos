@@ -514,7 +514,6 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Harvester_CanGuardArea.Read(exINI, pSection, "Harvester.CanGuardArea");
 	this->DigStartROT.Read(exINI, pSection, "DigStartROT");
 	this->DigInSpeed.Read(exINI, pSection, "DigInSpeed");
-	this->DiggingSpeed.Read(exINI, pSection, "DiggingSpeed");
 	this->DigOutSpeed.Read(exINI, pSection, "DigOutSpeed");
 	this->DigEndROT.Read(exINI, pSection, "DigEndROT");
 	this->FlightClimb.Read(exINI, pSection, "FlightClimb");
@@ -985,7 +984,6 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Harvester_CanGuardArea)
 		.Process(this->DigStartROT)
 		.Process(this->DigInSpeed)
-		.Process(this->DiggingSpeed)
 		.Process(this->DigOutSpeed)
 		.Process(this->DigEndROT)
 		.Process(this->FlightClimb)
