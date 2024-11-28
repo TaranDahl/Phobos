@@ -724,6 +724,12 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 
 #pragma endregion
 
+#pragma region AggressiveMission
+
+// 0x6F8792
+
+#pragma endregion
+
 #pragma region AttackMindControlledDelay
 
 bool __fastcall CanAttackMindControlled(TechnoClass* pControlled, TechnoClass* pRetaliator)
