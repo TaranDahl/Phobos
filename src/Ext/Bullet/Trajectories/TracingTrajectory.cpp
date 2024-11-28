@@ -29,7 +29,6 @@ void TracingTrajectoryType::Serialize(T& Stm)
 		.Process(this->TraceMode)
 		.Process(this->TheDuration)
 		.Process(this->TolerantTime)
-		.Process(this->AboveWeaponRange)
 		.Process(this->PeacefullyVanish)
 		.Process(this->TraceTheTarget)
 		.Process(this->CreateAtTarget)
@@ -41,6 +40,8 @@ void TracingTrajectoryType::Serialize(T& Stm)
 		.Process(this->WeaponTimer)
 		.Process(this->WeaponCycle)
 		.Process(this->Synchronize)
+		.Process(this->SuicideAboveRange)
+		.Process(this->SuicideIfNoWeapon)
 		;
 }
 
@@ -64,20 +65,21 @@ void TracingTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 	pINI->ReadString(pSection, "Trajectory.Tracing.TraceMode", "", Phobos::readBuffer);
 	if (INIClass::IsBlank(Phobos::readBuffer))
 		this->TraceMode = TraceTargetMode::Connection;
-	else if (_stricmp(Phobos::readBuffer, "map") == 0)
-		this->TraceMode = TraceTargetMode::Map;
+	else if (_stricmp(Phobos::readBuffer, "global") == 0)
+		this->TraceMode = TraceTargetMode::Global;
 	else if (_stricmp(Phobos::readBuffer, "body") == 0)
 		this->TraceMode = TraceTargetMode::Body;
 	else if (_stricmp(Phobos::readBuffer, "turret") == 0)
 		this->TraceMode = TraceTargetMode::Turret;
-	else if (_stricmp(Phobos::readBuffer, "rotate") == 0)
-		this->TraceMode = TraceTargetMode::Rotate;
+	else if (_stricmp(Phobos::readBuffer, "rotatecw") == 0)
+		this->TraceMode = TraceTargetMode::RotateCW;
+	else if (_stricmp(Phobos::readBuffer, "rotateccw") == 0)
+		this->TraceMode = TraceTargetMode::RotateCCW;
 	else
 		this->TraceMode = TraceTargetMode::Connection;
 
 	this->TheDuration.Read(exINI, pSection, "Trajectory.Tracing.TheDuration");
 	this->TolerantTime.Read(exINI, pSection, "Trajectory.Tracing.TolerantTime");
-	this->AboveWeaponRange.Read(exINI, pSection, "Trajectory.Tracing.AboveWeaponRange");
 	this->PeacefullyVanish.Read(exINI, pSection, "Trajectory.Tracing.PeacefullyVanish");
 	this->TraceTheTarget.Read(exINI, pSection, "Trajectory.Tracing.TraceTheTarget");
 	this->CreateAtTarget.Read(exINI, pSection, "Trajectory.Tracing.CreateAtTarget");
@@ -93,6 +95,8 @@ void TracingTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 
 	this->WeaponCycle.Read(exINI, pSection, "Trajectory.Tracing.WeaponCycle");
 	this->Synchronize.Read(exINI, pSection, "Trajectory.Tracing.Synchronize");
+	this->SuicideAboveRange.Read(exINI, pSection, "Trajectory.Tracing.SuicideAboveRange");
+	this->SuicideIfNoWeapon.Read(exINI, pSection, "Trajectory.Tracing.SuicideIfNoWeapon");
 }
 
 template<typename T>
@@ -102,6 +106,7 @@ void TracingTrajectory::Serialize(T& Stm)
 		.Process(this->Type)
 		.Process(this->WeaponIndex)
 		.Process(this->WeaponCount)
+		.Process(this->WeaponCycle)
 		.Process(this->ExistTimer)
 		.Process(this->WeaponTimer)
 		.Process(this->TolerantTimer)
@@ -110,7 +115,6 @@ void TracingTrajectory::Serialize(T& Stm)
 		.Process(this->FLHCoord)
 		.Process(this->BuildingCoord)
 		.Process(this->FirepowerMult)
-		.Process(this->RotateRadian)
 		;
 }
 
@@ -151,40 +155,7 @@ void TracingTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 		this->NotMainWeapon = true;
 	}
 
-	if (pType->TraceMode == TraceTargetMode::Rotate)
-	{
-		const auto theOffset = pType->OffsetCoord.Get();
-		const auto radius = Point2D{theOffset.X,theOffset.Y}.Magnitude();
-
-		if (abs(radius) > 1e-10)
-			this->RotateRadian = pType->Trajectory_Speed / radius;
-	}
-
-	const auto theCoords = pType->CreateCoord.Get();
-	auto theOffset = theCoords;
-
-	if (theCoords.X != 0 || theCoords.Y != 0)
-	{
-		const auto& theSource = pBullet->SourceCoords;
-		const auto& theTarget = pBullet->TargetCoords;
-		const auto rotateAngle = Math::atan2(theTarget.Y - theSource.Y , theTarget.X - theSource.X);
-
-		theOffset.X = static_cast<int>(theCoords.X * Math::cos(rotateAngle) + theCoords.Y * Math::sin(rotateAngle));
-		theOffset.Y = static_cast<int>(theCoords.X * Math::sin(rotateAngle) - theCoords.Y * Math::cos(rotateAngle));
-	}
-
-	if (pType->CreateAtTarget)
-	{
-		if (const auto pTarget = pBullet->Target)
-			pBullet->SetLocation(pTarget->GetCoords() + theOffset);
-		else
-			pBullet->SetLocation(pBullet->TargetCoords + theOffset);
-	}
-	else
-	{
-		pBullet->SetLocation(pBullet->SourceCoords + theOffset);
-	}
-
+	this->SetSourceLocation(pBullet);
 	this->InitializeDuration(pBullet, pType->TheDuration);
 }
 
@@ -200,8 +171,8 @@ bool TracingTrajectory::OnAI(BulletClass* pBullet)
 
 	this->ChangeVelocity(pBullet);
 
-	if (this->WeaponTimer.Completed())
-		this->FireTracingWeapon(pBullet);
+	if (this->WeaponTimer.Completed() && this->PrepareTracingWeapon(pBullet))
+		return true;
 
 	if (this->ExistTimer.Completed())
 		return true;
@@ -263,6 +234,35 @@ void TracingTrajectory::GetTechnoFLHCoord(BulletClass* pBullet, TechnoClass* pTe
 	this->FLHCoord = pExt->LastWeaponFLH;
 }
 
+void TracingTrajectory::SetSourceLocation(BulletClass* pBullet)
+{
+	const auto pType = this->Type;
+	const auto theCoords = pType->CreateCoord.Get();
+	auto theOffset = theCoords;
+
+	if (theCoords.X != 0 || theCoords.Y != 0)
+	{
+		const auto& theSource = pBullet->SourceCoords;
+		const auto& theTarget = pBullet->TargetCoords;
+		const auto rotateAngle = Math::atan2(theTarget.Y - theSource.Y , theTarget.X - theSource.X);
+
+		theOffset.X = static_cast<int>(theCoords.X * Math::cos(rotateAngle) + theCoords.Y * Math::sin(rotateAngle));
+		theOffset.Y = static_cast<int>(theCoords.X * Math::sin(rotateAngle) - theCoords.Y * Math::cos(rotateAngle));
+	}
+
+	if (pType->CreateAtTarget)
+	{
+		if (const auto pTarget = pBullet->Target)
+			pBullet->SetLocation(pTarget->GetCoords() + theOffset);
+		else
+			pBullet->SetLocation(pBullet->TargetCoords + theOffset);
+	}
+	else
+	{
+		pBullet->SetLocation(pBullet->SourceCoords + theOffset);
+	}
+}
+
 void TracingTrajectory::InitializeDuration(BulletClass* pBullet, int duration)
 {
 	if (duration <= 0)
@@ -313,9 +313,7 @@ bool TracingTrajectory::BulletDetonatePreCheck(BulletClass* pBullet)
 		}
 	}
 
-	const auto pTarget = pBullet->Target;
-
-	if (pTarget)
+	if (const auto pTarget = pBullet->Target)
 	{
 		pBullet->TargetCoords = pTarget->GetCoords();
 		this->TolerantTimer.Stop();
@@ -328,7 +326,7 @@ bool TracingTrajectory::BulletDetonatePreCheck(BulletClass* pBullet)
 			this->TolerantTimer.Start(pType->TolerantTime);
 	}
 
-	if (!pType->AboveWeaponRange && pTechno && !this->NotMainWeapon)
+	if (!pType->SuicideAboveRange && pTechno && !this->NotMainWeapon)
 	{
 		if (const auto pWeapon = pBullet->WeaponType)
 		{
@@ -361,7 +359,7 @@ void TracingTrajectory::ChangeVelocity(BulletClass* pBullet)
 	{
 		switch (pType->TraceMode)
 		{
-		case TraceTargetMode::Map:
+		case TraceTargetMode::Global:
 		{
 			break;
 		}
@@ -399,14 +397,40 @@ void TracingTrajectory::ChangeVelocity(BulletClass* pBullet)
 
 			break;
 		}
-		case TraceTargetMode::Rotate:
+		case TraceTargetMode::RotateCW:
 		{
 			const auto distanceCoords = pBullet->Location - destination;
 			const auto radius = Point2D{theCoords.X,theCoords.Y}.Magnitude();
 
 			if ((radius * 1.2) > Point2D{distanceCoords.X,distanceCoords.Y}.Magnitude())
 			{
-				const auto rotateAngle = Math::atan2(distanceCoords.Y, distanceCoords.X) + this->RotateRadian;
+				auto rotateAngle = Math::atan2(distanceCoords.Y, distanceCoords.X);
+
+				if (abs(radius) > 1e-10)
+					rotateAngle += (pType->Trajectory_Speed / radius);
+
+				theOffset.X = static_cast<int>(radius * Math::cos(rotateAngle));
+				theOffset.Y = static_cast<int>(radius * Math::sin(rotateAngle));
+			}
+			else
+			{
+				theOffset.X = 0;
+				theOffset.Y = 0;
+			}
+
+			break;
+		}
+		case TraceTargetMode::RotateCCW:
+		{
+			const auto distanceCoords = pBullet->Location - destination;
+			const auto radius = Point2D{theCoords.X,theCoords.Y}.Magnitude();
+
+			if ((radius * 1.2) > Point2D{distanceCoords.X,distanceCoords.Y}.Magnitude())
+			{
+				auto rotateAngle = Math::atan2(distanceCoords.Y, distanceCoords.X);
+
+				if (abs(radius) > 1e-10)
+					rotateAngle -= (pType->Trajectory_Speed / radius);
 
 				theOffset.X = static_cast<int>(radius * Math::cos(rotateAngle));
 				theOffset.Y = static_cast<int>(radius * Math::sin(rotateAngle));
@@ -444,7 +468,95 @@ void TracingTrajectory::ChangeVelocity(BulletClass* pBullet)
 		pBullet->Velocity *= (pType->Trajectory_Speed / distance);
 }
 
-void TracingTrajectory::FireTracingWeapon(BulletClass* pBullet)
+AbstractClass* TracingTrajectory::GetBulletTarget(BulletClass* pBullet, TechnoClass* pTechno, HouseClass* pOwner, WeaponTypeClass* pWeapon, WeaponTypeExt::ExtData* pWeaponExt)
+{
+	const auto pType = this->Type;
+
+	if (pType->TraceTheTarget)
+		return pBullet;
+
+	if (pType->Synchronize)
+		return pBullet->Target;
+
+	const auto vec = Helpers::Alex::getCellSpreadItems(pBullet->Location, (pWeapon->Range / 256.0), pWeapon->Projectile->AA);
+
+	for (const auto& pOpt : vec)
+	{
+		if (!pOpt->IsAlive || !pOpt->IsOnMap || pOpt->InLimbo || pOpt->IsSinking || pOpt->Health <= 0)
+			continue;
+
+		const auto pOptType = pOpt->GetTechnoType();
+
+		if (!pOptType->LegalTarget || pOpt == pTechno)
+			continue;
+
+		const auto absType = pOpt->WhatAmI();
+
+		if (pOwner->IsAlliedWith(pOpt->Owner))
+			continue;
+
+		const auto pCell = pOpt->GetCell();
+
+		if (absType == AbstractType::Infantry && pOpt->IsDisguisedAs(pOwner) && !pCell->DisguiseSensors_InclHouse(pOwner->ArrayIndex))
+			continue;
+
+		if (absType == AbstractType::Unit && pOpt->IsDisguised() && !pCell->DisguiseSensors_InclHouse(pOwner->ArrayIndex))
+			continue;
+
+		if (pOpt->CloakState == CloakState::Cloaked && !pCell->Sensors_InclHouse(pOwner->ArrayIndex))
+			continue;
+
+		if (MapClass::GetTotalDamage(100, pWeapon->Warhead, pOptType->Armor, 0) == 0)
+			continue;
+
+		if (pWeaponExt && (!EnumFunctions::IsTechnoEligible(pOpt, pWeaponExt->CanTarget) || !pWeaponExt->HasRequiredAttachedEffects(pOpt, pTechno)))
+			continue;
+
+		return pOpt;
+	}
+
+	return pBullet->Target;
+}
+
+CoordStruct TracingTrajectory::GetWeaponFireCoord(BulletClass* pBullet, TechnoClass* pTechno)
+{
+	if (this->Type->TraceTheTarget)
+	{
+		const auto pTransporter = pTechno->Transporter;
+
+		if (!this->NotMainWeapon && pTechno && (pTransporter || !pTechno->InLimbo))
+		{
+			if (pTechno->WhatAmI() != AbstractType::Building)
+			{
+				if (!pTransporter)
+					return TechnoExt::GetFLHAbsoluteCoords(pTechno, this->FLHCoord, pTechno->HasTurret());
+
+				return TechnoExt::GetFLHAbsoluteCoords(pTransporter, this->FLHCoord, pTransporter->HasTurret());
+			}
+
+			const auto pBuilding = static_cast<BuildingClass*>(pTechno);
+			Matrix3D mtx;
+			mtx.MakeIdentity();
+
+			if (pTechno->HasTurret())
+			{
+				TechnoTypeExt::ApplyTurretOffset(pBuilding->Type, &mtx);
+				mtx.RotateZ(static_cast<float>(pTechno->TurretFacing().GetRadian<32>()));
+			}
+
+			mtx.Translate(static_cast<float>(this->FLHCoord.X), static_cast<float>(this->FLHCoord.Y), static_cast<float>(this->FLHCoord.Z));
+			const auto result = mtx.GetTranslation();
+
+			return (pBuilding->GetCoords() + this->BuildingCoord + CoordStruct { static_cast<int>(result.X), -static_cast<int>(result.Y), static_cast<int>(result.Z) });
+		}
+
+		return pBullet->SourceCoords;
+	}
+
+	return pBullet->Location;
+}
+
+bool TracingTrajectory::PrepareTracingWeapon(BulletClass* pBullet)
 {
 	const auto pType = this->Type;
 	WeaponTypeClass* pWeapon = nullptr;
@@ -460,22 +572,26 @@ void TracingTrajectory::FireTracingWeapon(BulletClass* pBullet)
 			this->WeaponIndex %= validWeapons;
 			pWeapon = pType->Weapons[this->WeaponIndex];
 		}
-		else
+		else if (!pType->SuicideIfNoWeapon)
 		{
 			this->WeaponTimer.Stop();
-			return;
+			return false;
+		}
+		else
+		{
+			return true;
 		}
 	}
 	else
 	{
 		this->WeaponTimer.Stop();
-		return;
+		return false;
 	}
 
 	if (!pWeapon)
 	{
 		++this->WeaponIndex;
-		return;
+		return false;
 	}
 
 	if (const int validCounts = pType->WeaponCount.size())
@@ -485,7 +601,7 @@ void TracingTrajectory::FireTracingWeapon(BulletClass* pBullet)
 		if (!count)
 		{
 			++this->WeaponIndex;
-			return;
+			return false;
 		}
 		else if (count > 0 && ++this->WeaponCount >= count)
 		{
@@ -496,66 +612,20 @@ void TracingTrajectory::FireTracingWeapon(BulletClass* pBullet)
 	else
 	{
 		this->WeaponTimer.Stop();
-		return;
+		return false;
 	}
 
+	this->CreateTracingBullets(pBullet, pWeapon);
+	return false;
+}
+
+void TracingTrajectory::CreateTracingBullets(BulletClass* pBullet, WeaponTypeClass* pWeapon)
+{
+	const auto pType = this->Type;
 	const auto pTechno = pBullet->Owner;
 	const auto pOwner = pTechno ? pTechno->Owner : BulletExt::ExtMap.Find(pBullet)->FirerHouse;
 	const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
-
-	AbstractClass* pTarget = nullptr;
-
-	if (pType->TraceTheTarget)
-	{
-		pTarget = pBullet;
-	}
-	else if (pType->Synchronize)
-	{
-		pTarget = pBullet->Target;
-	}
-	else
-	{
-		const auto vec = Helpers::Alex::getCellSpreadItems(pBullet->Location, (pWeapon->Range / 256.0), pWeapon->Projectile->AA);
-
-		for (const auto& pOpt : vec)
-		{
-			if (!pOpt->IsAlive || !pOpt->IsOnMap || pOpt->InLimbo || pOpt->IsSinking || pOpt->Health <= 0)
-				continue;
-
-			const auto pOptType = pOpt->GetTechnoType();
-
-			if (!pOptType->LegalTarget || pOpt == pTechno)
-				continue;
-
-			const auto absType = pOpt->WhatAmI();
-
-			if (pOwner->IsAlliedWith(pOpt->Owner))
-				continue;
-
-			const auto pCell = pOpt->GetCell();
-
-			if (absType == AbstractType::Infantry && pOpt->IsDisguisedAs(pOwner) && !pCell->DisguiseSensors_InclHouse(pOwner->ArrayIndex))
-				continue;
-
-			if (absType == AbstractType::Unit && pOpt->IsDisguised() && !pCell->DisguiseSensors_InclHouse(pOwner->ArrayIndex))
-				continue;
-
-			if (pOpt->CloakState == CloakState::Cloaked && !pCell->Sensors_InclHouse(pOwner->ArrayIndex))
-				continue;
-
-			if (MapClass::GetTotalDamage(100, pWeapon->Warhead, pOptType->Armor, 0) == 0)
-				continue;
-
-			if (pWeaponExt && (!EnumFunctions::IsTechnoEligible(pOpt, pWeaponExt->CanTarget) || !pWeaponExt->HasRequiredAttachedEffects(pOpt, pTechno)))
-				continue;
-
-			pTarget = pOpt;
-			break;
-		}
-
-		if (!pTarget)
-			pTarget = pBullet->Target;
-	}
+	AbstractClass* pTarget = this->GetBulletTarget(pBullet, pTechno, pOwner, pWeapon, pWeaponExt);
 
 	if (!pTarget)
 		return;
@@ -566,45 +636,8 @@ void TracingTrajectory::FireTracingWeapon(BulletClass* pBullet)
 		this->WeaponTimer.Start((delay > 0) ? delay : 1);
 	}
 
-	const auto pTransporter = pTechno->Transporter;
+	const auto fireCoord = this->GetWeaponFireCoord(pBullet, pTechno);
 	const auto targetCoords = pTarget->GetCoords();
-
-	auto fireCoord = pBullet->SourceCoords;
-
-	if (pType->TraceTheTarget)
-	{
-		if (!this->NotMainWeapon && pTechno && (pTransporter || !pTechno->InLimbo))
-		{
-			if (pTechno->WhatAmI() != AbstractType::Building)
-			{
-				if (pTransporter)
-					fireCoord = TechnoExt::GetFLHAbsoluteCoords(pTransporter, this->FLHCoord, pTransporter->HasTurret());
-				else
-					fireCoord = TechnoExt::GetFLHAbsoluteCoords(pTechno, this->FLHCoord, pTechno->HasTurret());
-			}
-			else
-			{
-				const auto pBuilding = static_cast<BuildingClass*>(pTechno);
-				Matrix3D mtx;
-				mtx.MakeIdentity();
-
-				if (pTechno->HasTurret())
-				{
-					TechnoTypeExt::ApplyTurretOffset(pBuilding->Type, &mtx);
-					mtx.RotateZ(static_cast<float>(pTechno->TurretFacing().GetRadian<32>()));
-				}
-
-				mtx.Translate(static_cast<float>(this->FLHCoord.X), static_cast<float>(this->FLHCoord.Y), static_cast<float>(this->FLHCoord.Z));
-				const auto result = mtx.GetTranslation();
-				fireCoord = pBuilding->GetCoords() + this->BuildingCoord + CoordStruct { static_cast<int>(result.X), -static_cast<int>(result.Y), static_cast<int>(result.Z) };
-			}
-		}
-	}
-	else
-	{
-		fireCoord = pBullet->Location;
-	}
-
 	const auto finalDamage = static_cast<int>(pWeapon->Damage * this->FirepowerMult);
 
 	if (const auto pCreateBullet = pWeapon->Projectile->CreateBullet(pTarget, pTechno, finalDamage, pWeapon->Warhead, pWeapon->Speed, pWeapon->Bright))
