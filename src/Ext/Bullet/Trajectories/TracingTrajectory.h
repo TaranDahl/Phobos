@@ -5,10 +5,11 @@
 enum class TraceTargetMode
 {
 	Connection = 0,
-	Map = 1,
+	Global = 1,
 	Body = 2,
 	Turret = 3,
-	Rotate = 4,
+	RotateCW = 4,
+	RotateCCW = 5,
 };
 
 class TracingTrajectoryType final : public PhobosTrajectoryType
@@ -18,7 +19,6 @@ public:
 		, TraceMode { TraceTargetMode::Connection }
 		, TheDuration { 0 }
 		, TolerantTime { -1 }
-		, AboveWeaponRange { true }
 		, PeacefullyVanish { false }
 		, TraceTheTarget { true }
 		, CreateAtTarget { false }
@@ -30,6 +30,8 @@ public:
 		, WeaponTimer { 0 }
 		, WeaponCycle { -1 }
 		, Synchronize { true }
+		, SuicideAboveRange { false }
+		, SuicideIfNoWeapon { false }
 	{ }
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -41,7 +43,6 @@ public:
 	Valueable<TraceTargetMode> TraceMode;
 	Valueable<int> TheDuration;
 	Valueable<int> TolerantTime;
-	Valueable<bool> AboveWeaponRange;
 	Valueable<bool> PeacefullyVanish;
 	Valueable<bool> TraceTheTarget;
 	Valueable<bool> CreateAtTarget;
@@ -53,6 +54,8 @@ public:
 	Valueable<int> WeaponTimer;
 	Valueable<int> WeaponCycle;
 	Valueable<bool> Synchronize;
+	Valueable<bool> SuicideAboveRange;
+	Valueable<bool> SuicideIfNoWeapon;
 
 private:
 	template <typename T>
@@ -76,7 +79,6 @@ public:
 		, FLHCoord {}
 		, BuildingCoord {}
 		, FirepowerMult { 1.0 }
-		, RotateRadian { 0.0 }
 	{ }
 
 	virtual bool Load(PhobosStreamReader& Stm, bool RegisterForChange) override;
@@ -101,16 +103,19 @@ public:
 	CoordStruct FLHCoord;
 	CoordStruct BuildingCoord;
 	double FirepowerMult;
-	double RotateRadian;
 
 private:
 	template <typename T>
 	void Serialize(T& Stm);
 
 	void GetTechnoFLHCoord(BulletClass* pBullet, TechnoClass* pTechno);
+	void SetSourceLocation(BulletClass* pBullet);
 	void InitializeDuration(BulletClass* pBullet, int duration);
 	bool InvalidFireCondition(TechnoClass* pTechno);
 	bool BulletDetonatePreCheck(BulletClass* pBullet);
 	void ChangeVelocity(BulletClass* pBullet);
-	void FireTracingWeapon(BulletClass* pBullet);
+	AbstractClass* GetBulletTarget(BulletClass* pBullet, TechnoClass* pTechno, HouseClass* pOwner, WeaponTypeClass* pWeapon, WeaponTypeExt::ExtData* pWeaponExt);
+	CoordStruct GetWeaponFireCoord(BulletClass* pBullet, TechnoClass* pTechno);
+	bool PrepareTracingWeapon(BulletClass* pBullet);
+	void CreateTracingBullets(BulletClass* pBullet, WeaponTypeClass* pWeapon);
 };
