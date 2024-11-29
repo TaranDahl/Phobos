@@ -134,8 +134,11 @@ void TracingTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bul
 {
 	const auto pType = this->Type;
 
-	if (!pType->Weapons.empty() && !pType->WeaponCount.empty())
+	if (!pType->Weapons.empty() && !pType->WeaponCount.empty() && this->WeaponCycle)
+	{
+		this->WeaponCount = pType->WeaponCount[0];
 		this->WeaponTimer.Start(pType->WeaponTimer);
+	}
 
 	this->FLHCoord = pBullet->SourceCoords;
 
@@ -559,71 +562,46 @@ CoordStruct TracingTrajectory::GetWeaponFireCoord(BulletClass* pBullet, TechnoCl
 bool TracingTrajectory::PrepareTracingWeapon(BulletClass* pBullet)
 {
 	const auto pType = this->Type;
-	WeaponTypeClass* pWeapon = nullptr;
 
-	if (const int validWeapons = pType->Weapons.size())
+	if (const auto pWeapon = pType->Weapons[this->WeaponIndex])
+		this->CreateTracingBullets(pBullet, pWeapon);
+
+	if (this->WeaponCount < 0 || --this->WeaponCount > 0)
+		return false;
+
+	if (++this->WeaponIndex < static_cast<int>(pType->Weapons.size()))
 	{
-		if (this->WeaponIndex < validWeapons)
-		{
-			pWeapon = pType->Weapons[this->WeaponIndex];
-		}
-		else if (this->WeaponCycle < 0 || --this->WeaponCycle > 0)
-		{
-			this->WeaponIndex %= validWeapons;
-			pWeapon = pType->Weapons[this->WeaponIndex];
-		}
-		else if (!pType->SuicideIfNoWeapon)
-		{
-			this->WeaponTimer.Stop();
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-	}
-	else
-	{
-		this->WeaponTimer.Stop();
+		const int validCounts = pType->WeaponCount.size();
+		this->WeaponCount = pType->WeaponCount[(this->WeaponIndex < validCounts) ? this->WeaponIndex : (validCounts - 1)];
+
 		return false;
 	}
 
-	if (!pWeapon)
-	{
-		++this->WeaponIndex;
+	this->WeaponIndex = 0;
+	this->WeaponCount = pType->WeaponCount[0];
+
+	if (this->WeaponCycle < 0 || --this->WeaponCycle > 0)
 		return false;
-	}
 
-	if (const int validCounts = pType->WeaponCount.size())
-	{
-		const auto count = pType->WeaponCount[(this->WeaponIndex < validCounts) ? this->WeaponIndex : (validCounts - 1)];
+	this->WeaponTimer.Stop();
 
-		if (!count)
-		{
-			++this->WeaponIndex;
-			return false;
-		}
-		else if (count > 0 && ++this->WeaponCount >= count)
-		{
-			++this->WeaponIndex;
-			this->WeaponCount = 0;
-		}
-	}
-	else
-	{
-		this->WeaponTimer.Stop();
-		return false;
-	}
-
-	this->CreateTracingBullets(pBullet, pWeapon);
-	return false;
+	return pType->SuicideIfNoWeapon;
 }
 
 void TracingTrajectory::CreateTracingBullets(BulletClass* pBullet, WeaponTypeClass* pWeapon)
 {
 	const auto pType = this->Type;
 	const auto pTechno = pBullet->Owner;
-	const auto pOwner = pTechno ? pTechno->Owner : BulletExt::ExtMap.Find(pBullet)->FirerHouse;
+	auto pOwner = pTechno ? pTechno->Owner : BulletExt::ExtMap.Find(pBullet)->FirerHouse;
+
+	if (!pOwner || pOwner->Defeated)
+	{
+		if (const auto pNeutral = HouseClass::FindNeutral())
+			pOwner = pNeutral;
+		else
+			return;
+	}
+
 	const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
 	AbstractClass* pTarget = this->GetBulletTarget(pBullet, pTechno, pOwner, pWeapon, pWeaponExt);
 
@@ -635,6 +613,9 @@ void TracingTrajectory::CreateTracingBullets(BulletClass* pBullet, WeaponTypeCla
 		const auto delay = pType->WeaponDelay[(this->WeaponIndex < validDelays) ? this->WeaponIndex : (validDelays - 1)];
 		this->WeaponTimer.Start((delay > 0) ? delay : 1);
 	}
+
+	if (!this->WeaponCount)
+		return;
 
 	const auto fireCoord = this->GetWeaponFireCoord(pBullet, pTechno);
 	const auto targetCoords = pTarget->GetCoords();
@@ -720,7 +701,7 @@ void TracingTrajectory::CreateTracingBullets(BulletClass* pBullet, WeaponTypeCla
 	{
 		if (pWeapon->IsHouseColor || pWeaponExt->Laser_IsSingleColor)
 		{
-			auto const pLaser = GameCreate<LaserDrawClass>(fireCoord, targetCoords, ((pWeapon->IsHouseColor && pOwner) ? pOwner->LaserColor : pWeapon->LaserInnerColor), ColorStruct { 0, 0, 0 }, ColorStruct { 0, 0, 0 }, pWeapon->LaserDuration);
+			auto const pLaser = GameCreate<LaserDrawClass>(fireCoord, targetCoords, (pWeapon->IsHouseColor ? pOwner->LaserColor : pWeapon->LaserInnerColor), ColorStruct { 0, 0, 0 }, ColorStruct { 0, 0, 0 }, pWeapon->LaserDuration);
 			pLaser->IsHouseColor = true;
 			pLaser->Thickness = pWeaponExt->LaserThickness;
 			pLaser->IsSupported = (pLaser->Thickness > 3);
@@ -753,7 +734,7 @@ void TracingTrajectory::CreateTracingBullets(BulletClass* pBullet, WeaponTypeCla
 		{
 			pRadBeam->SetCoordsSource(fireCoord);
 			pRadBeam->SetCoordsTarget(targetCoords);
-			pRadBeam->Color = (pWeaponExt->Beam_IsHouseColor && pOwner) ? pOwner->LaserColor : pWeaponExt->Beam_Color.Get(isTemporal ? RulesClass::Instance->ChronoBeamColor : RulesClass::Instance->RadColor);
+			pRadBeam->Color = pWeaponExt->Beam_IsHouseColor ? pOwner->LaserColor : pWeaponExt->Beam_Color.Get(isTemporal ? RulesClass::Instance->ChronoBeamColor : RulesClass::Instance->RadColor);
 			pRadBeam->Period = pWeaponExt->Beam_Duration;
 			pRadBeam->Amplitude = pWeaponExt->Beam_Amplitude;
 		}
