@@ -472,7 +472,7 @@ bool TacticalButtonsClass::MouseIsOverMessageLists(const Point2D* pMousePosition
 			for (; pText; pText = static_cast<TextLabelClass*>(pText->GetNext()))
 				height += textHeight;
 
-			if (pMousePosition->Y < (height + 5))
+			if (pMousePosition->Y < (height + 2))
 				return true;
 		}
 	}
@@ -511,7 +511,7 @@ void TacticalButtonsClass::FPSCounterDraw()
 			color = 0x9FEC;
 	}
 
-	const int trans = InputManagerClass::Instance->IsForceMoveKeyPressed() ? 90 : 40;
+	const int trans = InputManagerClass::Instance->IsForceMoveKeyPressed() ? 80 : 40;
 	const auto height = DSurface::Composite->GetHeight() - ((Phobos::Config::SelectedDisplay_Enable && this->CurrentSelectCameo.size()) ? 80 : 32);
 	ColorStruct fillColor { 0, 0, 0 };
 	RectangleStruct rect { 0, (height - avgDim.Height), avgDim.Width + 4, avgDim.Height };

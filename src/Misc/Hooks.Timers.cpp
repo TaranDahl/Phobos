@@ -96,7 +96,7 @@ DEFINE_HOOK(0x6D4CE6, PrintTimerOnTactical_RectTrans, 0x6)
 	RectangleStruct rect { (location.X - width), location.Y, width, lineSpace };
 
 	ColorStruct fillColor { 0, 0, 0 };
-	DSurface::Composite->FillRectTrans(&rect, &fillColor, (InputManagerClass::Instance->IsForceMoveKeyPressed() ? 90 : 40));
+	DSurface::Composite->FillRectTrans(&rect, &fillColor, (InputManagerClass::Instance->IsForceMoveKeyPressed() ? 80 : 40));
 	Point2D top { rect.X - 1, rect.Y };
 	Point2D bot { top.X, top.Y + lineSpace - 1 };
 	DSurface::Composite->DrawLine(&top, &bot, COLOR_BLACK);
