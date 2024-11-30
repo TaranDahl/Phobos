@@ -15,11 +15,11 @@ DEFINE_HOOK(0x736A26, UnitClass_UpdateRotation_StopUnitIdleAction, 0x6)
 
 	if (pTypeExt)
 	{
-		constexpr double ratio = (65536 / 360);
+		constexpr double angleToRaw = (65536.0 / 360);
 
 		if (pTypeExt->Turret_BodyRotation_Enable && !pThis->Locomotor->Is_Moving_Now())
 		{
-			const auto rotate = DirStruct { static_cast<int>(pTypeExt->Turret_BodyRotation_Angle * ratio + 0.5) };
+			const auto rotate = DirStruct { static_cast<int>(pTypeExt->Turret_BodyRotation_Angle * angleToRaw + 0.5) };
 			const auto curDir = pThis->PrimaryFacing.Current();
 			DirStruct tgtDir = *pTgtDir;
 
@@ -27,11 +27,7 @@ DEFINE_HOOK(0x736A26, UnitClass_UpdateRotation_StopUnitIdleAction, 0x6)
 			{
 				const auto rightDir = DirStruct { static_cast<short>(pTgtDir->Raw) + static_cast<short>(rotate.Raw) };
 				const auto leftDir = DirStruct { static_cast<short>(pTgtDir->Raw) - static_cast<short>(rotate.Raw) };
-
-				if (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw)))
-					tgtDir = rightDir;
-				else
-					tgtDir = leftDir;
+				tgtDir = (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw))) ? rightDir : leftDir;
 			}
 			else
 			{
@@ -42,18 +38,14 @@ DEFINE_HOOK(0x736A26, UnitClass_UpdateRotation_StopUnitIdleAction, 0x6)
 				pThis->PrimaryFacing.SetDesired(tgtDir);
 		}
 
-		const auto rotate = DirStruct { static_cast<int>(pTypeExt->Turret_SelfRotation_Angle * ratio + 0.5) };
+		const auto rotate = DirStruct { static_cast<int>(pTypeExt->Turret_SelfRotation_Angle * angleToRaw + 0.5) };
 
 		if (pTypeExt->Turret_SelfRotation_Symmetric)
 		{
 			const auto curDir = pThis->SecondaryFacing.Current();
 			const auto rightDir = DirStruct { static_cast<short>(pTgtDir->Raw) + static_cast<short>(rotate.Raw) };
 			const auto leftDir = DirStruct { static_cast<short>(pTgtDir->Raw) - static_cast<short>(rotate.Raw) };
-
-			if (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw)))
-				*pTgtDir = rightDir;
-			else
-				*pTgtDir = leftDir;
+			*pTgtDir = (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw))) ? rightDir : leftDir;
 		}
 		else
 		{
@@ -164,12 +156,12 @@ DEFINE_HOOK(0x7410BB, UnitClass_GetFireError_CheckFacingError, 0x8)
 {
 	enum { NoNeedToCheck = 0x74132B, ContinueCheck = 0x7410C3 };
 
-	GET(FireError, fireError, EAX);
+	GET(const FireError, fireError, EAX);
 
 	if (fireError == FireError::OK)
 		return ContinueCheck;
 
-	GET(UnitClass*, pThis, ESI);
+	GET(UnitClass* const, pThis, ESI);
 
 	return (fireError == FireError::REARM && !pThis->Type->Turret && !pThis->IsWarpingIn()) ? ContinueCheck : NoNeedToCheck;
 }
@@ -181,46 +173,32 @@ DEFINE_HOOK(0x7412BB, UnitClass_GetFireError_CheckFacingDeviation, 0x7)
 	GET(UnitClass* const, pThis, ESI);
 	GET(AbstractClass* const, pTarget, EBP);
 	GET(BulletTypeClass* const, pBulletType, EDX);
-	GET(DirStruct, curDir, EDI);
-	GET(DirStruct*, pTargetDir, EAX);
+	GET(const DirStruct, curDir, EDI);
+	GET(DirStruct* const, pTgtDir, EAX);
 
-	const auto source = pThis->Location;
-	const auto target = pTarget->GetCoords();
-	const auto radian = Math::atan2(source.Y - target.Y, target.X - source.X);
+	*pTgtDir = pThis->GetTargetDirection(pTarget);
 
 	if (pThis->Type->Turret)
 	{
 		if (const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type))
 		{
-			const auto rotate = pTypeExt->Turret_SelfRotation_Angle * (Math::Pi / 180.0);
+			constexpr double angleToRaw = (65536.0 / 360);
+			const auto rotate = DirStruct { static_cast<int>(pTypeExt->Turret_SelfRotation_Angle * angleToRaw + 0.5) };
 
 			if (pTypeExt->Turret_SelfRotation_Symmetric)
 			{
-				const auto rightDir = DirStruct { radian + rotate };
-				const auto leftDir = DirStruct { radian - rotate };
-
-				if (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw)))
-					*pTargetDir = rightDir;
-				else
-					*pTargetDir = leftDir;
+				const auto rightDir = DirStruct { static_cast<short>(pTgtDir->Raw) + static_cast<short>(rotate.Raw) };
+				const auto leftDir = DirStruct { static_cast<short>(pTgtDir->Raw) - static_cast<short>(rotate.Raw) };
+				*pTgtDir = (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw))) ? rightDir : leftDir;
 			}
 			else
 			{
-				*pTargetDir = DirStruct { radian + rotate };
+				*pTgtDir = DirStruct { static_cast<short>(pTgtDir->Raw) + static_cast<short>(rotate.Raw) };
 			}
 		}
-		else
-		{
-			*pTargetDir = DirStruct { radian };
-		}
-	}
-	else
-	{
-		*pTargetDir = DirStruct { radian };
 	}
 
 	R->EBX(pBulletType->ROT ? 16 : 8);
-	R->EAX(pTargetDir);
 	return SkipGameCode;
 }
 
