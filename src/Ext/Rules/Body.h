@@ -147,6 +147,7 @@ public:
 		Valueable<int> CleanUpAirBarrier;
 		Valueable<int> AttackMindControlledDelay;
 		Valueable<bool> NoQueueUpToEnter;
+		Valueable<bool> AttackMove_Aggressive;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -252,7 +253,7 @@ public:
 		Valueable<bool> DistributeTargetingFrame;
 		Valueable<bool> DistributeTargetingFrame_AIOnly;
 		Valueable<bool> AttackMove_IgnoreWeaponCheck;
-		Valueable<bool> AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault;
+		Nullable<bool> AttackMove_StopWhenTargetAcquired;
 		Valueable<bool> BuildingTypeSelectable;
 
 		Valueable<double> AircraftLevelLightMultiplier;
@@ -384,6 +385,7 @@ public:
 			, CleanUpAirBarrier { 0 }
 			, AttackMindControlledDelay { 0 }
 			, NoQueueUpToEnter { false }
+			, AttackMove_Aggressive { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
@@ -482,7 +484,7 @@ public:
 			, DistributeTargetingFrame { false }
 			, DistributeTargetingFrame_AIOnly { true }
 			, AttackMove_IgnoreWeaponCheck { false }
-			, AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault { false }
+			, AttackMove_StopWhenTargetAcquired {}
 			, BuildingTypeSelectable { false }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
