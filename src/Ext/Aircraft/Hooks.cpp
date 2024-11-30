@@ -416,14 +416,11 @@ DEFINE_HOOK(0x4C762A, EventClass_RespondToEvent_StopAircraftAction, 0x6)
 {
 	GET(TechnoClass* const, pTechno, ESI);
 
-	if (RulesExt::Global()->ExpandAircraftMission && pTechno->WhatAmI() == AbstractType::Aircraft && !pTechno->Airstrike && !pTechno->Spawned)
-	{
-		if (pTechno->vt_entry_4C4()) // pTechno->MegaMissionIsAttackMove()
-			pTechno->vt_entry_4A8(); // pTechno->ClearMegaMissionData()
+	if (pTechno->vt_entry_4C4()) // pTechno->MegaMissionIsAttackMove()
+		pTechno->vt_entry_4A8(); // pTechno->ClearMegaMissionData()
 
-		if (pTechno->GetHeight() > Unsorted::CellHeight)
-			pTechno->EnterIdleMode(false, true);
-	}
+	if (RulesExt::Global()->ExpandAircraftMission && pTechno->WhatAmI() == AbstractType::Aircraft && !pTechno->Airstrike && !pTechno->Spawned && pTechno->GetHeight() > Unsorted::CellHeight)
+		pTechno->EnterIdleMode(false, true);
 
 	return 0;
 }

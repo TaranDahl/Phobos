@@ -147,6 +147,7 @@ public:
 		Valueable<int> CleanUpAirBarrier;
 		Valueable<int> AttackMindControlledDelay;
 		Valueable<bool> NoQueueUpToEnter;
+		Valueable<bool> AttackMove_Aggressive;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -384,6 +385,7 @@ public:
 			, CleanUpAirBarrier { 0 }
 			, AttackMindControlledDelay { 0 }
 			, NoQueueUpToEnter { false }
+			, AttackMove_Aggressive { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
