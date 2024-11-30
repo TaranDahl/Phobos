@@ -49,8 +49,6 @@ public:
 		bool CanCloakDuringRearm; // Current rearm timer was started by DecloakToFire=no weapon.
 		int WHAnimRemainingCreationInterval;
 		bool CanCurrentlyDeployIntoBuilding; // Only set on UnitClass technos with DeploysInto set in multiplayer games, recalculated once per frame so no need to serialize.
-		bool UnitIdleAction;
-		bool UnitIdleActionSelected;
 		bool UnitIdleIsSelected;
 		CDTimerClass UnitIdleActionTimer;
 		CDTimerClass UnitIdleActionGapTimer;
@@ -99,9 +97,7 @@ public:
 			, CanCloakDuringRearm { false }
 			, WHAnimRemainingCreationInterval { 0 }
 			, CanCurrentlyDeployIntoBuilding { false }
-			, UnitIdleAction { false }
-			, UnitIdleActionSelected { false }
-			, UnitIdleIsSelected { 0 }
+			, UnitIdleIsSelected { false }
 			, UnitIdleActionTimer {}
 			, UnitIdleActionGapTimer {}
 			, UnitAutoDeployTimer {}
@@ -145,7 +141,6 @@ public:
 		bool HasAttachedEffects(std::vector<AttachEffectTypeClass*> attachEffectTypes, bool requireAll, bool ignoreSameSource, TechnoClass* pInvoker, AbstractClass* pSource, std::vector<int> const* minCounts, std::vector<int> const* maxCounts) const;
 		int GetAttachedEffectCumulativeCount(AttachEffectTypeClass* pAttachEffectType, bool ignoreSameSource = false, TechnoClass* pInvoker = nullptr, AbstractClass* pSource = nullptr) const;
 		void InitializeDisplayInfo();
-		void InitializeUnitIdleAction();
 		void StopIdleAction();
 		void ApplyIdleAction();
 		void ManualIdleAction();

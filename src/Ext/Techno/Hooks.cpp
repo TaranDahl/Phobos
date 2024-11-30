@@ -137,7 +137,6 @@ DEFINE_HOOK(0x6F42F7, TechnoClass_Init, 0x2)
 	pExt->InitializeLaserTrails();
 	pExt->InitializeAttachEffects();
 	pExt->InitializeDisplayInfo();
-	pExt->InitializeUnitIdleAction();
 
 	if (pExt->TypeExtData->UniqueTechno && pThis->Owner->IsControlledByCurrentPlayer())
 		ScenarioExt::Global()->OwnedHeros.push_back(pExt);
