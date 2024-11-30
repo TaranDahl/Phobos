@@ -692,9 +692,26 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 
 #pragma endregion
 
-#pragma region AggressiveMission
+#pragma region AggressiveAttackMove
+/*
+DEFINE_HOOK(0x4C762A, EventClass_RespondToEvent_StopAttackMove, 0x6)
+{
+	GET(TechnoClass* const, pTechno, ESI);
 
-// 0x6F8792
+	if (pTechno->vt_entry_4C4()) // pTechno->MegaMissionIsAttackMove()
+		pTechno->vt_entry_4A8(); // pTechno->ClearMegaMissionData()
+
+	return 0;
+}
+*/
+DEFINE_HOOK(0x6F85AB, TechnoClass_CanAutoTargetObject_AggressiveAttackMove, 0x6)
+{
+	enum { ContinueCheck = 0x6F85BA, CanTarget = 0x6F8604 };
+
+	GET(TechnoClass*, pThis, EDI);
+
+	return (!pThis->Owner->IsControlledByHuman() || (RulesExt::Global()->AttackMove_Aggressive && pThis->vt_entry_4C4())) ? CanTarget : ContinueCheck;
+}
 
 #pragma endregion
 
