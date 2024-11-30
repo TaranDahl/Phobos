@@ -1778,7 +1778,7 @@ DEFINE_HOOK(0x4DF410, FootClass_UpdateAttackMove_TargetAcquired, 0x6)
 
 	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType))
 	{
-		if (pTypeExt->AttackMove_StopWhenTargetAcquired.Get(RulesExt::Global()->AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault && !pType->OpportunityFire))
+		if (pTypeExt->AttackMove_StopWhenTargetAcquired.Get(RulesExt::Global()->AttackMove_StopWhenTargetAcquired.Get(!pType->OpportunityFire)))
 		{
 			pThis->StopMoving();
 			pThis->AbortMotion();

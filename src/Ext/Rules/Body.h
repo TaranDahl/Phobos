@@ -252,7 +252,7 @@ public:
 		Valueable<bool> DistributeTargetingFrame;
 		Valueable<bool> DistributeTargetingFrame_AIOnly;
 		Valueable<bool> AttackMove_IgnoreWeaponCheck;
-		Valueable<bool> AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault;
+		Nullable<bool> AttackMove_StopWhenTargetAcquired;
 		Valueable<bool> BuildingTypeSelectable;
 
 		Valueable<double> AircraftLevelLightMultiplier;
@@ -482,7 +482,7 @@ public:
 			, DistributeTargetingFrame { false }
 			, DistributeTargetingFrame_AIOnly { true }
 			, AttackMove_IgnoreWeaponCheck { false }
-			, AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault { false }
+			, AttackMove_StopWhenTargetAcquired {}
 			, BuildingTypeSelectable { false }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }

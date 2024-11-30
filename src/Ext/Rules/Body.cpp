@@ -291,7 +291,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->DistributeTargetingFrame.Read(exINI, GameStrings::General, "DistributeTargetingFrame");
 	this->DistributeTargetingFrame_AIOnly.Read(exINI, GameStrings::General, "DistributeTargetingFrame.AIOnly");
 	this->AttackMove_IgnoreWeaponCheck.Read(exINI, GameStrings::General, "AttackMove.IgnoreWeaponCheck");
-	this->AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault.Read(exINI, GameStrings::General, "AttackMove.StopWhenTargetAcquired.UseOpportunityFireAsDefault");
+	this->AttackMove_StopWhenTargetAcquired.Read(exINI, GameStrings::General, "AttackMove.StopWhenTargetAcquired");
 	this->BuildingTypeSelectable.Read(exINI, GameStrings::General, "BuildingTypeSelectable");
 
 	this->AircraftLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "AircraftLevelLightMultiplier");
@@ -586,7 +586,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->DistributeTargetingFrame)
 		.Process(this->DistributeTargetingFrame_AIOnly)
 		.Process(this->AttackMove_IgnoreWeaponCheck)
-		.Process(this->AttackMove_StopWhenTargetAcquired_UseOpportunityFireAsDefault)
+		.Process(this->AttackMove_StopWhenTargetAcquired)
 		.Process(this->BuildingTypeSelectable)
 		.Process(this->AircraftLevelLightMultiplier)
 		.Process(this->JumpjetLevelLightMultiplier)
