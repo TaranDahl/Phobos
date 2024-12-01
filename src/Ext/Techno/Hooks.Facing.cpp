@@ -39,18 +39,7 @@ DEFINE_HOOK(0x736A26, UnitClass_UpdateRotation_StopUnitIdleAction, 0x6)
 		}
 
 		const auto rotate = DirStruct { static_cast<int>(pTypeExt->Turret_SelfRotation_Angle * angleToRaw + 0.5) };
-
-		if (pTypeExt->Turret_SelfRotation_Symmetric)
-		{
-			const auto curDir = pThis->SecondaryFacing.Current();
-			const auto rightDir = DirStruct { static_cast<short>(pTgtDir->Raw) + static_cast<short>(rotate.Raw) };
-			const auto leftDir = DirStruct { static_cast<short>(pTgtDir->Raw) - static_cast<short>(rotate.Raw) };
-			*pTgtDir = (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw))) ? rightDir : leftDir;
-		}
-		else
-		{
-			*pTgtDir = DirStruct { static_cast<short>(pTgtDir->Raw) + static_cast<short>(rotate.Raw) };
-		}
+		*pTgtDir = DirStruct { static_cast<short>(pTgtDir->Raw) + static_cast<short>(rotate.Raw) };
 	}
 
 	R->EDX<DirStruct*>(pTgtDir);
@@ -173,7 +162,6 @@ DEFINE_HOOK(0x7412BB, UnitClass_GetFireError_CheckFacingDeviation, 0x7)
 	GET(UnitClass* const, pThis, ESI);
 	GET(AbstractClass* const, pTarget, EBP);
 	GET(BulletTypeClass* const, pBulletType, EDX);
-	GET(const DirStruct, curDir, EDI);
 	GET(DirStruct* const, pTgtDir, EAX);
 
 	*pTgtDir = pThis->GetTargetDirection(pTarget);
@@ -184,17 +172,7 @@ DEFINE_HOOK(0x7412BB, UnitClass_GetFireError_CheckFacingDeviation, 0x7)
 		{
 			constexpr double angleToRaw = (65536.0 / 360);
 			const auto rotate = DirStruct { static_cast<int>(pTypeExt->Turret_SelfRotation_Angle * angleToRaw + 0.5) };
-
-			if (pTypeExt->Turret_SelfRotation_Symmetric)
-			{
-				const auto rightDir = DirStruct { static_cast<short>(pTgtDir->Raw) + static_cast<short>(rotate.Raw) };
-				const auto leftDir = DirStruct { static_cast<short>(pTgtDir->Raw) - static_cast<short>(rotate.Raw) };
-				*pTgtDir = (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw))) ? rightDir : leftDir;
-			}
-			else
-			{
-				*pTgtDir = DirStruct { static_cast<short>(pTgtDir->Raw) + static_cast<short>(rotate.Raw) };
-			}
+			*pTgtDir = DirStruct { static_cast<short>(pTgtDir->Raw) + static_cast<short>(rotate.Raw) };
 		}
 	}
 
