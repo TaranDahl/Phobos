@@ -257,6 +257,36 @@ TechnoClass* TechnoTypeExt::CreateUnit(TechnoTypeClass* pType, CoordStruct locat
 	return nullptr;
 }
 
+DirStruct TechnoTypeExt::ExtData::GetTurretDesiredDirection(DirStruct defaultDir)
+{
+	const auto turretExtraAngle = this->Turret_SelfRotation_Angle.Get();
+
+	if (!turretExtraAngle)
+		return defaultDir;
+
+	const auto rotate = DirStruct { static_cast<int>(turretExtraAngle * TechnoTypeExt::AngleToRaw + 0.5) };
+
+	return DirStruct { static_cast<short>(defaultDir.Raw) + static_cast<short>(rotate.Raw) };
+}
+
+DirStruct TechnoTypeExt::ExtData::GetBodyDesiredDirection(DirStruct currentDir, DirStruct defaultDir)
+{
+	const auto bodyAngle = this->Turret_BodyRotation_Angle.Get();
+
+	if (!bodyAngle)
+		return defaultDir;
+
+	const auto rotate = DirStruct { static_cast<int>(bodyAngle * TechnoTypeExt::AngleToRaw + 0.5) };
+
+	if (!this->Turret_BodyRotation_Symmetric)
+		return DirStruct { static_cast<short>(defaultDir.Raw) + static_cast<short>(rotate.Raw) };
+
+	const auto rightDir = DirStruct { static_cast<short>(defaultDir.Raw) + static_cast<short>(rotate.Raw) };
+	const auto leftDir = DirStruct { static_cast<short>(defaultDir.Raw) - static_cast<short>(rotate.Raw) };
+
+	return (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(currentDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(currentDir.Raw))) ? rightDir : leftDir;
+}
+
 // =============================
 // load / save
 

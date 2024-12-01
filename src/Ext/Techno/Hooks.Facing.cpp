@@ -5,41 +5,29 @@
 
 #pragma region UnitsFacing
 
+static inline DirStruct GetTurretDesiredDirection(bool canCheck, TechnoExt::ExtData* pExt, DirStruct defaultDir)
+{
+	return canCheck ? pExt->TypeExtData->GetTurretDesiredDirection(defaultDir) : defaultDir;
+}
+
 // Would it be better to rewrite the entire UpdateRotation() ?
 DEFINE_HOOK(0x736A26, UnitClass_UpdateRotation_StopUnitIdleAction, 0x6)
 {
 	GET(UnitClass* const, pThis, ESI);
 	GET(DirStruct* const, pTgtDir, EDX);
 
-	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type);
-
-	if (pTypeExt)
+	if (const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type))
 	{
-		constexpr double angleToRaw = (65536.0 / 360);
-
 		if (pTypeExt->Turret_BodyRotation_Enable && !pThis->Locomotor->Is_Moving_Now())
 		{
-			const auto rotate = DirStruct { static_cast<int>(pTypeExt->Turret_BodyRotation_Angle * angleToRaw + 0.5) };
 			const auto curDir = pThis->PrimaryFacing.Current();
-			DirStruct tgtDir = *pTgtDir;
-
-			if (pTypeExt->Turret_BodyRotation_Symmetric)
-			{
-				const auto rightDir = DirStruct { static_cast<short>(pTgtDir->Raw) + static_cast<short>(rotate.Raw) };
-				const auto leftDir = DirStruct { static_cast<short>(pTgtDir->Raw) - static_cast<short>(rotate.Raw) };
-				tgtDir = (abs(static_cast<short>(rightDir.Raw) - static_cast<short>(curDir.Raw)) < abs(static_cast<short>(leftDir.Raw) - static_cast<short>(curDir.Raw))) ? rightDir : leftDir;
-			}
-			else
-			{
-				tgtDir = DirStruct { static_cast<short>(pTgtDir->Raw) + static_cast<short>(rotate.Raw) };
-			}
+			const auto tgtDir = pTypeExt->GetBodyDesiredDirection(curDir, *pTgtDir);
 
 			if (abs(static_cast<short>(tgtDir.Raw) - static_cast<short>(curDir.Raw)) >= 8192)
 				pThis->PrimaryFacing.SetDesired(tgtDir);
 		}
 
-		const auto rotate = DirStruct { static_cast<int>(pTypeExt->Turret_SelfRotation_Angle * angleToRaw + 0.5) };
-		*pTgtDir = DirStruct { static_cast<short>(pTgtDir->Raw) + static_cast<short>(rotate.Raw) };
+		*pTgtDir = pTypeExt->GetTurretDesiredDirection(*pTgtDir);
 	}
 
 	R->EDX<DirStruct*>(pTgtDir);
@@ -86,7 +74,7 @@ DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0x6)
 			pExt->StopIdleAction();
 
 		if (!pThis->BunkerLinkedItem && pThis->Type->Speed && (!pThis->Type->IsSimpleDeployer || !pThis->Deployed))
-			pThis->SecondaryFacing.SetDesired(pThis->PrimaryFacing.Current());
+			pThis->SecondaryFacing.SetDesired(GetTurretDesiredDirection(canCheck, pExt, pThis->PrimaryFacing.Current()));
 
 		return SkipGameCode;
 	}
@@ -114,7 +102,7 @@ DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0x6)
 			pExt->StopIdleAction();
 
 		if (!pThis->BunkerLinkedItem && pThis->Type->Speed && (!pThis->Type->IsSimpleDeployer || !pThis->Deployed))
-			pThis->SecondaryFacing.SetDesired(pThis->GetTargetDirection(pDestination));
+			pThis->SecondaryFacing.SetDesired(GetTurretDesiredDirection(canCheck, pExt, pThis->GetTargetDirection(pDestination)));
 
 		return SkipGameCode;
 	}
@@ -132,7 +120,7 @@ DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0x6)
 	}
 
 	if (!pThis->BunkerLinkedItem && pThis->Type->Speed && (!pThis->Type->IsSimpleDeployer || !pThis->Deployed))
-		pThis->SecondaryFacing.SetDesired(pThis->PrimaryFacing.Current());
+		pThis->SecondaryFacing.SetDesired(GetTurretDesiredDirection(canCheck, pExt, pThis->PrimaryFacing.Current()));
 
 	return SkipGameCode;
 }
@@ -169,11 +157,7 @@ DEFINE_HOOK(0x7412BB, UnitClass_GetFireError_CheckFacingDeviation, 0x7)
 	if (pThis->Type->Turret)
 	{
 		if (const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type))
-		{
-			constexpr double angleToRaw = (65536.0 / 360);
-			const auto rotate = DirStruct { static_cast<int>(pTypeExt->Turret_SelfRotation_Angle * angleToRaw + 0.5) };
-			*pTgtDir = DirStruct { static_cast<short>(pTgtDir->Raw) + static_cast<short>(rotate.Raw) };
-		}
+			*pTgtDir = pTypeExt->GetTurretDesiredDirection(*pTgtDir);
 	}
 
 	R->EBX(pBulletType->ROT ? 16 : 8);

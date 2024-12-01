@@ -654,6 +654,8 @@ public:
 		virtual void SaveToStream(PhobosStreamWriter& Stm) override;
 
 		void ApplyTurretOffset(Matrix3D* mtx, double factor = 1.0);
+		DirStruct GetTurretDesiredDirection(DirStruct defaultDir);
+		DirStruct GetBodyDesiredDirection(DirStruct currentDir, DirStruct defaultDir);
 
 		// Ares 0.A
 		const char* GetSelectionGroupID() const;
@@ -674,6 +676,8 @@ public:
 	};
 
 	static ExtContainer ExtMap;
+
+	static constexpr double AngleToRaw = (65536.0 / 360);
 
 	static void ApplyTurretOffset(TechnoTypeClass* pType, Matrix3D* mtx, double factor = 1.0);
 	static TechnoTypeClass* GetTechnoType(ObjectTypeClass* pType);
