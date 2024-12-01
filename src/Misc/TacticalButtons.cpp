@@ -661,7 +661,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 
 		const bool ready = !pSuper->IsSuspended && (pSWType->UseChargeDrain ? pSuper->ChargeDrainState == ChargeDrainState::Ready : pSuper->IsReady);
 
-		// Flash or darken cameo
+		// Flash cameo
 		if (ready && canAfford)
 		{
 			const int delay = pSWType->FlashSidebarTabFrames;
@@ -672,11 +672,6 @@ void TacticalButtonsClass::SWSidebarDraw()
 					(BlitterFlags::bf_400 | BlitterFlags::TransLucent75), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 			}
 		}
-		else if (!canAfford)
-		{
-			DSurface::Composite->DrawSHP(FileSystem::SIDEBAR_PAL, Make_Global<SHPStruct*>(0xB07BC0), 0, &position, &rect,
-				(BlitterFlags::bf_400 | BlitterFlags::Darken), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
-		}
 
 		// SW charge progress
 		if (pSuper->ShouldDrawProgress())
@@ -685,6 +680,11 @@ void TacticalButtonsClass::SWSidebarDraw()
 
 			DSurface::Composite->DrawSHP(FileSystem::SIDEBAR_PAL, Make_Global<SHPStruct*>(0xB0B484), frame, &position, &rect,
 				BlitterFlags(0x404), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
+		}
+		else if (!canAfford)
+		{
+			DSurface::Composite->DrawSHP(FileSystem::SIDEBAR_PAL, Make_Global<SHPStruct*>(0xB07BC0), 0, &position, &rect,
+				(BlitterFlags::bf_400 | BlitterFlags::Darken), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 		}
 
 		// SW status
