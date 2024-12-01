@@ -622,6 +622,7 @@ void TacticalButtonsClass::SWSidebarDraw()
 		// Get SW data
 		const auto pSuper = pHouse->Supers.Items[data[i]];
 		const auto pSWType = pSuper->Type;
+		bool canAfford = true;
 
 		// Draw cameo
 		if (const auto pTypeExt = SWTypeExt::ExtMap.Find(pSWType))
@@ -653,20 +654,28 @@ void TacticalButtonsClass::SWSidebarDraw()
 						BlitterFlags::bf_400, 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 				}
 			}
+
+			if (!pHouse->CanTransactMoney(pTypeExt->Money_Amount))
+				canAfford = false;
 		}
 
 		const bool ready = !pSuper->IsSuspended && (pSWType->UseChargeDrain ? pSuper->ChargeDrainState == ChargeDrainState::Ready : pSuper->IsReady);
 
-		// Flash cameo
-		if (ready)
+		// Flash or darken cameo
+		if (ready && canAfford)
 		{
 			const int delay = pSWType->FlashSidebarTabFrames;
 
 			if (delay > 0 && ((Unsorted::CurrentFrame - pSuper->ReadyFrame) % (delay << 1)) > delay)
 			{
 				DSurface::Composite->DrawSHP(FileSystem::SIDEBAR_PAL, Make_Global<SHPStruct*>(0xB07BC0), 0, &position, &rect,
-					BlitterFlags(0x406), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
+					(BlitterFlags::bf_400 | BlitterFlags::TransLucent75), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 			}
+		}
+		else if (!canAfford)
+		{
+			DSurface::Composite->DrawSHP(FileSystem::SIDEBAR_PAL, Make_Global<SHPStruct*>(0xB07BC0), 0, &position, &rect,
+				(BlitterFlags::bf_400 | BlitterFlags::Darken), 0, 0, ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
 		}
 
 		// SW charge progress
