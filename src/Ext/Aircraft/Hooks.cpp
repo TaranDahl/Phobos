@@ -410,9 +410,9 @@ DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 
 	return 0;
 }
-
+/*
 // Stop: clear the mega mission and return to airbase immediately
-DEFINE_HOOK(0x4C762A, EventClass_RespondToEvent_StopAircraftAction, 0x6)
+DEFINE_HOOK(0x4C762A, EventClass_RespondToEvent_Stop, 0x6)
 {
 	GET(TechnoClass* const, pTechno, ESI);
 
@@ -424,7 +424,7 @@ DEFINE_HOOK(0x4C762A, EventClass_RespondToEvent_StopAircraftAction, 0x6)
 
 	return 0;
 }
-
+*/
 // GreatestThreat: for all the mission that should let the aircraft auto select a target
 AbstractClass* __fastcall AircraftClass_GreatestThreat(AircraftClass* pThis, void* _, ThreatType threatType, CoordStruct* pSelectCoords, bool onlyTargetHouseEnemy)
 {

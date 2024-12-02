@@ -232,7 +232,6 @@ public:
 		Nullable<bool> UnitIdlePointToMouse;
 		Nullable<int> TurretROT;
 		Valueable<double> Turret_SelfRotation_Restriction;
-		Valueable<bool> Turret_SelfRotation_Priority;
 		Valueable<double> Turret_SelfRotation_Angle;
 		Valueable<bool> Turret_BodyRotation_Enable;
 		Valueable<double> Turret_BodyRotation_Angle;
@@ -549,8 +548,7 @@ public:
 			, UnitIdleRotateTurret {}
 			, UnitIdlePointToMouse {}
 			, TurretROT {}
-			, Turret_SelfRotation_Restriction { 0.0 }
-			, Turret_SelfRotation_Priority { false }
+			, Turret_SelfRotation_Restriction { 180.0 }
 			, Turret_SelfRotation_Angle { 0.0 }
 			, Turret_BodyRotation_Enable { false }
 			, Turret_BodyRotation_Angle { 0.0 }
@@ -654,8 +652,10 @@ public:
 		virtual void SaveToStream(PhobosStreamWriter& Stm) override;
 
 		void ApplyTurretOffset(Matrix3D* mtx, double factor = 1.0);
-		DirStruct GetTurretDesiredDirection(DirStruct defaultDir);
-		DirStruct GetBodyDesiredDirection(DirStruct currentDir, DirStruct defaultDir);
+		DirStruct GetTurretDesiredDir(DirStruct defaultDir);
+		void SetTurretLimitedDir(FootClass* pThis, DirStruct desiredDir);
+		short GetTurretLimitedRaw(short currentDirectionRaw);
+		DirStruct GetBodyDesiredDir(DirStruct currentDir, DirStruct defaultDir);
 
 		// Ares 0.A
 		const char* GetSelectionGroupID() const;
