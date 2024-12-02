@@ -690,46 +690,50 @@ void TechnoExt::ExtData::ApplyIdleAction()
 	{
 		this->UnitIdleActionTimer.Stop();
 		this->UnitIdleActionGapTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionIntervalMin, RulesExt::Global()->UnitIdleActionIntervalMax));
-		bool noNeedTurnForward = false;
+		bool noTurn = false;
 
 		if (const auto pUnit = abstract_cast<UnitClass*>(pThis))
-			noNeedTurnForward = pUnit->BunkerLinkedItem || !pUnit->Type->Speed || (pUnit->Type->IsSimpleDeployer && pUnit->Deployed);
+			noTurn = pUnit->BunkerLinkedItem || !pUnit->Type->Speed || (pUnit->Type->IsSimpleDeployer && pUnit->Deployed);
 		else if (pThis->WhatAmI() == AbstractType::Building)
-			noNeedTurnForward = true;
+			noTurn = true;
+
+		const auto raw = static_cast<short>(ScenarioClass::Instance->Random.RandomRanged(0, 65535) - 32768);
+		const auto pTypeExt = this->TypeExtData;
 
 		this->StopRotateWithNewROT(ScenarioClass::Instance->Random.RandomRanged(2,4) >> 1);
-		const auto rotateRaw = ScenarioClass::Instance->Random.RandomRanged(0, 65535) - 32768;
-		turret->SetDesired(this->TypeExtData->GetTurretDesiredDirection(DirStruct { ((noNeedTurnForward ? rotateRaw : (rotateRaw / 4)) + pThis->PrimaryFacing.Current().Raw) }));
+		turret->SetDesired(pTypeExt->GetTurretDesiredDir(DirStruct { (pTypeExt->GetTurretLimitedRaw(noTurn ? raw : (raw / 4)) + static_cast<short>(pThis->PrimaryFacing.Current().Raw)) }));
 	}
 	else if (this->UnitIdleActionGapTimer.IsTicking()) // Check change direction
 	{
 		if (!this->UnitIdleActionGapTimer.HasTimeLeft()) // Set next direction
 		{
 			this->UnitIdleActionGapTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionIntervalMin, RulesExt::Global()->UnitIdleActionIntervalMax));
-			bool noNeedTurnForward = false;
+			bool noTurn = false;
 
 			if (const auto pUnit = abstract_cast<UnitClass*>(pThis))
-				noNeedTurnForward = pUnit->BunkerLinkedItem || !pUnit->Type->Speed || (pUnit->Type->IsSimpleDeployer && pUnit->Deployed);
+				noTurn = pUnit->BunkerLinkedItem || !pUnit->Type->Speed || (pUnit->Type->IsSimpleDeployer && pUnit->Deployed);
 			else if (pThis->WhatAmI() == AbstractType::Building)
-				noNeedTurnForward = true;
+				noTurn = true;
+
+			const auto raw = static_cast<short>(ScenarioClass::Instance->Random.RandomRanged(0, 65535) - 32768);
+			const auto pTypeExt = this->TypeExtData;
 
 			this->StopRotateWithNewROT(ScenarioClass::Instance->Random.RandomRanged(2,4) >> 1);
-			const auto rotateRaw = ScenarioClass::Instance->Random.RandomRanged(0, 65535) - 32768;
-			turret->SetDesired(this->TypeExtData->GetTurretDesiredDirection(DirStruct { ((noNeedTurnForward ? rotateRaw : (rotateRaw / 4)) + pThis->PrimaryFacing.Current().Raw) }));
+			turret->SetDesired(pTypeExt->GetTurretDesiredDir(DirStruct { (pTypeExt->GetTurretLimitedRaw(noTurn ? raw : (raw / 4)) + static_cast<short>(pThis->PrimaryFacing.Current().Raw)) }));
 		}
 	}
 	else if (!this->UnitIdleActionTimer.IsTicking()) // In idle now
 	{
 		this->UnitIdleActionTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionRestartMin, RulesExt::Global()->UnitIdleActionRestartMax));
-		bool noNeedTurnForward = false;
+		bool noTurn = false;
 
 		if (const auto pUnit = abstract_cast<UnitClass*>(pThis))
-			noNeedTurnForward = pUnit->BunkerLinkedItem || !pUnit->Type->Speed || (pUnit->Type->IsSimpleDeployer && pUnit->Deployed);
+			noTurn = pUnit->BunkerLinkedItem || !pUnit->Type->Speed || (pUnit->Type->IsSimpleDeployer && pUnit->Deployed);
 		else if (pThis->WhatAmI() == AbstractType::Building)
-			noNeedTurnForward = true;
+			noTurn = true;
 
-		if (!noNeedTurnForward)
-			turret->SetDesired(this->TypeExtData->GetTurretDesiredDirection(pThis->PrimaryFacing.Current()));
+		if (!noTurn)
+			turret->SetDesired(this->TypeExtData->GetTurretDesiredDir(pThis->PrimaryFacing.Current()));
 	}
 }
 
@@ -740,7 +744,9 @@ void TechnoExt::ExtData::ManualIdleAction()
 
 	if (pThis->IsSelected)
 	{
-		if (this->TypeExtData->UnitIdleRotateTurret.Get(RulesExt::Global()->UnitIdleRotateTurret))
+		const auto pTypeExt = this->TypeExtData;
+
+		if (pTypeExt->UnitIdleRotateTurret.Get(RulesExt::Global()->UnitIdleRotateTurret))
 			this->StopIdleAction();
 
 		this->UnitIdleIsSelected = true;
@@ -749,7 +755,12 @@ void TechnoExt::ExtData::ManualIdleAction()
 		if (mouseCoords != CoordStruct::Empty) // Mouse in tactical
 		{
 			const auto offset = -static_cast<int>(pThis->GetCoords().Z * 1.2307692307692307692307692307692); // ((Unsorted::LeptonsPerCell / 2) / Unsorted::LevelHeight)
-			turret->SetDesired(this->TypeExtData->GetTurretDesiredDirection(pThis->GetTargetDirection(MapClass::Instance->GetCellAt(CoordStruct { mouseCoords.X - offset, mouseCoords.Y - offset, 0 }))));
+			const auto targetDir = pThis->GetTargetDirection(MapClass::Instance->GetCellAt(CoordStruct { mouseCoords.X - offset, mouseCoords.Y - offset, 0 }));
+
+			if (const auto pFoot = abstract_cast<FootClass*>(pThis))
+				pTypeExt->SetTurretLimitedDir(pFoot, targetDir);
+			else
+				turret->SetDesired(pTypeExt->GetTurretDesiredDir(targetDir));
 		}
 	}
 	else if (this->UnitIdleIsSelected) // Immediately stop when is not selected
