@@ -693,17 +693,30 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 #pragma endregion
 
 #pragma region AggressiveAttackMove
-/*
-DEFINE_HOOK(0x4C762A, EventClass_RespondToEvent_StopAttackMove, 0x6)
+
+DEFINE_HOOK(0x4C75E6, EventClass_RespondToEvent_Stop, 0x5)
 {
+	enum { SkipGameCode = 0x4C762A };
+
 	GET(TechnoClass* const, pTechno, ESI);
+
+	pTechno->SetTarget(nullptr);
+	const auto pFoot = abstract_cast<FootClass*>(pTechno);
+
+	if (!pFoot || !locomotion_cast<JumpjetLocomotionClass*>(pFoot->Locomotor))
+		pTechno->SetDestination(nullptr, true);
+	else if (pFoot->Destination && static_cast<int>(CellClass::Coord2Cell(pFoot->Destination->GetCoords()).DistanceFromSquared(pTechno->GetMapCoords())) > 2)
+		pTechno->SetDestination(pTechno->GetCell()->GetNeighbourCell(static_cast<FacingType>(pTechno->PrimaryFacing.Current().Raw >> 13)), true);
 
 	if (pTechno->vt_entry_4C4()) // pTechno->MegaMissionIsAttackMove()
 		pTechno->vt_entry_4A8(); // pTechno->ClearMegaMissionData()
 
-	return 0;
+	if (RulesExt::Global()->ExpandAircraftMission && pTechno->WhatAmI() == AbstractType::Aircraft && !pTechno->Airstrike && !pTechno->Spawned && pTechno->GetHeight() > Unsorted::CellHeight)
+		pTechno->EnterIdleMode(false, true);
+
+	return SkipGameCode;
 }
-*/
+
 DEFINE_HOOK(0x6F85AB, TechnoClass_CanAutoTargetObject_AggressiveAttackMove, 0x6)
 {
 	enum { ContinueCheck = 0x6F85BA, CanTarget = 0x6F8604 };
