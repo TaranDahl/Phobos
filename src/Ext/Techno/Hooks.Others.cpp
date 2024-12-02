@@ -2,6 +2,7 @@
 
 #include <EventClass.h>
 #include <SpawnManagerClass.h>
+#include <JumpjetLocomotionClass.h>
 
 #include <Ext/Building/Body.h>
 #include <Ext/WeaponType/Body.h>
