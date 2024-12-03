@@ -738,7 +738,7 @@ DEFINE_HOOK(0x4C75E6, EventClass_RespondToEvent_Stop, 0x5)
 	if (!pFoot || !locomotion_cast<JumpjetLocomotionClass*>(pFoot->Locomotor))
 		pTechno->SetDestination(nullptr, true);
 	else if (pFoot->Destination && static_cast<int>(CellClass::Coord2Cell(pFoot->Destination->GetCoords()).DistanceFromSquared(pTechno->GetMapCoords())) > 2)
-		pTechno->SetDestination(pTechno->GetCell()->GetNeighbourCell(static_cast<FacingType>((((pTechno->PrimaryFacing.Current().Raw >> 12) + 1) >> 1) - 1)), true);
+		pTechno->SetDestination(pTechno->GetCell()->GetNeighbourCell(static_cast<FacingType>(((pTechno->PrimaryFacing.Current().Raw + 8192) >> 13) & 7)), true);
 
 	if (pTechno->vt_entry_4C4()) // pTechno->MegaMissionIsAttackMove()
 		pTechno->vt_entry_4A8(); // pTechno->ClearMegaMissionData()
