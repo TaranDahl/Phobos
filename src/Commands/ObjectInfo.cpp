@@ -61,6 +61,9 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 	{
 		if (pTarget)
 		{
+			if (count)
+				append(", ");
+
 			auto mapCoords = CellStruct::Empty;
 			auto ID = "N/A";
 
@@ -78,7 +81,9 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 			const auto distance = (pCurrent->DistanceFrom(pTarget) / Unsorted::LeptonsPerCell);
 			append("%s = %s [Distance: %d, Location: (%d, %d)]", pInfoName, ID, distance, mapCoords.X, mapCoords.Y);
 
-			if (!(++count % 3))
+			count = (count + 1) % 3;
+
+			if (!count)
 				append("\n");
 		}
 	};
