@@ -91,7 +91,7 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 	auto printFoots = [&append, &display, &count, &getTargetInfo](FootClass* pFoot)
 	{
 		// Basic Status
-		append("[Phobos] Dump ObjectInfo runs.\n");
+		append("[Phobos] Dump ObjectInfo runs. Current Frame: %d\n", Unsorted::CurrentFrame());
 		auto pType = pFoot->GetTechnoType();
 		append("ID = %s, ", pType->ID);
 		append("Owner = %s (%s), ", pFoot->Owner->get_ID(), pFoot->Owner->PlainName);
@@ -188,7 +188,7 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 	auto printBuilding = [&append, &display, &count, &getTargetInfo](BuildingClass* pBuilding)
 	{
 		// Basic Status
-		append("[Phobos] Dump ObjectInfo runs.\n");
+		append("[Phobos] Dump ObjectInfo runs. Current Frame: %d\n", Unsorted::CurrentFrame());
 		auto pType = pBuilding->Type;
 		append("ID = %s, ", pType->ID);
 		append("Owner = %s (%s), ", pBuilding->Owner->get_ID(), pBuilding->Owner->PlainName);
