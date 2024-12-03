@@ -739,7 +739,7 @@ DEFINE_HOOK(0x4C75E6, EventClass_RespondToEvent_Stop, 0x5)
 	if (!pJumpjetLoco)
 		pTechno->SetDestination(nullptr, true);
 	else if (!pFoot->Destination)
-		pTechno->SetDestination(pTechno->GetCell(), true);
+		pTechno->QueueMission(Mission::Guard, true);
 	else if (static_cast<int>(CellClass::Coord2Cell(pFoot->Destination->GetCoords()).DistanceFromSquared(pTechno->GetMapCoords())) > 2)
 		pTechno->SetDestination(pTechno->GetCell()->GetNeighbourCell(static_cast<FacingType>(((((pJumpjetLoco->LocomotionFacing.Current().Raw) >> 12) + 1) >> 1) & 7)), true);
 
