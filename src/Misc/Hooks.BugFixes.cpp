@@ -966,10 +966,6 @@ DEFINE_HOOK(0x5B11DD, MechLocomotionClass_ProcessMoving_SlowdownDistance, 0x9)
 	return distance >= pLinkedTo->GetCurrentSpeed() ? KeepMoving : CloseEnough;
 }
 
-// ReselectIfLimboed only works if the target is infantry.
-// Why did you do this, WW?
-DEFINE_JUMP(LJMP, 0x6FF78F, 0x6FF79C) // TechnoClass_Fire_ReselectIfLimboedCheck
-
 // Skip the Disappear func calling in cloak process.
 // Disappear announces the techno's pointer invalid and make the references in bullet or missile spawns null.
 DEFINE_JUMP(LJMP, 0x703789, 0x703795);
