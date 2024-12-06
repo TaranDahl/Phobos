@@ -359,9 +359,8 @@ DEFINE_HOOK(0x469AA4, BulletClass_Logics_Extras, 0x5)
 		if (!pThis->WH->Parasite && pWeaponExt->UnlimboDetonate)
 		{
 			auto const pExt = BulletExt::ExtMap.Find(pThis);
-			auto const pFirer = pExt->LimboedLauncher;
 
-			if (pFirer)
+			if (auto const pFirer = pExt->LimboedLauncher)
 			{
 				bool unlimboResult = false;
 
@@ -374,16 +373,12 @@ DEFINE_HOOK(0x469AA4, BulletClass_Logics_Extras, 0x5)
 				else
 				{
 					auto const pFirerType = pFirer->GetTechnoType();
-					auto pCell = MapClass::Instance->GetCellAt(*coords);
-					bool isBridge = pCell->ContainsBridge() && pCell->GetFloorHeight({ 0,0 }) + CellClass::BridgeHeight;
-
-					auto nCell = MapClass::Instance->NearByLocation(CellClass::Coord2Cell(*coords),
+					auto const isBridge = MapClass::Instance->GetCellAt(*coords)->ContainsBridge();
+					auto const nearByCell = MapClass::Instance->NearByLocation(CellClass::Coord2Cell(*coords),
 						pFirerType->SpeedType, -1, pFirerType->MovementZone, isBridge, 1, 1, false,
 						false, false, isBridge, CellStruct::Empty, false, false);
 
-					pCell = MapClass::Instance->TryGetCellAt(nCell);
-					auto location = pCell->GetCoords();
-					unlimboResult = pFirer->Unlimbo(location, pExt->LimboedDir);
+					unlimboResult = pFirer->Unlimbo(CellClass::Cell2Coord(nearByCell), pExt->LimboedDir);
 				}
 
 				if (unlimboResult)
@@ -396,7 +391,10 @@ DEFINE_HOOK(0x469AA4, BulletClass_Logics_Extras, 0x5)
 					}
 
 					if (auto const pTeam = pFirer->OldTeam)
-						pTeam->AddMember(static_cast<FootClass*>(pFirer), 0);
+					{
+						if (auto const pFoot = abstract_cast<FootClass*>(pFirer))
+							pTeam->AddMember(pFoot, 0);
+					}
 
 					pFirer->UpdateSight(0, 0, 0, 0, 0);
 				}
