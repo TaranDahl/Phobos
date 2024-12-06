@@ -175,12 +175,12 @@ namespace Helpers
 						{
 							if (auto const pTechno = abstract_cast<TechnoClass*>(*obj))
 							{
-								if (static_cast<BuildingClass*>(pTechno)->Type->InvisibleInGame)
-									continue;
-
 								// Starkku: Buildings need their distance from the origin coords checked at cell level.
 								if (pTechno->WhatAmI() == AbstractType::Building)
 								{
+									if (static_cast<BuildingClass*>(pTechno)->Type->InvisibleInGame)
+										continue;
+
 									auto const cellCenterCoords = pCell->GetCenterCoords();
 									double dist = 0.0;
 
