@@ -1925,7 +1925,7 @@ void TacticalButtonsClass::SelectedDraw()
 										}
 									}
 								}
-								else
+								else if (pDisguiseType) // May disguise as an object
 								{
 									name = pDisguiseType->UIName;
 									pSHP = pDisguiseType->GetCameo();
