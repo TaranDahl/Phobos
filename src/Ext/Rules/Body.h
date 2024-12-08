@@ -147,6 +147,7 @@ public:
 		Valueable<int> CleanUpAirBarrier;
 		Valueable<int> AttackMindControlledDelay;
 		Valueable<bool> NoQueueUpToEnter;
+		Valueable<bool> NoQueueUpToUnload;
 		Valueable<bool> AttackMove_Aggressive;
 
 		Valueable<bool> AllowParallelAIQueues;
@@ -385,6 +386,7 @@ public:
 			, CleanUpAirBarrier { 0 }
 			, AttackMindControlledDelay { 0 }
 			, NoQueueUpToEnter { false }
+			, NoQueueUpToUnload { false }
 			, AttackMove_Aggressive { false }
 
 			, AllowParallelAIQueues { true }
