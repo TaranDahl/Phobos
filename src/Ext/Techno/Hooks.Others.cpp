@@ -523,7 +523,7 @@ DEFINE_HOOK(0x55B4E1, LogicClass_Update_UnmarkCellOccupationFlags, 0x5)
 
 #pragma endregion
 
-#pragma region NoQueueUpToEnter
+#pragma region NoQueueUpToEnterAndUnload
 
 bool __fastcall CanEnterNow(UnitClass* pTransport, FootClass* pPassenger)
 {
@@ -684,6 +684,20 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 	}
 
 	return 0;
+}
+
+DEFINE_HOOK(0x73DC1E, UnitClass_Mission_Unload_NoQueueUpToUnload, 0xA)
+{
+	enum { QuickUnload = 0x73E5B1, VanillaUnload = 0x73E289 };
+
+	GET(UnitClass* const, pThis, ESI);
+
+	const int sound = pThis->GetTechnoType()->LeaveTransportSound;
+
+	if (sound != -1)
+		VoxClass::PlayAtPos(sound, &pThis->Location);
+
+	return RulesExt::Global()->NoQueueUpToUnload ? QuickUnload : VanillaUnload;
 }
 
 #pragma endregion
