@@ -566,12 +566,7 @@ bool __fastcall CanEnterNow(UnitClass* pTransport, FootClass* pPassenger)
 		return false;
 
 	if (needCalculate && remain < static_cast<int>(pLink->GetTechnoType()->Size))
-	{
 		pLink->SendToFirstLink(RadioCommand::NotifyUnlink);
-		pLink->SetDestination(nullptr, true);
-		pLink->QueueMission(Mission::Guard, false);
-		pLink->EnterIdleMode(false, true);
-	}
 
 	return true;
 }
@@ -597,7 +592,7 @@ DEFINE_HOOK(0x51A0D4, InfantryClass_UpdatePosition_NoQueueUpToEnter, 0x6)
 				if (CanEnterNow(pDest, pThis)) // Replace send radio command: QueryCanEnter
 				{
 					pThis->unknown_500 = nullptr; // Added, to prevent passengers from wanting to get on after getting off
-					pThis->EnterIdleMode(false, true); // Added, to stop the passengers and let OpenTopped work normally
+					pThis->EnterIdleMode(false, false); // Added, to stop the passengers and let OpenTopped work normally
 
 					if (const auto pTag = pDest->AttachedTag)
 						pTag->RaiseEvent(TriggerEvent::EnteredBy, pThis, CellStruct::Empty);
@@ -653,7 +648,7 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 				if (CanEnterNow(pDest, pThis)) // Replace send radio command: QueryCanEnter
 				{
 					pThis->unknown_500 = nullptr; // Added, to prevent passengers from wanting to get on after getting off
-					pThis->EnterIdleMode(false, true); // Added, to stop the passengers and let OpenTopped work normally
+					pThis->EnterIdleMode(false, false); // Added, to stop the passengers and let OpenTopped work normally
 
 					// I don't know why units have no trigger
 
