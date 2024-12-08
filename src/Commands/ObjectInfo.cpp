@@ -10,7 +10,6 @@
 #include <AITriggerTypeClass.h>
 #include <Helpers/Enumerators.h>
 #include <CRT.h>
-#include <bitset>
 
 #include <Ext/TechnoType/Body.h>
 #include <Ext/Techno/Body.h>
@@ -189,9 +188,25 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 			bool onBridge = pCell->ContainsBridge();
 
 			if (onBridge)
-				append("Location Cell (On Ground): ");
+			{
+				auto flags = pCell->AltOccupationFlags;
+				append("Location Cell (On Bridge): [Occupation Flags: ");
+
+				for (int i = 0; i < 8; ++i, flags >>= 1)
+					append("%d", (flags & 1));
+
+				append("]; ");
+			}
 			else
-				append("Location Cell (On Bridge): ");
+			{
+				auto flags = pCell->OccupationFlags;
+				append("Location Cell (On Ground): [Occupation Flags: ");
+
+				for (int i = 0; i < 8; ++i, flags >>= 1)
+					append("%d", (flags & 1));
+
+				append("]; ");
+			}
 
 			if (auto pObj = (onBridge ? pCell->AltObject : pCell->FirstObject))
 			{
@@ -221,8 +236,7 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 				append("; ");
 			}
 
-			std::bitset<32> binary(onBridge ? pCell->AltOccupationFlags : pCell->OccupationFlags);
-			append("[Occupation Flags: %s]\n", binary.to_string());
+			append("\n");
 		}
 
 		// End
@@ -330,9 +344,25 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 			bool onBridge = pCell->ContainsBridge();
 
 			if (onBridge)
-				append("Location Cell (on ground): ");
+			{
+				auto flags = pCell->AltOccupationFlags;
+				append("Location Cell (On Bridge): [Occupation Flags: ");
+
+				for (int i = 0; i < 8; ++i, flags >>= 1)
+					append("%d", (flags & 1));
+
+				append("]; ");
+			}
 			else
-				append("Location Cell (on bridge): ");
+			{
+				auto flags = pCell->OccupationFlags;
+				append("Location Cell (On Ground): [Occupation Flags: ");
+
+				for (int i = 0; i < 8; ++i, flags >>= 1)
+					append("%d", (flags & 1));
+
+				append("]; ");
+			}
 
 			if (auto pObj = (onBridge ? pCell->AltObject : pCell->FirstObject))
 			{
@@ -355,8 +385,7 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 			if (auto pObj = pCell->Jumpjet)
 				append("[Content Jumpjet: %s]; ", pObj->GetType()->get_ID());
 
-			std::bitset<32> binary(onBridge ? pCell->AltOccupationFlags : pCell->OccupationFlags);
-			append("[Occupation Flags: %s]\n", binary.to_string());
+			append("\n");
 		}
 
 		// End
