@@ -10,6 +10,7 @@
 #include <AITriggerTypeClass.h>
 #include <Helpers/Enumerators.h>
 #include <CRT.h>
+#include <bitset>
 
 #include <Ext/TechnoType/Body.h>
 #include <Ext/Techno/Body.h>
@@ -95,7 +96,8 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		auto pType = pFoot->GetTechnoType();
 		append("ID = %s, ", pType->ID);
 		append("Owner = %s (%s), ", pFoot->Owner->get_ID(), pFoot->Owner->PlainName);
-		append("Location = (%d, %d), ", pFoot->GetMapCoords().X, pFoot->GetMapCoords().Y);
+		const auto cell = pFoot->GetMapCoords();
+		append("Location = (%d, %d), ", cell.X, cell.Y);
 		append("Health = (%d/%d)", pFoot->Health, pType->Strength);
 
 		auto pTechnoExt = TechnoExt::ExtMap.Find(pFoot);
@@ -181,6 +183,48 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		if (count % 3)
 			append("\n");
 
+		// Cell Status
+		if (const auto pCell = MapClass::Instance->TryGetCellAt(cell))
+		{
+			bool onBridge = pCell->ContainsBridge();
+
+			if (onBridge)
+				append("Location Cell (On Ground): ");
+			else
+				append("Location Cell (On Bridge): ");
+
+			if (auto pObj = (onBridge ? pCell->AltObject : pCell->FirstObject))
+			{
+				if (pObj == pFoot)
+					append("[Content Objects: %s(me)", pObj->GetType()->get_ID());
+				else
+					append("[Content Objects: %s", pObj->GetType()->get_ID());
+
+				for (pObj = pObj->NextObject; pObj; pObj = pObj->NextObject)
+				{
+					if (pObj == pFoot)
+						append(", %s(me)", pObj->GetType()->get_ID());
+					else
+						append(", %s", pObj->GetType()->get_ID());
+				}
+
+				append("]; ");
+			}
+
+			if (auto pObj = pCell->Jumpjet)
+			{
+				if (pObj == pFoot)
+					append("[Content Jumpjet: %s(me)]", pObj->GetType()->get_ID());
+				else
+					append("[Content Jumpjet: %s]", pObj->GetType()->get_ID());
+
+				append("; ");
+			}
+
+			std::bitset<32> binary(onBridge ? pCell->AltOccupationFlags : pCell->OccupationFlags);
+			append("[Occupation Flags: %s]\n", binary.to_string());
+		}
+
 		// End
 		display();
 	};
@@ -192,7 +236,8 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		auto pType = pBuilding->Type;
 		append("ID = %s, ", pType->ID);
 		append("Owner = %s (%s), ", pBuilding->Owner->get_ID(), pBuilding->Owner->PlainName);
-		append("Location = (%d, %d), ", pBuilding->GetMapCoords().X, pBuilding->GetMapCoords().Y);
+		const auto cell = pBuilding->GetMapCoords();
+		append("Location = (%d, %d), ", cell.X, cell.Y);
 		append("Health = (%d/%d)", pBuilding->Health, pType->Strength);
 
 		auto pTechnoExt = TechnoExt::ExtMap.Find(pBuilding);
@@ -278,6 +323,41 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 
 		if (count % 3)
 			append("\n");
+
+		// Cell Status
+		if (const auto pCell = MapClass::Instance->TryGetCellAt(cell))
+		{
+			bool onBridge = pCell->ContainsBridge();
+
+			if (onBridge)
+				append("Location Cell (on ground): ");
+			else
+				append("Location Cell (on bridge): ");
+
+			if (auto pObj = (onBridge ? pCell->AltObject : pCell->FirstObject))
+			{
+				if (pObj == pBuilding)
+					append("[Content Objects: %s(me)", pObj->GetType()->get_ID());
+				else
+					append("[Content Objects: %s", pObj->GetType()->get_ID());
+
+				for (pObj = pObj->NextObject; pObj; pObj = pObj->NextObject)
+				{
+					if (pObj == pBuilding)
+						append(", %s(me)", pObj->GetType()->get_ID());
+					else
+						append(", %s", pObj->GetType()->get_ID());
+				}
+
+				append("]; ");
+			}
+
+			if (auto pObj = pCell->Jumpjet)
+				append("[Content Jumpjet: %s]; ", pObj->GetType()->get_ID());
+
+			std::bitset<32> binary(onBridge ? pCell->AltOccupationFlags : pCell->OccupationFlags);
+			append("[Occupation Flags: %s]\n", binary.to_string());
+		}
 
 		// End
 		display();
