@@ -111,10 +111,18 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		append("\n");
 
 		// Mission Status
-		append("CurrentMission = %d (%s), Status = %d, MissionStartFrame = %d, ", pFoot->CurrentMission, MissionControlClass::FindName(pFoot->CurrentMission), pFoot->MissionStatus, pFoot->CurrentMissionStartTime);
-		append("SuspendedMission = %d (%s), ", pFoot->SuspendedMission, MissionControlClass::FindName(pFoot->SuspendedMission));
-		append("QueuedMission = %d (%s), ", pFoot->QueuedMission, MissionControlClass::FindName(pFoot->QueuedMission));
-		append("MegaMission = %d (%s)\n", pFoot->unknown_int_5C4, MissionControlClass::FindName(static_cast<Mission>(pFoot->unknown_int_5C4)));
+		append("CurrentMission = %d (%s), Status = %d, MissionStartFrame = %d", pFoot->CurrentMission, MissionControlClass::FindName(pFoot->CurrentMission), pFoot->MissionStatus, pFoot->CurrentMissionStartTime);
+
+		if (pFoot->SuspendedMission != Mission::None)
+			append(", SuspendedMission = %d (%s)", pFoot->SuspendedMission, MissionControlClass::FindName(pFoot->SuspendedMission));
+
+		if (pFoot->QueuedMission != Mission::None)
+			append(", QueuedMission = %d (%s)", pFoot->QueuedMission, MissionControlClass::FindName(pFoot->QueuedMission));
+
+		if (pFoot->unknown_int_5C4 != -1)
+			append(", MegaMission = %d (%s)", pFoot->unknown_int_5C4, MissionControlClass::FindName(static_cast<Mission>(pFoot->unknown_int_5C4)));
+
+		append("\n");
 
 		// Team Status
 		if (pFoot->BelongsToATeam())
@@ -266,9 +274,15 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		append("\n");
 
 		// Mission Status
-		append("CurrentMission = %d (%s), Status = %d, MissionStartFrame = %d\n", pBuilding->CurrentMission, MissionControlClass::FindName(pBuilding->CurrentMission), pBuilding->MissionStatus, pBuilding->CurrentMissionStartTime);
-		append("SuspendedMission = %d (%s), ", pBuilding->SuspendedMission, MissionControlClass::FindName(pBuilding->SuspendedMission));
-		append("QueuedMission = %d (%s)\n", pBuilding->QueuedMission, MissionControlClass::FindName(pBuilding->QueuedMission));
+		append("CurrentMission = %d (%s), Status = %d, MissionStartFrame = %d", pBuilding->CurrentMission, MissionControlClass::FindName(pBuilding->CurrentMission), pBuilding->MissionStatus, pBuilding->CurrentMissionStartTime);
+
+		if (pBuilding->SuspendedMission != Mission::None)
+			append(", SuspendedMission = %d (%s)", pBuilding->SuspendedMission, MissionControlClass::FindName(pBuilding->SuspendedMission));
+
+		if (pBuilding->QueuedMission != Mission::None)
+			append(", QueuedMission = %d (%s)", pBuilding->QueuedMission, MissionControlClass::FindName(pBuilding->QueuedMission));
+
+		append("\n");
 
 		// Building Status
 		bool nextLine = false;
