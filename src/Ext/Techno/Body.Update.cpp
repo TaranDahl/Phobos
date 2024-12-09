@@ -689,7 +689,7 @@ void TechnoExt::ExtData::ApplyIdleAction()
 	if (this->UnitIdleActionTimer.Completed()) // Set first direction
 	{
 		this->UnitIdleActionTimer.Stop();
-		this->UnitIdleActionGapTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionIntervalMin, RulesExt::Global()->UnitIdleActionIntervalMax));
+		this->UnitIdleActionGapTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->Turret_IdleIntervalMin, RulesExt::Global()->Turret_IdleIntervalMax));
 		bool noTurn = false;
 
 		if (const auto pUnit = abstract_cast<UnitClass*>(pThis))
@@ -707,7 +707,7 @@ void TechnoExt::ExtData::ApplyIdleAction()
 	{
 		if (!this->UnitIdleActionGapTimer.HasTimeLeft()) // Set next direction
 		{
-			this->UnitIdleActionGapTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionIntervalMin, RulesExt::Global()->UnitIdleActionIntervalMax));
+			this->UnitIdleActionGapTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->Turret_IdleIntervalMin, RulesExt::Global()->Turret_IdleIntervalMax));
 			bool noTurn = false;
 
 			if (const auto pUnit = abstract_cast<UnitClass*>(pThis))
@@ -724,7 +724,7 @@ void TechnoExt::ExtData::ApplyIdleAction()
 	}
 	else if (!this->UnitIdleActionTimer.IsTicking()) // In idle now
 	{
-		this->UnitIdleActionTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->UnitIdleActionRestartMin, RulesExt::Global()->UnitIdleActionRestartMax));
+		this->UnitIdleActionTimer.Start(ScenarioClass::Instance->Random.RandomRanged(RulesExt::Global()->Turret_IdleRestartMin, RulesExt::Global()->Turret_IdleRestartMax));
 		bool noTurn = false;
 
 		if (const auto pUnit = abstract_cast<UnitClass*>(pThis))
@@ -746,7 +746,7 @@ void TechnoExt::ExtData::ManualIdleAction()
 	{
 		const auto pTypeExt = this->TypeExtData;
 
-		if (pTypeExt->UnitIdleRotateTurret.Get(RulesExt::Global()->UnitIdleRotateTurret))
+		if (pTypeExt->Turret_IdleRotate.Get(RulesExt::Global()->Turret_IdleRotate))
 			this->StopIdleAction();
 
 		this->UnitIdleIsSelected = true;

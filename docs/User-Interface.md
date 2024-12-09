@@ -309,24 +309,24 @@ ProgressDisplay.Buildings.PipsShape=PIPS.shp  ; filename - including the .shp ex
 ### Units Rotate Turret When in Idle Action
 
 - Now unit with turret without `TurretSpins=true` can looks more vivid when it is in idle.
-  - `UnitIdleRotateTurret` controls whether units can rotate their turrets when in idle. Defaults to `[AudioVisual]` -> `UnitIdleRotateTurret`.
-  - `UnitIdlePointToMouse` controls whether units will turn their turrets to your mouse when in idle. Defaults to `[AudioVisual]` -> `UnitIdlePointToMouse`.
-  - `UnitIdleActionRestartMin` and `UnitIdleActionRestartMax` control the delay from idle to action occurrence together.
-  - `UnitIdleActionIntervalMin` and `UnitIdleActionIntervalMax` control the delay between every idle actions together.
+  - `Turret.IdleRotate` controls whether units can rotate their turrets when in idle. Defaults to `[AudioVisual]` -> `Turret.IdleRotate`.
+  - `Turret.PointToMouse` controls whether units will turn their turrets to your mouse when in idle. Defaults to `[AudioVisual]` -> `Turret.PointToMouse`.
+  - `Turret.IdleRestartMin` and `Turret.IdleRestartMax` control the delay from idle to action occurrence together.
+  - `Turret.IdleIntervalMin` and `Turret.IdleIntervalMax` control the delay between every idle actions together.
 
 In `rulesmd.ini`:
 ```ini
 [AudioVisual]
-UnitIdleRotateTurret=false      ; boolean
-UnitIdlePointToMouse=false      ; boolean
-UnitIdleActionRestartMin=150    ; integer, number of frames
-UnitIdleActionRestartMax=300    ; integer, number of frames
-UnitIdleActionIntervalMin=150   ; integer, number of frames
-UnitIdleActionIntervalMax=450   ; integer, number of frames
+Turret.IdleRotate=false      ; boolean
+Turret.PointToMouse=false      ; boolean
+Turret.IdleRestartMin=150    ; integer, number of frames
+Turret.IdleRestartMax=300    ; integer, number of frames
+Turret.IdleIntervalMin=150   ; integer, number of frames
+Turret.IdleIntervalMax=450   ; integer, number of frames
 
 [SOMETECHNO]                    ; TechnoType
-UnitIdleRotateTurret=           ; boolean
-UnitIdlePointToMouse=           ; boolean
+Turret.IdleRotate=           ; boolean
+Turret.PointToMouse=           ; boolean
 ```
 
 ### More display styles for placing grids

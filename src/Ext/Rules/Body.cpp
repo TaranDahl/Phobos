@@ -140,12 +140,12 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->JumpjetClimbPredictHeight.Read(exINI, GameStrings::General, "JumpjetClimbPredictHeight");
 	this->JumpjetClimbWithoutCutOut.Read(exINI, GameStrings::General, "JumpjetClimbWithoutCutOut");
 	this->ExpandTurretRotation.Read(exINI, GameStrings::General, "ExpandTurretRotation");
-	this->UnitIdleRotateTurret.Read(exINI, GameStrings::AudioVisual, "UnitIdleRotateTurret");
-	this->UnitIdlePointToMouse.Read(exINI, GameStrings::AudioVisual, "UnitIdlePointToMouse");
-	this->UnitIdleActionRestartMin.Read(exINI, GameStrings::AudioVisual, "UnitIdleActionRestartMin");
-	this->UnitIdleActionRestartMax.Read(exINI, GameStrings::AudioVisual, "UnitIdleActionRestartMax");
-	this->UnitIdleActionIntervalMin.Read(exINI, GameStrings::AudioVisual, "UnitIdleActionIntervalMin");
-	this->UnitIdleActionIntervalMax.Read(exINI, GameStrings::AudioVisual, "UnitIdleActionIntervalMax");
+	this->Turret_IdleRotate.Read(exINI, GameStrings::AudioVisual, "Turret.IdleRotate");
+	this->Turret_PointToMouse.Read(exINI, GameStrings::AudioVisual, "Turret.PointToMouse");
+	this->Turret_IdleRestartMin.Read(exINI, GameStrings::AudioVisual, "Turret.IdleRestartMin");
+	this->Turret_IdleRestartMax.Read(exINI, GameStrings::AudioVisual, "Turret.IdleRestartMax");
+	this->Turret_IdleIntervalMin.Read(exINI, GameStrings::AudioVisual, "Turret.IdleIntervalMin");
+	this->Turret_IdleIntervalMax.Read(exINI, GameStrings::AudioVisual, "Turret.IdleIntervalMax");
 	this->RecountBurst.Read(exINI, GameStrings::General, "RecountBurst");
 	this->FactoryProgressDisplay.Read(exINI, GameStrings::AudioVisual, "FactoryProgressDisplay");
 	this->MainSWProgressDisplay.Read(exINI, GameStrings::AudioVisual, "MainSWProgressDisplay");
@@ -391,12 +391,12 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->JumpjetClimbPredictHeight)
 		.Process(this->JumpjetClimbWithoutCutOut)
 		.Process(this->ExpandTurretRotation)
-		.Process(this->UnitIdleRotateTurret)
-		.Process(this->UnitIdlePointToMouse)
-		.Process(this->UnitIdleActionRestartMin)
-		.Process(this->UnitIdleActionRestartMax)
-		.Process(this->UnitIdleActionIntervalMin)
-		.Process(this->UnitIdleActionIntervalMax)
+		.Process(this->Turret_IdleRotate)
+		.Process(this->Turret_PointToMouse)
+		.Process(this->Turret_IdleRestartMin)
+		.Process(this->Turret_IdleRestartMax)
+		.Process(this->Turret_IdleIntervalMin)
+		.Process(this->Turret_IdleIntervalMax)
 		.Process(this->RecountBurst)
 		.Process(this->FactoryProgressDisplay)
 		.Process(this->MainSWProgressDisplay)

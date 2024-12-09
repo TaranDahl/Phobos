@@ -35,7 +35,7 @@ DEFINE_HOOK(0x7369D6, UnitClass_UpdateRotation_StopUnitIdleAction, 0xA)
 				const auto targetDir = pThis->GetTargetDirection(pThis->Target);
 				pTypeExt->SetTurretLimitedDir(pThis, targetDir);
 
-				if (pTypeExt->Turret_BodyRotation_Enable && !pThis->Locomotor->Is_Moving_Now())
+				if (pTypeExt->Turret_BodyOrientation && !pThis->Locomotor->Is_Moving_Now())
 				{
 					const auto curDir = pThis->PrimaryFacing.Current();
 					const auto tgtDir = pTypeExt->GetBodyDesiredDir(curDir, targetDir);
@@ -77,7 +77,7 @@ DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0x6)
 	// Busy in attacking or driver dead?
 	if (pThis->Target || (Unsorted::CurrentFrame - pThis->unknown_int_120) < (RulesClass::Instance->GuardAreaTargetingDelay + 5) || (currentMission == Mission::Harmless && pThis->Owner == HouseClass::FindSpecial()))
 	{
-		if (pTypeExt->UnitIdleRotateTurret.Get(RulesExt::Global()->UnitIdleRotateTurret))
+		if (pTypeExt->Turret_IdleRotate.Get(RulesExt::Global()->Turret_IdleRotate))
 			pExt->StopIdleAction();
 
 		return SkipGameCode;
@@ -88,7 +88,7 @@ DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0x6)
 	// Turret locked?
 	if (pWeaponStruct && pWeaponStruct->WeaponType && pWeaponStruct->TurretLocked)
 	{
-		if (pTypeExt->UnitIdleRotateTurret.Get(RulesExt::Global()->UnitIdleRotateTurret))
+		if (pTypeExt->Turret_IdleRotate.Get(RulesExt::Global()->Turret_IdleRotate))
 			pExt->StopIdleAction();
 
 		if (!pThis->BunkerLinkedItem && pThis->Type->Speed && (!pThis->Type->IsSimpleDeployer || !pThis->Deployed))
@@ -100,7 +100,7 @@ DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0x6)
 	// Point to mouse
 	if (SessionClass::IsSingleplayer() && pThis->Owner->IsControlledByCurrentPlayer())
 	{
-		if (pTypeExt->UnitIdlePointToMouse.Get(RulesExt::Global()->UnitIdlePointToMouse))
+		if (pTypeExt->Turret_PointToMouse.Get(RulesExt::Global()->Turret_PointToMouse))
 			pExt->ManualIdleAction();
 
 		if (pExt->UnitIdleIsSelected)
@@ -112,7 +112,7 @@ DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0x6)
 
 	if (pDestination && !pJumpjetLoco)
 	{
-		if (pTypeExt->UnitIdleRotateTurret.Get(RulesExt::Global()->UnitIdleRotateTurret))
+		if (pTypeExt->Turret_IdleRotate.Get(RulesExt::Global()->Turret_IdleRotate))
 			pExt->StopIdleAction();
 
 		if (!pThis->BunkerLinkedItem && pThis->Type->Speed && (!pThis->Type->IsSimpleDeployer || !pThis->Deployed))
@@ -122,7 +122,7 @@ DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0x6)
 	}
 
 	// Idle main
-	if (pTypeExt->UnitIdleRotateTurret.Get(RulesExt::Global()->UnitIdleRotateTurret))
+	if (pTypeExt->Turret_IdleRotate.Get(RulesExt::Global()->Turret_IdleRotate))
 	{
 		if (currentMission == Mission::Guard || (pJumpjetLoco && pJumpjetLoco->State == JumpjetLocomotionClass::State::Hovering))
 		{
