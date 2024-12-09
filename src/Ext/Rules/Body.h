@@ -95,6 +95,7 @@ public:
 
 		Valueable<bool> JumpjetClimbPredictHeight;
 		Valueable<bool> JumpjetClimbWithoutCutOut;
+		Valueable<bool> ExpandTurretRotation;
 		Valueable<bool> UnitIdleRotateTurret;
 		Valueable<bool> UnitIdlePointToMouse;
 		Valueable<int> UnitIdleActionRestartMin;
@@ -282,6 +283,7 @@ public:
 
 			, JumpjetClimbPredictHeight { false }
 			, JumpjetClimbWithoutCutOut { false }
+			, ExpandTurretRotation { false }
 			, UnitIdleRotateTurret { false }
 			, UnitIdlePointToMouse { false }
 			, UnitIdleActionRestartMin { 150 }
