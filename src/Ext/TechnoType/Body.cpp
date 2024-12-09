@@ -260,7 +260,7 @@ TechnoClass* TechnoTypeExt::CreateUnit(TechnoTypeClass* pType, CoordStruct locat
 
 DirStruct TechnoTypeExt::ExtData::GetTurretDesiredDir(DirStruct defaultDir)
 {
-	const auto turretExtraAngle = this->Turret_SelfRotation_Angle.Get();
+	const auto turretExtraAngle = this->Turret_ExtraAngle.Get();
 
 	if (!turretExtraAngle)
 		return defaultDir;
@@ -272,7 +272,7 @@ DirStruct TechnoTypeExt::ExtData::GetTurretDesiredDir(DirStruct defaultDir)
 
 void TechnoTypeExt::ExtData::SetTurretLimitedDir(FootClass* pThis, DirStruct desiredDir)
 {
-	const auto turretRestrictAngle = this->Turret_SelfRotation_Restriction.Get();
+	const auto turretRestrictAngle = this->Turret_Restriction.Get();
 	const auto pBody = &pThis->PrimaryFacing;
 	const auto pTurret = &pThis->SecondaryFacing;
 	const auto destinationDir = this->GetTurretDesiredDir(desiredDir);
@@ -300,7 +300,7 @@ void TechnoTypeExt::ExtData::SetTurretLimitedDir(FootClass* pThis, DirStruct des
 
 	const auto currentDifference = static_cast<short>(turretRaw - bodyRaw);
 	const auto desiredDifference = static_cast<short>(desiredRaw - bodyRaw);
-	const auto restrictRaw = static_cast<short>(this->Turret_SelfRotation_Restriction * TechnoTypeExt::AngleToRaw + 0.5);
+	const auto restrictRaw = static_cast<short>(this->Turret_Restriction * TechnoTypeExt::AngleToRaw + 0.5);
 
 	if (currentDifference < -restrictRaw)
 	{
@@ -316,7 +316,7 @@ void TechnoTypeExt::ExtData::SetTurretLimitedDir(FootClass* pThis, DirStruct des
 	}
 
 	if ((desiredDifference < -restrictRaw || desiredDifference > restrictRaw) && !pThis->Locomotor->Is_Moving_Now())
-		pBody->SetDesired(this->Turret_BodyRotation_Enable ? this->GetBodyDesiredDir(currentDir, desiredDir) : desiredDir);
+		pBody->SetDesired(this->Turret_BodyOrientation ? this->GetBodyDesiredDir(currentDir, desiredDir) : desiredDir);
 
 	if ((currentDifference > 0 && desiredDifference < 0) || (currentDifference < 0 && desiredDifference > 0))
 		pTurret->SetDesired(bodyDir);
@@ -326,7 +326,7 @@ void TechnoTypeExt::ExtData::SetTurretLimitedDir(FootClass* pThis, DirStruct des
 
 short TechnoTypeExt::ExtData::GetTurretLimitedRaw(short currentDirectionRaw)
 {
-	const auto turretRestrictAngle = this->Turret_SelfRotation_Restriction.Get();
+	const auto turretRestrictAngle = this->Turret_Restriction.Get();
 
 	if (turretRestrictAngle < 0)
 		return 0;
@@ -334,7 +334,7 @@ short TechnoTypeExt::ExtData::GetTurretLimitedRaw(short currentDirectionRaw)
 	if (turretRestrictAngle >= 180)
 		return currentDirectionRaw;
 
-	const auto restrictRaw = static_cast<short>(this->Turret_SelfRotation_Restriction * TechnoTypeExt::AngleToRaw + 0.5);
+	const auto restrictRaw = static_cast<short>(this->Turret_Restriction * TechnoTypeExt::AngleToRaw + 0.5);
 
 	if (currentDirectionRaw < -restrictRaw)
 		return -restrictRaw;
@@ -347,7 +347,7 @@ short TechnoTypeExt::ExtData::GetTurretLimitedRaw(short currentDirectionRaw)
 
 DirStruct TechnoTypeExt::ExtData::GetBodyDesiredDir(DirStruct currentDir, DirStruct defaultDir)
 {
-	const auto bodyAngle = this->Turret_BodyRotation_Angle.Get();
+	const auto bodyAngle = this->Turret_BodyOrientationAngle.Get();
 
 	if (!bodyAngle)
 		return defaultDir;
@@ -356,7 +356,7 @@ DirStruct TechnoTypeExt::ExtData::GetBodyDesiredDir(DirStruct currentDir, DirStr
 	const auto rotate = DirStruct { this->GetTurretLimitedRaw(rotateRaw) };
 	const auto rightDir = DirStruct { static_cast<short>(defaultDir.Raw) + static_cast<short>(rotate.Raw) };
 
-	if (!this->Turret_BodyRotation_Symmetric)
+	if (!this->Turret_BodyOrientationSymmetric)
 		return rightDir;
 
 	const auto leftDir = DirStruct { static_cast<short>(defaultDir.Raw) - static_cast<short>(rotate.Raw) };
@@ -565,14 +565,14 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->LeaveTransportKill.Read(exINI, pSection, "LeaveTransportKill");
 	this->RecountBurst.Read(exINI, pSection, "RecountBurst");
-	this->UnitIdleRotateTurret.Read(exINI, pSection, "UnitIdleRotateTurret");
-	this->UnitIdlePointToMouse.Read(exINI, pSection, "UnitIdlePointToMouse");
+	this->Turret_IdleRotate.Read(exINI, pSection, "Turret.IdleRotate");
+	this->Turret_PointToMouse.Read(exINI, pSection, "Turret.PointToMouse");
 	this->TurretROT.Read(exINI, pSection, "TurretROT");
-	this->Turret_SelfRotation_Restriction.Read(exINI, pSection, "Turret.SelfRotation.Restriction");
-	this->Turret_SelfRotation_Angle.Read(exINI, pSection, "Turret.SelfRotation.Angle");
-	this->Turret_BodyRotation_Enable.Read(exINI, pSection, "Turret.BodyRotation.Enable");
-	this->Turret_BodyRotation_Angle.Read(exINI, pSection, "Turret.BodyRotation.Angle");
-	this->Turret_BodyRotation_Symmetric.Read(exINI, pSection, "Turret.BodyRotation.Symmetric");
+	this->Turret_Restriction.Read(exINI, pSection, "Turret.Restriction");
+	this->Turret_ExtraAngle.Read(exINI, pSection, "Turret.ExtraAngle");
+	this->Turret_BodyOrientation.Read(exINI, pSection, "Turret.BodyOrientation");
+	this->Turret_BodyOrientationAngle.Read(exINI, pSection, "Turret.BodyOrientationAngle");
+	this->Turret_BodyOrientationSymmetric.Read(exINI, pSection, "Turret.BodyOrientationSymmetric");
 	this->CanBeBuiltOn.Read(exINI, pSection, "CanBeBuiltOn");
 	this->UnitBaseNormal.Read(exINI, pSection, "UnitBaseNormal");
 	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
@@ -1031,14 +1031,14 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 
 		.Process(this->LeaveTransportKill)
 		.Process(this->RecountBurst)
-		.Process(this->UnitIdleRotateTurret)
-		.Process(this->UnitIdlePointToMouse)
+		.Process(this->Turret_IdleRotate)
+		.Process(this->Turret_PointToMouse)
 		.Process(this->TurretROT)
-		.Process(this->Turret_SelfRotation_Restriction)
-		.Process(this->Turret_SelfRotation_Angle)
-		.Process(this->Turret_BodyRotation_Enable)
-		.Process(this->Turret_BodyRotation_Angle)
-		.Process(this->Turret_BodyRotation_Symmetric)
+		.Process(this->Turret_Restriction)
+		.Process(this->Turret_ExtraAngle)
+		.Process(this->Turret_BodyOrientation)
+		.Process(this->Turret_BodyOrientationAngle)
+		.Process(this->Turret_BodyOrientationSymmetric)
 		.Process(this->CanBeBuiltOn)
 		.Process(this->UnitBaseNormal)
 		.Process(this->UnitBaseForAllyBuilding)

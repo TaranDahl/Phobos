@@ -228,14 +228,14 @@ public:
 
 		Valueable<bool> LeaveTransportKill;
 		Nullable<bool> RecountBurst;
-		Nullable<bool> UnitIdleRotateTurret;
-		Nullable<bool> UnitIdlePointToMouse;
+		Nullable<bool> Turret_IdleRotate;
+		Nullable<bool> Turret_PointToMouse;
 		Nullable<int> TurretROT;
-		Valueable<double> Turret_SelfRotation_Restriction;
-		Valueable<double> Turret_SelfRotation_Angle;
-		Valueable<bool> Turret_BodyRotation_Enable;
-		Valueable<double> Turret_BodyRotation_Angle;
-		Valueable<bool> Turret_BodyRotation_Symmetric;
+		Valueable<double> Turret_Restriction;
+		Valueable<double> Turret_ExtraAngle;
+		Valueable<bool> Turret_BodyOrientation;
+		Valueable<double> Turret_BodyOrientationAngle;
+		Valueable<bool> Turret_BodyOrientationSymmetric;
 		Valueable<bool> CanBeBuiltOn;
 		Valueable<bool> UnitBaseNormal;
 		Valueable<bool> UnitBaseForAllyBuilding;
@@ -545,14 +545,14 @@ public:
 
 			, LeaveTransportKill { false }
 			, RecountBurst {}
-			, UnitIdleRotateTurret {}
-			, UnitIdlePointToMouse {}
+			, Turret_IdleRotate {}
+			, Turret_PointToMouse {}
 			, TurretROT {}
-			, Turret_SelfRotation_Restriction { 180.0 }
-			, Turret_SelfRotation_Angle { 0.0 }
-			, Turret_BodyRotation_Enable { false }
-			, Turret_BodyRotation_Angle { 0.0 }
-			, Turret_BodyRotation_Symmetric { true }
+			, Turret_Restriction { 180.0 }
+			, Turret_ExtraAngle { 0.0 }
+			, Turret_BodyOrientation { false }
+			, Turret_BodyOrientationAngle { 0.0 }
+			, Turret_BodyOrientationSymmetric { true }
 			, CanBeBuiltOn { false }
 			, UnitBaseNormal { false }
 			, UnitBaseForAllyBuilding { false }

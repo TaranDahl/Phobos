@@ -96,12 +96,12 @@ public:
 		Valueable<bool> JumpjetClimbPredictHeight;
 		Valueable<bool> JumpjetClimbWithoutCutOut;
 		Valueable<bool> ExpandTurretRotation;
-		Valueable<bool> UnitIdleRotateTurret;
-		Valueable<bool> UnitIdlePointToMouse;
-		Valueable<int> UnitIdleActionRestartMin;
-		Valueable<int> UnitIdleActionRestartMax;
-		Valueable<int> UnitIdleActionIntervalMin;
-		Valueable<int> UnitIdleActionIntervalMax;
+		Valueable<bool> Turret_IdleRotate;
+		Valueable<bool> Turret_PointToMouse;
+		Valueable<int> Turret_IdleRestartMin;
+		Valueable<int> Turret_IdleRestartMax;
+		Valueable<int> Turret_IdleIntervalMin;
+		Valueable<int> Turret_IdleIntervalMax;
 		Valueable<bool> RecountBurst;
 		Valueable<bool> FactoryProgressDisplay;
 		Valueable<bool> MainSWProgressDisplay;
@@ -336,12 +336,12 @@ public:
 			, JumpjetClimbPredictHeight { false }
 			, JumpjetClimbWithoutCutOut { false }
 			, ExpandTurretRotation { false }
-			, UnitIdleRotateTurret { false }
-			, UnitIdlePointToMouse { false }
-			, UnitIdleActionRestartMin { 150 }
-			, UnitIdleActionRestartMax { 300 }
-			, UnitIdleActionIntervalMin { 150 }
-			, UnitIdleActionIntervalMax { 450 }
+			, Turret_IdleRotate { false }
+			, Turret_PointToMouse { false }
+			, Turret_IdleRestartMin { 150 }
+			, Turret_IdleRestartMax { 300 }
+			, Turret_IdleIntervalMin { 150 }
+			, Turret_IdleIntervalMax { 450 }
 			, RecountBurst { false }
 			, FactoryProgressDisplay { false }
 			, MainSWProgressDisplay { false }
