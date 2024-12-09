@@ -14,9 +14,7 @@ DEFINE_HOOK(0x7369D6, UnitClass_UpdateRotation_StopUnitIdleAction, 0xA)
 
 	GET(UnitClass* const, pThis, ESI);
 
-	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type);
-
-	if (!pTypeExt)
+	if (!RulesExt::Global()->ExpandTurretRotation)
 		return 0;
 
 	if (const auto pWeaponStruct = pThis->GetTurretWeapon())
@@ -26,6 +24,8 @@ DEFINE_HOOK(0x7369D6, UnitClass_UpdateRotation_StopUnitIdleAction, 0xA)
 
 		if (pWeapon && (!pWeapon->OmniFire || (pWeaponTypeExt && pWeaponTypeExt->OmniFire_TurnToTarget)))
 		{
+			const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type);
+
 			if (pWeaponStruct->TurretLocked)
 			{
 				pTypeExt->SetTurretLimitedDir(pThis, pThis->PrimaryFacing.Current());
@@ -56,15 +56,10 @@ DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0x6)
 
 	GET(UnitClass* const, pThis, ESI);
 
+	if (!RulesExt::Global()->ExpandTurretRotation)
+		return 0;
+
 	const auto pExt = TechnoExt::ExtMap.Find(pThis);
-
-	if (!pExt)
-		return 0;
-
-	const auto pTypeExt = pExt->TypeExtData;
-
-	if (!pExt->TypeExtData)
-		return 0;
 
 	// Turning to target?
 	if (pThis->SecondaryFacing.IsRotating())
@@ -72,10 +67,11 @@ DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0x6)
 		// Repeatedly check TurretSpins and IsRotating() seems unnecessary
 		pThis->unknown_bool_6AF = true;
 
-		if (!pExt || (!pExt->UnitIdleActionTimer.IsTicking() && !pExt->UnitIdleActionGapTimer.IsTicking() && !pExt->UnitIdleIsSelected))
+		if (!pExt->UnitIdleActionTimer.IsTicking() && !pExt->UnitIdleActionGapTimer.IsTicking() && !pExt->UnitIdleIsSelected)
 			return SkipGameCode;
 	}
 
+	const auto pTypeExt = pExt->TypeExtData;
 	const auto currentMission = pThis->CurrentMission;
 
 	// Busy in attacking or driver dead?
@@ -112,13 +108,9 @@ DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0x6)
 	}
 
 	const auto pDestination = pThis->Destination;
-	// Bugfix: Align jumpjet turret's facing with body's
-	// When jumpjets arrived at their FootClass::Destination, they seems stuck at the Move mission
-	// and therefore the turret facing was set to DirStruct{atan2(0,0)}==DirType::East at 0x736BBB
-	// that's why they will come back to normal when giving stop command explicitly
-	// so the best way is to fix the Mission if necessary, but I don't know how to do it
-	// so I skipped jumpjets check temporarily
-	if (pDestination && !locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor))
+	const auto pJumpjetLoco = locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor);
+
+	if (pDestination && !pJumpjetLoco)
 	{
 		if (pTypeExt->UnitIdleRotateTurret.Get(RulesExt::Global()->UnitIdleRotateTurret))
 			pExt->StopIdleAction();
@@ -132,7 +124,7 @@ DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0x6)
 	// Idle main
 	if (pTypeExt->UnitIdleRotateTurret.Get(RulesExt::Global()->UnitIdleRotateTurret))
 	{
-		if (currentMission == Mission::Guard || currentMission == Mission::Sticky)
+		if (currentMission == Mission::Guard || (pJumpjetLoco && pJumpjetLoco->State == JumpjetLocomotionClass::State::Hovering))
 		{
 			pExt->ApplyIdleAction();
 			return SkipGameCode;
@@ -176,11 +168,8 @@ DEFINE_HOOK(0x7412BB, UnitClass_GetFireError_CheckFacingDeviation, 0x7)
 
 	*pTgtDir = pThis->GetTargetDirection(pTarget);
 
-	if (pThis->Type->Turret)
-	{
-		if (const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type))
-			*pTgtDir = pTypeExt->GetTurretDesiredDir(*pTgtDir);
-	}
+	if (RulesExt::Global()->ExpandTurretRotation && pThis->Type->Turret)
+		*pTgtDir = TechnoTypeExt::ExtMap.Find(pThis->Type)->GetTurretDesiredDir(*pTgtDir);
 
 	R->EBX(pBulletType->ROT ? 16 : 8);
 	return SkipGameCode;
