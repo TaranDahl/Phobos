@@ -217,7 +217,6 @@ public:
 		Valueable<bool> CombatAlert_UseEVA;
 		Valueable<bool> CylinderRangefinding;
 		Valueable<bool> BuildingWaypoint;
-		Valueable<bool> AircraftWaypoint;
 		Valueable<bool> StopPlanningOnEnter;
 		Valueable<bool> StrafingTargetScatter;
 		Nullable<int> AINormalTargetingDelay;
@@ -450,7 +449,6 @@ public:
 			, CombatAlert_UseEVA { true }
 			, CylinderRangefinding { false }
 			, BuildingWaypoint { false }
-			, AircraftWaypoint { false }
 			, StopPlanningOnEnter { true }
 			, StrafingTargetScatter { true }
 			, AINormalTargetingDelay {}
