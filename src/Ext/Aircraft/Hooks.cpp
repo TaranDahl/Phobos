@@ -443,21 +443,7 @@ DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 
 	return 0;
 }
-/*
-// Stop: clear the mega mission and return to airbase immediately
-DEFINE_HOOK(0x4C762A, EventClass_RespondToEvent_Stop, 0x6)
-{
-	GET(TechnoClass* const, pTechno, ESI);
 
-	if (pTechno->vt_entry_4C4()) // pTechno->MegaMissionIsAttackMove()
-		pTechno->vt_entry_4A8(); // pTechno->ClearMegaMissionData()
-
-	if (RulesExt::Global()->ExpandAircraftMission && pTechno->WhatAmI() == AbstractType::Aircraft && !pTechno->Airstrike && !pTechno->Spawned && pTechno->GetHeight() > Unsorted::CellHeight)
-		pTechno->EnterIdleMode(false, true);
-
-	return 0;
-}
-*/
 // GreatestThreat: for all the mission that should let the aircraft auto select a target
 AbstractClass* __fastcall AircraftClass_GreatestThreat(AircraftClass* pThis, void* _, ThreatType threatType, CoordStruct* pSelectCoords, bool onlyTargetHouseEnemy)
 {
