@@ -885,12 +885,6 @@ bool __fastcall BuildingTypeClass_CanUseWaypoint(BuildingTypeClass* pThis)
 }
 DEFINE_JUMP(VTABLE, 0x7E4610, GET_OFFSET(BuildingTypeClass_CanUseWaypoint))
 
-bool __fastcall AircraftTypeClass_CanUseWaypoint(AircraftTypeClass* pThis)
-{
-	return RulesExt::Global()->AircraftWaypoint;
-}
-DEFINE_JUMP(VTABLE, 0x7E2908, GET_OFFSET(AircraftTypeClass_CanUseWaypoint))
-
 #pragma endregion
 
 #pragma region EngineerAutoFire

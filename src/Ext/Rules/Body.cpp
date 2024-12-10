@@ -255,7 +255,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->CombatAlert_UseAttackVoice.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseAttackVoice");
 	this->CombatAlert_UseEVA.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseEVA");
 	this->CylinderRangefinding.Read(exINI, GameStrings::General, "CylinderRangefinding");
-	this->AircraftWaypoint.Read(exINI, GameStrings::General, "AircraftWaypoint");
 	this->BuildingWaypoint.Read(exINI, GameStrings::General, "BuildingWaypoint");
 	this->StopPlanningOnEnter.Read(exINI, GameStrings::General, "StopPlanningOnEnter");
 	this->StrafingTargetScatter.Read(exINI, GameStrings::General, "StrafingTargetScatter");
@@ -553,7 +552,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->CombatAlert_UseAttackVoice)
 		.Process(this->CombatAlert_UseEVA)
 		.Process(this->CylinderRangefinding)
-		.Process(this->AircraftWaypoint)
 		.Process(this->BuildingWaypoint)
 		.Process(this->StopPlanningOnEnter)
 		.Process(this->StrafingTargetScatter)
