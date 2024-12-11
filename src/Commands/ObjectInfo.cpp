@@ -133,13 +133,13 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 
 			for (int i = 0; i < AITriggerTypeClass::Array->Count && !found; i++)
 			{
-				auto pTriggerTeam1Type = AITriggerTypeClass::Array->GetItem(i)->Team1;
-				auto pTriggerTeam2Type = AITriggerTypeClass::Array->GetItem(i)->Team2;
+				auto pTriggerType = AITriggerTypeClass::Array->GetItem(i);
+				auto pTriggerTeam1Type = pTriggerType->Team1;
+				auto pTriggerTeam2Type = pTriggerType->Team2;
 
 				if (pTeamType && ((pTriggerTeam1Type && pTriggerTeam1Type == pTeamType) || (pTriggerTeam2Type && pTriggerTeam2Type == pTeamType)))
 				{
 					found = true;
-					auto pTriggerType = AITriggerTypeClass::Array->GetItem(i);
 					append("Trigger ID = %s, weights [Current, Min, Max]: %f, %f, %f", pTriggerType->ID, pTriggerType->Weight_Current, pTriggerType->Weight_Minimum, pTriggerType->Weight_Maximum);
 				}
 			}
@@ -202,8 +202,6 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 
 				for (int i = 0; i < 8; ++i, flags >>= 1)
 					append("%d", (flags & 1));
-
-				append("]; ");
 			}
 			else
 			{
@@ -212,16 +210,16 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 
 				for (int i = 0; i < 8; ++i, flags >>= 1)
 					append("%d", (flags & 1));
-
-				append("]; ");
 			}
+
+			append("]");
 
 			if (auto pObj = (onBridge ? pCell->AltObject : pCell->FirstObject))
 			{
 				if (pObj == pFoot)
-					append("[Content Objects: %s(me)", pObj->GetType()->get_ID());
+					append("; [Content Objects: %s(me)", pObj->GetType()->get_ID());
 				else
-					append("[Content Objects: %s", pObj->GetType()->get_ID());
+					append("; [Content Objects: %s", pObj->GetType()->get_ID());
 
 				for (pObj = pObj->NextObject; pObj; pObj = pObj->NextObject)
 				{
@@ -231,17 +229,15 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 						append(", %s", pObj->GetType()->get_ID());
 				}
 
-				append("]; ");
+				append("]");
 			}
 
 			if (auto pObj = pCell->Jumpjet)
 			{
 				if (pObj == pFoot)
-					append("[Content Jumpjet: %s(me)]", pObj->GetType()->get_ID());
+					append("; [Content Jumpjet: %s(me)]", pObj->GetType()->get_ID());
 				else
-					append("[Content Jumpjet: %s]", pObj->GetType()->get_ID());
-
-				append("; ");
+					append("; [Content Jumpjet: %s]", pObj->GetType()->get_ID());
 			}
 
 			append("\n");
@@ -364,8 +360,6 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 
 				for (int i = 0; i < 8; ++i, flags >>= 1)
 					append("%d", (flags & 1));
-
-				append("]; ");
 			}
 			else
 			{
@@ -374,16 +368,16 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 
 				for (int i = 0; i < 8; ++i, flags >>= 1)
 					append("%d", (flags & 1));
-
-				append("]; ");
 			}
+
+			append("]");
 
 			if (auto pObj = (onBridge ? pCell->AltObject : pCell->FirstObject))
 			{
 				if (pObj == pBuilding)
-					append("[Content Objects: %s(me)", pObj->GetType()->get_ID());
+					append("; [Content Objects: %s(me)", pObj->GetType()->get_ID());
 				else
-					append("[Content Objects: %s", pObj->GetType()->get_ID());
+					append("; [Content Objects: %s", pObj->GetType()->get_ID());
 
 				for (pObj = pObj->NextObject; pObj; pObj = pObj->NextObject)
 				{
@@ -393,11 +387,11 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 						append(", %s", pObj->GetType()->get_ID());
 				}
 
-				append("]; ");
+				append("]");
 			}
 
 			if (auto pObj = pCell->Jumpjet)
-				append("[Content Jumpjet: %s]; ", pObj->GetType()->get_ID());
+				append("; [Content Jumpjet: %s]", pObj->GetType()->get_ID());
 
 			append("\n");
 		}
