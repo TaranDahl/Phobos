@@ -97,6 +97,7 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		append("Owner = %s (%s), ", pFoot->Owner->get_ID(), pFoot->Owner->PlainName);
 		const auto cell = pFoot->GetMapCoords();
 		append("Location = (%d, %d), ", cell.X, cell.Y);
+		append("Tether = (%s, %s), ", (pFoot->unknown_bool_418 ? "yes" : "no"), (pFoot->unknown_bool_419 ? "yes" : "no"));
 		append("Health = (%d/%d)", pFoot->Health, pType->Strength);
 
 		auto pTechnoExt = TechnoExt::ExtMap.Find(pFoot);
@@ -171,7 +172,7 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		// Related Status
 		getTargetInfo(pFoot, pFoot->Target, "Target");
 		getTargetInfo(pFoot, pFoot->LastTarget, "LastTarget");
-		getTargetInfo(pFoot, pFoot->GetNthLink(), "NearestLink");
+		getTargetInfo(pFoot, pFoot->GetNthLink(), "NthLink");
 		getTargetInfo(pFoot, pFoot->ArchiveTarget, "ArchiveTarget");
 		getTargetInfo(pFoot, pFoot->Transporter, "Transporter");
 		getTargetInfo(pFoot, pFoot->Destination, "Destination");
@@ -256,6 +257,7 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		append("Owner = %s (%s), ", pBuilding->Owner->get_ID(), pBuilding->Owner->PlainName);
 		const auto cell = pBuilding->GetMapCoords();
 		append("Location = (%d, %d), ", cell.X, cell.Y);
+		append("Tether = (%s, %s), ", (pBuilding->unknown_bool_418 ? "yes" : "no"), (pBuilding->unknown_bool_419 ? "yes" : "no"));
 		append("Health = (%d/%d)", pBuilding->Health, pType->Strength);
 
 		auto pTechnoExt = TechnoExt::ExtMap.Find(pBuilding);
@@ -341,7 +343,7 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		// Related Status
 		getTargetInfo(pBuilding, pBuilding->Target, "Target");
 		getTargetInfo(pBuilding, pBuilding->LastTarget, "LastTarget");
-		getTargetInfo(pBuilding, pBuilding->GetNthLink(), "NearestLink");
+		getTargetInfo(pBuilding, pBuilding->GetNthLink(), "NthLink");
 		getTargetInfo(pBuilding, pBuilding->ArchiveTarget, "ArchiveTarget");
 		getTargetInfo(pBuilding, pBuilding->Transporter, "Transporter");
 
