@@ -752,14 +752,14 @@ DEFINE_HOOK(0x4C75E6, EventClass_RespondToEvent_Stop, 0x5)
 	else if (!pFoot->Destination) // When in attack move and have had a target, the destination will be cleaned up, enter the guard mission can prevent the jumpjets stuck in a status of standing idly by
 		pTechno->QueueMission(Mission::Guard, true);
 	else if (static_cast<int>(CellClass::Coord2Cell(pFoot->Destination->GetCoords()).DistanceFromSquared(pTechno->GetMapCoords())) > 2) // If the jumpjet is moving, find the forward cell then stop in it
-		pTechno->SetDestination(pTechno->GetCell()->GetNeighbourCell(static_cast<FacingType>(((((pJumpjetLoco->LocomotionFacing.Current().Raw) >> 12) + 1) >> 1) & 7)), true);
+		pTechno->SetDestination(pTechno->GetCell()->GetNeighbourCell(static_cast<FacingType>(pJumpjetLoco->LocomotionFacing.Current().GetValue<3>())), true);
 
 	// To avoid technos being unable to stop in attack move mega mission
 	if (pTechno->vt_entry_4C4()) // pTechno->MegaMissionIsAttackMove()
 		pTechno->vt_entry_4A8(); // pTechno->ClearMegaMissionData()
 
 	// To avoid aircrafts pausing in the air and let they returning to air base immediately
-	if (RulesExt::Global()->ExpandAircraftMission && pTechno->WhatAmI() == AbstractType::Aircraft && !pTechno->Airstrike && !pTechno->Spawned && static_cast<AircraftClass*>(pTechno)->Type->AirportBound && pTechno->GetHeight() > Unsorted::CellHeight)
+	if (pTechno->WhatAmI() == AbstractType::Aircraft && !pTechno->Airstrike && !pTechno->Spawned && static_cast<AircraftClass*>(pTechno)->Type->AirportBound && pTechno->GetHeight() > Unsorted::CellHeight)
 		pTechno->EnterIdleMode(false, true);
 
 	return SkipGameCode;
