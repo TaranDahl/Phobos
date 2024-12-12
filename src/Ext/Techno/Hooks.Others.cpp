@@ -753,7 +753,7 @@ DEFINE_HOOK(0x6F85AB, TechnoClass_CanAutoTargetObject_AggressiveAttackMove, 0x6)
 {
 	enum { ContinueCheck = 0x6F85BA, CanTarget = 0x6F8604 };
 
-	GET(TechnoClass*, pThis, EDI);
+	GET(TechnoClass* const, pThis, EDI);
 
 	return (!pThis->Owner->IsControlledByHuman() || (RulesExt::Global()->AttackMove_Aggressive && pThis->vt_entry_4C4())) ? CanTarget : ContinueCheck;
 }
@@ -791,8 +791,8 @@ DEFINE_HOOK(0x7089E8, TechnoClass_AllowedToRetaliate_AttackMindControlledDelay, 
 {
 	enum { CannotRetaliate = 0x708B17 };
 
-	GET(TechnoClass*, pThis, ESI);
-	GET(TechnoClass*, pAttacker, EBP);
+	GET(TechnoClass* const, pThis, ESI);
+	GET(TechnoClass* const, pAttacker, EBP);
 
 	return CanAttackMindControlled(pAttacker, pThis) ? 0 : CannotRetaliate;
 }
@@ -801,8 +801,8 @@ DEFINE_HOOK(0x6F7EA2, TechnoClass_CanAutoTargetObject_AttackMindControlledDelay,
 {
 	enum { CannotSelect = 0x6F894F };
 
-	GET(TechnoClass*, pThis, EDI);
-	GET(ObjectClass*, pTarget, ESI);
+	GET(TechnoClass* const, pThis, EDI);
+	GET(ObjectClass* const, pTarget, ESI);
 
 	if (const auto pTechno = abstract_cast<TechnoClass*>(pTarget))
 	{
