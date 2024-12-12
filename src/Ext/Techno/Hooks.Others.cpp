@@ -743,10 +743,10 @@ DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6)
 
 	// Check aircrafts
 	const auto pAircraft = abstract_cast<AircraftClass*>(pTechno);
-	const bool findAirport = pAircraft && !pAircraft->Airstrike && !pAircraft->Spawned && pAircraft->Type->AirportBound;
+	const bool commonAircraft = pAircraft && !pAircraft->Airstrike && !pAircraft->Spawned;
 
 	// To avoid aircrafts overlap by keep link if is returning or is in airport now.
-	if (!findAirport || !pAircraft->DockNowHeadingTo || (pAircraft->DockNowHeadingTo != pAircraft->GetNthLink()))
+	if (!commonAircraft || !pAircraft->DockNowHeadingTo || (pAircraft->DockNowHeadingTo != pAircraft->GetNthLink()))
 		pTechno->SendToEachLink(RadioCommand::NotifyUnlink);
 
 	// To avoid technos being unable to stop in attack move mega mission
@@ -756,11 +756,23 @@ DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6)
 	// Clearing the current target should still be necessary for all technos
 	pTechno->SetTarget(nullptr);
 
-	if (findAirport)
+	if (commonAircraft)
 	{
-		// To avoid aircrafts pausing in the air and let they returning to air base immediately.
-		if (!pAircraft->DockNowHeadingTo || (pAircraft->DockNowHeadingTo != pAircraft->GetNthLink()))
-			pAircraft->EnterIdleMode(false, true);
+		if (pAircraft->Type->AirportBound)
+		{
+			// To avoid `AirportBound=yes` aircrafts pausing in the air and let they returning to air base immediately.
+			if (!pAircraft->DockNowHeadingTo || (pAircraft->DockNowHeadingTo != pAircraft->GetNthLink())) // If the aircraft have no valid dock, try to find a new one
+				pAircraft->EnterIdleMode(false, true);
+		}
+		else if (const auto pDestination = pAircraft->Destination)
+		{
+			// To avoid `AirportBound=no` aircrafts ignoring the stop task or directly return to the airport.
+			if (pAircraft->Ammo && static_cast<int>(CellClass::Coord2Cell(pDestination->GetCoords()).DistanceFromSquared(pAircraft->GetMapCoords())) > 2) // If the aircraft is moving, find the forward cell then stop in it
+				pAircraft->SetDestination(pAircraft->GetCell()->GetNeighbourCell(static_cast<FacingType>(pAircraft->PrimaryFacing.Current().GetValue<3>())), true);
+			else if (!pAircraft->Ammo && (!pAircraft->DockNowHeadingTo || (pAircraft->DockNowHeadingTo != pAircraft->GetNthLink())))
+				pAircraft->EnterIdleMode(false, true);
+		}
+		// Otherwise landing or idling normally without answering the stop command
 	}
 	else
 	{
@@ -775,6 +787,7 @@ DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6)
 			pTechno->QueueMission(Mission::Guard, true);
 		else if (static_cast<int>(CellClass::Coord2Cell(pFoot->Destination->GetCoords()).DistanceFromSquared(pTechno->GetMapCoords())) > 2) // If the jumpjet is moving, find the forward cell then stop in it
 			pTechno->SetDestination(pTechno->GetCell()->GetNeighbourCell(static_cast<FacingType>(pJumpjetLoco->LocomotionFacing.Current().GetValue<3>())), true);
+		// Otherwise landing or idling normally without answering the stop command
 	}
 
 	return SkipGameCode;
@@ -784,7 +797,7 @@ DEFINE_HOOK(0x6F85AB, TechnoClass_CanAutoTargetObject_AggressiveAttackMove, 0x6)
 {
 	enum { ContinueCheck = 0x6F85BA, CanTarget = 0x6F8604 };
 
-	GET(TechnoClass*, pThis, EDI);
+	GET(TechnoClass* const, pThis, EDI);
 
 	return (!pThis->Owner->IsControlledByHuman() || (RulesExt::Global()->AttackMove_Aggressive && pThis->vt_entry_4C4())) ? CanTarget : ContinueCheck;
 }
@@ -822,8 +835,8 @@ DEFINE_HOOK(0x7089E8, TechnoClass_AllowedToRetaliate_AttackMindControlledDelay, 
 {
 	enum { CannotRetaliate = 0x708B17 };
 
-	GET(TechnoClass*, pThis, ESI);
-	GET(TechnoClass*, pAttacker, EBP);
+	GET(TechnoClass* const, pThis, ESI);
+	GET(TechnoClass* const, pAttacker, EBP);
 
 	return CanAttackMindControlled(pAttacker, pThis) ? 0 : CannotRetaliate;
 }
@@ -832,8 +845,8 @@ DEFINE_HOOK(0x6F7EA2, TechnoClass_CanAutoTargetObject_AttackMindControlledDelay,
 {
 	enum { CannotSelect = 0x6F894F };
 
-	GET(TechnoClass*, pThis, EDI);
-	GET(ObjectClass*, pTarget, ESI);
+	GET(TechnoClass* const, pThis, EDI);
+	GET(ObjectClass* const, pTarget, ESI);
 
 	if (const auto pTechno = abstract_cast<TechnoClass*>(pTarget))
 	{
