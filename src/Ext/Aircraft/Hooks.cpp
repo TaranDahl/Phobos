@@ -450,7 +450,18 @@ DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 
 	return 0;
 }
+/*
+// This allows the aircraft to receive stop commands even at low altitudes, but if used, receiving a move command
+// then quickly receiving a stop command can result in the aircraft landing in an incorrect direction
+DEFINE_HOOK(0x417944, AircraftClass_EnterIdleMode_DockCheck, 0x7)
+{
+	enum { Continue = 0x417953, Invalid = 0x417AD4 };
 
+	GET(AircraftClass* const, pThis, ESI);
+
+	return (pThis->GetHeight() > 0) ? Continue : Invalid; // Replace IsInAir()
+}
+*/
 // GreatestThreat: for all the mission that should let the aircraft auto select a target
 AbstractClass* __fastcall AircraftClass_GreatestThreat(AircraftClass* pThis, void* _, ThreatType threatType, CoordStruct* pSelectCoords, bool onlyTargetHouseEnemy)
 {
