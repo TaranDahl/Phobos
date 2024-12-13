@@ -15,6 +15,7 @@
 #include "SelectedInfo.h"
 #include "HerosInfo.h"
 #include "FPSNewCounter.h"
+#include "DistributionMode.h"
 
 DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 {
@@ -39,6 +40,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<SelectedInfoCommandClass>();
 	MakeCommand<HerosInfoCommandClass>();
 	MakeCommand<FPSNewCounterCommandClass>();
+	MakeCommand<DistributionModeCommandClass>();
 
 	if (Phobos::Config::DevelopmentCommands)
 	{
