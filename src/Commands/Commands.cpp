@@ -38,7 +38,8 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<SelectedInfoCommandClass>();
 	MakeCommand<HerosInfoCommandClass>();
 	MakeCommand<FPSNewCounterCommandClass>();
-	MakeCommand<DistributionModeCommandClass>();
+	MakeCommand<DistributionMode1CommandClass>();
+	MakeCommand<DistributionMode2CommandClass>();
 
 	if (Phobos::Config::DevelopmentCommands)
 	{

@@ -4,34 +4,69 @@
 #include <Utilities/Helpers.Alex.h>
 #include <Helpers/Macro.h>
 
-int DistributionModeCommandClass::Mode = 0; // 0 = Off, 1 = Small range and same type only, 2 = Small range, 3 = Big range
+int DistributionMode1CommandClass::Mode = 0;
+int DistributionMode2CommandClass::Mode = 0;
 
-const char* DistributionModeCommandClass::GetName() const
+void __fastcall PrintDistributionModeMessage()
 {
-	return "Distribution Mode";
+	wchar_t text[0x40];
+	swprintf_s(text, L"Distribution Mode < Spread: r=%2d , Filter: %s >",
+		(DistributionMode1CommandClass::Mode ? (2 << DistributionMode1CommandClass::Mode) : 0),
+		((DistributionMode2CommandClass::Mode > 1) ? ((DistributionMode2CommandClass::Mode == 3) ? L"Name" : L"Type") : (DistributionMode2CommandClass::Mode == 1) ? L"Auto" : L"None")
+	);
+	MessageListClass::Instance->PrintMessage(text, 200, 5, true);
 }
 
-const wchar_t* DistributionModeCommandClass::GetUIName() const
+const char* DistributionMode1CommandClass::GetName() const
 {
-	return GeneralUtils::LoadStringUnlessMissing("TXT_DISTRIBUTION", L"Distribution mode");
+	return "Distribution Mode Spread";
 }
 
-const wchar_t* DistributionModeCommandClass::GetUICategory() const
+const wchar_t* DistributionMode1CommandClass::GetUIName() const
+{
+	return GeneralUtils::LoadStringUnlessMissing("TXT_DISTR_SPREAD", L"Distribution spread");
+}
+
+const wchar_t* DistributionMode1CommandClass::GetUICategory() const
 {
 	return CATEGORY_CONTROL;
 }
 
-const wchar_t* DistributionModeCommandClass::GetUIDescription() const
+const wchar_t* DistributionMode1CommandClass::GetUIDescription() const
 {
-	return GeneralUtils::LoadStringUnlessMissing("TXT_DISTRIBUTION_DESC", L"Automatically and averagely select similar targets around the original target");
+	return GeneralUtils::LoadStringUnlessMissing("TXT_DISTR_SPREAD_DESC", L"Automatically and averagely select similar targets around the original target. This is for changing the search range");
 }
 
-void DistributionModeCommandClass::Execute(WWKey eInput) const
+void DistributionMode1CommandClass::Execute(WWKey eInput) const
 {
-	DistributionModeCommandClass::Mode = ((DistributionModeCommandClass::Mode + 1) & 3);
-	wchar_t text[0x20];
-	swprintf_s(text, L"Distribution Mode < %d >", DistributionModeCommandClass::Mode);
-	MessageListClass::Instance->PrintMessage(text, 600, 5, true);
+	DistributionMode1CommandClass::Mode = ((DistributionMode1CommandClass::Mode + 1) & 3);
+	PrintDistributionModeMessage();
+}
+
+const char* DistributionMode2CommandClass::GetName() const
+{
+	return "Distribution Mode Filter";
+}
+
+const wchar_t* DistributionMode2CommandClass::GetUIName() const
+{
+	return GeneralUtils::LoadStringUnlessMissing("TXT_DISTR_FILTER", L"Distribution filter");
+}
+
+const wchar_t* DistributionMode2CommandClass::GetUICategory() const
+{
+	return CATEGORY_CONTROL;
+}
+
+const wchar_t* DistributionMode2CommandClass::GetUIDescription() const
+{
+	return GeneralUtils::LoadStringUnlessMissing("TXT_DISTR_FILTER_DESC", L"Automatically and averagely select similar targets around the original target. This is for changing the filter criteria");
+}
+
+void DistributionMode2CommandClass::Execute(WWKey eInput) const
+{
+	DistributionMode2CommandClass::Mode = ((DistributionMode2CommandClass::Mode + 1) & 3);
+	PrintDistributionModeMessage();
 }
 
 DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
@@ -39,17 +74,19 @@ DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
 	enum { SkipGameCode = 0x4AE85C };
 
 	GET(ObjectClass* const, pTarget, EBP);
-	GET_STACK(const Action, action, STACK_OFFSET(0x20, 0xC));
+	GET_STACK(const Action, mouseAction, STACK_OFFSET(0x20, 0xC));
 
 	const auto count = ObjectClass::CurrentObjects->Count;
 
 	if (count > 0)
 	{
-		const int mode = DistributionModeCommandClass::Mode;
+		const auto mode1 = DistributionMode1CommandClass::Mode;
+		const auto mode2 = DistributionMode2CommandClass::Mode;
 
-		if (mode && count > 1 && action != Action::NoMove && (pTarget->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None && !pTarget->IsInAir())
+		// Distribution mode main
+		if (mode1 && count > 1 && mouseAction != Action::NoMove && (pTarget->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None && !pTarget->IsInAir())
 		{
-			const double range = (mode == 3) ? 15 : 7.5;
+			const auto range = (2 << mode1);
 			const auto pItems = Helpers::Alex::getCellSpreadItems(pTarget->Location, range, false);
 			std::map<TechnoClass*, int> record;
 			int current = 1;
@@ -59,18 +96,18 @@ DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
 
 			for (const auto& pSelect : ObjectClass::CurrentObjects())
 			{
-				ObjectClass* pCanTarget = nullptr;
-				ObjectClass* pNewTarget = nullptr;
+				TechnoClass* pCanTarget = nullptr;
+				TechnoClass* pNewTarget = nullptr;
 
-				for (auto& [pItem, num] : record)
+				for (const auto& [pItem, num] : record)
 				{
-					if (pSelect->MouseOverObject(pItem, false) == action && (mode != 1 || TechnoTypeExt::GetSelectionGroupID(pItem->GetTechnoType()) == TechnoTypeExt::GetSelectionGroupID(pTarget->GetTechnoType())))
+					if (pSelect->MouseOverObject(pItem, false) == mouseAction && (mode2 < 2 || (pItem->WhatAmI() == pTarget->WhatAmI()
+						&& (mode2 < 3 || TechnoTypeExt::GetSelectionGroupID(pItem->GetTechnoType()) == TechnoTypeExt::GetSelectionGroupID(pTarget->GetTechnoType())))))
 					{
 						pCanTarget = pItem;
 
 						if (num < current)
 						{
-							++num;
 							pNewTarget = pCanTarget;
 							break;
 						}
@@ -87,20 +124,38 @@ DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
 				}
 
 				if (pNewTarget)
-					pSelect->ObjectClickedAction(action, pNewTarget, false);
+				{
+					if (record.contains(pNewTarget))
+						++record[pNewTarget];
+
+					pSelect->ObjectClickedAction(mouseAction, pNewTarget, false);
+				}
 				else
-					pSelect->ObjectClickedAction(pSelect->MouseOverObject(pTarget, false), pTarget, false);
+				{
+					const auto currentAction = pSelect->MouseOverObject(pTarget, false);
+
+					if (mode2 && currentAction == Action::NoMove && (pSelect->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None)
+						static_cast<TechnoClass*>(pSelect)->ClickedMission(Mission::Area_Guard, reinterpret_cast<ObjectClass*>(pSelect->GetCellAgain()), nullptr, nullptr);
+					else
+						pSelect->ObjectClickedAction(currentAction, pTarget, false);
+				}
 
 				Unsorted::MoveFeedback = false;
 			}
-
-			return SkipGameCode;
 		}
-
-		for (const auto& pSelect : ObjectClass::CurrentObjects())
+		else // Vanilla
 		{
-			pSelect->ObjectClickedAction(pSelect->MouseOverObject(pTarget, false), pTarget, false);
-			Unsorted::MoveFeedback = false;
+			for (const auto& pSelect : ObjectClass::CurrentObjects())
+			{
+				const auto currentAction = pSelect->MouseOverObject(pTarget, false);
+
+				if (mode2 && mouseAction != Action::NoMove && currentAction == Action::NoMove && (pSelect->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None)
+					static_cast<TechnoClass*>(pSelect)->ClickedMission(Mission::Area_Guard, reinterpret_cast<ObjectClass*>(pSelect->GetCellAgain()), nullptr, nullptr);
+				else
+					pSelect->ObjectClickedAction(currentAction, pTarget, false);
+
+				Unsorted::MoveFeedback = false;
+			}
 		}
 	}
 
