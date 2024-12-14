@@ -9,6 +9,16 @@
 int DistributionMode1CommandClass::Mode = 0;
 int DistributionMode2CommandClass::Mode = 0;
 
+void __fastcall PrintDistributionModeMessage()
+{
+	wchar_t text[0x40];
+	swprintf_s(text, L"Distribution Mode < Spread: r=%2d , Filter: %s >",
+		(DistributionMode1CommandClass::Mode ? (2 << DistributionMode1CommandClass::Mode) : 0),
+		((DistributionMode2CommandClass::Mode > 1) ? ((DistributionMode2CommandClass::Mode == 3) ? L"Name" : L"Type") : (DistributionMode2CommandClass::Mode == 1) ? L"Auto" : L"None")
+	);
+	MessageListClass::Instance->PrintMessage(text, 200, 5, true);
+}
+
 const char* DistributionMode1CommandClass::GetName() const
 {
 	return "Distribution Mode Spread";
@@ -32,6 +42,7 @@ const wchar_t* DistributionMode1CommandClass::GetUIDescription() const
 void DistributionMode1CommandClass::Execute(WWKey eInput) const
 {
 	DistributionMode1CommandClass::Mode = ((DistributionMode1CommandClass::Mode + 1) & 3);
+	PrintDistributionModeMessage();
 }
 
 const char* DistributionMode2CommandClass::GetName() const
@@ -57,6 +68,7 @@ const wchar_t* DistributionMode2CommandClass::GetUIDescription() const
 void DistributionMode2CommandClass::Execute(WWKey eInput) const
 {
 	DistributionMode2CommandClass::Mode = ((DistributionMode2CommandClass::Mode + 1) & 3);
+	PrintDistributionModeMessage();
 }
 
 DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
@@ -151,7 +163,7 @@ DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
 
 	return SkipGameCode;
 }
-
+/*
 DEFINE_HOOK(0x4F4596, GScreenClass_DrawOnTop_DrawDistributionModeShape, 0x7)
 {
 	const auto mode1 = DistributionMode1CommandClass::Mode;
@@ -191,3 +203,4 @@ DEFINE_HOOK(0x4F4596, GScreenClass_DrawOnTop_DrawDistributionModeShape, 0x7)
 
 	return 0;
 }
+*/
