@@ -688,7 +688,7 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 
 DEFINE_HOOK(0x73DC1E, UnitClass_Mission_Unload_NoQueueUpToUnload, 0xA)
 {
-	enum { QuickUnload = 0x73E5B1, VanillaUnload = 0x73E289 };
+	enum { QuickUnload = 0x73E2B7, VanillaUnload = 0x73E289 };
 
 	GET(UnitClass* const, pThis, ESI);
 
@@ -697,7 +697,13 @@ DEFINE_HOOK(0x73DC1E, UnitClass_Mission_Unload_NoQueueUpToUnload, 0xA)
 	if (sound != -1)
 		VoxClass::PlayAtPos(sound, &pThis->Location);
 
-	return RulesExt::Global()->NoQueueUpToUnload ? QuickUnload : VanillaUnload;
+	if (RulesExt::Global()->NoQueueUpToUnload)
+	{
+		R->EAX(1); // Can be customized
+		return QuickUnload;
+	}
+
+	return VanillaUnload;
 }
 
 #pragma endregion
