@@ -89,7 +89,7 @@ DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
 		if (mode1 && count > 1 && mouseAction != Action::NoMove && (pTarget->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None && !pTarget->IsInAir())
 		{
 			const auto range = (2 << mode1);
-			const auto pItems = Helpers::Alex::getCellSpreadItems(pTarget->Location, range, false);
+			const auto pItems = Helpers::Alex::getCellSpreadItems(pTarget->Location, range);
 			std::map<TechnoClass*, int> record;
 			int current = 1;
 
@@ -103,7 +103,7 @@ DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
 
 				for (const auto& [pItem, num] : record)
 				{
-					if (pSelect->MouseOverObject(pItem, false) == mouseAction && (mode2 < 2 || (pItem->WhatAmI() == pTarget->WhatAmI()
+					if (pSelect->MouseOverObject(pItem) == mouseAction && (mode2 < 2 || (pItem->WhatAmI() == pTarget->WhatAmI()
 						&& (mode2 < 3 || TechnoTypeExt::GetSelectionGroupID(pItem->GetTechnoType()) == TechnoTypeExt::GetSelectionGroupID(pTarget->GetTechnoType())))))
 					{
 						pCanTarget = pItem;
@@ -134,7 +134,7 @@ DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
 				}
 				else
 				{
-					const auto currentAction = pSelect->MouseOverObject(pTarget, false);
+					const auto currentAction = pSelect->MouseOverObject(pTarget);
 
 					if (mode2 && currentAction == Action::NoMove && (pSelect->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None)
 						static_cast<TechnoClass*>(pSelect)->ClickedMission(Mission::Area_Guard, reinterpret_cast<ObjectClass*>(pSelect->GetCellAgain()), nullptr, nullptr);
@@ -149,7 +149,7 @@ DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
 		{
 			for (const auto& pSelect : ObjectClass::CurrentObjects())
 			{
-				const auto currentAction = pSelect->MouseOverObject(pTarget, false);
+				const auto currentAction = pSelect->MouseOverObject(pTarget);
 
 				if (mode2 && mouseAction != Action::NoMove && currentAction == Action::NoMove && (pSelect->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None)
 					static_cast<TechnoClass*>(pSelect)->ClickedMission(Mission::Area_Guard, reinterpret_cast<ObjectClass*>(pSelect->GetCellAgain()), nullptr, nullptr);
