@@ -4,6 +4,7 @@
 #include <Utilities/Helpers.Alex.h>
 #include <Helpers/Macro.h>
 
+#include <HouseClass.h>
 #include <WWMouseClass.h>
 
 int DistributionMode1CommandClass::Mode = 0;
@@ -88,6 +89,13 @@ DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
 		// Distribution mode main
 		if (mode1 && count > 1 && mouseAction != Action::NoMove && !PlanningNodeClass::PlanningModeActive && (pTarget->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None && !pTarget->IsInAir())
 		{
+			const auto pSpecial = HouseClass::FindSpecial();
+			const auto pCivilian = HouseClass::FindCivilianSide();
+			const auto pNeutral = HouseClass::FindNeutral();
+
+			const auto pTargetHouse = static_cast<TechnoClass*>(pTarget)->Owner;
+			const bool targetIsNeutral = pTargetHouse == pSpecial || pTargetHouse == pCivilian || pTargetHouse == pNeutral;
+
 			const auto range = (2 << mode1);
 			const auto pItems = Helpers::Alex::getCellSpreadItems(pTarget->Location, range);
 			std::map<TechnoClass*, int> record;
@@ -103,7 +111,8 @@ DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
 
 				for (const auto& [pItem, num] : record)
 				{
-					if (pSelect->MouseOverObject(pItem) == mouseAction && (mode2 < 2 || (pItem->WhatAmI() == pTarget->WhatAmI()
+					if (pSelect->MouseOverObject(pItem) == mouseAction && (targetIsNeutral || (pItem->Owner != pSpecial && pItem->Owner != pCivilian && pItem->Owner != pNeutral))
+						&& (mode2 < 2 || (pItem->WhatAmI() == pTarget->WhatAmI()
 						&& (mode2 < 3 || TechnoTypeExt::GetSelectionGroupID(pItem->GetTechnoType()) == TechnoTypeExt::GetSelectionGroupID(pTarget->GetTechnoType())))))
 					{
 						pCanTarget = pItem;
