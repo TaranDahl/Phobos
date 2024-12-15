@@ -686,18 +686,52 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 	return 0;
 }
 
-DEFINE_HOOK(0x73DC1E, UnitClass_Mission_Unload_NoQueueUpToUnload, 0xA)
+static inline void PlayUnitLeaveTransportSound(UnitClass* pThis)
 {
-	enum { QuickUnload = 0x73E5B1, VanillaUnload = 0x73E289 };
-
-	GET(UnitClass* const, pThis, ESI);
-
-	const int sound = pThis->GetTechnoType()->LeaveTransportSound;
+	const int sound = pThis->Type->LeaveTransportSound;
 
 	if (sound != -1)
 		VoxClass::PlayAtPos(sound, &pThis->Location);
+}
 
-	return RulesExt::Global()->NoQueueUpToUnload ? QuickUnload : VanillaUnload;
+DEFINE_HOOK(0x73DC9C, UnitClass_Mission_Unload_NoQueueUpToUnloadBreak, 0xA)
+{
+	enum { SkipGameCode = 0x73E289 };
+
+	GET(FootClass* const, pPassenger, EDI);
+
+	pPassenger->Undiscover();
+
+	if (RulesExt::Global()->NoQueueUpToUnload)
+	{
+		GET(UnitClass* const, pThis, ESI);
+		PlayUnitLeaveTransportSound(pThis);
+	}
+
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x73DC1E, UnitClass_Mission_Unload_NoQueueUpToUnloadLoop, 0xA)
+{
+	enum { UnloadLoop = 0x73D8CB, UnloadReturn = 0x73E289 };
+
+	GET(UnitClass* const, pThis, ESI);
+
+	if (RulesExt::Global()->NoQueueUpToUnload)
+	{
+		if (pThis->Passengers.NumPassengers <= pThis->NonPassengerCount)
+		{
+			PlayUnitLeaveTransportSound(pThis);
+			pThis->MissionStatus = 4;
+			return UnloadReturn;
+		}
+
+		R->EBX(0); // Reset
+		return UnloadLoop;
+	}
+
+	PlayUnitLeaveTransportSound(pThis);
+	return UnloadReturn;
 }
 /*
 static inline bool CanBuildingUnloadOccupants(BuildingClass* pThis)
