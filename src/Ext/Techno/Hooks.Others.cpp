@@ -770,7 +770,7 @@ static inline bool CanBuildingUnloadOccupants(BuildingClass* pThis)
 	if (pThis->GetOccupantCount() <= 0)
 		return false;
 
-	const auto topLeftCell = CellClass::Coord2Cell(pThis->Location);
+	const auto topLeftCell = pThis->GetMapCoords();
 	const auto pOccupant = pThis->Occupants.GetItem(0);
 
 	for (auto pFoundation = pThis->Type->FoundationOutside; *pFoundation != CellStruct { 0x7FFF, 0x7FFF }; ++pFoundation)
