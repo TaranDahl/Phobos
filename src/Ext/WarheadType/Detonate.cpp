@@ -196,9 +196,49 @@ void WarheadTypeExt::ExtData::ApplyBuildingUndeploy(TechnoClass* pTarget)
 		return;
 
 	auto cell = pBuilding->GetMapCoords();
+	const auto width = pType->GetFoundationWidth();
+	const auto height = pType->GetFoundationHeight(false);
 
-	if (pType->GetFoundationWidth() > 2 || pType->GetFoundationHeight(false) > 2)
+	if (width > 2 || height > 2)
 		cell += CellStruct { 1, 1 };
+
+	if (this->BuildingUndeploy_Leave)
+	{
+		const auto pHouse = pBuilding->Owner;
+		const auto pItems = Helpers::Alex::getCellSpreadItems(pBuilding->GetCoords(), 16);
+		int record[16] = {0};
+
+		for (const auto& pItem : pItems)
+		{
+			if ((pHouse && pHouse->IsAlliedWith(pItem)) || !pItem->IsArmed())
+				continue;
+
+			record[pBuilding->GetTargetDirection(pItem).GetValue<4>()] += pItem->GetTechnoType()->Cost;
+		}
+
+		int costs = 0;
+		int dir = 0;
+
+		for (int i = 0; i < 16; ++i)
+		{
+			if (record[i] > costs)
+			{
+				dir = i;
+				costs = record[i];
+			}
+		}
+
+		if (!costs)
+			dir = ScenarioClass::Instance->Random.RandomRanged(0, 15);
+
+		const double radian = -(((dir + 8) / 16.0) * Math::TwoPi);
+
+		cell.X += static_cast<short>(12 * cos(radian));
+		cell.Y -= static_cast<short>(12 * sin(radian));
+
+		cell = MapClass::Instance->NearByLocation(cell, pType->UndeploysInto->SpeedType, -1, pType->UndeploysInto->MovementZone,
+			false, (width + 2), (height + 2), false, false, false, false, CellStruct::Empty, false, false);
+	}
 
 	pBuilding->SetArchiveTarget(MapClass::Instance->GetCellAt(cell));
 	pBuilding->Sell(0xFFFFFFFF);
