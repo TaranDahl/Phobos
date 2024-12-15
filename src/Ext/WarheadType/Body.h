@@ -160,6 +160,7 @@ public:
 		Nullable<bool> Particle_AlphaImageIsLightFlash;
 
 		Valueable<bool> BuildingUndeploy;
+		Valueable<bool> BuildingUndeploy_Leave;
 		Nullable<double> DamageOwnerMultiplier;
 		Nullable<double> DamageAlliesMultiplier;
 		Nullable<double> DamageEnemiesMultiplier;
@@ -332,6 +333,7 @@ public:
 			, Particle_AlphaImageIsLightFlash {}
 
 			, BuildingUndeploy { false }
+			, BuildingUndeploy_Leave { false }
 			, DamageOwnerMultiplier {}
 			, DamageAlliesMultiplier {}
 			, DamageEnemiesMultiplier {}
