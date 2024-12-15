@@ -86,7 +86,7 @@ DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
 		const auto mode2 = DistributionMode2CommandClass::Mode;
 
 		// Distribution mode main
-		if (mode1 && count > 1 && mouseAction != Action::NoMove && (pTarget->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None && !pTarget->IsInAir())
+		if (mode1 && count > 1 && mouseAction != Action::NoMove && !PlanningNodeClass::PlanningModeActive && (pTarget->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None && !pTarget->IsInAir())
 		{
 			const auto range = (2 << mode1);
 			const auto pItems = Helpers::Alex::getCellSpreadItems(pTarget->Location, range);
