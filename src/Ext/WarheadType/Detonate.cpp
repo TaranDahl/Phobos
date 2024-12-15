@@ -279,13 +279,16 @@ void WarheadTypeExt::ExtData::ApplyBuildingUndeploy(TechnoClass* pTarget)
 		if (!costs)
 			dir = ScenarioClass::Instance->Random.RandomRanged(0, 15);
 
-		const double radian = -(((dir + 8) / 16.0) * Math::TwoPi);
+		const double radian = -(((dir - 4) / 16.0) * Math::TwoPi);
 
-		cell.X += static_cast<short>(12 * cos(radian));
-		cell.Y -= static_cast<short>(12 * sin(radian));
+		cell.X -= static_cast<short>(12 * cos(radian));
+		cell.Y += static_cast<short>(12 * sin(radian));
 
-		cell = MapClass::Instance->NearByLocation(cell, pType->UndeploysInto->SpeedType, -1, pType->UndeploysInto->MovementZone,
+		const auto newCell = MapClass::Instance->NearByLocation(cell, pType->UndeploysInto->SpeedType, -1, pType->UndeploysInto->MovementZone,
 			false, (width + 2), (height + 2), false, false, false, false, CellStruct::Empty, false, false);
+
+		if (newCell != CellStruct::Empty)
+			cell = newCell;
 	}
 
 	pBuilding->SetArchiveTarget(MapClass::Instance->GetCellAt(cell));
