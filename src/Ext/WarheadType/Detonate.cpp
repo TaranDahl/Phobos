@@ -195,6 +195,11 @@ void WarheadTypeExt::ExtData::ApplyBuildingUndeploy(TechnoClass* pTarget)
 	if (!pType->UndeploysInto || (pType->ConstructionYard && !GameModeOptionsClass::Instance->MCVRedeploy))
 		return;
 
+	const auto mission = pBuilding->CurrentMission;
+
+	if (mission == Mission::Construction || mission == Mission::Selling)
+		return;
+
 	auto cell = pBuilding->GetMapCoords();
 	const auto width = pType->GetFoundationWidth();
 	const auto height = pType->GetFoundationHeight(false);
@@ -205,26 +210,29 @@ void WarheadTypeExt::ExtData::ApplyBuildingUndeploy(TechnoClass* pTarget)
 	if (this->BuildingUndeploy_Leave)
 	{
 		const auto pHouse = pBuilding->Owner;
-		const auto pItems = Helpers::Alex::getCellSpreadItems(pBuilding->GetCoords(), 16);
+		const auto pItems = Helpers::Alex::getCellSpreadItems(pBuilding->GetCoords(), 20);
 		int record[16] = {0};
 
 		for (const auto& pItem : pItems)
 		{
-			if ((pHouse && pHouse->IsAlliedWith(pItem)) || !pItem->IsArmed())
-				continue;
-
-			record[pBuilding->GetTargetDirection(pItem).GetValue<4>()] += pItem->GetTechnoType()->Cost;
+			if ((!pHouse || !pHouse->IsAlliedWith(pItem)) && pItem->IsArmed())
+				record[pBuilding->GetTargetDirection(pItem).GetValue<4>()] += pItem->GetTechnoType()->Cost;
 		}
 
 		int costs = 0;
 		int dir = 0;
 
-		for (int i = 0; i < 16; ++i)
+		for (int i = 16; i < 32; ++i)
 		{
-			if (record[i] > costs)
+			int newCosts = 0;
+
+			for (int j = -7; j < 8; ++j)
+				newCosts += ((8 - abs(j)) * record[(i + j) & 15]);
+
+			if (newCosts > costs)
 			{
-				dir = i;
-				costs = record[i];
+				dir = (i - 16);
+				costs = newCosts;
 			}
 		}
 
@@ -233,8 +241,8 @@ void WarheadTypeExt::ExtData::ApplyBuildingUndeploy(TechnoClass* pTarget)
 
 		const double radian = -(((dir - 4) / 16.0) * Math::TwoPi);
 
-		cell.X -= static_cast<short>(12 * cos(radian));
-		cell.Y += static_cast<short>(12 * sin(radian));
+		cell.X -= static_cast<short>(14 * cos(radian));
+		cell.Y += static_cast<short>(14 * sin(radian));
 
 		const auto newCell = MapClass::Instance->NearByLocation(cell, pType->UndeploysInto->SpeedType, -1, pType->UndeploysInto->MovementZone,
 			false, (width + 2), (height + 2), false, false, false, false, CellStruct::Empty, false, false);
