@@ -1915,20 +1915,6 @@ DEFINE_HOOK(0x4DF410, FootClass_UpdateAttackMove_TargetAcquired, 0x6)
 
 	return 0;
 }
-DEFINE_HOOK(0x4DF3BA, FootClass_UpdateAttackMove_PursuitTarget, 0x6)
-{
-	GET(FootClass*, pThis, ESI);
-
-	auto const pType = pThis->GetTechnoType();
-
-	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType))
-	{
-		if (pTypeExt->AttackMove_PursuitTarget && pThis->vt_entry_3B4(reinterpret_cast<DWORD>(pThis->Target))) // InAttackMoveKeepRange
-			pThis->SetDestination(pThis->Target, true);
-	}
-
-	return 0;
-}
 
 DEFINE_HOOK(0x711E90, TechnoTypeClass_CanAttackMove_IgnoreWeapon, 0x6)
 {

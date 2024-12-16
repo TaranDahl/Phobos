@@ -403,7 +403,16 @@ DEFINE_HOOK(0x4DF3BA, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget, 0
 
 	GET(FootClass* const, pThis, ESI);
 
-	return ((RulesExt::Global()->ExpandAircraftMission && pThis->WhatAmI() == AbstractType::Aircraft) || pThis->vt_entry_3B4(reinterpret_cast<DWORD>(pThis->Target))) ? HoldTarget : LoseTarget; // pThis->InAuxiliarySearchRange(pThis->Target)
+	if (RulesExt::Global()->ExpandAircraftMission && pThis->WhatAmI() == AbstractType::Aircraft)
+		return HoldTarget;
+
+	const auto inSearchRange = pThis->vt_entry_3B4(reinterpret_cast<DWORD>(pThis->Target)); // pThis->InAuxiliarySearchRange(pThis->Target)
+	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	if (pTypeExt && pTypeExt->AttackMove_PursuitTarget && inSearchRange)
+		pThis->SetDestination(pThis->Target, true);
+
+	return inSearchRange ? HoldTarget : LoseTarget;
 }
 
 DEFINE_HOOK(0x418CD1, AircraftClass_Mission_Attack_ContinueFlyToDestination, 0x6)
