@@ -590,6 +590,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->RateDown_Ammo.Read(exINI, pSection, "RateDown.Ammo");
 	this->RateDown_Delay.Read(exINI, pSection, "RateDown.Delay");
 	this->RateDown_Cover.Read(exINI, pSection, "RateDown.Cover");
+	this->RateDown_Reset.Read(exINI, pSection, "RateDown.Reset");
 	this->UniqueTechno.Read(exINI, pSection, "UniqueTechno");
 
 	this->CombatAlert.Read(exINI, pSection, "CombatAlert");
@@ -1061,6 +1062,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->RateDown_Ammo)
 		.Process(this->RateDown_Delay)
 		.Process(this->RateDown_Cover)
+		.Process(this->RateDown_Reset)
 		.Process(this->UniqueTechno)
 
 		.Process(this->CombatAlert)

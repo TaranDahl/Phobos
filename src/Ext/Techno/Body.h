@@ -58,6 +58,7 @@ public:
 		int LastHurtFrame;
 		int LastBeLockedFrame;
 		int LastBeControlledFrame;
+		DWORD LastTargetID;
 		int AccumulatedGattlingValue;
 		bool ShouldUpdateGattlingValue;
 		int MyTargetingFrame;
@@ -108,6 +109,7 @@ public:
 			, LastHurtFrame { 0 }
 			, LastBeLockedFrame { 0 }
 			, LastBeControlledFrame { 0 }
+			, LastTargetID { 0xFFFFFFFF }
 			, AccumulatedGattlingValue { 0 }
 			, ShouldUpdateGattlingValue { false }
 			, MyTargetingFrame { ScenarioClass::Instance->Random.RandomRanged(0,15) }
