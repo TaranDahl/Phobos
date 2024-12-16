@@ -303,6 +303,7 @@ public:
 		Valueable<bool> AttackMove_Follow;
 		Valueable<bool> AttackMove_Follow_IncludeAir;
 		Nullable<bool> AttackMove_StopWhenTargetAcquired;
+		Valueable<bool> AttackMove_PursuitTarget;
 		Valueable<TechnoTypeClass*> ThisIsAJumpjet;
 		Valueable<bool> ImAJumpjetFromAirport;
 		Valueable<bool> IgnoreRallyPoint;
@@ -620,6 +621,7 @@ public:
 			, AttackMove_Follow { false }
 			, AttackMove_Follow_IncludeAir { false }
 			, AttackMove_StopWhenTargetAcquired {}
+			, AttackMove_PursuitTarget { false }
 			, ThisIsAJumpjet { nullptr }
 			, ImAJumpjetFromAirport { false }
 			, IgnoreRallyPoint { false }

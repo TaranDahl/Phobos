@@ -1893,9 +1893,38 @@ DEFINE_HOOK(0x4DF410, FootClass_UpdateAttackMove_TargetAcquired, 0x6)
 	{
 		if (pTypeExt->AttackMove_StopWhenTargetAcquired.Get(RulesExt::Global()->AttackMove_StopWhenTargetAcquired.Get(!pType->OpportunityFire)))
 		{
-			pThis->StopMoving();
-			pThis->AbortMotion();
+			if (auto const pJumpjetLoco = locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor))
+			{
+				auto crd = pThis->GetCoords();
+				pJumpjetLoco->DestinationCoords.X = crd.X;
+				pJumpjetLoco->DestinationCoords.Y = crd.Y;
+				pJumpjetLoco->CurrentSpeed = 0;
+				pJumpjetLoco->MaxSpeed = 0;
+				pThis->AbortMotion();
+			}
+			else
+			{
+				pThis->StopMoving();
+				pThis->AbortMotion();
+			}
 		}
+
+		if (pTypeExt->AttackMove_PursuitTarget)
+			pThis->SetDestination(pThis->Target, true);
+	}
+
+	return 0;
+}
+DEFINE_HOOK(0x4DF3BA, FootClass_UpdateAttackMove_PursuitTarget, 0x6)
+{
+	GET(FootClass*, pThis, ESI);
+
+	auto const pType = pThis->GetTechnoType();
+
+	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType))
+	{
+		if (pTypeExt->AttackMove_PursuitTarget && pThis->vt_entry_3B4(reinterpret_cast<DWORD>(pThis->Target))) // InAttackMoveKeepRange
+			pThis->SetDestination(pThis->Target, true);
 	}
 
 	return 0;
