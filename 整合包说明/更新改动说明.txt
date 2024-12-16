@@ -1,0 +1,83 @@
+
+-------------------------------------------------------------------------------------------------------------------
+请勿二次传播转发，本平台用于EC整合包开发组合
+存在开发中内容和待测试内容，但本平台完全公开
+如只需在模组使用部分功能，请自行合并需要的内容
+对于未发布pr的内容，请前往作者的github页面查找
+对于需要反馈问题，请联系作者以寻求解决方案
+                                    - by 緋紅熱茶
+-------------------------------------------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------------------------------------------
+对于初次使用的新朋友：
+超出公版的部分，直接查看《额外功能说明》即可，该文档内容仅记录当前build版本内的更新内容
+-------------------------------------------------------------------------------------------------------------------
+对于该文档内容的记录：
+ + 代表仅有 +1_X 的测试包有此更新
+ - 代表仅有 +3_X 的合并包有此更新
+ = 代表包括 +1_X 的测试包和 +3_X 的合并包都有此更新
+-------------------------------------------------------------------------------------------------------------------
+
+ 2024.12.16  Phobos-build-45+3_3 -> Phobos-build-45+3_4 (beta: Phobos-build-45+1_4)
+
+ = 现在 [ExpandAircraftMission] 的平滑移动路线不会影响正在执行脚本任务的飞机，且现在飞机在返回机场时如果接收到停止
+   命令不会刷新返回状态，并修复原版停在机场的飞机接收停止命令时会停止回复弹药生命且可以重叠放置的问题
+ = 现在 [NoQueueUpToUnload] 释放载员时不再会有1帧的间隔
+ = 新增 [BuildingUndeploy.Leave] 选项，可以让单位在被收起后前往威胁较低的空地
+ = 新增目标平均分配模式，需要两个快捷键，详细说明请见《额外功能说明》
+ = 增加 [ObjectInfoDump] 的输出信息
+
+ 2024.12.11  Phobos-build-45+3_2 -> Phobos-build-45+3_3 (beta: Phobos-build-45+1_3)
+
+ = 合并 Phobos-develop 近期所有改动（2024.12.9 - commit 796b2b4d12bfb9a452eb9532c8fd117b79f2ce88）
+   > commit 1fc263b2... 修复暴击弹头触发时未检查暴击动画数量的问题
+   > commit 796b2b4d... 【重要】部分还原 commit 6c856f03... 的多文件解析行为，防止读取遗漏或错误导致出现严重问题
+ = 修复 [ExpandAircraftMission] 意外影响 [AirportBound=no] 的飞行器移动行为的问题
+ = 更正 [ObjectInfoDump] 的部分格式
+
+ 2024.12.10  Phobos-build-45+3_1 -> Phobos-build-45+3_2 (beta: Phobos-build-45+1_2)
+
+ = 合并 Phobos-develop 近期所有改动（2024.12.9 - commit d0aca00ee3cc6f50bce1cf545ec5370b8f79b89b）
+   > commit f749352b... 修复所有Ares和Phobos新效果范围变大的问题
+   > commit 06e0285b... 临时修复 [CreateUnit] 创造空中单位时没有将单位添加到 AirTracker 的问题
+   > commit 43a75880... 修复发射超武触发行为的问题
+   > commit fd935c3f... 部分代码修正
+   > commit 5889d51a... 新增 [ApplyLunarFixes] 选项，以决定是否启用月球地形修复
+   > commit d0aca00e... 从客户端加载游戏时初始化 Enumerable 数组
+ - 移除 [AircraftWaypoint] 选项，现在 [ExpandAircraftMission] 启用后即会启用飞机的路径点功能
+ = 修复 [ExpandAircraftMission] 启用后，飞机的警戒行为搜索距离为固定的超长距离的问题，且现在平滑了飞机的移动路线
+ = 修复 [Trajectory=Straight] 的抛体在 [Phobos-build-44+3_30] 的更新后只能在特定角度下攻击到障碍物的问题
+ = 更改 [UnitIdleRotateTurret] 键名为 [Turret.IdleRotate]
+ = 更改 [UnitIdlePointToMouse] 键名为 [Turret.PointToMouse]
+ = 更改 [UnitIdleActionRestartMin] 键名为 [Turret.IdleRestartMin]
+ = 更改 [UnitIdleActionRestartMax] 键名为 [Turret.IdleRestartMax]
+ = 更改 [UnitIdleActionIntervalMin] 键名为 [Turret.IdleIntervalMin]
+ = 更改 [UnitIdleActionIntervalMax] 键名为 [Turret.IdleIntervalMax]
+ = 更改 [Turret.SelfRotation.Restriction] 键名为 [Turret.Restriction]
+ = 更改 [Turret.SelfRotation.Angle] 键名为 [Turret.ExtraAngle]
+ = 更改 [Turret.BodyRotation.Enable] 键名为 [Turret.BodyOrientation]
+ = 更改 [Turret.BodyRotation.Angle] 键名为 [Turret.BodyOrientationAngle]
+ = 更改 [Turret.BodyRotation.Symmetric] 键名为 [Turret.BodyOrientationSymmetric]
+ = 现在 [Turret.IdleRotate] 支持 [Locomotor=Jumpjet] 的单位在闲置时旋转炮塔了
+ = 现在 [NoQueueUpToEnter] 不再禁止使用路径点进行连续进入的行为（若之后路径点进入的载具已满，则可能出现空气墙）
+ = 新增 [NoQueueUpToUnload] 选项，可以让载员快速离开载具
+ = 新增 [ExpandTurretRotation] 选项，用于启用所有炮塔旋转相关的功能
+
+ 2024.12.8  Phobos-build-45+3_0 -> Phobos-build-45+3_1 (beta: Phobos-build-45+1_1)
+
+ = 修复所有Ares和Phobos新效果范围变大的问题（由公版 commit 69e88125... 导致的问题）
+ = 修复 [SelectedDisplay.Enable] 在非己方侦测伪装范围内选中一个伪装成石头、树木等物体的单位时会弹窗的问题
+ = 增加 [ObjectInfoDump] 的输出信息
+
+ 2024.12.6  Phobos-build-44+3_31 -> Phobos-build-45+3_0 (beta: Phobos-build-45+1_0)
+
+ = 合并 Phobos-develop 近期所有改动（2024.12.6 - commit e7a13104c67c24744364f9d5e02c6198df88332b）
+   > commit 69e88125... 优化获取范围内单位的算法（该更新不明所以地把格子上单位的距离检查给删了，感觉会有问题）
+   > commit 1528f0d4... 将Ares原本不准确的获取范围内单位的算法修正为Phobos使用的算法
+   > commit 6f9b1c47... 部分代码简化
+   > commit e7a13104... 版本号和版权信息更新（build 44 -> build 45）
+ - 修复 [UnlimboDetonate] 的武器在部分情况下可能会弹窗的问题
+ = 修复 [Locomotor=Jumpjet] 的单位在执行停止命令时判断朝向不够准确的问题，以及在执行移动攻击命令过之后在执行停止命
+   令时仍会陷入袖手旁观状态的问题
+ = 优化 [JumpjetClimbPredictHeight] 对前方格子的判断，使用更精确的算法并移除了原本多余的重复判断
+ = 增加 [ObjectInfoDump] 的输出信息
