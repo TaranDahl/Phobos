@@ -1212,7 +1212,7 @@ DEFINE_HOOK(0x4F8DB1, HouseClass_Update_CheckHangUpBuilding, 0x6)
 		{
 			const auto pBuildingType = pHouseExt->CurrentBuildingType;
 
-			if (pHouseExt->CurrentBuildingTimer.Completed())
+			if (pHouseExt->CurrentBuildingTimer.Completed() && pBuildingType)
 			{
 				pHouseExt->CurrentBuildingTimer.Stop();
 				const EventClass event
