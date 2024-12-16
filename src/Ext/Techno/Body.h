@@ -58,6 +58,7 @@ public:
 		int LastHurtFrame;
 		int LastBeLockedFrame;
 		int LastBeControlledFrame;
+		DWORD LastTargetID;
 		int AccumulatedGattlingValue;
 		bool ShouldUpdateGattlingValue;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
@@ -106,6 +107,7 @@ public:
 			, LastHurtFrame { 0 }
 			, LastBeLockedFrame { 0 }
 			, LastBeControlledFrame { 0 }
+			, LastTargetID { 0xFFFFFFFF }
 			, AccumulatedGattlingValue { 0 }
 			, ShouldUpdateGattlingValue { false }
 			, FiringObstacleCell {}
