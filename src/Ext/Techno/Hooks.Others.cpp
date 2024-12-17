@@ -224,6 +224,7 @@ DEFINE_HOOK(0x70DE40, BuildingClass_sub_70DE40_GattlingRateDownDelay, 0xA)
 				{
 					pExt->LastTargetID = 0xFFFFFFFF;
 					pThis->GattlingValue = 0;
+					pThis->CurrentGattlingStage = 0;
 
 					return Return;
 				}
@@ -231,6 +232,7 @@ DEFINE_HOOK(0x70DE40, BuildingClass_sub_70DE40_GattlingRateDownDelay, 0xA)
 				{
 					pExt->LastTargetID = pThis->Target->UniqueID;
 					pThis->GattlingValue = 0;
+					pThis->CurrentGattlingStage = 0;
 
 					return Return;
 				}
@@ -294,11 +296,13 @@ DEFINE_HOOK(0x70DE70, TechnoClass_sub_70DE70_GattlingRateDownReset, 0x5)
 			{
 				pExt->LastTargetID = 0xFFFFFFFF;
 				pThis->GattlingValue = 0;
+				pThis->CurrentGattlingStage = 0;
 			}
 			else if (pExt->LastTargetID != pThis->Target->UniqueID)
 			{
 				pExt->LastTargetID = pThis->Target->UniqueID;
 				pThis->GattlingValue = 0;
+				pThis->CurrentGattlingStage = 0;
 			}
 		}
 
@@ -330,6 +334,7 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 				{
 					pExt->LastTargetID = 0xFFFFFFFF;
 					pThis->GattlingValue = 0;
+					pThis->CurrentGattlingStage = 0;
 
 					return SkipGameCode;
 				}
@@ -337,6 +342,7 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 				{
 					pExt->LastTargetID = pThis->Target->UniqueID;
 					pThis->GattlingValue = 0;
+					pThis->CurrentGattlingStage = 0;
 
 					return SkipGameCode;
 				}
