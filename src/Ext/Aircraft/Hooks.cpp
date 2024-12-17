@@ -397,7 +397,7 @@ DEFINE_HOOK(0x6FA68B, TechnoClass_Update_AttackMovePaused, 0xA) // To make aircr
 	return (RulesExt::Global()->ExpandAircraftMission && pThis->WhatAmI() == AbstractType::Aircraft && (!pThis->Ammo || pThis->GetHeight() < Unsorted::CellHeight)) ? SkipGameCode : 0;
 }
 
-DEFINE_HOOK(0x4DF3BA, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget, 0x6)
+DEFINE_HOOK(0x4DF3BA, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget1, 0x6)
 {
 	enum { LoseTarget = 0x4DF3D3, HoldTarget = 0x4DF4AB };
 
@@ -413,6 +413,15 @@ DEFINE_HOOK(0x4DF3BA, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget, 0
 		pThis->SetDestination(pThis->Target, true);
 
 	return inSearchRange ? HoldTarget : LoseTarget;
+}
+
+DEFINE_HOOK(0x4DF42A, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget2, 0x6)
+{
+	enum { ContinueCheck = 0x4DF462, HoldTarget = 0x4DF4AB };
+
+	GET(FootClass* const, pThis, ESI);
+
+	return (RulesExt::Global()->ExpandAircraftMission && pThis->WhatAmI() == AbstractType::Aircraft) ? HoldTarget : ContinueCheck;
 }
 
 DEFINE_HOOK(0x418CD1, AircraftClass_Mission_Attack_ContinueFlyToDestination, 0x6)
