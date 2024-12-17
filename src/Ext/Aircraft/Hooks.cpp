@@ -408,11 +408,11 @@ DEFINE_HOOK(0x4DF3BA, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget1, 
 
 DEFINE_HOOK(0x4DF42A, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget2, 0x6)
 {
-	enum { LoseTarget = 0x4DF462, HoldTarget = 0x4DF4AB };
+	enum { ContinueCheck = 0x4DF462, HoldTarget = 0x4DF4AB };
 
 	GET(FootClass* const, pThis, ESI);
 
-	return (RulesExt::Global()->ExpandAircraftMission && pThis->WhatAmI() == AbstractType::Aircraft) ? HoldTarget : LoseTarget;
+	return (RulesExt::Global()->ExpandAircraftMission && pThis->WhatAmI() == AbstractType::Aircraft) ? HoldTarget : ContinueCheck;
 }
 
 DEFINE_HOOK(0x418CD1, AircraftClass_Mission_Attack_ContinueFlyToDestination, 0x6)
