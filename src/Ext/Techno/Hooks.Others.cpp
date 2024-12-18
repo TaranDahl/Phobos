@@ -918,6 +918,50 @@ DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6)
 	return SkipGameCode;
 }
 
+static inline bool CheckAttackMoveCanResetTarget(FootClass* pThis)
+{
+	if (!pThis->Target || pThis->Target == reinterpret_cast<AbstractClass*>(pThis->unknown_5CC))
+		return false;
+
+	if (pThis->TargetingTimer.InProgress())
+		return false;
+
+	const auto pPrimary = pThis->GetWeapon(0);
+
+	if (!pPrimary)
+		return false;
+
+	const auto pPrimaryWeapon = pPrimary->WeaponType;
+
+	if (!pPrimaryWeapon)
+		return false;
+
+	const auto pSecondary = pThis->GetWeapon(1);
+
+	if (!pSecondary)
+		return true;
+
+	const auto pSecondaryWeapon = pSecondary->WeaponType;
+
+	if (!pSecondaryWeapon || !pSecondaryWeapon->NeverUse)
+		return true;
+
+	return pSecondaryWeapon->Range <= pPrimaryWeapon->Range;
+}
+
+DEFINE_HOOK(0x4DF3A0, FootClass_UpdateAttackMove_SelectNewTarget, 0x6)
+{
+	GET(FootClass* const, pThis, ECX);
+
+	if (RulesExt::Global()->AttackMove_Aggressive && CheckAttackMoveCanResetTarget(pThis))
+	{
+		pThis->Target = nullptr;
+		pThis->unknown_bool_5D1 = false; // pThis->HaveAttackMoveTarget
+	}
+
+	return 0;
+}
+
 DEFINE_HOOK(0x6F85AB, TechnoClass_CanAutoTargetObject_AggressiveAttackMove, 0x6)
 {
 	enum { ContinueCheck = 0x6F85BA, CanTarget = 0x6F8604 };
