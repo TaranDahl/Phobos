@@ -622,7 +622,10 @@ bool __fastcall CanEnterNow(UnitClass* pTransport, FootClass* pPassenger)
 		return false;
 
 	if (needCalculate && remain < static_cast<int>(pLink->GetTechnoType()->Size))
+	{
 		pLink->SendToFirstLink(RadioCommand::NotifyUnlink);
+		pLink->EnterIdleMode(false, true);
+	}
 
 	return true;
 }
