@@ -48,6 +48,9 @@ void TechnoExt::ExtData::OnEarlyUpdate()
 	this->UpdateAttachEffects();
 	this->UpdateRecountBurst();
 	this->UpdateRearmInEMPState();
+
+	if (this->AttackMoveFollowerTempCount)
+		this->AttackMoveFollowerTempCount--;
 }
 
 void TechnoExt::ExtData::ApplyInterceptor()
