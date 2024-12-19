@@ -2049,7 +2049,7 @@ DEFINE_HOOK(0x4DF3A6, FootClass_UpdateAttackMove_Follow, 0x6)
 				auto const pTargetExt = TechnoExt::ExtMap.Find(pTechno);
 
 				// Check this to prevent the followed techno from being surrounded
-				if (!pTargetExt || pTargetExt->AttackMoveFollowerTempCount >= 9)
+				if (!pTargetExt || pTargetExt->AttackMoveFollowerTempCount >= 6)
 					continue;
 
 				auto const pTargetTypeExt = pTargetExt->TypeExtData;
