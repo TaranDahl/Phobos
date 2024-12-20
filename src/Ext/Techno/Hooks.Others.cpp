@@ -920,7 +920,14 @@ DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6)
 
 static inline bool CheckAttackMoveCanResetTarget(FootClass* pThis)
 {
-	if (!pThis->Target || pThis->Target == reinterpret_cast<AbstractClass*>(pThis->unknown_5CC))
+	const auto pTarget = pThis->Target;
+
+	if (!pTarget || pTarget == reinterpret_cast<AbstractClass*>(pThis->unknown_5CC))
+		return false;
+
+	const auto pTargetTechno = abstract_cast<TechnoClass*>(pTarget);
+
+	if (!pTargetTechno || pTargetTechno->IsArmed())
 		return false;
 
 	if (pThis->TargetingTimer.InProgress())
@@ -934,6 +941,11 @@ static inline bool CheckAttackMoveCanResetTarget(FootClass* pThis)
 	const auto pPrimaryWeapon = pPrimary->WeaponType;
 
 	if (!pPrimaryWeapon)
+		return false;
+
+	const auto pNewTarget = abstract_cast<TechnoClass*>(pThis->GreatestThreat(ThreatType::Range, &pThis->Location, false));
+
+	if (!pNewTarget || pNewTarget->GetTechnoType() == pTargetTechno->GetTechnoType())
 		return false;
 
 	const auto pSecondary = pThis->GetWeapon(1);
