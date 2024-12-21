@@ -63,6 +63,7 @@ public:
 		bool ShouldUpdateGattlingValue;
 		int MyTargetingFrame;
 		int AttackMoveFollowerTempCount;
+		CellClass* AutoTargetedWallCell;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 		bool KeepTargetOnMove;
 		bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
@@ -115,6 +116,7 @@ public:
 			, ShouldUpdateGattlingValue { false }
 			, MyTargetingFrame { ScenarioClass::Instance->Random.RandomRanged(0,15) }
 			, AttackMoveFollowerTempCount { 0 }
+			, AutoTargetedWallCell{ nullptr }
 			, FiringObstacleCell {}
 			, KeepTargetOnMove { false }
 			, IsDetachingForCloak { false }

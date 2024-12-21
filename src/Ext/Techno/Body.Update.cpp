@@ -51,6 +51,15 @@ void TechnoExt::ExtData::OnEarlyUpdate()
 
 	if (this->AttackMoveFollowerTempCount)
 		this->AttackMoveFollowerTempCount--;
+
+	if (auto pCell = this->AutoTargetedWallCell)
+	{
+		if (pCell->OverlayTypeIndex == -1)
+		{
+			this->OwnerObject()->SetTarget(nullptr);
+			this->AutoTargetedWallCell = nullptr;
+		}
+	}
 }
 
 void TechnoExt::ExtData::ApplyInterceptor()
