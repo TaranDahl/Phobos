@@ -977,16 +977,19 @@ DEFINE_HOOK(0x51AB5C, InfantryClass_SetDestination_JJInfFix, 0x6)
 	GET(InfantryClass* const, pThis, EBP);
 	GET(AbstractClass* const, pDest, EBX);
 
-	if (pThis->Type->BalloonHover && !pDest && pThis->Destination && locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor) && pThis->Target)
+	auto pJumpjetLoco = locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor);
+
+	if (pThis->Type->BalloonHover && !pDest && pThis->Destination && pJumpjetLoco && pThis->Target)
 	{
-		if (pThis->IsCloseEnough(pThis->Target, pThis->SelectWeapon(pThis->Target))) // if in range, then stop.
+		if (pThis->IsCloseEnoughToAttack(pThis->Target))
 		{
-			pThis->StopMoving();
+			auto crd = pThis->GetCoords();
+			pJumpjetLoco->DestinationCoords.X = crd.X;
+			pJumpjetLoco->DestinationCoords.Y = crd.Y;
+			pJumpjetLoco->CurrentSpeed = 0;
+			pJumpjetLoco->MaxSpeed = 0;
 			pThis->AbortMotion();
 		}
-
-		pThis->ForceMission(Mission::Attack);
-		return FuncRet;
 	}
 
 	return 0;
@@ -997,9 +1000,15 @@ DEFINE_HOOK(0x741A66, UnitClass_SetDestination_JJVehFix, 0x5)
 {
 	GET(UnitClass* const, pThis, EBP);
 
-	if (pThis->IsCloseEnough(pThis->Target, pThis->SelectWeapon(pThis->Target)))
+	auto pJumpjetLoco = locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor);
+
+	if (pThis->IsCloseEnough(pThis->Target, pThis->SelectWeapon(pThis->Target)) && pJumpjetLoco)
 	{
-		pThis->StopMoving();
+		auto crd = pThis->GetCoords();
+		pJumpjetLoco->DestinationCoords.X = crd.X;
+		pJumpjetLoco->DestinationCoords.Y = crd.Y;
+		pJumpjetLoco->CurrentSpeed = 0;
+		pJumpjetLoco->MaxSpeed = 0;
 		pThis->AbortMotion();
 	}
 
