@@ -43,6 +43,15 @@ void TechnoExt::ExtData::OnEarlyUpdate()
 	this->UpdateLaserTrails();
 	this->DepletedAmmoActions();
 	this->UpdateAttachEffects();
+
+	if (auto pCell = this->AutoTargetedWallCell)
+	{
+		if (pCell->OverlayTypeIndex == -1)
+		{
+			this->OwnerObject()->SetTarget(nullptr);
+			this->AutoTargetedWallCell = nullptr;
+		}
+	}
 }
 
 

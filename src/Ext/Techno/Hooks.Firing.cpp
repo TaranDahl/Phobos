@@ -934,3 +934,16 @@ DEFINE_HOOK(0x6F8D32, TechnoClass_ScanToAttackWall_DestroyOwnerlessWalls, 0x9)
 
 	return GoOtherChecks;
 }
+
+DEFINE_HOOK(0x6F9B64, TechnoClass_SelectAutoTarget_RecordAttackWall, 0x7)
+{
+	GET(TechnoClass*, pThis, ESI);
+	GET(CellClass*, pCell, EAX);
+
+	if (auto pExt = TechnoExt::ExtMap.Find(pThis))
+	{
+		pExt->AutoTargetedWallCell = pCell;
+	}
+
+	return 0;
+}
