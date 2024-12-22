@@ -1888,6 +1888,19 @@ DEFINE_HOOK(0x73AAB3, UnitClass_UpdateMoving_RallyPointAreaGuard, 0x5)
 	return 0;
 }
 
+DEFINE_HOOK(0x4438C9, BuildingClass_SetRallyPoint_PathFinding, 0x6)
+{
+	GET(BuildingClass* const, pThis, EBP);
+	GET(int, movementzone, ESI);
+	GET_STACK(int, speedtype, STACK_OFFSET(0xA4, -0x84));
+
+	auto const pExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
+	R->ESI(pExt->RallyMovementZone.Get(movementzone));
+	R->Stack(STACK_OFFSET(0xA4, -0x84), pExt->RallySpeedType.Get(speedtype));
+
+	return 0;
+}
+
 #pragma endregion
 
 #pragma region CrushBuildingOnAnyCell

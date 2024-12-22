@@ -68,6 +68,8 @@ public:
 		Valueable<bool> JustHasRallyPoint;
 		Nullable<CoordStruct> JumpjetExitCoord;
 		Valueable<bool> AnimDontDelayBurst;
+		Nullable<int> RallySpeedType;
+		Nullable<int> RallyMovementZone;
 
 		Valueable<bool> AutoUpgrade;
 		Valueable<bool> LimboBuild;
@@ -128,6 +130,8 @@ public:
 			, JustHasRallyPoint { false }
 			, JumpjetExitCoord { }
 			, AnimDontDelayBurst { false }
+			, RallySpeedType { }
+			, RallyMovementZone { }
 			, AutoUpgrade { false }
 			, LimboBuild { false }
 			, LimboBuildID { -1 }
