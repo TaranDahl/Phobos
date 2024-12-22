@@ -70,6 +70,8 @@ public:
 
 		Valueable<bool> JustHasRallyPoint;
 		Nullable<CoordStruct> JumpjetExitCoord;
+		Nullable<int> RallySpeedType;
+		Nullable<int> RallyMovementZone;
 
 		ExtData(BuildingTypeClass* OwnerObject) : Extension<BuildingTypeClass>(OwnerObject)
 			, PowersUp_Owner { AffectedHouse::Owner }
@@ -113,6 +115,8 @@ public:
 			, FactoryPlant_DisallowTypes {}
 			, JustHasRallyPoint { false }
 			, JumpjetExitCoord { }
+			, RallySpeedType { }
+			, RallyMovementZone { }
 		{ }
 
 		// Ares 0.A functions

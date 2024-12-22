@@ -154,6 +154,8 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->JustHasRallyPoint.Read(exINI, pSection, "JustHasRallyPoint");
 	this->JumpjetExitCoord.Read(exINI, pSection, "JumpjetExitCoord");
+	this->RallySpeedType.Read(exINI, pSection, "RallySpeedType");
+	this->RallyMovementZone.Read(exINI, pSection, "RallyMovementZone");
 
 	if (pThis->NumberOfDocks > 0)
 	{
@@ -272,6 +274,8 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 
 		.Process(this->JustHasRallyPoint)
 		.Process(this->JumpjetExitCoord)
+		.Process(this->RallySpeedType)
+		.Process(this->RallyMovementZone)
 		;
 }
 
