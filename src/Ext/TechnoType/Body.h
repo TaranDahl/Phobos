@@ -314,8 +314,6 @@ public:
 
 		Nullable<bool> KeepAlive;
 
-		ValueableVector<TechnoTypeClass*> InitialPayload_Types;
-		ValueableVector<int> InitialPayload_Nums;
 		Valueable<double> FallingDownDamage;
 		Nullable<double> FallingDownDamage_Water;
 
@@ -633,8 +631,6 @@ public:
 
 			, KeepAlive {}
 
-			, InitialPayload_Types {}
-			, InitialPayload_Nums {}
 			, FallingDownDamage { 1.0 }
 			, FallingDownDamage_Water {}
 
