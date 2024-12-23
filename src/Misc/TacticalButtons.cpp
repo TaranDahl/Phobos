@@ -1872,8 +1872,9 @@ void TacticalButtonsClass::SelectedDraw()
 					{
 						const auto pHouse = HouseClass::CurrentPlayer();
 						auto name = pType->UIName;
+						const auto pOwner = pThis->Owner;
 
-						if (!pHouse->IsAlliedWith(pThis) && !pHouse->IsObserver())
+						if ((!pOwner || !pOwner->IsAlliedWith(pHouse)) && !pHouse->IsObserver())
 						{
 							if (pThis->IsDisguised() && !pThis->GetCell()->DisguiseSensors_InclHouse(pHouse->ArrayIndex))
 							{

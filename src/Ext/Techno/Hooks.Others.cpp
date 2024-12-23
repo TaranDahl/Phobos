@@ -969,8 +969,9 @@ bool __fastcall CanAttackMindControlled(TechnoClass* pControlled, TechnoClass* p
 		return true;
 
 	const auto pHome = pManager->GetOriginalOwner(pControlled);
+	const auto pHouse = pRetaliator->Owner;
 
-	if (!pHome || !pHome->IsAlliedWith(pRetaliator))
+	if (!pHome || !pHouse || !pHouse->IsAlliedWith(pHome))
 		return true;
 
 	const auto pExt = TechnoExt::ExtMap.Find(pControlled);
