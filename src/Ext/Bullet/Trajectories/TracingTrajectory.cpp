@@ -350,14 +350,14 @@ bool TracingTrajectory::BulletDetonatePreCheck(BulletClass* pBullet)
 			this->TolerantTimer.Start(pType->TolerantTime);
 	}
 
-	if (!pType->SuicideAboveRange && pTechno && !this->NotMainWeapon)
+	if (pType->SuicideAboveRange)
 	{
 		if (const auto pWeapon = pBullet->WeaponType)
 		{
-			auto source = pTechno->GetCoords();
+			auto source = (pTechno && !this->NotMainWeapon) ? pTechno->GetCoords() : pBullet->SourceCoords;
 			auto target = pBullet->TargetCoords;
 
-			if (pTechno->IsInAir())
+			if (this->NotMainWeapon || (pTechno && pTechno->IsInAir()))
 			{
 				source.Z = 0;
 				target.Z = 0;
