@@ -20,16 +20,20 @@ public:
 		, TraceMode { TraceTargetMode::Connection }
 		, TheDuration { 0 }
 		, TolerantTime { -1 }
+		, ROT { -1 }
+		, BulletSpin { false }
 		, PeacefullyVanish { false }
 		, TraceTheTarget { true }
 		, CreateAtTarget { false }
 		, CreateCoord { { 0, 0, 0 } }
 		, OffsetCoord { { 0, 0, 0 } }
+		, WeaponCoord { { 0, 0, 0 } }
 		, Weapons {}
 		, WeaponCount {}
 		, WeaponDelay {}
 		, WeaponTimer { 0 }
 		, WeaponCycle { -1 }
+		, WeaponCheck { false }
 		, Synchronize { true }
 		, SuicideAboveRange { false }
 		, SuicideIfNoWeapon { false }
@@ -44,16 +48,20 @@ public:
 	Valueable<TraceTargetMode> TraceMode;
 	Valueable<int> TheDuration;
 	Valueable<int> TolerantTime;
+	Valueable<int> ROT;
+	Valueable<bool> BulletSpin;
 	Valueable<bool> PeacefullyVanish;
 	Valueable<bool> TraceTheTarget;
 	Valueable<bool> CreateAtTarget;
 	Valueable<CoordStruct> CreateCoord;
 	Valueable<CoordStruct> OffsetCoord;
+	Valueable<CoordStruct> WeaponCoord;
 	ValueableVector<WeaponTypeClass*> Weapons;
 	ValueableVector<int> WeaponCount;
 	ValueableVector<int> WeaponDelay;
 	Valueable<int> WeaponTimer;
 	Valueable<int> WeaponCycle;
+	Valueable<bool> WeaponCheck;
 	Valueable<bool> Synchronize;
 	Valueable<bool> SuicideAboveRange;
 	Valueable<bool> SuicideIfNoWeapon;
@@ -114,7 +122,9 @@ private:
 	void InitializeDuration(BulletClass* pBullet, int duration);
 	bool InvalidFireCondition(TechnoClass* pTechno);
 	bool BulletDetonatePreCheck(BulletClass* pBullet);
-	void ChangeVelocity(BulletClass* pBullet);
+	void ChangeFacing(BulletClass* pBullet);
+	bool CheckFireFacing(BulletClass* pBullet);
+	BulletVelocity ChangeVelocity(BulletClass* pBullet);
 	AbstractClass* GetBulletTarget(BulletClass* pBullet, TechnoClass* pTechno, HouseClass* pOwner, WeaponTypeClass* pWeapon, WeaponTypeExt::ExtData* pWeaponExt);
 	CoordStruct GetWeaponFireCoord(BulletClass* pBullet, TechnoClass* pTechno);
 	bool PrepareTracingWeapon(BulletClass* pBullet);
