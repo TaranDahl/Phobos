@@ -15,6 +15,8 @@
 
 #include <WWMouseClass.h>
 #include <TacticalClass.h>
+#include <TargetClass.h>
+#include <EventClass.h>
 
 // TechnoClass_AI_0x6F9E50
 // It's not recommended to do anything more here it could have a better place for performance consideration
@@ -58,6 +60,14 @@ void TechnoExt::ExtData::OnEarlyUpdate()
 		{
 			this->OwnerObject()->SetTarget(nullptr);
 			this->AutoTargetedWallCell = nullptr;
+		}
+	}
+
+	if (this->HasCachedClick)
+	{
+		if (EventClass::OutList->Count < 128)
+		{
+			this->ProcessCachedClick();
 		}
 	}
 }
@@ -1236,4 +1246,25 @@ void TechnoExt::ExtData::RecalculateStatMultipliers()
 
 	if (forceDecloak && pThis->CloakState == CloakState::Cloaked)
 		pThis->Uncloak(true);
+}
+
+void TechnoExt::ExtData::ClearCachedClick()
+{
+	this->HasCachedClick = false;
+	this->CachedMission = Mission::None;
+	this->CachedCell = nullptr;
+	this->CachedTarget = nullptr;
+}
+
+void TechnoExt::ExtData::ProcessCachedClick()
+{
+	TargetClass target1 = TargetClass(this->CachedCell);
+	TargetClass target2 = TargetClass(this->CachedTarget);
+	TargetClass target3 = TargetClass(this->OwnerObject());
+	TargetClass target4;
+	target4.m_ID = target3.m_ID;
+	target4.m_RTTI = 0;
+	EventClass event = EventClass(HouseClass::CurrentPlayer->ArrayIndex, target3, this->CachedMission, target2, target1, target4);
+	EventClass::AddEvent(event);
+	this->ClearCachedClick();
 }

@@ -2225,7 +2225,7 @@ DEFINE_HOOK(0x6521CE, EventClass_AddEvent, 0x5)
 
 	return 0;
 }
-
+/*
 DEFINE_HOOK(0x646EF5, EventClass_AddMegaMissionEvent, 0xA)
 {
 	GET(EventClass*, pEvent, EAX);
@@ -2270,6 +2270,25 @@ DEFINE_HOOK(0x64C739, Game_ProcessDoList_AddMegaMissionEvent, 0xA)
 		}
 
 		reinterpret_cast<EventClass*(__fastcall*)()>(0x4E7F00)(); // EventClass::ClearMegaMissionList
+	}
+
+	return 0;
+}
+*/
+DEFINE_HOOK(0x6FFDA5, TechnoClass_ClickedMission_CacheClickedMission, 0x7)
+{
+	GET_STACK(AbstractClass* const, pCell, STACK_OFFSET(0x98, 0xC));
+	GET(TechnoClass* const, pThis, ECX);
+	GET(AbstractClass* const, pTarget, EBP);
+	GET(Mission const, mission, EDI);
+
+	if (EventClass::OutList->Count >= 128)
+	{
+		auto const pExt = TechnoExt::ExtMap.Find(pThis);
+		pExt->HasCachedClick = true;
+		pExt->CachedMission = mission;
+		pExt->CachedCell = pCell;
+		pExt->CachedTarget = pTarget;
 	}
 
 	return 0;
