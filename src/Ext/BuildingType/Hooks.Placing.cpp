@@ -1269,7 +1269,7 @@ DEFINE_HOOK(0x6D504C, TacticalClass_DrawPlacement_DrawPlacingPreview, 0x6)
 
 	for (const auto& pHouse : *HouseClass::Array)
 	{
-		if (pPlayer->IsObserver() || pPlayer->IsAlliedWith(pHouse))
+		if (pPlayer->IsObserver() || pHouse->IsAlliedWith(pPlayer))
 		{
 			const auto pHouseExt = HouseExt::ExtMap.Find(pHouse);
 			const bool isPlayer = pHouse == pPlayer;
