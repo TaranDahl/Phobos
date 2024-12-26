@@ -639,7 +639,7 @@ DEFINE_HOOK(0x51A0D4, InfantryClass_UpdatePosition_NoQueueUpToEnter, 0x6)
 	if (!RulesExt::Global()->NoQueueUpToEnter)
 		return 0;
 
-	if (const auto pDest = abstract_cast<UnitClass*>(pThis->CurrentMission == Mission::Enter ? pThis->Destination : pThis->unknown_500))
+	if (const auto pDest = abstract_cast<UnitClass*>(pThis->CurrentMission == Mission::Enter ? pThis->Destination : pThis->QueueUpToEnter))
 	{
 		if (pDest->Type->Passengers > 0)
 		{
@@ -655,7 +655,7 @@ DEFINE_HOOK(0x51A0D4, InfantryClass_UpdatePosition_NoQueueUpToEnter, 0x6)
 
 					pThis->ArchiveTarget = nullptr;
 					pThis->OnBridge = false;
-					pThis->unknown_C4 = 0;
+					pThis->MissionAccumulateTime = 0;
 					pThis->GattlingValue = 0;
 					pThis->CurrentGattlingStage = 0;
 
@@ -674,7 +674,7 @@ DEFINE_HOOK(0x51A0D4, InfantryClass_UpdatePosition_NoQueueUpToEnter, 0x6)
 					pDest->AddPassenger(pThis);
 					pThis->Undiscover();
 
-					pThis->unknown_500 = nullptr; // Added, to prevent passengers from wanting to get on after getting off
+					pThis->QueueUpToEnter = nullptr; // Added, to prevent passengers from wanting to get on after getting off
 					pThis->SetSpeedPercentage(0.0); // Added, to stop the passengers and let OpenTopped work normally
 
 					return EnteredThenReturn;
@@ -695,7 +695,7 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 	if (!RulesExt::Global()->NoQueueUpToEnter)
 		return 0;
 
-	if (const auto pDest = abstract_cast<UnitClass*>(pThis->CurrentMission == Mission::Enter ? pThis->Destination : pThis->unknown_500))
+	if (const auto pDest = abstract_cast<UnitClass*>(pThis->CurrentMission == Mission::Enter ? pThis->Destination : pThis->QueueUpToEnter))
 	{
 		if (pDest->Type->Passengers > 0)
 		{
@@ -710,7 +710,7 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 
 					pThis->ArchiveTarget = nullptr;
 					pThis->OnBridge = false;
-					pThis->unknown_C4 = 0;
+					pThis->MissionAccumulateTime = 0;
 					pThis->GattlingValue = 0;
 					pThis->CurrentGattlingStage = 0;
 
@@ -733,7 +733,7 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 
 					pThis->Undiscover();
 
-					pThis->unknown_500 = nullptr; // Added, to prevent passengers from wanting to get on after getting off
+					pThis->QueueUpToEnter = nullptr; // Added, to prevent passengers from wanting to get on after getting off
 					pThis->SetSpeedPercentage(0.0); // Added, to stop the passengers and let OpenTopped work normally
 
 					return EnteredThenReturn;
@@ -830,7 +830,7 @@ static inline bool CheckAttackMoveCanResetTarget(FootClass* pThis)
 {
 	const auto pTarget = pThis->Target;
 
-	if (!pTarget || pTarget == reinterpret_cast<AbstractClass*>(pThis->unknown_5CC))
+	if (!pTarget || pTarget == pThis->MegaTarget)
 		return false;
 
 	const auto pTargetTechno = abstract_cast<TechnoClass*>(pTarget);
@@ -876,7 +876,7 @@ DEFINE_HOOK(0x4DF3A0, FootClass_UpdateAttackMove_SelectNewTarget, 0x6)
 	if (RulesExt::Global()->AttackMove_Aggressive && CheckAttackMoveCanResetTarget(pThis))
 	{
 		pThis->Target = nullptr;
-		pThis->unknown_bool_5D1 = false; // pThis->HaveAttackMoveTarget
+		pThis->HaveAttackMoveTarget = false;
 	}
 
 	return 0;
@@ -888,7 +888,7 @@ DEFINE_HOOK(0x6F85AB, TechnoClass_CanAutoTargetObject_AggressiveAttackMove, 0x6)
 
 	GET(TechnoClass* const, pThis, EDI);
 
-	return (!pThis->Owner->IsControlledByHuman() || (RulesExt::Global()->AttackMove_Aggressive && pThis->vt_entry_4C4())) ? CanTarget : ContinueCheck;
+	return (!pThis->Owner->IsControlledByHuman() || (RulesExt::Global()->AttackMove_Aggressive && pThis->MegaMissionIsAttackMove())) ? CanTarget : ContinueCheck;
 }
 
 #pragma endregion
