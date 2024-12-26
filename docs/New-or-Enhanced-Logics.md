@@ -1084,28 +1084,28 @@ Trajectory.Parabola.AxisOfRotation=0,0,1        ; integer - Forward,Lateral,Heig
 
 在 `rulesmd.ini` 之中：
 ```ini
-[SOMEPROJECTILE]                                ; Projectile
-Trajectory=Tracing                              ; Trajectory type
-Trajectory.Tracing.TraceMode=Connection         ; TraceMode value enumeration (Connection|Global|Body|Turret|RotateCW|RotateCCW)
-Trajectory.Tracing.TheDuration=0                ; integer
-Trajectory.Tracing.TolerantTime=-1              ; integer
-Trajectory.Tracing.ROT=-1                       ; integer
-Trajectory.Tracing.BulletSpin=no                ; boolean
-Trajectory.Tracing.PeacefullyVanish=no          ; boolean
-Trajectory.Tracing.TraceTheTarget=yes           ; boolean
-Trajectory.Tracing.CreateAtTarget=no            ; boolean
-Trajectory.Tracing.CreateCoord=0,0,0            ; integer - Forward,Lateral,Height
-Trajectory.Tracing.OffsetCoord=0,0,0            ; integer - Forward,Lateral,Height
-Trajectory.Tracing.WeaponCoord=0,0,0            ; integer - Forward,Lateral,Height
-Trajectory.Tracing.Weapons=                     ; list of WeaponTypes
-Trajectory.Tracing.WeaponCount=                 ; list of integers
-Trajectory.Tracing.WeaponDelay=                 ; list of integers
-Trajectory.Tracing.WeaponTimer=0                ; integer
-Trajectory.Tracing.WeaponCycle=-1               ; integer
-Trajectory.Tracing.WeaponCheck=no               ; boolean
-Trajectory.Tracing.Synchronize=yes              ; boolean
-Trajectory.Tracing.SuicideAboveRange=no         ; boolean
-Trajectory.Tracing.SuicideIfNoWeapon=no         ; boolean
+[SOMEPROJECTILE]                          ; Projectile
+Trajectory=Tracing                        ; Trajectory type
+Trajectory.Tracing.TraceMode=Connection   ; TraceMode value enumeration (Connection|Global|Body|Turret|RotateCW|RotateCCW)
+Trajectory.Tracing.TheDuration=0          ; integer
+Trajectory.Tracing.TolerantTime=-1        ; integer
+Trajectory.Tracing.ROT=-1                 ; integer
+Trajectory.Tracing.BulletSpin=no          ; boolean
+Trajectory.Tracing.PeacefullyVanish=no    ; boolean
+Trajectory.Tracing.TraceTheTarget=yes     ; boolean
+Trajectory.Tracing.CreateAtTarget=no      ; boolean
+Trajectory.Tracing.CreateCoord=0,0,0      ; integer - Forward,Lateral,Height
+Trajectory.Tracing.OffsetCoord=0,0,0      ; integer - Forward,Lateral,Height
+Trajectory.Tracing.WeaponCoord=0,0,0      ; integer - Forward,Lateral,Height
+Trajectory.Tracing.Weapons=               ; list of WeaponTypes
+Trajectory.Tracing.WeaponCount=           ; list of integers
+Trajectory.Tracing.WeaponDelay=           ; list of integers
+Trajectory.Tracing.WeaponTimer=0          ; integer
+Trajectory.Tracing.WeaponCycle=-1         ; integer
+Trajectory.Tracing.WeaponCheck=no         ; boolean
+Trajectory.Tracing.Synchronize=yes        ; boolean
+Trajectory.Tracing.SuicideAboveRange=no   ; boolean
+Trajectory.Tracing.SuicideIfNoWeapon=no   ; boolean
 ```
 
 ```{note}

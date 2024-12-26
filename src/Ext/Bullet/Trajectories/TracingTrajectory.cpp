@@ -744,7 +744,13 @@ void TracingTrajectory::CreateTracingBullets(BulletClass* pBullet, WeaponTypeCla
 		{
 			const auto flag = pBulletExt->Trajectory->Flag();
 
-			if (flag == TrajectoryFlag::Disperse)
+			if (flag == TrajectoryFlag::Tracing)
+			{
+				const auto pTrajectory = static_cast<TracingTrajectory*>(pBulletExt->Trajectory.get());
+				pTrajectory->FirepowerMult = this->FirepowerMult;
+				pTrajectory->NotMainWeapon = true;
+			}
+			else if (flag == TrajectoryFlag::Disperse)
 			{
 				const auto pTrajectory = static_cast<DisperseTrajectory*>(pBulletExt->Trajectory.get());
 				pTrajectory->FirepowerMult = this->FirepowerMult;
@@ -757,12 +763,6 @@ void TracingTrajectory::CreateTracingBullets(BulletClass* pBullet, WeaponTypeCla
 			else if (flag == TrajectoryFlag::Engrave)
 			{
 				const auto pTrajectory = static_cast<EngraveTrajectory*>(pBulletExt->Trajectory.get());
-				pTrajectory->NotMainWeapon = true;
-			}
-			else if (flag == TrajectoryFlag::Tracing)
-			{
-				const auto pTrajectory = static_cast<TracingTrajectory*>(pBulletExt->Trajectory.get());
-				pTrajectory->FirepowerMult = this->FirepowerMult;
 				pTrajectory->NotMainWeapon = true;
 			}
 		}
