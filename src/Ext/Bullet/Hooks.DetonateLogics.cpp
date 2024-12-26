@@ -383,10 +383,9 @@ DEFINE_HOOK(0x469AA4, BulletClass_Logics_Extras, 0x5)
 
 				if (unlimboResult)
 				{
-					if (pFirer->unknown_bool_432 // ShouldBeReselectOnUnlimbo
-						&& pFirer->Owner->IsControlledByCurrentPlayer())
+					if (pFirer->ShouldBeReselectOnUnlimbo && pFirer->Owner->IsControlledByCurrentPlayer())
 					{
-						pFirer->unknown_bool_432 = false;
+						pFirer->ShouldBeReselectOnUnlimbo = false;
 						pFirer->Select();
 					}
 

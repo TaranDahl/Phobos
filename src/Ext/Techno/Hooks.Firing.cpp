@@ -784,7 +784,7 @@ DEFINE_HOOK(0x6FF78F, TechnoClass_Fire_ReselectIfLimboedCheck, 0xA)
 	{
 		GET(TechnoClass* const, pThis, ESI);
 
-		pThis->unknown_bool_432 = false;
+		pThis->ShouldBeReselectOnUnlimbo = false;
 	}
 
 	return SkipGameCode;

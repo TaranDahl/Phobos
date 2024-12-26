@@ -1996,7 +1996,7 @@ DEFINE_HOOK(0x4DF3A6, FootClass_UpdateAttackMove_Follow, 0x6)
 		{
 			if ((pTechno->AbstractFlags & AbstractFlags::Foot) != AbstractFlags::None &&
 				pTechno != pThis && pTechno->Owner == pThis->Owner &&
-				pTechno->vt_entry_4C4()) // MegaMissionIsAttackMove()
+				pTechno->MegaMissionIsAttackMove())
 			{
 				auto const pTargetExt = TechnoExt::ExtMap.Find(pTechno);
 
@@ -2029,15 +2029,15 @@ DEFINE_HOOK(0x4DF3A6, FootClass_UpdateAttackMove_Follow, 0x6)
 		}
 		else
 		{
-			if (pThis->unknown_5CC) // MegaTarget
-				pThis->SetDestination(reinterpret_cast<AbstractClass*>(pThis->unknown_5CC), false);
-			else if (pThis->unknown_5C8) // MegaDestination
-				pThis->SetDestination(reinterpret_cast<AbstractClass*>(pThis->unknown_5C8), false);
+			if (pThis->MegaTarget)
+				pThis->SetDestination(pThis->MegaTarget, false);
+			else if (pThis->MegaDestination)
+				pThis->SetDestination(pThis->MegaDestination, false);
 			else
 				pThis->SetDestination(nullptr, false);
 		}
 
-		pThis->vt_entry_4A8(); // ClearMegaMission
+		pThis->ClearMegaMissionData();
 
 		R->EAX(pClosestTarget);
 		return FuncRet;
