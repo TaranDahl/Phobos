@@ -1083,7 +1083,7 @@ void TacticalButtonsClass::HerosDraw()
 					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, (20 - time));
 				}
 
-				time = Unsorted::CurrentFrame - pTechno->unknown_int_120;
+				time = Unsorted::CurrentFrame - pTechno->LastFireBulletFrame;
 
 				if (time < 20)
 				{
@@ -1201,7 +1201,7 @@ void TacticalButtonsClass::HerosDraw()
 					DSurface::Composite->FillRectTrans(&drawRect, &fillColor, (20 - time));
 				}
 
-				time = Unsorted::CurrentFrame - pSelect->unknown_int_120;
+				time = Unsorted::CurrentFrame - pSelect->LastFireBulletFrame;
 
 				if (time < 20)
 				{

@@ -350,7 +350,7 @@ void BuildingExt::KickOutStuckUnits(BuildingClass* pThis)
 	{
 		if (const auto pUnit = abstract_cast<UnitClass*>(pTechno))
 		{
-			if (!pUnit->unknown_bool_418 && pUnit->GetCurrentSpeed() <= 0)
+			if (!pUnit->IsTether && pUnit->GetCurrentSpeed() <= 0)
 			{
 				if (const auto pTeam = pUnit->Team)
 					pTeam->LiberateMember(pUnit);
@@ -372,7 +372,7 @@ void BuildingExt::KickOutStuckUnits(BuildingClass* pThis)
 		{
 			if (const auto pUnit = abstract_cast<UnitClass*>(pObject))
 			{
-				if (pThis->Owner != pUnit->Owner || pUnit->unknown_bool_418)
+				if (pThis->Owner != pUnit->Owner || pUnit->IsTether)
 					continue;
 
 				const auto height = pUnit->GetHeight();
