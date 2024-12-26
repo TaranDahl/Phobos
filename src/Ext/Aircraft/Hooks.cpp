@@ -1,6 +1,5 @@
 #include <AircraftClass.h>
 #include <FlyLocomotionClass.h>
-#include <EventClass.h>
 
 #include <Ext/Aircraft/Body.h>
 #include <Ext/Techno/Body.h>
@@ -325,7 +324,7 @@ DEFINE_HOOK(0x415EEE, AircraftClass_Fire_KickOutPassengers, 0x6)
 // Waypoint: enable and smooth moving action
 bool __fastcall AircraftTypeClass_CanUseWaypoint(AircraftTypeClass* pThis)
 {
-	return RulesExt::Global()->ExpandAircraftMission.Get();
+	return RulesExt::Global()->ExtendedAircraftMissions.Get();
 }
 DEFINE_JUMP(VTABLE, 0x7E2908, GET_OFFSET(AircraftTypeClass_CanUseWaypoint))
 
@@ -341,7 +340,7 @@ DEFINE_HOOK(0x416A0A, AircraftClass_Mission_Move_SmoothMoving, 0x5)
 	GET(AircraftClass* const, pThis, ESI);
 	GET(CoordStruct* const, pCoords, EAX);
 
-	if (!RulesExt::Global()->ExpandAircraftMission)
+	if (!RulesExt::Global()->ExtendedAircraftMissions)
 		return 0;
 
 	const auto pType = pThis->Type;
@@ -351,6 +350,8 @@ DEFINE_HOOK(0x416A0A, AircraftClass_Mission_Move_SmoothMoving, 0x5)
 
 	const int distance = Game::F2I(Point2D { pCoords->X, pCoords->Y }.DistanceFrom(Point2D { pThis->Location.X, pThis->Location.Y }));
 
+	// When the horizontal distance between the aircraft and its destination is greater than half of its deceleration distance
+	// or its turning radius, continue to move forward, otherwise return to airbase or execute the next planning path
 	if (distance > std::max((pType->SlowdownDistance >> 1), (2048 / pType->ROT)))
 		return (R->Origin() == 0x4168C7 ? ContinueMoving1 : ContinueMoving2);
 
@@ -367,7 +368,7 @@ DEFINE_HOOK(0x41A96C, AircraftClass_Mission_AreaGuard, 0x6)
 
 	GET(AircraftClass* const, pThis, ESI);
 
-	if (RulesExt::Global()->ExpandAircraftMission && !pThis->Team && pThis->Ammo && pThis->IsArmed())
+	if (RulesExt::Global()->ExtendedAircraftMissions && !pThis->Team && pThis->Ammo && pThis->IsArmed())
 	{
 		auto coords = pThis->GetCoords();
 
@@ -384,7 +385,7 @@ DEFINE_HOOK(0x41A96C, AircraftClass_Mission_AreaGuard, 0x6)
 // AttackMove: return when no ammo or arrived destination
 bool __fastcall AircraftTypeClass_CanAttackMove(AircraftTypeClass* pThis)
 {
-	return RulesExt::Global()->ExpandAircraftMission.Get();
+	return RulesExt::Global()->ExtendedAircraftMissions.Get();
 }
 DEFINE_JUMP(VTABLE, 0x7E290C, GET_OFFSET(AircraftTypeClass_CanAttackMove))
 
@@ -394,25 +395,32 @@ DEFINE_HOOK(0x6FA68B, TechnoClass_Update_AttackMovePaused, 0xA) // To make aircr
 
 	GET(TechnoClass* const, pThis, ESI);
 
-	return (RulesExt::Global()->ExpandAircraftMission && pThis->WhatAmI() == AbstractType::Aircraft && (!pThis->Ammo || pThis->GetHeight() < Unsorted::CellHeight)) ? SkipGameCode : 0;
+	const bool skip = RulesExt::Global()->ExtendedAircraftMissions
+		&& pThis->WhatAmI() == AbstractType::Aircraft
+		&& (!pThis->Ammo || pThis->GetHeight() < Unsorted::CellHeight);
+
+	return skip ? SkipGameCode : 0;
 }
 
-DEFINE_HOOK(0x4DF3BA, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget1, 0x6)
+DEFINE_HOOK(0x4DF3BA, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget1, 0x6) // When it have MegaDestination
 {
 	enum { LoseTarget = 0x4DF3D3, HoldTarget = 0x4DF4AB };
 
 	GET(FootClass* const, pThis, ESI);
 
-	return ((RulesExt::Global()->ExpandAircraftMission && pThis->WhatAmI() == AbstractType::Aircraft) || pThis->vt_entry_3B4(reinterpret_cast<DWORD>(pThis->Target))) ? HoldTarget : LoseTarget; // pThis->InAuxiliarySearchRange(pThis->Target)
+	const bool hold = (RulesExt::Global()->ExtendedAircraftMissions && pThis->WhatAmI() == AbstractType::Aircraft)
+		|| pThis->vt_entry_3B4(reinterpret_cast<DWORD>(pThis->Target)); // pThis->InAuxiliarySearchRange(pThis->Target)
+
+	return hold ? HoldTarget : LoseTarget;
 }
 
-DEFINE_HOOK(0x4DF42A, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget2, 0x6)
+DEFINE_HOOK(0x4DF42A, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget2, 0x6) // When it have MegaTarget
 {
 	enum { ContinueCheck = 0x4DF462, HoldTarget = 0x4DF4AB };
 
 	GET(FootClass* const, pThis, ESI);
 
-	return (RulesExt::Global()->ExpandAircraftMission && pThis->WhatAmI() == AbstractType::Aircraft) ? HoldTarget : ContinueCheck;
+	return (RulesExt::Global()->ExtendedAircraftMissions && pThis->WhatAmI() == AbstractType::Aircraft) ? HoldTarget : ContinueCheck;
 }
 
 DEFINE_HOOK(0x418CD1, AircraftClass_Mission_Attack_ContinueFlyToDestination, 0x6)
@@ -423,7 +431,7 @@ DEFINE_HOOK(0x418CD1, AircraftClass_Mission_Attack_ContinueFlyToDestination, 0x6
 
 	if (!pThis->Target)
 	{
-		if (!RulesExt::Global()->ExpandAircraftMission || !pThis->vt_entry_4C4() || !pThis->unknown_5C8) // (!pThis->MegaMissionIsAttackMove() || !pThis->MegaDestination)
+		if (!RulesExt::Global()->ExtendedAircraftMissions || !pThis->vt_entry_4C4() || !pThis->unknown_5C8) // (!pThis->MegaMissionIsAttackMove() || !pThis->MegaDestination)
 			return Continue;
 
 		pThis->SetDestination(reinterpret_cast<AbstractClass*>(pThis->unknown_5C8), false); // pThis->MegaDestination
@@ -446,7 +454,7 @@ DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 
 	GET(AircraftClass* const, pThis, ESI);
 
-	if (RulesExt::Global()->ExpandAircraftMission && !pThis->Ammo && !pThis->Airstrike && !pThis->Spawned)
+	if (RulesExt::Global()->ExtendedAircraftMissions && !pThis->Ammo && !pThis->Airstrike && !pThis->Spawned)
 	{
 		if (!SessionClass::IsCampaign()) // To avoid AI's aircrafts team repeatedly attempting to attack the target when no ammo
 		{
@@ -471,10 +479,13 @@ DEFINE_HOOK(0x417944, AircraftClass_EnterIdleMode_DockCheck, 0x7)
 	return (pThis->GetHeight() > 0) ? Continue : Invalid; // Replace IsInAir()
 }
 */
+// Stop: clear the mega mission and return to airbase immediately
+// (StopEventFix's DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6) in Hooks.BugFixes.cpp)
+
 // GreatestThreat: for all the mission that should let the aircraft auto select a target
 AbstractClass* __fastcall AircraftClass_GreatestThreat(AircraftClass* pThis, void* _, ThreatType threatType, CoordStruct* pSelectCoords, bool onlyTargetHouseEnemy)
 {
-	if (RulesExt::Global()->ExpandAircraftMission)
+	if (RulesExt::Global()->ExtendedAircraftMissions)
 	{
 		if (const auto pPrimaryWeapon = pThis->GetWeapon(0)->WeaponType)
 			threatType |= pPrimaryWeapon->AllowedThreats();

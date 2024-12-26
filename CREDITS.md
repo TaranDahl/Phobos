@@ -391,6 +391,7 @@ This page lists all the individual contributions to the project by their author.
   - Building placing and deploying logic enhancement
   - Unit base normal and new placing grids
   - Grey cameo preview and cameo overlays
+  - Fix `Stop` command not working so well in some cases
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
