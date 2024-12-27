@@ -535,7 +535,10 @@ DEFINE_HOOK(0x6FF8F1, TechnoClass_FireAt_AfterFire, 0x6)
 		auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
 
 		if (pWeaponExt && pWeaponExt->ResetGattlingValue)
+		{
+			pThis->CurrentGattlingStage = 0;
 			reinterpret_cast<void(__thiscall*)(TechnoClass*, int)>(0x70E000)(pThis, 0); // TechnoClass::UpdateGattlingValueDecrease
+		}
 	}
 
 	return 0;
