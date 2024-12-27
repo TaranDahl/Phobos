@@ -226,7 +226,6 @@ public:
 		ValueableVector<int> BuildLimitGroup_ExtraLimit_MaxCount;
 		Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
-		Valueable<bool> LeaveTransportKill;
 		Nullable<bool> RecountBurst;
 		Nullable<bool> Turret_IdleRotate;
 		Nullable<bool> Turret_PointToMouse;
@@ -484,7 +483,6 @@ public:
 			, BuildLimitGroup_ExtraLimit_MaxCount {}
 			, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
 
-			, LeaveTransportKill { false }
 			, RecountBurst {}
 			, Turret_IdleRotate {}
 			, Turret_PointToMouse {}
