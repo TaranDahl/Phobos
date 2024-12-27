@@ -1052,6 +1052,19 @@ DEFINE_HOOK(0x6F8D32, TechnoClass_ScanToAttackWall_DestroyOwnerlessWalls, 0x9)
 	return GoOtherChecks;
 }
 
+DEFINE_HOOK(0x6F9B64, TechnoClass_SelectAutoTarget_RecordAttackWall, 0x7)
+{
+	GET(TechnoClass*, pThis, ESI);
+	GET(CellClass*, pCell, EAX);
+
+	if (auto pExt = TechnoExt::ExtMap.Find(pThis))
+	{
+		pExt->AutoTargetedWallCell = pCell;
+	}
+
+	return 0;
+}
+
 #pragma endregion
 
 #pragma region CylinderRange
@@ -1730,6 +1743,19 @@ DEFINE_HOOK(0x73AAB3, UnitClass_UpdateMoving_RallyPointAreaGuard, 0x5)
 	return 0;
 }
 
+DEFINE_HOOK(0x4438C9, BuildingClass_SetRallyPoint_PathFinding, 0x6)
+{
+	GET(BuildingClass* const, pThis, EBP);
+	GET(int, movementzone, ESI);
+	GET_STACK(int, speedtype, STACK_OFFSET(0xA4, -0x84));
+
+	auto const pExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
+	R->ESI(pExt->RallyMovementZone.Get(movementzone));
+	R->Stack(STACK_OFFSET(0xA4, -0x84), pExt->RallySpeedType.Get(speedtype));
+
+	return 0;
+}
+
 #pragma endregion
 
 #pragma region CrushBuildingOnAnyCell
@@ -2053,7 +2079,7 @@ DEFINE_HOOK(0x6521CE, EventClass_AddEvent, 0x5)
 
 	return 0;
 }
-
+/*
 DEFINE_HOOK(0x646EF5, EventClass_AddMegaMissionEvent, 0xA)
 {
 	GET(EventClass*, pEvent, EAX);
@@ -2098,6 +2124,25 @@ DEFINE_HOOK(0x64C739, Game_ProcessDoList_AddMegaMissionEvent, 0xA)
 		}
 
 		reinterpret_cast<EventClass*(__fastcall*)()>(0x4E7F00)(); // EventClass::ClearMegaMissionList
+	}
+
+	return 0;
+}
+*/
+DEFINE_HOOK(0x6FFDA5, TechnoClass_ClickedMission_CacheClickedMission, 0x7)
+{
+	GET_STACK(AbstractClass* const, pCell, STACK_OFFSET(0x98, 0xC));
+	GET(TechnoClass* const, pThis, ECX);
+	GET(AbstractClass* const, pTarget, EBP);
+	GET(Mission const, mission, EDI);
+
+	if (EventClass::OutList->Count >= 128)
+	{
+		auto const pExt = TechnoExt::ExtMap.Find(pThis);
+		pExt->HasCachedClick = true;
+		pExt->CachedMission = mission;
+		pExt->CachedCell = pCell;
+		pExt->CachedTarget = pTarget;
 	}
 
 	return 0;
