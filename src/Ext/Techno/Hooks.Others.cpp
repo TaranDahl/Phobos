@@ -588,12 +588,9 @@ DEFINE_HOOK(0x51A0D4, InfantryClass_UpdatePosition_NoQueueUpToEnter, 0x6)
 
 	GET(InfantryClass* const, pThis, ESI);
 
-	if (!RulesExt::Global()->NoQueueUpToEnter)
-		return 0;
-
 	if (const auto pDest = abstract_cast<UnitClass*>(pThis->CurrentMission == Mission::Enter ? pThis->Destination : pThis->QueueUpToEnter))
 	{
-		if (pDest->Type->Passengers > 0)
+		if (pDest->Type->Passengers > 0 && TechnoTypeExt::ExtMap.Find(pDest->Type)->NoQueueUpToEnter.Get(RulesExt::Global()->NoQueueUpToEnter))
 		{
 			const auto thisCell = pThis->GetCoords();
 			const auto destCell = pDest->GetCoords();
@@ -644,12 +641,9 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 
 	GET(UnitClass* const, pThis, EBP);
 
-	if (!RulesExt::Global()->NoQueueUpToEnter)
-		return 0;
-
 	if (const auto pDest = abstract_cast<UnitClass*>(pThis->CurrentMission == Mission::Enter ? pThis->Destination : pThis->QueueUpToEnter))
 	{
-		if (pDest->Type->Passengers > 0)
+		if (pDest->Type->Passengers > 0 && TechnoTypeExt::ExtMap.Find(pDest->Type)->NoQueueUpToEnter.Get(RulesExt::Global()->NoQueueUpToEnter))
 		{
 			const auto thisCell = pThis->GetCoords();
 			const auto destCell = pDest->GetCoords();
@@ -709,16 +703,14 @@ DEFINE_HOOK(0x73DC9C, UnitClass_Mission_Unload_NoQueueUpToUnloadBreak, 0xA)
 {
 	enum { SkipGameCode = 0x73E289 };
 
+	GET(UnitClass* const, pThis, ESI);
 	GET(FootClass* const, pPassenger, EDI);
 
 	pPassenger->Undiscover();
 
-	if (RulesExt::Global()->NoQueueUpToUnload)
-	{
-		// Play the sound when interrupted for some reason
-		GET(UnitClass* const, pThis, ESI);
+	// Play the sound when interrupted for some reason
+	if (TechnoTypeExt::ExtMap.Find(pThis->Type)->NoQueueUpToUnload.Get(RulesExt::Global()->NoQueueUpToUnload))
 		PlayUnitLeaveTransportSound(pThis);
-	}
 
 	return SkipGameCode;
 }
@@ -729,7 +721,7 @@ DEFINE_HOOK(0x73DC1E, UnitClass_Mission_Unload_NoQueueUpToUnloadLoop, 0xA)
 
 	GET(UnitClass* const, pThis, ESI);
 
-	if (RulesExt::Global()->NoQueueUpToUnload)
+	if (TechnoTypeExt::ExtMap.Find(pThis->Type)->NoQueueUpToUnload.Get(RulesExt::Global()->NoQueueUpToUnload))
 	{
 		if (pThis->Passengers.NumPassengers <= pThis->NonPassengerCount)
 		{
