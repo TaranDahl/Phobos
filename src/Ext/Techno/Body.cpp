@@ -541,9 +541,7 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 void TechnoExt::ExtData::InvalidatePointer(void* ptr, bool bRemoved)
 {
 	if (this->HasCachedClick && this->CachedTarget == ptr)
-	{
 		this->ClearCachedClick();
-	}
 }
 
 void TechnoExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

@@ -1058,9 +1058,7 @@ DEFINE_HOOK(0x6F9B64, TechnoClass_SelectAutoTarget_RecordAttackWall, 0x7)
 	GET(CellClass*, pCell, EAX);
 
 	if (auto pExt = TechnoExt::ExtMap.Find(pThis))
-	{
 		pExt->AutoTargetedWallCell = pCell;
-	}
 
 	return 0;
 }

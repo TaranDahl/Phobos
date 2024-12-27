@@ -63,13 +63,8 @@ void TechnoExt::ExtData::OnEarlyUpdate()
 		}
 	}
 
-	if (this->HasCachedClick)
-	{
-		if (EventClass::OutList->Count < 128)
-		{
-			this->ProcessCachedClick();
-		}
-	}
+	if (this->HasCachedClick && EventClass::OutList->Count < 128)
+		this->ProcessCachedClick();
 }
 
 void TechnoExt::ExtData::ApplyInterceptor()
