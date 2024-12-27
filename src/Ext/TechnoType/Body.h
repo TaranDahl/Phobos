@@ -259,6 +259,8 @@ public:
 		Valueable<bool> RateDown_Reset;
 		Valueable<bool> UniqueTechno;
 		Valueable<bool> HarvesterQuickUnloader;
+		Nullable<bool> NoQueueUpToEnter;
+		Nullable<bool> NoQueueUpToUnload;
 
 		Nullable<AnimTypeClass*> Wake;
 		Nullable<AnimTypeClass*> Wake_Grapple;
@@ -516,6 +518,8 @@ public:
 			, RateDown_Reset { false }
 			, UniqueTechno { false }
 			, HarvesterQuickUnloader { false }
+			, NoQueueUpToEnter {}
+			, NoQueueUpToUnload {}
 
 			, Wake { }
 			, Wake_Grapple { }
