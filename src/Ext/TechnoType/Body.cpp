@@ -563,7 +563,6 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildLimitGroup_ExtraLimit_MaxCount.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxCount");
 	this->BuildLimitGroup_ExtraLimit_MaxNum.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxNum");
 
-	this->LeaveTransportKill.Read(exINI, pSection, "LeaveTransportKill");
 	this->RecountBurst.Read(exINI, pSection, "RecountBurst");
 	this->Turret_IdleRotate.Read(exINI, pSection, "Turret.IdleRotate");
 	this->Turret_PointToMouse.Read(exINI, pSection, "Turret.PointToMouse");
@@ -592,6 +591,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->RateDown_Cover.Read(exINI, pSection, "RateDown.Cover");
 	this->RateDown_Reset.Read(exINI, pSection, "RateDown.Reset");
 	this->UniqueTechno.Read(exINI, pSection, "UniqueTechno");
+	this->NoQueueUpToEnter.Read(exINI, pSection, "NoQueueUpToEnter");
+	this->NoQueueUpToUnload.Read(exINI, pSection, "NoQueueUpToUnload");
 
 	this->CombatAlert.Read(exINI, pSection, "CombatAlert");
 	this->CombatAlert_NotBuilding.Read(exINI, pSection, "CombatAlert.NotBuilding");
@@ -1029,7 +1030,6 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxCount)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxNum)
 
-		.Process(this->LeaveTransportKill)
 		.Process(this->RecountBurst)
 		.Process(this->Turret_IdleRotate)
 		.Process(this->Turret_PointToMouse)
@@ -1062,6 +1062,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->RateDown_Cover)
 		.Process(this->RateDown_Reset)
 		.Process(this->UniqueTechno)
+		.Process(this->NoQueueUpToEnter)
+		.Process(this->NoQueueUpToUnload)
 
 		.Process(this->CombatAlert)
 		.Process(this->CombatAlert_NotBuilding)

@@ -397,6 +397,7 @@ This page lists all the individual contributions to the project by their author.
   - Exclusive Sidebar for Superweapons
   - Fix `LimboKill` not working reliably
   - Observer sidebar in skirmish game mode
+  - Fix `Stop` command not working so well in some cases
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
@@ -445,6 +446,7 @@ This page lists all the individual contributions to the project by their author.
 - **thomassneddon** - general assistance, knowledge about voxel lighting model
 - **Xkein** - general assistance, YRpp edits
 - **mevitar** - honorary shield tester *triple* award
+- **Phobos CN Tester Group (Reedom, Mantis, Swim Wing, Takitoru, Examon, AKB, Pusheen, ZQ, Claptrap, BunkerGeneral, Big J, Skywalker, ChickEmperor, Shifty, Mikain, Tobiichi Origami, Feiron, W_S502, Ailink, AbrahamMikhail, Tide, Fnfalsc, Yumeri_Rei, Nacho, Zhuzi, Ika_Aru)** - extensive and thorough testing
 - **Damfoos** - extensive and thorough testing
 - **Dmitry Volkov** - extensive and thorough testing
 - **Rise of the East community** - extensive playtesting of in-dev features

@@ -162,7 +162,6 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Fix the bug that parasite will vanish if it missed its target when its previous cell is occupied.
 - Units are now unable to kick out from a factory that is in construction process, and will not always stuck in the factory.
 - Fixed disguised units not using the correct palette if target has custom palette.
-- Fixed `MovementZone=Subterannean` harvesters being unable to find docks if in area enclosed by water, cliffs etc.
 - Building upgrades now consistently use building's `PowerUpN` animation settings corresponding to the upgrade's `PowersUpToLevel` where possible.
 - Subterranean units are no longer allowed to perform deploy functions like firing weapons or `IsSimpleDeployer` while burrowed or burrowing, they will instead emerge first like they do for transport unloading.
 - The otherwise unused setting `[AI]` -> `PowerSurplus` (defaults to 50) which determines how much surplus power AI players will strive to have can be restored by setting `[AI]` -> `EnablePowerSurplus` to true.
@@ -183,6 +182,11 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - `<Player @ X>` can now be used as owner for pre-placed objects on skirmish and multiplayer maps.
 - Follower vehicle index for preplaced vehicles in maps is now explicitly constrained to `[Units]` list in map files and is no longer thrown off by vehicles that could not be created or created vehicles having other vehicles as initial passengers.
 - Drive/Jumpjet/Ship/Teleport locomotor did not power on when it is un-piggybacked bugfix
+- Prevent jumpjets from falling into a state of standing idly by when receive the stop(shortcut: s) command.
+- Prevent technos from being unable to stop the attack move mission when receive the stop(shortcut: s) command.
+- Prevent aircrafts from duplicatedly finding airport and overlapping when receive the stop(shortcut: s) command.
+- Prevent aircrafts from briefly pausing in the air before returning when receive the stop(shortcut: s) command.
+- Prevent aircrafts with `AirportBound=no` continue moving forward when receive the stop(shortcut: s) command.
 - Unit `Speed` setting now accepts floating-point values. Internally parsed values are clamped down to maximum of 100, multiplied by 256 and divided by 100, the result (which at this point is converted to an integer) then clamped down to maximum of 255 giving effective internal speed value range of 0 to 255, e.g leptons traveled per game frame.
 - Subterranean movement now benefits from speed multipliers from all sources such as veterancy, AttachEffect etc.
 
@@ -237,12 +241,12 @@ LandingDir=     ; Direction type (integers from 0-255). Accepts negative values 
 
 ### Expand Aircraft Mission
 
-- Now, when a `stop` command (S) is issued to an aircraft, the aircraft will immediately return to the airport. When a `guard` command (G) is issued, the aircraft will search for targets around the current location and return immediately when target is not found, target is destroyed or ammos are depleted (Note that if the target is destroyed but ammos are not depleted yet, it will also return because the aircraft's command is one-time). When a `attack move` command (Ctrl+Shift) is issued, the aircraft will move towards the destination and search for nearby targets on the route for attack. Once ammos are depleted or the destination is reached, it will return (Note that if the  automatically selected target is destroyed but ammos are not depleted yet during the process, the aircraft will continue to go to the destination).
+- Now, when a `stop` command (`[S]` by default) is issued to an aircraft, the aircraft will immediately return to the airport. When a `guard` command (`[G]` by default) is issued, the aircraft will search for targets around the current location and return immediately when target is not found, target is destroyed or ammos are depleted (Note that if the target is destroyed but ammos are not depleted yet, it will also return because the aircraft's command is one-time). When a `attack move` command (Ctrl+Shift) is issued, the aircraft will move towards the destination and search for nearby targets on the route for attack. Once ammo is depleted or the destination is reached, it will return (Note that if the automatically selected target is destroyed but ammo is not depleted yet during the process, the aircraft will continue to go to the destination).
 
 In `rulesmd.ini`:
 ```ini
 [General]
-ExpandAircraftMission=     ; boolean
+ExtendedAircraftMissions=false    ; boolean
 ```
 
 ## Animations

@@ -750,6 +750,7 @@ Currently interceptor weapons with projectiles that do not have `Inviso=true` wi
     - In `Trajectory=Disperse`, it refers to the maximum speed of the projectile and it cannot exceed 256. `Trajectory.Speed` will be fixed at 192 by setting `Trajectory.Disperse.UniqueCurve=true`.
     - In `Trajectory=Engrave`, it refers to the engrave speed of the projectile and it cannot exceed 128. Recommend set as about 40.
     - In `Trajectory=Parabola`, it refers to the horizontal velocity of the projectile and is only used for modes 0, 3, or 5 and it has no restrictions.
+    - In `Trajectory=Tracing`, it refers to the tracing speed of the projectile and Negative numbers are considered infinite.
 
   In `rulesmd.ini`:
 ```ini
@@ -767,7 +768,7 @@ Trajectory.Speed=100.0  ; floating point value
   - `Trajectory.Straight.TargetSnapDistance` controls the maximum distance in cells from intended target the projectile can be at moment of detonation to make the projectile 'snap' on the intended target. Set to 0 to disable snapping.
   - `Trajectory.Straight.PassThrough` enables special case logic where the projectile does not detonate in contact with the target but instead travels up to a distance defined by `Trajectory.Straight.DetonationDistance`. Note that the firing angle of the projectile is adjusted with this in mind, making it fire straight ahead if the target is on same elevation.
   - `Trajectory.Straight.PassDetonate` enables extra detonations when the projectile is traveling.
-    - `Trajectory.Straight.PassDetonateWarhead` defined the warhead detonated by `Trajectory.Straight.PassDetonate`, and `Trajectory.Straight.PassDetonateDamage` defined the damage caused by `Trajectory.Straight.PassDetonateWarhead`.
+    - `Trajectory.Straight.PassDetonateWarhead` defines the warhead detonated by `Trajectory.Straight.PassDetonate`, and `Trajectory.Straight.PassDetonateDamage` defines the damage caused by `Trajectory.Straight.PassDetonateWarhead`.
     - `Trajectory.Straight.PassDetonateDelay` controls the delay for detonating the warhead defined by `Trajectory.Straight.Warhead`.
     - `Trajectory.Straight.PassDetonateTimer` controls the initial delay for detonating the warhead defined by `Trajectory.Straight.Warhead`.
     - `Trajectory.Straight.PassDetonateLocal` controls whether `Trajectory.Straight.PassDetonateWarhead` and weapon's `Warhead` are always detonate at ground level. It will also no longer restrict vertical velocity of the projectile when using `Trajectory.Straight.ConfineAtHeight`.
@@ -778,7 +779,7 @@ Trajectory.Speed=100.0  ; floating point value
     - `Trajectory.Straight.UseDisperseBurst` controls whether the calculation of `Trajectory.Straight.RotateCoord` is based on its superior's `Trajectory.Disperse.WeaponBurst` of the dispersed trajectory, rather than `Burst` of the weapon. If this value is not appropriate, it will result in unsatisfactory visual displays.
     - `Trajectory.Straight.AxisOfRotation` controls the rotation axis when calculating `Trajectory.Straight.RotateCoord`. The axis will rotates with the unit orientation or the vector that from target position to the source position.
   - `Trajectory.Straight.ProximityImpact` controls the initial proximity fuse times. When there are enough remaining times and the projectile approaches another valid target, it will detonate a warhead defined by `Trajectory.Straight.Warhead` on it. If the times is about to run out, it will also detonate itself at its location. This function can be cancelled by setting to 0. A negative integer means unlimited times. By the way, you can use the weapon's `Warhead` with low versus only to aim at the target, and use the `Trajectory.Straight.ProximityWarhead` to causing actual harm.
-    - `Trajectory.Straight.ProximityWarhead` defined the warhead detonated by `Trajectory.Straight.ProximityImpact`, and `Trajectory.Straight.ProximityDamage` defined the damage caused by `Trajectory.Straight.ProximityWarhead`.
+    - `Trajectory.Straight.ProximityWarhead` defines the warhead detonated by `Trajectory.Straight.ProximityImpact`, and `Trajectory.Straight.ProximityDamage` defines the damage caused by `Trajectory.Straight.ProximityWarhead`.
     - `Trajectory.Straight.ProximityRadius` controls the range of proximity fuse. It can NOT be set as a negative integer.
     - `Trajectory.Straight.ProximityDirect` controls whether let the target receive damage instead of detonating the warhead.
     - `Trajectory.Straight.ProximityMedial` controls whether to detonate `Trajectory.Straight.ProximityWarhead` at the bullet's location rather than the proximity target's location. If `Trajectory.Straight.ProximityDirect` is set to true, this will only affect the calculation result of `Trajectory.Straight.EdgeAttenuation`.
@@ -906,8 +907,8 @@ Trajectory.Bombard.SubjectToGround=false      ; boolean
   - `Trajectory.Disperse.SuicideShortOfROT` controls whether the projectile will explode when it detected its insufficient turning ability.
   - `Trajectory.Disperse.SuicideAboveRange` controls the projectile to self destruct directly after reaching the flight distance. Set to 0 to disable suicide.
   - `Trajectory.Disperse.SuicideIfNoWeapon` controls whether the projectile will self destruct after the number of times it spreads the weapon has been exhausted. If `Trajectory.Disperse.WeaponCount` set to 0, this will not be enabled.
-  - `Trajectory.Disperse.Weapons` defined the dispersal weapons of the projectile.
-    - `Trajectory.Disperse.WeaponBurst` defined how many corresponding weapons each time the projectile will fire. When the quantity is lower than `Trajectory.Disperse.Weapons`, it will use the last value.
+  - `Trajectory.Disperse.Weapons` defines the dispersal weapons of the projectile.
+    - `Trajectory.Disperse.WeaponBurst` defines how many corresponding weapons each time the projectile will fire. When the quantity is lower than `Trajectory.Disperse.Weapons`, it will use the last value.
     - `Trajectory.Disperse.WeaponCount` controls how many times the projectile can spread the weapon. Set to a negative value means unlimited times.
     - `Trajectory.Disperse.WeaponDelay` controls the delay for dispersing the weapons defined by `Trajectory.Disperse.Weapons`.
     - `Trajectory.Disperse.WeaponTimer` controls the initial delay for dispersing the weapons defined by `Trajectory.Disperse.Weapons`.
@@ -923,6 +924,7 @@ Trajectory.Bombard.SubjectToGround=false      ; boolean
 
 In `rulesmd.ini`:
 ```ini
+[SOMEPROJECTILE]                                ; Projectile
 Trajectory=Disperse                             ; Trajectory type
 Trajectory.Disperse.UniqueCurve=false           ; boolean
 Trajectory.Disperse.PreAimCoord=0,0,0           ; integer - Forward,Lateral,Height
@@ -990,6 +992,7 @@ Trajectory.Disperse.WeaponDoRepeat=false        ; boolean
 
 In `rulesmd.ini`:
 ```ini
+[SOMEPROJECTILE]                               ; Projectile
 Trajectory=Engrave                             ; Trajectory type
 Trajectory.Engrave.ApplyRangeModifiers=false   ; boolean
 Trajectory.Engrave.SourceCoord=0,0             ; integer - Forward,Lateral
@@ -1043,6 +1046,7 @@ Trajectory.Engrave.DamageDelay=2               ; integer
 
 In `rulesmd.ini`:
 ```ini
+[SOMEPROJECTILE]                                ; Projectile
 Trajectory=Parabola                             ; Trajectory type
 Trajectory.Parabola.DetonationDistance=0.4      ; floating point value
 Trajectory.Parabola.TargetSnapDistance=0.5      ; floating point value
@@ -1070,6 +1074,66 @@ Trajectory.Parabola.AxisOfRotation=0,0,1        ; integer - Forward,Lateral,Heig
 ```
 
 #### Tracing trajectory
+
+- A trajectory that keeps following the target and will only detonate when its survival time is exhausted.
+  - `Trajectory.Tracing.TraceMode` controls how should the projectile trace the target. This is used to calculate coordinate axis of `Trajectory.Tracing.OffsetCoord` located on the tracking target. The H axis is not affected by the tilt and deflection of the tracking target, and always faces directly above. This has the following 6 modes.
+    - Connection - Line vector. Take the horizontal component of the vector between the launch position and the target position as the F axis.
+    - Global - Map direction. Take the lower right side of the map as the F axis.
+    - Body - Follow the body. The F axis is the body orientation of the tracking target.
+    - Turret - Follow the turret. The F axis is the turret orientation of the tracking target.
+    - RotateCW - Rotate clockwise. Rotate clockwise around the H axis with the resultant offset in the FL direction as the radius.
+    - RotateCCW - Rotate counterclockwise. Rotate counterclockwise around the H axis with the resultant offset in the FL direction as the radius.
+  - `Trajectory.Tracing.TheDuration` controls the tracing duration in frames. If it is a non-positive number, the projectile will use weapon's `ROF`-10 as the duration. At least 1 frame.
+  - `Trajectory.Tracing.TolerantTime` controls how long the projectile will detonate after losing the target. If it is 0, it will detonate directly when switching targets.
+  - `Trajectory.Tracing.ROT` controls the rotational speed of the projectile. When it is negative, it will follow the direction of movement. When it is 0, it will always face the target. When it is positive, it will rotate towards the target according to this speed. If `Trajectory.Tracing.BulletSpin=true`, the direction of rotation is determined by its positive or negative sign, and the speed of rotation is determined by its value.
+  - `Trajectory.Tracing.BulletSpin` controls whether the projectile will continuously rotate itself like `TurretSpin`.
+  - `Trajectory.Tracing.PeacefullyVanish` controls whether the projectile disappears directly when it is about to detonate, without producing animation or causing damage
+  - `Trajectory.Tracing.TraceTheTarget` controls whether the target tracked by the projectile is the target of the projectile, and the tracing weapons will be fired by the unit towards the projectile. Otherwise, it will trace the firer, and the tracing weapons will be fired from the projectile towards the target. At the same time, the projectile will detonate if the firer dies.
+  - `Trajectory.Tracing.CreateAtTarget` controls whether the projectile is directly generated at the target position.
+  - `Trajectory.Tracing.CreateCoord` controls the generate position. Not related to `Trajectory.Tracing.TraceMode`.
+  - `Trajectory.Tracing.OffsetCoord` controls the tracing position on its target, use `Trajectory.Tracing.TraceMode` determines the specific location.
+  - `Trajectory.Tracing.WeaponCoord` controls the FLH where the projectile fires the weapon when `Trajectory.Tracing.TraceTheTarget=false`.
+  - `Trajectory.Tracing.Weapons` defines the tracing weapons of the projectile.
+    - `Trajectory.Tracing.WeaponCount` controls how many times the projectile can fire the corresponding weapon. Set to a negative value means unlimited times. If set to zero, the cooling will be calculated directly without firing the tracing weapon. If the quantity is less than `Trajectory.Tracing.Weapons`, the last value in the list will be used.
+    - `Trajectory.Tracing.WeaponDelay` controls the delay after firing the corresponding weapon, at least 1 frame. If the quantity is less than `Trajectory.Tracing.Weapons`, the last value in the list will be used.
+    - `Trajectory.Tracing.WeaponTimer` controls the initial delay for firing the tracing weapons defined by `Trajectory.Tracing.Weapons`.
+    - `Trajectory.Tracing.WeaponCycle` controls how many rounds of weapons the projectile can fire, zero will not fire weapons, and negative numbers are considered infinite.
+    - `Trajectory.Tracing.WeaponCheck` controls whether the projectile will check its orientation before firing the tracing weapons. Ignore this if `Trajectory.Tracing.Synchronize=false` or `Trajectory.Tracing.TraceTheTarget=true` or `Trajectory.Tracing.BulletSpin=true` or have negative `Trajectory.Tracing.ROT`.
+  - `Trajectory.Tracing.Synchronize` controls whether the target of the projectile is synchronized with the target of its firer. If not, the projectile will not update the target. When `Trajectory.Tracing.TraceTheTarget=no`, the tracing weapons will select their own targets to attack based on its range.
+  - `Trajectory.Tracing.SuicideAboveRange` controls whether the projectile will explode if its target exceeds the range.
+  - `Trajectory.Tracing.SuicideIfNoWeapon` controls whether the projectile will explode after firing the final weapon.
+
+在 `rulesmd.ini` 之中：
+```ini
+[SOMEPROJECTILE]                          ; Projectile
+Trajectory=Tracing                        ; Trajectory type
+Trajectory.Tracing.TraceMode=Connection   ; TraceMode value enumeration (Connection|Global|Body|Turret|RotateCW|RotateCCW)
+Trajectory.Tracing.TheDuration=0          ; integer
+Trajectory.Tracing.TolerantTime=-1        ; integer
+Trajectory.Tracing.ROT=-1                 ; integer
+Trajectory.Tracing.BulletSpin=no          ; boolean
+Trajectory.Tracing.PeacefullyVanish=no    ; boolean
+Trajectory.Tracing.TraceTheTarget=yes     ; boolean
+Trajectory.Tracing.CreateAtTarget=no      ; boolean
+Trajectory.Tracing.CreateCoord=0,0,0      ; integer - Forward,Lateral,Height
+Trajectory.Tracing.OffsetCoord=0,0,0      ; integer - Forward,Lateral,Height
+Trajectory.Tracing.WeaponCoord=0,0,0      ; integer - Forward,Lateral,Height
+Trajectory.Tracing.Weapons=               ; list of WeaponTypes
+Trajectory.Tracing.WeaponCount=           ; list of integers
+Trajectory.Tracing.WeaponDelay=           ; list of integers
+Trajectory.Tracing.WeaponTimer=0          ; integer
+Trajectory.Tracing.WeaponCycle=-1         ; integer
+Trajectory.Tracing.WeaponCheck=no         ; boolean
+Trajectory.Tracing.Synchronize=yes        ; boolean
+Trajectory.Tracing.SuicideAboveRange=no   ; boolean
+Trajectory.Tracing.SuicideIfNoWeapon=no   ; boolean
+```
+
+```{note}
+- If you set `Trajectory.Tracing.TraceTheTarget=false` and `Trajectory.Tracing.Synchronize=false`, make sure you set low `Range` values for weapons in `Trajectory.Tracing.Weapons` unless necessary.
+- Note that the listed Weapons in `Trajectory.Tracing.Weapons` must be listed in `[WeaponTypes]` for them to work.
+- `Trajectory.Tracing.Weapons` now not support customized `Bolt.ColorN`.
+```
 
 ### Shrapnel enhancements
 

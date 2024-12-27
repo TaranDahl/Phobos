@@ -124,7 +124,7 @@ public:
 		Valueable<double> DamageOwnerMultiplier;
 		Valueable<double> DamageAlliesMultiplier;
 		Valueable<double> DamageEnemiesMultiplier;
-		Valueable<bool> ExpandAircraftMission;
+		Valueable<bool> ExtendedAircraftMissions;
 		Valueable<bool> CheckUnitBaseNormal;
 		Valueable<bool> Cameo_AlwaysExist;
 		Valueable<SHPStruct*> Cameo_OverlayShapes;
@@ -139,7 +139,7 @@ public:
 		PhobosPCXFile SelectedVehicleMissingPCX;
 		PhobosPCXFile SelectedAircraftMissingPCX;
 		PhobosPCXFile SelectedBuildingMissingPCX;
-		Valueable<bool> AINonAutoDeploy;
+		Valueable<bool> AIAutoDeployMCV;
 		Valueable<bool> AISetBaseCenter;
 		Valueable<bool> AIBiasSpawnCell;
 		Valueable<bool> AIForbidConYard;
@@ -363,7 +363,7 @@ public:
 			, DamageOwnerMultiplier { 1.0 }
 			, DamageAlliesMultiplier { 1.0 }
 			, DamageEnemiesMultiplier { 1.0 }
-			, ExpandAircraftMission { false }
+			, ExtendedAircraftMissions { false }
 			, CheckUnitBaseNormal { false }
 			, Cameo_AlwaysExist { false }
 			, Cameo_OverlayShapes { FileSystem::PIPS_SHP }
@@ -374,8 +374,8 @@ public:
 			, PlacementGrid_LandFrames { { 1, 0, 0 } }
 			, PlacementGrid_WaterFrames { { 1, 0, 0 } }
 			, SWSidebarBackground { true }
-			, AINonAutoDeploy { false }
-			, AISetBaseCenter { false }
+			, AIAutoDeployMCV { true }
+			, AISetBaseCenter { true }
 			, AIBiasSpawnCell { false }
 			, AIForbidConYard { false }
 			, SelectedInfantryMissingPCX {}

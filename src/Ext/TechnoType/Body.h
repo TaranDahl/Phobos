@@ -226,7 +226,6 @@ public:
 		ValueableVector<int> BuildLimitGroup_ExtraLimit_MaxCount;
 		Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
 
-		Valueable<bool> LeaveTransportKill;
 		Nullable<bool> RecountBurst;
 		Nullable<bool> Turret_IdleRotate;
 		Nullable<bool> Turret_PointToMouse;
@@ -259,6 +258,8 @@ public:
 		Valueable<int> RateDown_Cover;
 		Valueable<bool> RateDown_Reset;
 		Valueable<bool> UniqueTechno;
+		Nullable<bool> NoQueueUpToEnter;
+		Nullable<bool> NoQueueUpToUnload;
 
 		Nullable<bool> CombatAlert;
 		Nullable<bool> CombatAlert_NotBuilding;
@@ -543,7 +544,6 @@ public:
 			, BuildLimitGroup_ExtraLimit_MaxCount {}
 			, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
 
-			, LeaveTransportKill { false }
 			, RecountBurst {}
 			, Turret_IdleRotate {}
 			, Turret_PointToMouse {}
@@ -576,6 +576,8 @@ public:
 			, RateDown_Cover { 0 }
 			, RateDown_Reset { false }
 			, UniqueTechno { false }
+			, NoQueueUpToEnter {}
+			, NoQueueUpToUnload {}
 
 			, CombatAlert {}
 			, CombatAlert_NotBuilding {}

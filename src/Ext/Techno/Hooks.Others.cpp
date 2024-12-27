@@ -24,29 +24,26 @@ DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstNoDelay, 0x5)
 	{
 		if (pWeapon->Burst > 1)
 		{
-			if (const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
+			if (WeaponTypeExt::ExtMap.Find(pWeapon)->Burst_NoDelay)
 			{
-				if (pWeaponExt->Burst_NoDelay)
+				if (pThis->Fire(pTarget, wpIdx))
 				{
-					if (pThis->Fire(pTarget, wpIdx))
+					if (!pThis->CurrentBurstIndex)
+						return SkipVanillaFire;
+
+					auto rof = pThis->RearmTimer.TimeLeft;
+					pThis->RearmTimer.Start(0);
+
+					for (auto i = pThis->CurrentBurstIndex; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
 					{
-						if (!pThis->CurrentBurstIndex)
-							return SkipVanillaFire;
-
-						auto rof = pThis->RearmTimer.TimeLeft;
+						rof = pThis->RearmTimer.TimeLeft;
 						pThis->RearmTimer.Start(0);
-
-						for (auto i = pThis->CurrentBurstIndex; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
-						{
-							rof = pThis->RearmTimer.TimeLeft;
-							pThis->RearmTimer.Start(0);
-						}
-
-						pThis->RearmTimer.Start(rof);
 					}
 
-					return SkipVanillaFire;
+					pThis->RearmTimer.Start(rof);
 				}
+
+				return SkipVanillaFire;
 			}
 		}
 	}
@@ -66,29 +63,26 @@ DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 	{
 		if (pWeapon->Burst > 1)
 		{
-			if (const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
+			if (WeaponTypeExt::ExtMap.Find(pWeapon)->Burst_NoDelay)
 			{
-				if (pWeaponExt->Burst_NoDelay)
+				if (pThis->Fire(pTarget, wpIdx))
 				{
-					if (pThis->Fire(pTarget, wpIdx))
+					if (!pThis->CurrentBurstIndex)
+						return SkipVanillaFire;
+
+					auto rof = pThis->RearmTimer.TimeLeft;
+					pThis->RearmTimer.Start(0);
+
+					for (auto i = pThis->CurrentBurstIndex; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
 					{
-						if (!pThis->CurrentBurstIndex)
-							return SkipVanillaFire;
-
-						auto rof = pThis->RearmTimer.TimeLeft;
+						rof = pThis->RearmTimer.TimeLeft;
 						pThis->RearmTimer.Start(0);
-
-						for (auto i = pThis->CurrentBurstIndex; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
-						{
-							rof = pThis->RearmTimer.TimeLeft;
-							pThis->RearmTimer.Start(0);
-						}
-
-						pThis->RearmTimer.Start(rof);
 					}
 
-					return SkipVanillaFire;
+					pThis->RearmTimer.Start(rof);
 				}
+
+				return SkipVanillaFire;
 			}
 		}
 	}
@@ -111,13 +105,13 @@ DEFINE_HOOK(0x44B630, BuildingClass_MissionAttack_AnimDelayedFire, 0x6)
 
 #pragma region AIConstructionYard
 
-DEFINE_HOOK(0x740A11, UnitClass_Mission_Guard_AINonAutoDeploy, 0x6)
+DEFINE_HOOK(0x740A11, UnitClass_Mission_Guard_AIAutoDeployMCV, 0x6)
 {
 	enum { SkipGameCode = 0x740A50 };
 
 	GET(UnitClass*, pMCV, ESI);
 
-	return (RulesExt::Global()->AINonAutoDeploy && pMCV->Owner->NumConYards > 0) ? SkipGameCode : 0;
+	return (!RulesExt::Global()->AIAutoDeployMCV && pMCV->Owner->NumConYards > 0) ? SkipGameCode : 0;
 }
 
 DEFINE_HOOK(0x739889, UnitClass_TryToDeploy_AISetBaseCenter, 0x6)
@@ -126,7 +120,7 @@ DEFINE_HOOK(0x739889, UnitClass_TryToDeploy_AISetBaseCenter, 0x6)
 
 	GET(UnitClass*, pMCV, EBP);
 
-	return (RulesExt::Global()->AISetBaseCenter && pMCV->Owner->NumConYards > 1) ? SkipGameCode : 0;
+	return (!RulesExt::Global()->AISetBaseCenter && pMCV->Owner->NumConYards > 1) ? SkipGameCode : 0;
 }
 
 DEFINE_HOOK(0x4FD538, HouseClass_AIHouseUpdate_CheckAIBaseCenter, 0x7)
@@ -241,77 +235,45 @@ DEFINE_HOOK(0x70DE40, BuildingClass_sub_70DE40_GattlingRateDownDelay, 0xA)
 	GET(BuildingClass* const, pThis, ECX);
 	GET_STACK(int, rateDown, STACK_OFFSET(0x0, 0x4));
 
-	do
+	auto newValue = pThis->GattlingValue;
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+	const auto pTypeExt = pExt->TypeExtData;
+
+	if (pTypeExt->RateDown_Reset && (!pThis->Target || pExt->LastTargetID != pThis->Target->UniqueID))
 	{
-		auto newValue = pThis->GattlingValue;
-
-		if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-		{
-			const auto pTypeExt = pExt->TypeExtData;
-
-			if (pTypeExt->RateDown_Reset)
-			{
-				if (!pThis->Target)
-				{
-					pExt->LastTargetID = 0xFFFFFFFF;
-					pThis->GattlingValue = 0;
-					pThis->CurrentGattlingStage = 0;
-
-					return Return;
-				}
-				else if (pExt->LastTargetID != pThis->Target->UniqueID)
-				{
-					pExt->LastTargetID = pThis->Target->UniqueID;
-					pThis->GattlingValue = 0;
-					pThis->CurrentGattlingStage = 0;
-
-					return Return;
-				}
-			}
-
-			if (pTypeExt->RateDown_Delay < 0)
-				return Return;
-
-			++pExt->AccumulatedGattlingValue;
-			auto remain = pExt->AccumulatedGattlingValue;
-
-			if (!pExt->ShouldUpdateGattlingValue)
-				remain -= pTypeExt->RateDown_Delay;
-
-			if (remain <= 0)
-				return Return;
-
-			// Time's up
-			pExt->AccumulatedGattlingValue = 0;
-			pExt->ShouldUpdateGattlingValue = true;
-
-			if (pThis->Ammo <= pTypeExt->RateDown_Ammo)
-				rateDown = pTypeExt->RateDown_Cover;
-
-			if (!rateDown)
-				break;
-
-			newValue -= (rateDown * remain);
-		}
-		else
-		{
-			if (!rateDown)
-				break;
-
-			newValue -= rateDown;
-		}
-
-		if (newValue <= 0)
-			break;
-
-		pThis->GattlingValue = newValue;
-
+		pExt->LastTargetID = pThis->Target ? pThis->Target->UniqueID : 0xFFFFFFFF;
+		pThis->GattlingValue = 0;
+		pThis->CurrentGattlingStage = 0;
 		return Return;
 	}
-	while (false);
 
-	pThis->GattlingValue = 0;
+	if (pTypeExt->RateDown_Delay < 0)
+		return Return;
 
+	++pExt->AccumulatedGattlingValue;
+	auto remain = pExt->AccumulatedGattlingValue;
+
+	if (!pExt->ShouldUpdateGattlingValue)
+		remain -= pTypeExt->RateDown_Delay;
+
+	if (remain <= 0)
+		return Return;
+
+	// Time's up
+	pExt->AccumulatedGattlingValue = 0;
+	pExt->ShouldUpdateGattlingValue = true;
+
+	if (pThis->Ammo <= pTypeExt->RateDown_Ammo)
+		rateDown = pTypeExt->RateDown_Cover;
+
+	if (!rateDown)
+	{
+		pThis->GattlingValue = 0;
+		return Return;
+	}
+
+	newValue -= (rateDown * remain);
+	pThis->GattlingValue = (newValue <= 0) ? 0 : newValue;
 	return Return;
 }
 
@@ -321,20 +283,11 @@ DEFINE_HOOK(0x70DE70, TechnoClass_sub_70DE70_GattlingRateDownReset, 0x5)
 
 	if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
 	{
-		if (pExt->TypeExtData->RateDown_Reset)
+		if (pExt->TypeExtData->RateDown_Reset && (!pThis->Target || pExt->LastTargetID != pThis->Target->UniqueID))
 		{
-			if (!pThis->Target)
-			{
-				pExt->LastTargetID = 0xFFFFFFFF;
-				pThis->GattlingValue = 0;
-				pThis->CurrentGattlingStage = 0;
-			}
-			else if (pExt->LastTargetID != pThis->Target->UniqueID)
-			{
-				pExt->LastTargetID = pThis->Target->UniqueID;
-				pThis->GattlingValue = 0;
-				pThis->CurrentGattlingStage = 0;
-			}
+			pExt->LastTargetID = pThis->Target ? pThis->Target->UniqueID : 0xFFFFFFFF;
+			pThis->GattlingValue = 0;
+			pThis->CurrentGattlingStage = 0;
 		}
 
 		pExt->AccumulatedGattlingValue = 0;
@@ -351,84 +304,50 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 	GET(TechnoClass* const, pThis, ESI);
 	GET_STACK(int, rateMult, STACK_OFFSET(0x10, 0x4));
 
-	do
+	auto newValue = pThis->GattlingValue;
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+	const auto pTypeExt = pExt->TypeExtData;
+
+	if (pTypeExt->RateDown_Reset && (!pThis->Target || pExt->LastTargetID != pThis->Target->UniqueID))
 	{
-		auto newValue = pThis->GattlingValue;
-
-		if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-		{
-			const auto pTypeExt = pExt->TypeExtData;
-
-			if (pTypeExt->RateDown_Reset)
-			{
-				if (!pThis->Target)
-				{
-					pExt->LastTargetID = 0xFFFFFFFF;
-					pThis->GattlingValue = 0;
-					pThis->CurrentGattlingStage = 0;
-
-					return SkipGameCode;
-				}
-				else if (pExt->LastTargetID != pThis->Target->UniqueID)
-				{
-					pExt->LastTargetID = pThis->Target->UniqueID;
-					pThis->GattlingValue = 0;
-					pThis->CurrentGattlingStage = 0;
-
-					return SkipGameCode;
-				}
-			}
-
-			if (pTypeExt->RateDown_Delay < 0)
-				return SkipGameCode;
-
-			pExt->AccumulatedGattlingValue += rateMult;
-			auto remain = pExt->AccumulatedGattlingValue;
-
-			if (!pExt->ShouldUpdateGattlingValue)
-				remain -= pTypeExt->RateDown_Delay;
-
-			if (remain <= 0 && rateMult)
-				return SkipGameCode;
-
-			// Time's up
-			pExt->AccumulatedGattlingValue = 0;
-			pExt->ShouldUpdateGattlingValue = true;
-
-			if (!rateMult)
-				break;
-
-			const auto rateDown = (pThis->Ammo <= pTypeExt->RateDown_Ammo) ? pTypeExt->RateDown_Cover.Get() : pTypeExt->OwnerObject()->RateDown;
-
-			if (!rateDown)
-				break;
-
-			newValue -= (rateDown * remain);
-		}
-		else
-		{
-			if (!rateMult)
-				break;
-
-			const auto rateDown = pThis->GetTechnoType()->RateDown;
-
-			if (!rateDown)
-				break;
-
-			newValue -= (rateDown * rateMult);
-		}
-
-		if (newValue <= 0)
-			break;
-
-		pThis->GattlingValue = newValue;
-
+		pExt->LastTargetID = pThis->Target ? pThis->Target->UniqueID : 0xFFFFFFFF;
+		pThis->GattlingValue = 0;
+		pThis->CurrentGattlingStage = 0;
 		return SkipGameCode;
 	}
-	while (false);
 
-	pThis->GattlingValue = 0;
+	if (pTypeExt->RateDown_Delay < 0)
+		return SkipGameCode;
 
+	pExt->AccumulatedGattlingValue += rateMult;
+	auto remain = pExt->AccumulatedGattlingValue;
+
+	if (!pExt->ShouldUpdateGattlingValue)
+		remain -= pTypeExt->RateDown_Delay;
+
+	if (remain <= 0 && rateMult)
+		return SkipGameCode;
+
+	// Time's up
+	pExt->AccumulatedGattlingValue = 0;
+	pExt->ShouldUpdateGattlingValue = true;
+
+	if (!rateMult)
+	{
+		pThis->GattlingValue = 0;
+		return SkipGameCode;
+	}
+
+	const auto rateDown = (pThis->Ammo <= pTypeExt->RateDown_Ammo) ? pTypeExt->RateDown_Cover.Get() : pTypeExt->OwnerObject()->RateDown;
+
+	if (!rateDown)
+	{
+		pThis->GattlingValue = 0;
+		return SkipGameCode;
+	}
+
+	newValue -= (rateDown * remain);
+	pThis->GattlingValue = (newValue <= 0) ? 0 : newValue;
 	return SkipGameCode;
 }
 
@@ -643,6 +562,7 @@ bool __fastcall CanEnterNow(UnitClass* pTransport, FootClass* pPassenger)
 		const auto linkCell = pLink->GetCoords();
 		const auto tranCell = pTransport->GetCoords();
 
+		// When the most important passenger is close, need to prevent overlap
 		if (abs(linkCell.X - tranCell.X) <= 384 && abs(linkCell.Y - tranCell.Y) <= 384)
 			return (predictSize <= (maxSize - pLink->GetTechnoType()->Size));
 	}
@@ -654,6 +574,7 @@ bool __fastcall CanEnterNow(UnitClass* pTransport, FootClass* pPassenger)
 
 	if (needCalculate && remain < static_cast<int>(pLink->GetTechnoType()->Size))
 	{
+		// Avoid passenger moving forward, resulting in overlap with transport and create invisible barrier
 		pLink->SendToFirstLink(RadioCommand::NotifyUnlink);
 		pLink->EnterIdleMode(false, true);
 	}
@@ -667,12 +588,9 @@ DEFINE_HOOK(0x51A0D4, InfantryClass_UpdatePosition_NoQueueUpToEnter, 0x6)
 
 	GET(InfantryClass* const, pThis, ESI);
 
-	if (!RulesExt::Global()->NoQueueUpToEnter)
-		return 0;
-
-	if (const auto pDest = abstract_cast<UnitClass*>(pThis->CurrentMission == Mission::Enter ? pThis->Destination : pThis->unknown_500))
+	if (const auto pDest = abstract_cast<UnitClass*>(pThis->CurrentMission == Mission::Enter ? pThis->Destination : pThis->QueueUpToEnter))
 	{
-		if (pDest->Type->Passengers > 0)
+		if (pDest->Type->Passengers > 0 && TechnoTypeExt::ExtMap.Find(pDest->Type)->NoQueueUpToEnter.Get(RulesExt::Global()->NoQueueUpToEnter))
 		{
 			const auto thisCell = pThis->GetCoords();
 			const auto destCell = pDest->GetCoords();
@@ -686,7 +604,7 @@ DEFINE_HOOK(0x51A0D4, InfantryClass_UpdatePosition_NoQueueUpToEnter, 0x6)
 
 					pThis->ArchiveTarget = nullptr;
 					pThis->OnBridge = false;
-					pThis->unknown_C4 = 0;
+					pThis->MissionAccumulateTime = 0;
 					pThis->GattlingValue = 0;
 					pThis->CurrentGattlingStage = 0;
 
@@ -705,7 +623,7 @@ DEFINE_HOOK(0x51A0D4, InfantryClass_UpdatePosition_NoQueueUpToEnter, 0x6)
 					pDest->AddPassenger(pThis);
 					pThis->Undiscover();
 
-					pThis->unknown_500 = nullptr; // Added, to prevent passengers from wanting to get on after getting off
+					pThis->QueueUpToEnter = nullptr; // Added, to prevent passengers from wanting to get on after getting off
 					pThis->SetSpeedPercentage(0.0); // Added, to stop the passengers and let OpenTopped work normally
 
 					return EnteredThenReturn;
@@ -723,12 +641,9 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 
 	GET(UnitClass* const, pThis, EBP);
 
-	if (!RulesExt::Global()->NoQueueUpToEnter)
-		return 0;
-
-	if (const auto pDest = abstract_cast<UnitClass*>(pThis->CurrentMission == Mission::Enter ? pThis->Destination : pThis->unknown_500))
+	if (const auto pDest = abstract_cast<UnitClass*>(pThis->CurrentMission == Mission::Enter ? pThis->Destination : pThis->QueueUpToEnter))
 	{
-		if (pDest->Type->Passengers > 0)
+		if (pDest->Type->Passengers > 0 && TechnoTypeExt::ExtMap.Find(pDest->Type)->NoQueueUpToEnter.Get(RulesExt::Global()->NoQueueUpToEnter))
 		{
 			const auto thisCell = pThis->GetCoords();
 			const auto destCell = pDest->GetCoords();
@@ -741,7 +656,7 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 
 					pThis->ArchiveTarget = nullptr;
 					pThis->OnBridge = false;
-					pThis->unknown_C4 = 0;
+					pThis->MissionAccumulateTime = 0;
 					pThis->GattlingValue = 0;
 					pThis->CurrentGattlingStage = 0;
 
@@ -764,7 +679,7 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 
 					pThis->Undiscover();
 
-					pThis->unknown_500 = nullptr; // Added, to prevent passengers from wanting to get on after getting off
+					pThis->QueueUpToEnter = nullptr; // Added, to prevent passengers from wanting to get on after getting off
 					pThis->SetSpeedPercentage(0.0); // Added, to stop the passengers and let OpenTopped work normally
 
 					return EnteredThenReturn;
@@ -788,15 +703,14 @@ DEFINE_HOOK(0x73DC9C, UnitClass_Mission_Unload_NoQueueUpToUnloadBreak, 0xA)
 {
 	enum { SkipGameCode = 0x73E289 };
 
+	GET(UnitClass* const, pThis, ESI);
 	GET(FootClass* const, pPassenger, EDI);
 
 	pPassenger->Undiscover();
 
-	if (RulesExt::Global()->NoQueueUpToUnload)
-	{
-		GET(UnitClass* const, pThis, ESI);
+	// Play the sound when interrupted for some reason
+	if (TechnoTypeExt::ExtMap.Find(pThis->Type)->NoQueueUpToUnload.Get(RulesExt::Global()->NoQueueUpToUnload))
 		PlayUnitLeaveTransportSound(pThis);
-	}
 
 	return SkipGameCode;
 }
@@ -807,10 +721,11 @@ DEFINE_HOOK(0x73DC1E, UnitClass_Mission_Unload_NoQueueUpToUnloadLoop, 0xA)
 
 	GET(UnitClass* const, pThis, ESI);
 
-	if (RulesExt::Global()->NoQueueUpToUnload)
+	if (TechnoTypeExt::ExtMap.Find(pThis->Type)->NoQueueUpToUnload.Get(RulesExt::Global()->NoQueueUpToUnload))
 	{
 		if (pThis->Passengers.NumPassengers <= pThis->NonPassengerCount)
 		{
+			// If unloading is required within one frame, the sound will only be played when the last passenger leaves
 			PlayUnitLeaveTransportSound(pThis);
 			pThis->MissionStatus = 4;
 			return UnloadReturn;
@@ -857,72 +772,11 @@ DEFINE_HOOK(0x44733A, BuildingClass_MouseOverObject_BuildingCheckDeploy, 0xA)
 
 #pragma region AggressiveAttackMove
 
-DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6)
-{
-	enum { SkipGameCode = 0x4C762A };
-
-	GET(TechnoClass* const, pTechno, ESI);
-
-	// Check aircrafts
-	const auto pAircraft = abstract_cast<AircraftClass*>(pTechno);
-	const bool commonAircraft = pAircraft && !pAircraft->Airstrike && !pAircraft->Spawned;
-	const auto mission = pTechno->CurrentMission;
-
-	// To avoid aircrafts overlap by keep link if is returning or is in airport now.
-	if (!commonAircraft || (mission != Mission::Sleep && mission != Mission::Guard && mission != Mission::Enter) || !pAircraft->DockNowHeadingTo || (pAircraft->DockNowHeadingTo != pAircraft->GetNthLink()))
-		pTechno->SendToEachLink(RadioCommand::NotifyUnlink);
-
-	// To avoid technos being unable to stop in attack move mega mission
-	if (pTechno->vt_entry_4C4()) // pTechno->MegaMissionIsAttackMove()
-		pTechno->vt_entry_4A8(); // pTechno->ClearMegaMissionData()
-
-	// Clearing the current target should still be necessary for all technos
-	pTechno->SetTarget(nullptr);
-
-	if (commonAircraft)
-	{
-		if (pAircraft->Type->AirportBound)
-		{
-			// To avoid `AirportBound=yes` aircrafts pausing in the air and let they returning to air base immediately.
-			if (!pAircraft->DockNowHeadingTo || (pAircraft->DockNowHeadingTo != pAircraft->GetNthLink())) // If the aircraft have no valid dock, try to find a new one
-				pAircraft->EnterIdleMode(false, true);
-		}
-		else if (pAircraft->Ammo)
-		{
-			// To avoid `AirportBound=no` aircrafts ignoring the stop task or directly return to the airport.
-			if (pAircraft->Destination && static_cast<int>(CellClass::Coord2Cell(pAircraft->Destination->GetCoords()).DistanceFromSquared(pAircraft->GetMapCoords())) > 2) // If the aircraft is moving, find the forward cell then stop in it
-				pAircraft->SetDestination(pAircraft->GetCell()->GetNeighbourCell(static_cast<FacingType>(pAircraft->PrimaryFacing.Current().GetValue<3>())), true);
-		}
-		else if (!pAircraft->DockNowHeadingTo || (pAircraft->DockNowHeadingTo != pAircraft->GetNthLink()))
-		{
-			pAircraft->EnterIdleMode(false, true);
-		}
-		// Otherwise landing or idling normally without answering the stop command
-	}
-	else
-	{
-		// Check Jumpjets
-		const auto pFoot = abstract_cast<FootClass*>(pTechno);
-		const auto pJumpjetLoco = pFoot ? locomotion_cast<JumpjetLocomotionClass*>(pFoot->Locomotor) : nullptr;
-
-		// To avoid jumpjets falling into a state of standing idly by
-		if (!pJumpjetLoco) // If is not jumpjet, clear the destination is enough
-			pTechno->SetDestination(nullptr, true);
-		else if (!pFoot->Destination) // When in attack move and have had a target, the destination will be cleaned up, enter the guard mission can prevent the jumpjets stuck in a status of standing idly by
-			pTechno->QueueMission(Mission::Guard, true);
-		else if (static_cast<int>(CellClass::Coord2Cell(pFoot->Destination->GetCoords()).DistanceFromSquared(pTechno->GetMapCoords())) > 2) // If the jumpjet is moving, find the forward cell then stop in it
-			pTechno->SetDestination(pTechno->GetCell()->GetNeighbourCell(static_cast<FacingType>(pJumpjetLoco->LocomotionFacing.Current().GetValue<3>())), true);
-		// Otherwise landing or idling normally without answering the stop command
-	}
-
-	return SkipGameCode;
-}
-
 static inline bool CheckAttackMoveCanResetTarget(FootClass* pThis)
 {
 	const auto pTarget = pThis->Target;
 
-	if (!pTarget || pTarget == reinterpret_cast<AbstractClass*>(pThis->unknown_5CC))
+	if (!pTarget || pTarget == pThis->MegaTarget)
 		return false;
 
 	const auto pTargetTechno = abstract_cast<TechnoClass*>(pTarget);
@@ -968,7 +822,7 @@ DEFINE_HOOK(0x4DF3A0, FootClass_UpdateAttackMove_SelectNewTarget, 0x6)
 	if (RulesExt::Global()->AttackMove_Aggressive && CheckAttackMoveCanResetTarget(pThis))
 	{
 		pThis->Target = nullptr;
-		pThis->unknown_bool_5D1 = false; // pThis->HaveAttackMoveTarget
+		pThis->HaveAttackMoveTarget = false;
 	}
 
 	return 0;
@@ -980,7 +834,7 @@ DEFINE_HOOK(0x6F85AB, TechnoClass_CanAutoTargetObject_AggressiveAttackMove, 0x6)
 
 	GET(TechnoClass* const, pThis, EDI);
 
-	return (!pThis->Owner->IsControlledByHuman() || (RulesExt::Global()->AttackMove_Aggressive && pThis->vt_entry_4C4())) ? CanTarget : ContinueCheck;
+	return (!pThis->Owner->IsControlledByHuman() || (RulesExt::Global()->AttackMove_Aggressive && pThis->MegaMissionIsAttackMove())) ? CanTarget : ContinueCheck;
 }
 
 #pragma endregion
@@ -2083,7 +1937,7 @@ DEFINE_HOOK(0x4DF3A6, FootClass_UpdateAttackMove_Follow, 0x6)
 		{
 			if ((pTechno->AbstractFlags & AbstractFlags::Foot) != AbstractFlags::None &&
 				pTechno != pThis && pTechno->Owner == pThis->Owner &&
-				pTechno->vt_entry_4C4()) // MegaMissionIsAttackMove()
+				pTechno->MegaMissionIsAttackMove())
 			{
 				auto const pTargetExt = TechnoExt::ExtMap.Find(pTechno);
 
@@ -2116,15 +1970,15 @@ DEFINE_HOOK(0x4DF3A6, FootClass_UpdateAttackMove_Follow, 0x6)
 		}
 		else
 		{
-			if (pThis->unknown_5CC) // MegaTarget
-				pThis->SetDestination(reinterpret_cast<AbstractClass*>(pThis->unknown_5CC), false);
-			else if (pThis->unknown_5C8) // MegaDestination
-				pThis->SetDestination(reinterpret_cast<AbstractClass*>(pThis->unknown_5C8), false);
+			if (pThis->MegaTarget)
+				pThis->SetDestination(pThis->MegaTarget, false);
+			else if (pThis->MegaDestination)
+				pThis->SetDestination(pThis->MegaDestination, false);
 			else
 				pThis->SetDestination(nullptr, false);
 		}
 
-		pThis->vt_entry_4A8(); // ClearMegaMission
+		pThis->ClearMegaMissionData();
 
 		R->EAX(pClosestTarget);
 		return FuncRet;

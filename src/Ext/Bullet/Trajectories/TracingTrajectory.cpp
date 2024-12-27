@@ -29,16 +29,20 @@ void TracingTrajectoryType::Serialize(T& Stm)
 		.Process(this->TraceMode)
 		.Process(this->TheDuration)
 		.Process(this->TolerantTime)
+		.Process(this->ROT)
+		.Process(this->BulletSpin)
 		.Process(this->PeacefullyVanish)
 		.Process(this->TraceTheTarget)
 		.Process(this->CreateAtTarget)
 		.Process(this->CreateCoord)
 		.Process(this->OffsetCoord)
+		.Process(this->WeaponCoord)
 		.Process(this->Weapons)
 		.Process(this->WeaponCount)
 		.Process(this->WeaponDelay)
 		.Process(this->WeaponTimer)
 		.Process(this->WeaponCycle)
+		.Process(this->WeaponCheck)
 		.Process(this->Synchronize)
 		.Process(this->SuicideAboveRange)
 		.Process(this->SuicideIfNoWeapon)
@@ -80,11 +84,14 @@ void TracingTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 
 	this->TheDuration.Read(exINI, pSection, "Trajectory.Tracing.TheDuration");
 	this->TolerantTime.Read(exINI, pSection, "Trajectory.Tracing.TolerantTime");
+	this->ROT.Read(exINI, pSection, "Trajectory.Tracing.ROT");
+	this->BulletSpin.Read(exINI, pSection, "Trajectory.Tracing.BulletSpin");
 	this->PeacefullyVanish.Read(exINI, pSection, "Trajectory.Tracing.PeacefullyVanish");
 	this->TraceTheTarget.Read(exINI, pSection, "Trajectory.Tracing.TraceTheTarget");
 	this->CreateAtTarget.Read(exINI, pSection, "Trajectory.Tracing.CreateAtTarget");
 	this->CreateCoord.Read(exINI, pSection, "Trajectory.Tracing.CreateCoord");
 	this->OffsetCoord.Read(exINI, pSection, "Trajectory.Tracing.OffsetCoord");
+	this->WeaponCoord.Read(exINI, pSection, "Trajectory.Tracing.WeaponCoord");
 	this->Weapons.Read(exINI, pSection, "Trajectory.Tracing.Weapons");
 	this->WeaponCount.Read(exINI, pSection, "Trajectory.Tracing.WeaponCount");
 	this->WeaponDelay.Read(exINI, pSection, "Trajectory.Tracing.WeaponDelay");
@@ -94,6 +101,7 @@ void TracingTrajectoryType::Read(CCINIClass* const pINI, const char* pSection)
 		this->WeaponTimer = 0;
 
 	this->WeaponCycle.Read(exINI, pSection, "Trajectory.Tracing.WeaponCycle");
+	this->WeaponCheck.Read(exINI, pSection, "Trajectory.Tracing.WeaponCheck");
 	this->Synchronize.Read(exINI, pSection, "Trajectory.Tracing.Synchronize");
 	this->SuicideAboveRange.Read(exINI, pSection, "Trajectory.Tracing.SuicideAboveRange");
 	this->SuicideIfNoWeapon.Read(exINI, pSection, "Trajectory.Tracing.SuicideIfNoWeapon");
@@ -172,13 +180,13 @@ bool TracingTrajectory::OnAI(BulletClass* pBullet)
 	if (this->BulletDetonatePreCheck(pBullet))
 		return true;
 
-	this->ChangeVelocity(pBullet);
-
-	if (this->WeaponTimer.Completed() && this->PrepareTracingWeapon(pBullet))
+	if (this->WeaponTimer.Completed() && this->CheckFireFacing(pBullet) && this->PrepareTracingWeapon(pBullet))
 		return true;
 
 	if (this->ExistTimer.Completed())
 		return true;
+
+	this->ChangeFacing(pBullet);
 
 	return false;
 }
@@ -195,7 +203,11 @@ void TracingTrajectory::OnAIPreDetonate(BulletClass* pBullet)
 
 void TracingTrajectory::OnAIVelocity(BulletClass* pBullet, BulletVelocity* pSpeed, BulletVelocity* pPosition)
 {
-	pSpeed->Z += BulletTypeExt::GetAdjustedGravity(pBullet->Type);
+	*pSpeed = this->ChangeVelocity(pBullet); // This is for location calculation
+	const auto pType = this->Type;
+
+	if (pType->ROT < 0 && !pType->BulletSpin) // This is for image drawing
+		pBullet->Velocity = *pSpeed;
 }
 
 TrajectoryCheckReturnType TracingTrajectory::OnAITargetCoordCheck(BulletClass* pBullet)
@@ -264,6 +276,15 @@ void TracingTrajectory::SetSourceLocation(BulletClass* pBullet)
 	{
 		pBullet->SetLocation(pBullet->SourceCoords + theOffset);
 	}
+
+	BulletVelocity facing
+	{
+		static_cast<double>(pBullet->TargetCoords.X - pBullet->SourceCoords.X),
+		static_cast<double>(pBullet->TargetCoords.Y - pBullet->SourceCoords.Y),
+		0
+	};
+
+	pBullet->Velocity = facing * (1 / facing.Magnitude());
 }
 
 void TracingTrajectory::InitializeDuration(BulletClass* pBullet, int duration)
@@ -329,14 +350,14 @@ bool TracingTrajectory::BulletDetonatePreCheck(BulletClass* pBullet)
 			this->TolerantTimer.Start(pType->TolerantTime);
 	}
 
-	if (!pType->SuicideAboveRange && pTechno && !this->NotMainWeapon)
+	if (pType->SuicideAboveRange)
 	{
 		if (const auto pWeapon = pBullet->WeaponType)
 		{
-			auto source = pTechno->GetCoords();
+			auto source = (pTechno && !this->NotMainWeapon) ? pTechno->GetCoords() : pBullet->SourceCoords;
 			auto target = pBullet->TargetCoords;
 
-			if (pTechno->IsInAir())
+			if (this->NotMainWeapon || (pTechno && pTechno->IsInAir()))
 			{
 				source.Z = 0;
 				target.Z = 0;
@@ -350,11 +371,82 @@ bool TracingTrajectory::BulletDetonatePreCheck(BulletClass* pBullet)
 	return false;
 }
 
-void TracingTrajectory::ChangeVelocity(BulletClass* pBullet)
+void TracingTrajectory::ChangeFacing(BulletClass* pBullet)
+{
+	const auto pType = this->Type;
+	constexpr double ratio = Math::TwoPi / 256;
+
+	if (!pType->BulletSpin)
+	{
+		if (pType->ROT < 0)
+			return;
+
+		BulletVelocity desiredFacing
+		{
+			static_cast<double>(pBullet->TargetCoords.X - pBullet->Location.X),
+			static_cast<double>(pBullet->TargetCoords.Y - pBullet->Location.Y),
+			0
+		};
+
+		if (!pType->ROT)
+		{
+			pBullet->Velocity = desiredFacing * (1 / desiredFacing.Magnitude());
+			return;
+		}
+
+		const auto current = Math::atan2(pBullet->Velocity.Y, pBullet->Velocity.X);
+		const auto desired = Math::atan2(desiredFacing.Y, desiredFacing.X);
+		const auto rotate = pType->ROT * ratio;
+
+		const auto differenceP = desired - current;
+		const bool dir1 = differenceP > 0;
+		const auto delta = dir1 ? differenceP : -differenceP;
+
+		const bool dir2 = delta > Math::Pi;
+		const auto differenceR = dir2 ? (Math::TwoPi - delta) : delta;
+		const bool dirR = dir1 ^ dir2;
+
+		if (differenceR <= rotate)
+		{
+			pBullet->Velocity = desiredFacing * (1 / desiredFacing.Magnitude());
+			return;
+		}
+
+		const auto facing = current + (dirR ? rotate : -rotate);
+		pBullet->Velocity.X = Math::cos(facing);
+		pBullet->Velocity.Y = Math::sin(facing);
+		pBullet->Velocity.Z = 0;
+	}
+	else
+	{
+		const auto radian = Math::atan2(pBullet->Velocity.Y, pBullet->Velocity.X) + (pType->ROT * ratio);
+		pBullet->Velocity.X = Math::cos(radian);
+		pBullet->Velocity.Y = Math::sin(radian);
+		pBullet->Velocity.Z = 0;
+	}
+}
+
+bool TracingTrajectory::CheckFireFacing(BulletClass* pBullet)
 {
 	const auto pType = this->Type;
 
-	const auto destination = pType->TraceTheTarget ? pBullet->TargetCoords : pBullet->Owner->GetCoords();
+	if (!pType->WeaponCheck || !pType->Synchronize || pType->TraceTheTarget || pType->ROT < 0 || pType->BulletSpin)
+		return true;
+
+	const auto& theBullet = pBullet->Location;
+	const auto& theTarget = pBullet->TargetCoords;
+	const auto targetDir = DirStruct { Math::atan2(theTarget.Y - theBullet.Y, theTarget.X - theBullet.X) };
+	const auto bulletDir = DirStruct { Math::atan2(pBullet->Velocity.Y, pBullet->Velocity.X) };
+
+	return abs(static_cast<short>(static_cast<short>(targetDir.Raw) - static_cast<short>(bulletDir.Raw))) <= (2048 + (pType->ROT << 8));
+}
+
+BulletVelocity TracingTrajectory::ChangeVelocity(BulletClass* pBullet)
+{
+	const auto pType = this->Type;
+	const auto pFirer = pBullet->Owner;
+
+	const auto destination = (pType->TraceTheTarget || !pFirer) ? pBullet->TargetCoords : (pFirer->Transporter ? pFirer->Transporter->GetCoords() : pFirer->GetCoords());
 	const auto theCoords = pType->OffsetCoord.Get();
 	auto theOffset = theCoords;
 
@@ -463,12 +555,17 @@ void TracingTrajectory::ChangeVelocity(BulletClass* pBullet)
 	const auto distanceCoords = ((destination + theOffset) - pBullet->Location);
 	const auto distance = distanceCoords.Magnitude();
 
-	pBullet->Velocity.X = static_cast<double>(distanceCoords.X);
-	pBullet->Velocity.Y = static_cast<double>(distanceCoords.Y);
-	pBullet->Velocity.Z = static_cast<double>(distanceCoords.Z);
+	BulletVelocity velocity
+	{
+		static_cast<double>(distanceCoords.X),
+		static_cast<double>(distanceCoords.Y),
+		static_cast<double>(distanceCoords.Z)
+	};
 
 	if (pType->Trajectory_Speed > 0 && distance > pType->Trajectory_Speed)
-		pBullet->Velocity *= (pType->Trajectory_Speed / distance);
+		velocity *= (pType->Trajectory_Speed / distance);
+
+	return velocity;
 }
 
 AbstractClass* TracingTrajectory::GetBulletTarget(BulletClass* pBullet, TechnoClass* pTechno, HouseClass* pOwner, WeaponTypeClass* pWeapon, WeaponTypeExt::ExtData* pWeaponExt)
@@ -523,7 +620,9 @@ AbstractClass* TracingTrajectory::GetBulletTarget(BulletClass* pBullet, TechnoCl
 
 CoordStruct TracingTrajectory::GetWeaponFireCoord(BulletClass* pBullet, TechnoClass* pTechno)
 {
-	if (this->Type->TraceTheTarget)
+	const auto pType = this->Type;
+
+	if (pType->TraceTheTarget)
 	{
 		const auto pTransporter = pTechno->Transporter;
 
@@ -556,7 +655,20 @@ CoordStruct TracingTrajectory::GetWeaponFireCoord(BulletClass* pBullet, TechnoCl
 		return pBullet->SourceCoords;
 	}
 
-	return pBullet->Location;
+	const auto& weaponCoord = pType->WeaponCoord.Get();
+
+	if (weaponCoord == CoordStruct::Empty)
+		return pBullet->Location;
+
+	const auto rotateRadian = Math::atan2(pBullet->TargetCoords.Y - pBullet->Location.Y , pBullet->TargetCoords.X - pBullet->Location.X);
+	CoordStruct fireOffsetCoord
+	{
+		static_cast<int>(weaponCoord.X * Math::cos(rotateRadian) + weaponCoord.Y * Math::sin(rotateRadian)),
+		static_cast<int>(weaponCoord.X * Math::sin(rotateRadian) - weaponCoord.Y * Math::cos(rotateRadian)),
+		weaponCoord.Z
+	};
+
+	return pBullet->Location + fireOffsetCoord;
 }
 
 bool TracingTrajectory::PrepareTracingWeapon(BulletClass* pBullet)
@@ -603,7 +715,7 @@ void TracingTrajectory::CreateTracingBullets(BulletClass* pBullet, WeaponTypeCla
 	}
 
 	const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
-	AbstractClass* pTarget = this->GetBulletTarget(pBullet, pTechno, pOwner, pWeapon, pWeaponExt);
+	const auto pTarget = this->GetBulletTarget(pBullet, pTechno, pOwner, pWeapon, pWeaponExt);
 
 	if (!pTarget)
 		return;
@@ -632,7 +744,13 @@ void TracingTrajectory::CreateTracingBullets(BulletClass* pBullet, WeaponTypeCla
 		{
 			const auto flag = pBulletExt->Trajectory->Flag();
 
-			if (flag == TrajectoryFlag::Disperse)
+			if (flag == TrajectoryFlag::Tracing)
+			{
+				const auto pTrajectory = static_cast<TracingTrajectory*>(pBulletExt->Trajectory.get());
+				pTrajectory->FirepowerMult = this->FirepowerMult;
+				pTrajectory->NotMainWeapon = true;
+			}
+			else if (flag == TrajectoryFlag::Disperse)
 			{
 				const auto pTrajectory = static_cast<DisperseTrajectory*>(pBulletExt->Trajectory.get());
 				pTrajectory->FirepowerMult = this->FirepowerMult;
@@ -645,12 +763,6 @@ void TracingTrajectory::CreateTracingBullets(BulletClass* pBullet, WeaponTypeCla
 			else if (flag == TrajectoryFlag::Engrave)
 			{
 				const auto pTrajectory = static_cast<EngraveTrajectory*>(pBulletExt->Trajectory.get());
-				pTrajectory->NotMainWeapon = true;
-			}
-			else if (flag == TrajectoryFlag::Tracing)
-			{
-				const auto pTrajectory = static_cast<TracingTrajectory*>(pBulletExt->Trajectory.get());
-				pTrajectory->FirepowerMult = this->FirepowerMult;
 				pTrajectory->NotMainWeapon = true;
 			}
 		}

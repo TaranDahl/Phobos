@@ -97,7 +97,7 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		append("Owner = %s (%s), ", pFoot->Owner->get_ID(), pFoot->Owner->PlainName);
 		const auto cell = pFoot->GetMapCoords();
 		append("Location = (%d, %d), ", cell.X, cell.Y);
-		append("Tether = (%s, %s), ", (pFoot->unknown_bool_418 ? "yes" : "no"), (pFoot->unknown_bool_419 ? "yes" : "no"));
+		append("Tether = (%s, %s), ", (pFoot->IsTether ? "yes" : "no"), (pFoot->IsAlternativeTether ? "yes" : "no"));
 		append("Health = (%d/%d)", pFoot->Health, pType->Strength);
 
 		auto pTechnoExt = TechnoExt::ExtMap.Find(pFoot);
@@ -120,8 +120,8 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		if (pFoot->QueuedMission != Mission::None)
 			append(", QueuedMission = %d (%s)", pFoot->QueuedMission, MissionControlClass::FindName(pFoot->QueuedMission));
 
-		if (pFoot->unknown_int_5C4 != -1)
-			append(", MegaMission = %d (%s)", pFoot->unknown_int_5C4, MissionControlClass::FindName(static_cast<Mission>(pFoot->unknown_int_5C4)));
+		if (pFoot->MegaMission != Mission::None)
+			append(", MegaMission = %d (%s)", pFoot->MegaMission, MissionControlClass::FindName(pFoot->MegaMission));
 
 		append("\n");
 
@@ -177,10 +177,10 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		getTargetInfo(pFoot, pFoot->Transporter, "Transporter");
 		getTargetInfo(pFoot, pFoot->Destination, "Destination");
 		getTargetInfo(pFoot, pFoot->LastDestination, "LastDestination");
-		getTargetInfo(pFoot, pFoot->unknown_500, "QueueUpToEnter");
+		getTargetInfo(pFoot, pFoot->QueueUpToEnter, "QueueUpToEnter");
 		getTargetInfo(pFoot, pFoot->unknown_5A0, "Follow");
-		getTargetInfo(pFoot, reinterpret_cast<AbstractClass*>(pFoot->unknown_5CC), "MegaTarget");
-		getTargetInfo(pFoot, reinterpret_cast<AbstractClass*>(pFoot->unknown_5C8), "MegaDestination");
+		getTargetInfo(pFoot, pFoot->MegaTarget, "MegaTarget");
+		getTargetInfo(pFoot, pFoot->MegaDestination, "MegaDestination");
 		getTargetInfo(pFoot, pFoot->ParasiteEatingMe, "Parasite");
 
 		if (const auto pUnit = abstract_cast<UnitClass*>(pFoot))
@@ -257,7 +257,7 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		append("Owner = %s (%s), ", pBuilding->Owner->get_ID(), pBuilding->Owner->PlainName);
 		const auto cell = pBuilding->GetMapCoords();
 		append("Location = (%d, %d), ", cell.X, cell.Y);
-		append("Tether = (%s, %s), ", (pBuilding->unknown_bool_418 ? "yes" : "no"), (pBuilding->unknown_bool_419 ? "yes" : "no"));
+		append("Tether = (%s, %s), ", (pBuilding->IsTether ? "yes" : "no"), (pBuilding->IsAlternativeTether ? "yes" : "no"));
 		append("Health = (%d/%d)", pBuilding->Health, pType->Strength);
 
 		auto pTechnoExt = TechnoExt::ExtMap.Find(pBuilding);

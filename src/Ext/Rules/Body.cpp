@@ -168,7 +168,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->DamageOwnerMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageOwnerMultiplier");
 	this->DamageAlliesMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageAlliesMultiplier");
 	this->DamageEnemiesMultiplier.Read(exINI, GameStrings::CombatDamage, "DamageEnemiesMultiplier");
-	this->ExpandAircraftMission.Read(exINI, GameStrings::General, "ExpandAircraftMission");
+	this->ExtendedAircraftMissions.Read(exINI, GameStrings::General, "ExtendedAircraftMissions");
 	this->CheckUnitBaseNormal.Read(exINI, GameStrings::General, "CheckUnitBaseNormal");
 	this->Cameo_AlwaysExist.Read(exINI, GameStrings::AudioVisual, "Cameo.AlwaysExist");
 	this->Cameo_OverlayShapes.Read(exINI, GameStrings::AudioVisual, "Cameo.OverlayShapes");
@@ -183,7 +183,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->SelectedVehicleMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedVehicleMissingPCX");
 	this->SelectedAircraftMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedAircraftMissingPCX");
 	this->SelectedBuildingMissingPCX.Read(pINI, GameStrings::AudioVisual, "SelectedBuildingMissingPCX");
-	this->AINonAutoDeploy.Read(exINI, GameStrings::AI, "AINonAutoDeploy");
+	this->AIAutoDeployMCV.Read(exINI, GameStrings::AI, "AIAutoDeployMCV");
 	this->AISetBaseCenter.Read(exINI, GameStrings::AI, "AISetBaseCenter");
 	this->AIBiasSpawnCell.Read(exINI, GameStrings::AI, "AIBiasSpawnCell");
 	this->AIForbidConYard.Read(exINI, GameStrings::AI, "AIForbidConYard");
@@ -470,7 +470,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->DamageOwnerMultiplier)
 		.Process(this->DamageAlliesMultiplier)
 		.Process(this->DamageEnemiesMultiplier)
-		.Process(this->ExpandAircraftMission)
+		.Process(this->ExtendedAircraftMissions)
 		.Process(this->CheckUnitBaseNormal)
 		.Process(this->Cameo_AlwaysExist)
 		.Process(this->Cameo_OverlayShapes)
@@ -485,7 +485,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->SelectedVehicleMissingPCX)
 		.Process(this->SelectedAircraftMissingPCX)
 		.Process(this->SelectedBuildingMissingPCX)
-		.Process(this->AINonAutoDeploy)
+		.Process(this->AIAutoDeployMCV)
 		.Process(this->AISetBaseCenter)
 		.Process(this->AIBiasSpawnCell)
 		.Process(this->AIForbidConYard)
