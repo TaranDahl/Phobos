@@ -113,7 +113,7 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 	const auto pType = pThis->Type;
 	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
 
-	if (!pTypeExt || !pTypeExt->HarvesterQuickUnloader)
+	if (!pTypeExt->HarvesterQuickUnloader)
 		return 0;
 
 	std::vector<BuildingTypeClass*> docks;
@@ -290,11 +290,8 @@ DEFINE_HOOK(0x441226, BuildingClass_Unlimbo_RecheckRefinery, 0x6)
 {
 	GET(BuildingClass* const, pThis, ESI);
 
-	if (pThis->Type->Refinery)
-	{
-		if (const auto pHouseExt = HouseExt::ExtMap.Find(pThis->Owner))
-			pHouseExt->LastRefineryBuildFrame = Unsorted::CurrentFrame;
-	}
+	if (pThis->Type->Refinery && pThis->Owner)
+		HouseExt::ExtMap.Find(pThis->Owner)->LastRefineryBuildFrame = Unsorted::CurrentFrame;
 
 	return 0;
 }

@@ -22,29 +22,26 @@ DEFINE_HOOK(0x5209EE, InfantryClass_UpdateFiring_BurstNoDelay, 0x5)
 	{
 		if (pWeapon->Burst > 1)
 		{
-			if (const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
+			if (WeaponTypeExt::ExtMap.Find(pWeapon)->Burst_NoDelay)
 			{
-				if (pWeaponExt->Burst_NoDelay)
+				if (pThis->Fire(pTarget, wpIdx))
 				{
-					if (pThis->Fire(pTarget, wpIdx))
+					if (!pThis->CurrentBurstIndex)
+						return SkipVanillaFire;
+
+					auto rof = pThis->RearmTimer.TimeLeft;
+					pThis->RearmTimer.Start(0);
+
+					for (auto i = pThis->CurrentBurstIndex; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
 					{
-						if (!pThis->CurrentBurstIndex)
-							return SkipVanillaFire;
-
-						auto rof = pThis->RearmTimer.TimeLeft;
+						rof = pThis->RearmTimer.TimeLeft;
 						pThis->RearmTimer.Start(0);
-
-						for (auto i = pThis->CurrentBurstIndex; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
-						{
-							rof = pThis->RearmTimer.TimeLeft;
-							pThis->RearmTimer.Start(0);
-						}
-
-						pThis->RearmTimer.Start(rof);
 					}
 
-					return SkipVanillaFire;
+					pThis->RearmTimer.Start(rof);
 				}
+
+				return SkipVanillaFire;
 			}
 		}
 	}
@@ -64,29 +61,26 @@ DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 	{
 		if (pWeapon->Burst > 1)
 		{
-			if (const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
+			if (WeaponTypeExt::ExtMap.Find(pWeapon)->Burst_NoDelay)
 			{
-				if (pWeaponExt->Burst_NoDelay)
+				if (pThis->Fire(pTarget, wpIdx))
 				{
-					if (pThis->Fire(pTarget, wpIdx))
+					if (!pThis->CurrentBurstIndex)
+						return SkipVanillaFire;
+
+					auto rof = pThis->RearmTimer.TimeLeft;
+					pThis->RearmTimer.Start(0);
+
+					for (auto i = pThis->CurrentBurstIndex; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
 					{
-						if (!pThis->CurrentBurstIndex)
-							return SkipVanillaFire;
-
-						auto rof = pThis->RearmTimer.TimeLeft;
+						rof = pThis->RearmTimer.TimeLeft;
 						pThis->RearmTimer.Start(0);
-
-						for (auto i = pThis->CurrentBurstIndex; i != pWeapon->Burst && pThis->GetFireError(pTarget, wpIdx, true) == FireError::OK && pThis->Fire(pTarget, wpIdx); ++i)
-						{
-							rof = pThis->RearmTimer.TimeLeft;
-							pThis->RearmTimer.Start(0);
-						}
-
-						pThis->RearmTimer.Start(rof);
 					}
 
-					return SkipVanillaFire;
+					pThis->RearmTimer.Start(rof);
 				}
+
+				return SkipVanillaFire;
 			}
 		}
 	}
@@ -210,77 +204,45 @@ DEFINE_HOOK(0x70DE40, BuildingClass_sub_70DE40_GattlingRateDownDelay, 0xA)
 	GET(BuildingClass* const, pThis, ECX);
 	GET_STACK(int, rateDown, STACK_OFFSET(0x0, 0x4));
 
-	do
+	auto newValue = pThis->GattlingValue;
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+	const auto pTypeExt = pExt->TypeExtData;
+
+	if (pTypeExt->RateDown_Reset && (!pThis->Target || pExt->LastTargetID != pThis->Target->UniqueID))
 	{
-		auto newValue = pThis->GattlingValue;
-
-		if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-		{
-			const auto pTypeExt = pExt->TypeExtData;
-
-			if (pTypeExt->RateDown_Reset)
-			{
-				if (!pThis->Target)
-				{
-					pExt->LastTargetID = 0xFFFFFFFF;
-					pThis->GattlingValue = 0;
-					pThis->CurrentGattlingStage = 0;
-
-					return Return;
-				}
-				else if (pExt->LastTargetID != pThis->Target->UniqueID)
-				{
-					pExt->LastTargetID = pThis->Target->UniqueID;
-					pThis->GattlingValue = 0;
-					pThis->CurrentGattlingStage = 0;
-
-					return Return;
-				}
-			}
-
-			if (pTypeExt->RateDown_Delay < 0)
-				return Return;
-
-			++pExt->AccumulatedGattlingValue;
-			auto remain = pExt->AccumulatedGattlingValue;
-
-			if (!pExt->ShouldUpdateGattlingValue)
-				remain -= pTypeExt->RateDown_Delay;
-
-			if (remain <= 0)
-				return Return;
-
-			// Time's up
-			pExt->AccumulatedGattlingValue = 0;
-			pExt->ShouldUpdateGattlingValue = true;
-
-			if (pThis->Ammo <= pTypeExt->RateDown_Ammo)
-				rateDown = pTypeExt->RateDown_Cover;
-
-			if (!rateDown)
-				break;
-
-			newValue -= (rateDown * remain);
-		}
-		else
-		{
-			if (!rateDown)
-				break;
-
-			newValue -= rateDown;
-		}
-
-		if (newValue <= 0)
-			break;
-
-		pThis->GattlingValue = newValue;
-
+		pExt->LastTargetID = pThis->Target ? pThis->Target->UniqueID : 0xFFFFFFFF;
+		pThis->GattlingValue = 0;
+		pThis->CurrentGattlingStage = 0;
 		return Return;
 	}
-	while (false);
 
-	pThis->GattlingValue = 0;
+	if (pTypeExt->RateDown_Delay < 0)
+		return Return;
 
+	++pExt->AccumulatedGattlingValue;
+	auto remain = pExt->AccumulatedGattlingValue;
+
+	if (!pExt->ShouldUpdateGattlingValue)
+		remain -= pTypeExt->RateDown_Delay;
+
+	if (remain <= 0)
+		return Return;
+
+	// Time's up
+	pExt->AccumulatedGattlingValue = 0;
+	pExt->ShouldUpdateGattlingValue = true;
+
+	if (pThis->Ammo <= pTypeExt->RateDown_Ammo)
+		rateDown = pTypeExt->RateDown_Cover;
+
+	if (!rateDown)
+	{
+		pThis->GattlingValue = 0;
+		return Return;
+	}
+
+	newValue -= (rateDown * remain);
+	pThis->GattlingValue = (newValue <= 0) ? 0 : newValue;
 	return Return;
 }
 
@@ -290,20 +252,11 @@ DEFINE_HOOK(0x70DE70, TechnoClass_sub_70DE70_GattlingRateDownReset, 0x5)
 
 	if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
 	{
-		if (pExt->TypeExtData->RateDown_Reset)
+		if (pExt->TypeExtData->RateDown_Reset && (!pThis->Target || pExt->LastTargetID != pThis->Target->UniqueID))
 		{
-			if (!pThis->Target)
-			{
-				pExt->LastTargetID = 0xFFFFFFFF;
-				pThis->GattlingValue = 0;
-				pThis->CurrentGattlingStage = 0;
-			}
-			else if (pExt->LastTargetID != pThis->Target->UniqueID)
-			{
-				pExt->LastTargetID = pThis->Target->UniqueID;
-				pThis->GattlingValue = 0;
-				pThis->CurrentGattlingStage = 0;
-			}
+			pExt->LastTargetID = pThis->Target ? pThis->Target->UniqueID : 0xFFFFFFFF;
+			pThis->GattlingValue = 0;
+			pThis->CurrentGattlingStage = 0;
 		}
 
 		pExt->AccumulatedGattlingValue = 0;
@@ -320,84 +273,50 @@ DEFINE_HOOK(0x70E01E, TechnoClass_sub_70E000_GattlingRateDownDelay, 0x6)
 	GET(TechnoClass* const, pThis, ESI);
 	GET_STACK(int, rateMult, STACK_OFFSET(0x10, 0x4));
 
-	do
+	auto newValue = pThis->GattlingValue;
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+	const auto pTypeExt = pExt->TypeExtData;
+
+	if (pTypeExt->RateDown_Reset && (!pThis->Target || pExt->LastTargetID != pThis->Target->UniqueID))
 	{
-		auto newValue = pThis->GattlingValue;
-
-		if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-		{
-			const auto pTypeExt = pExt->TypeExtData;
-
-			if (pTypeExt->RateDown_Reset)
-			{
-				if (!pThis->Target)
-				{
-					pExt->LastTargetID = 0xFFFFFFFF;
-					pThis->GattlingValue = 0;
-					pThis->CurrentGattlingStage = 0;
-
-					return SkipGameCode;
-				}
-				else if (pExt->LastTargetID != pThis->Target->UniqueID)
-				{
-					pExt->LastTargetID = pThis->Target->UniqueID;
-					pThis->GattlingValue = 0;
-					pThis->CurrentGattlingStage = 0;
-
-					return SkipGameCode;
-				}
-			}
-
-			if (pTypeExt->RateDown_Delay < 0)
-				return SkipGameCode;
-
-			pExt->AccumulatedGattlingValue += rateMult;
-			auto remain = pExt->AccumulatedGattlingValue;
-
-			if (!pExt->ShouldUpdateGattlingValue)
-				remain -= pTypeExt->RateDown_Delay;
-
-			if (remain <= 0 && rateMult)
-				return SkipGameCode;
-
-			// Time's up
-			pExt->AccumulatedGattlingValue = 0;
-			pExt->ShouldUpdateGattlingValue = true;
-
-			if (!rateMult)
-				break;
-
-			const auto rateDown = (pThis->Ammo <= pTypeExt->RateDown_Ammo) ? pTypeExt->RateDown_Cover.Get() : pTypeExt->OwnerObject()->RateDown;
-
-			if (!rateDown)
-				break;
-
-			newValue -= (rateDown * remain);
-		}
-		else
-		{
-			if (!rateMult)
-				break;
-
-			const auto rateDown = pThis->GetTechnoType()->RateDown;
-
-			if (!rateDown)
-				break;
-
-			newValue -= (rateDown * rateMult);
-		}
-
-		if (newValue <= 0)
-			break;
-
-		pThis->GattlingValue = newValue;
-
+		pExt->LastTargetID = pThis->Target ? pThis->Target->UniqueID : 0xFFFFFFFF;
+		pThis->GattlingValue = 0;
+		pThis->CurrentGattlingStage = 0;
 		return SkipGameCode;
 	}
-	while (false);
 
-	pThis->GattlingValue = 0;
+	if (pTypeExt->RateDown_Delay < 0)
+		return SkipGameCode;
 
+	pExt->AccumulatedGattlingValue += rateMult;
+	auto remain = pExt->AccumulatedGattlingValue;
+
+	if (!pExt->ShouldUpdateGattlingValue)
+		remain -= pTypeExt->RateDown_Delay;
+
+	if (remain <= 0 && rateMult)
+		return SkipGameCode;
+
+	// Time's up
+	pExt->AccumulatedGattlingValue = 0;
+	pExt->ShouldUpdateGattlingValue = true;
+
+	if (!rateMult)
+	{
+		pThis->GattlingValue = 0;
+		return SkipGameCode;
+	}
+
+	const auto rateDown = (pThis->Ammo <= pTypeExt->RateDown_Ammo) ? pTypeExt->RateDown_Cover.Get() : pTypeExt->OwnerObject()->RateDown;
+
+	if (!rateDown)
+	{
+		pThis->GattlingValue = 0;
+		return SkipGameCode;
+	}
+
+	newValue -= (rateDown * remain);
+	pThis->GattlingValue = (newValue <= 0) ? 0 : newValue;
 	return SkipGameCode;
 }
 
@@ -612,6 +531,7 @@ bool __fastcall CanEnterNow(UnitClass* pTransport, FootClass* pPassenger)
 		const auto linkCell = pLink->GetCoords();
 		const auto tranCell = pTransport->GetCoords();
 
+		// When the most important passenger is close, need to prevent overlap
 		if (abs(linkCell.X - tranCell.X) <= 384 && abs(linkCell.Y - tranCell.Y) <= 384)
 			return (predictSize <= (maxSize - pLink->GetTechnoType()->Size));
 	}
@@ -623,6 +543,7 @@ bool __fastcall CanEnterNow(UnitClass* pTransport, FootClass* pPassenger)
 
 	if (needCalculate && remain < static_cast<int>(pLink->GetTechnoType()->Size))
 	{
+		// Avoid passenger moving forward, resulting in overlap with transport and create invisible barrier
 		pLink->SendToFirstLink(RadioCommand::NotifyUnlink);
 		pLink->EnterIdleMode(false, true);
 	}
@@ -763,6 +684,7 @@ DEFINE_HOOK(0x73DC9C, UnitClass_Mission_Unload_NoQueueUpToUnloadBreak, 0xA)
 
 	if (RulesExt::Global()->NoQueueUpToUnload)
 	{
+		// Play the sound when interrupted for some reason
 		GET(UnitClass* const, pThis, ESI);
 		PlayUnitLeaveTransportSound(pThis);
 	}
@@ -780,6 +702,7 @@ DEFINE_HOOK(0x73DC1E, UnitClass_Mission_Unload_NoQueueUpToUnloadLoop, 0xA)
 	{
 		if (pThis->Passengers.NumPassengers <= pThis->NonPassengerCount)
 		{
+			// If unloading is required within one frame, the sound will only be played when the last passenger leaves
 			PlayUnitLeaveTransportSound(pThis);
 			pThis->MissionStatus = 4;
 			return UnloadReturn;
