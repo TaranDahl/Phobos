@@ -376,6 +376,9 @@ This page lists all the individual contributions to the project by their author.
 - **NaotoYuuki**
   - Vertical & meteor trajectory projectile prototypes
 - **CrimRecya**
+  - Fix `LimboKill` not working reliably
+  - Allow using waypoints, area guard and attack move with aircraft
+  - Fix `Stop` command not working so well in some cases
   - Technos will maintain a suitable distance after firing
   - Several new Infotypes, no display in specific status and a new single frame display method
   - Projectile subject to ground check before firing
@@ -395,9 +398,7 @@ This page lists all the individual contributions to the project by their author.
   - Units will not always stuck in the factory
   - Optimize aircrafts stop action and allow they using area guard and attack moving
   - Exclusive Sidebar for Superweapons
-  - Fix `LimboKill` not working reliably
   - Observer sidebar in skirmish game mode
-  - Fix `Stop` command not working so well in some cases
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
