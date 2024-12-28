@@ -319,7 +319,7 @@ DEFINE_HOOK(0x415EEE, AircraftClass_Fire_KickOutPassengers, 0x6)
 }
 
 // Aircraft mission hard code are all disposable that no ammo, target died or arrived destination all will call the aircraft return airbase
-#pragma region AircraftMissionExpand
+#pragma region ExtendedAircraftMissions
 
 // Waypoint: enable and smooth moving action
 bool __fastcall AircraftTypeClass_CanUseWaypoint(AircraftTypeClass* pThis)
@@ -455,7 +455,7 @@ DEFINE_HOOK(0x418CD1, AircraftClass_Mission_Attack_ContinueFlyToDestination, 0x6
 	return Return;
 }
 
-// Idle: clear the target and megatarget if no ammo
+// Idle: clear the target if no ammo
 DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 {
 	enum { ClearTarget = 0x414D3F };
@@ -469,9 +469,6 @@ DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 			if (const auto pTeam = pThis->Team)
 				pTeam->LiberateMember(pThis);
 		}
-
-		if (pThis->MegaMissionIsAttackMove())
-			pThis->ClearMegaMissionData();
 
 		return ClearTarget;
 	}
