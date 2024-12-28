@@ -449,7 +449,7 @@ DEFINE_HOOK(0x418CD1, AircraftClass_Mission_Attack_ContinueFlyToDestination, 0x6
 	return Return;
 }
 
-// Idle: clear the target and megatarget if no ammo
+// Idle: clear the target if no ammo
 DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 {
 	enum { ClearTarget = 0x414D3F };
@@ -463,9 +463,6 @@ DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 			if (const auto pTeam = pThis->Team)
 				pTeam->LiberateMember(pThis);
 		}
-
-		if (pThis->MegaMissionIsAttackMove())
-			pThis->ClearMegaMissionData();
 
 		return ClearTarget;
 	}
