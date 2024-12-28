@@ -408,6 +408,7 @@ DEFINE_HOOK(0x4DF3BA, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget1, 
 
 	GET(FootClass* const, pThis, ESI);
 
+	// The aircraft is constantly moving, which may cause its target to constantly enter and leave its range, so it is fixed to hold the target.
 	if (RulesExt::Global()->ExtendedAircraftMissions && pThis->WhatAmI() == AbstractType::Aircraft)
 		return HoldTarget;
 
@@ -420,6 +421,7 @@ DEFINE_HOOK(0x4DF42A, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget2, 
 
 	GET(FootClass* const, pThis, ESI);
 
+	// Although if the target selected by CS is an object rather than cell.
 	return (RulesExt::Global()->ExtendedAircraftMissions && pThis->WhatAmI() == AbstractType::Aircraft) ? HoldTarget : ContinueCheck;
 }
 
@@ -447,7 +449,7 @@ DEFINE_HOOK(0x418CD1, AircraftClass_Mission_Attack_ContinueFlyToDestination, 0x6
 	return Return;
 }
 
-// Idle: clear the target if no ammo
+// Idle: clear the target and megatarget if no ammo
 DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 {
 	enum { ClearTarget = 0x414D3F };
@@ -461,6 +463,9 @@ DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 			if (const auto pTeam = pThis->Team)
 				pTeam->LiberateMember(pThis);
 		}
+
+		if (pThis->MegaMissionIsAttackMove())
+			pThis->ClearMegaMissionData();
 
 		return ClearTarget;
 	}
