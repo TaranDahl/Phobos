@@ -397,7 +397,7 @@ DEFINE_HOOK(0x6FA68B, TechnoClass_Update_AttackMovePaused, 0xA) // To make aircr
 
 	const bool skip = RulesExt::Global()->ExtendedAircraftMissions
 		&& pThis->WhatAmI() == AbstractType::Aircraft
-		&& (!pThis->Ammo || pThis->GetHeight() < Unsorted::CellHeight);
+		&& (!pThis->Ammo || !pThis->IsInAir());
 
 	return skip ? SkipGameCode : 0;
 }
@@ -469,18 +469,7 @@ DEFINE_HOOK(0x414D4D, AircraftClass_Update_ClearTargetIfNoAmmo, 0x6)
 
 	return 0;
 }
-/*
-// This allows the aircraft to receive stop commands even at low altitudes, but if used, receiving a move command
-// then quickly receiving a stop command can result in the aircraft landing in an incorrect direction
-DEFINE_HOOK(0x417944, AircraftClass_EnterIdleMode_DockCheck, 0x7)
-{
-	enum { Continue = 0x417953, Invalid = 0x417AD4 };
 
-	GET(AircraftClass* const, pThis, ESI);
-
-	return (pThis->GetHeight() > 0) ? Continue : Invalid; // Replace IsInAir()
-}
-*/
 // Stop: clear the mega mission and return to airbase immediately
 // (StopEventFix's DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6) in Hooks.BugFixes.cpp)
 
