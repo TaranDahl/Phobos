@@ -319,7 +319,7 @@ DEFINE_HOOK(0x415EEE, AircraftClass_Fire_KickOutPassengers, 0x6)
 }
 
 // Aircraft mission hard code are all disposable that no ammo, target died or arrived destination all will call the aircraft return airbase
-#pragma region AircraftMissionExpand
+#pragma region ExtendedAircraftMissions
 
 // Waypoint: enable and smooth moving action
 bool __fastcall AircraftTypeClass_CanUseWaypoint(AircraftTypeClass* pThis)
