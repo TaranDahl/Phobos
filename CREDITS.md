@@ -372,6 +372,8 @@ This page lists all the individual contributions to the project by their author.
   - Allow to change the speed of gas particles
 - **CrimRecya**
   - Fix `LimboKill` not working reliably
+  - Allow using waypoints, area guard and attack move with aircraft
+  - Fix `Stop` command not working so well in some cases
   - Projectile subject to ground check before firing
   - Enhanced Straight trajectory
   - New Disperse trajectory
@@ -387,11 +389,9 @@ This page lists all the individual contributions to the project by their author.
   - Display factories, superweapons, iron curtain and temporal progress on specific technos
   - Units Rotate Turret When in Idle Action
   - Observer sidebar in skirmish game mode
-  - Optimize aircrafts stop action and allow they using area guard and attack moving
   - Building placing and deploying logic enhancement
   - Unit base normal and new placing grids
   - Grey cameo preview and cameo overlays
-  - Fix `Stop` command not working so well in some cases
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
