@@ -345,16 +345,8 @@ DEFINE_HOOK(0x468E61, BulletClass_Explode_TargetSnapChecks1, 0x6)
 	{
 		if (pExt->Trajectory && CheckTrajectoryCanNotAlwaysSnap(pExt->Trajectory->Flag()) && !pExt->SnappedToTarget)
 		{
-			if (auto const pTrajectory = pExt->Trajectory.get())
-			{
-				const TrajectoryFlag flag = pTrajectory->Flag();
-
-				if (flag != TrajectoryFlag::Invalid)
-				{
-					R->EAX(pThis->Type);
-					return SkipChecks;
-				}
-			}
+			R->EAX(pThis->Type);
+			return SkipChecks;
 		}
 	}
 
