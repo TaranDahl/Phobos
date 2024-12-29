@@ -274,19 +274,6 @@ DEFINE_HOOK(0x6FC339, TechnoClass_CanFire, 0x6)
 		const auto pTechno = abstract_cast<TechnoClass*>(pTarget);
 		CellClass* pTargetCell = nullptr;
 
-		if (pWeaponExt->NoRepeatFire > 0)
-		{
-			if (const auto pTargetTechnoExt = TechnoExt::ExtMap.Find(pTechno))
-			{
-				if ((pTargetTechnoExt->LastLockedMeID != pThis->UniqueID || !pWeaponExt->NoRepeatFire_IgnoreSameFirer)
-					&& (pTargetTechnoExt->LastLockedMeWH == pWeapon->Warhead || !pWeaponExt->NoRepeatFire_OnlySameWarhead)
-					&& ((Unsorted::CurrentFrame - pTargetTechnoExt->LastBeLockedFrame) < pWeaponExt->NoRepeatFire))
-				{
-					return CannotFire;
-				}
-			}
-		}
-
 		// AAOnly doesn't need to be checked if LandTargeting=1.
 		if (pThis->GetTechnoType()->LandTargeting != LandTargetingType::Land_Not_OK && pWeapon->Projectile->AA && pTarget && !pTarget->IsInAir())
 		{
@@ -478,13 +465,14 @@ DEFINE_HOOK(0x6FDDC0, TechnoClass_FireAt_DiscardAEOnFire, 0x6)
 
 	if (const auto pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
 	{
-		if (pWeaponExt->NoRepeatFire > 0)
+		if (pWeaponExt->AttachEffect_Enable)
 		{
-			if (const auto pTargetTechnoExt = TechnoExt::ExtMap.Find(abstract_cast<TechnoClass*>(pTarget)))
+			if (const auto pTargetTechno = abstract_cast<TechnoClass*>(pTarget))
 			{
-				pTargetTechnoExt->LastBeLockedFrame = Unsorted::CurrentFrame;
-				pTargetTechnoExt->LastLockedMeID = pTarget->UniqueID;
-				pTargetTechnoExt->LastLockedMeWH = pWeapon->Warhead;
+				auto const& info = pWeaponExt->AttachEffects;
+				AttachEffectClass::Attach(pTargetTechno, pThis->Owner, pThis, pWeapon, info);
+				AttachEffectClass::Detach(pTargetTechno, info);
+				AttachEffectClass::DetachByGroups(pTargetTechno, info);
 			}
 		}
 	}
