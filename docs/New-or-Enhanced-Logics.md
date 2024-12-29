@@ -750,7 +750,7 @@ Currently interceptor weapons with projectiles that do not have `Inviso=true` wi
     - In `Trajectory=Disperse`, it refers to the maximum speed of the projectile and it cannot exceed 256. `Trajectory.Speed` will be fixed at 192 by setting `Trajectory.Disperse.UniqueCurve=true`.
     - In `Trajectory=Engrave`, it refers to the engrave speed of the projectile and it cannot exceed 128. Recommend set as about 40.
     - In `Trajectory=Parabola`, it refers to the horizontal velocity of the projectile and is only used for modes 0, 3, or 5 and it has no restrictions.
-    - In `Trajectory=Tracing`, it refers to the tracing speed of the projectile and Negative numbers are considered infinite.
+    - In `Trajectory=Tracing`, it refers to the speed of tracing and turning around of the projectile.
 
   In `rulesmd.ini`:
 ```ini
@@ -770,7 +770,7 @@ Trajectory.Speed=100.0  ; floating point value
   - `Trajectory.Straight.PassDetonate` enables extra detonations when the projectile is traveling.
     - `Trajectory.Straight.PassDetonateWarhead` defines the warhead detonated by `Trajectory.Straight.PassDetonate`, and `Trajectory.Straight.PassDetonateDamage` defines the damage caused by `Trajectory.Straight.PassDetonateWarhead`.
     - `Trajectory.Straight.PassDetonateDelay` controls the delay for detonating the warhead defined by `Trajectory.Straight.Warhead`.
-    - `Trajectory.Straight.PassDetonateTimer` controls the initial delay for detonating the warhead defined by `Trajectory.Straight.Warhead`.
+    - `Trajectory.Straight.PassDetonateInitialDelay` controls the initial delay for detonating the warhead defined by `Trajectory.Straight.Warhead`.
     - `Trajectory.Straight.PassDetonateLocal` controls whether `Trajectory.Straight.PassDetonateWarhead` and weapon's `Warhead` are always detonate at ground level. It will also no longer restrict vertical velocity of the projectile when using `Trajectory.Straight.ConfineAtHeight`.
   - `Trajectory.Straight.LeadTimeCalculate` controls whether the projectile need to calculate the lead time of the target when firing. Note that this will not affect the facing of the turret.
   - `Trajectory.Straight.OffsetCoord` controls the offsets of the target. Projectile will aim at this position to attack. It also supports `Inaccurate=yes` and `Trajectory.Straight.LeadTimeCalculate=true` on this basis.
@@ -804,7 +804,7 @@ Trajectory.Straight.PassDetonate=false          ; boolean
 Trajectory.Straight.PassDetonateWarhead=        ; WarheadType
 Trajectory.Straight.PassDetonateDamage=0        ; integer
 Trajectory.Straight.PassDetonateDelay=1         ; integer
-Trajectory.Straight.PassDetonateTimer=0         ; integer
+Trajectory.Straight.PassDetonateInitialDelay=0  ; integer
 Trajectory.Straight.PassDetonateLocal=false     ; boolean
 Trajectory.Straight.LeadTimeCalculate=false     ; boolean
 Trajectory.Straight.OffsetCoord=0,0,0           ; integer - Forward,Lateral,Height
@@ -911,8 +911,8 @@ Trajectory.Bombard.SubjectToGround=false      ; boolean
     - `Trajectory.Disperse.WeaponBurst` defines how many corresponding weapons each time the projectile will fire. When the quantity is lower than `Trajectory.Disperse.Weapons`, it will use the last value.
     - `Trajectory.Disperse.WeaponCount` controls how many times the projectile can spread the weapon. Set to a negative value means unlimited times.
     - `Trajectory.Disperse.WeaponDelay` controls the delay for dispersing the weapons defined by `Trajectory.Disperse.Weapons`.
-    - `Trajectory.Disperse.WeaponTimer` controls the initial delay for dispersing the weapons defined by `Trajectory.Disperse.Weapons`.
-    - `Trajectory.Disperse.WeaponScope` controls the weapon dispersing timer to start counting only within this distance of reaching the target. Set to 0 to disable this function. Set to a negative value means it will only disperse the weapon at most once before detonation.
+    - `Trajectory.Disperse.WeaponInitialDelay` controls the initial delay for dispersing the weapons defined by `Trajectory.Disperse.Weapons`.
+    - `Trajectory.Disperse.WeaponEffectiveRange` controls the weapon dispersing timer to start counting only within this distance of reaching the target. Set to 0 to disable this function. Set to a negative value means it will only disperse the weapon at most once before detonation.
     - `Trajectory.Disperse.WeaponSeparate` controls whether the projectile no longer fire all the weapons in `Trajectory.Disperse.Weapons` at once and instead fire a group of weapons in the list order, following `Trajectory.Disperse.WeaponBurst`.
     - `Trajectory.Disperse.WeaponRetarget` controls whether the dispersed weapons will find new targets on their own. Using the `Range`, `CanTarget`, required `AttachedEffects` of weapons to search new targets.
     - `Trajectory.Disperse.WeaponLocation` controls whether the dispersed weapons will search for new targets at the center of the spreading position, otherwise they will focus on the original target.
@@ -951,8 +951,8 @@ Trajectory.Disperse.Weapons=                    ; list of WeaponTypes
 Trajectory.Disperse.WeaponBurst=                ; list of integers
 Trajectory.Disperse.WeaponCount=0               ; integer
 Trajectory.Disperse.WeaponDelay=1               ; integer
-Trajectory.Disperse.WeaponTimer=0               ; integer
-Trajectory.Disperse.WeaponScope=0               ; floating point value
+Trajectory.Disperse.WeaponInitialDelay=0        ; integer
+Trajectory.Disperse.WeaponEffectiveRange=0      ; floating point value
 Trajectory.Disperse.WeaponSeparate=false        ; boolean
 Trajectory.Disperse.WeaponRetarget=false        ; boolean
 Trajectory.Disperse.WeaponLocation=false        ; boolean
@@ -1096,7 +1096,7 @@ Trajectory.Parabola.AxisOfRotation=0,0,1        ; integer - Forward,Lateral,Heig
   - `Trajectory.Tracing.Weapons` defines the tracing weapons of the projectile.
     - `Trajectory.Tracing.WeaponCount` controls how many times the projectile can fire the corresponding weapon. Set to a negative value means unlimited times. If set to zero, the cooling will be calculated directly without firing the tracing weapon. If the quantity is less than `Trajectory.Tracing.Weapons`, the last value in the list will be used.
     - `Trajectory.Tracing.WeaponDelay` controls the delay after firing the corresponding weapon, at least 1 frame. If the quantity is less than `Trajectory.Tracing.Weapons`, the last value in the list will be used.
-    - `Trajectory.Tracing.WeaponTimer` controls the initial delay for firing the tracing weapons defined by `Trajectory.Tracing.Weapons`.
+    - `Trajectory.Tracing.WeaponInitialDelay` controls the initial delay for firing the tracing weapons defined by `Trajectory.Tracing.Weapons`.
     - `Trajectory.Tracing.WeaponCycle` controls how many rounds of weapons the projectile can fire, zero will not fire weapons, and negative numbers are considered infinite.
     - `Trajectory.Tracing.WeaponCheck` controls whether the projectile will check its orientation before firing the tracing weapons. Ignore this if `Trajectory.Tracing.Synchronize=false` or `Trajectory.Tracing.TraceTheTarget=true` or `Trajectory.Tracing.BulletSpin=true` or have negative `Trajectory.Tracing.ROT`.
   - `Trajectory.Tracing.Synchronize` controls whether the target of the projectile is synchronized with the target of its firer. If not, the projectile will not update the target. When `Trajectory.Tracing.TraceTheTarget=no`, the tracing weapons will select their own targets to attack based on its range.
@@ -1121,7 +1121,7 @@ Trajectory.Tracing.WeaponCoord=0,0,0      ; integer - Forward,Lateral,Height
 Trajectory.Tracing.Weapons=               ; list of WeaponTypes
 Trajectory.Tracing.WeaponCount=           ; list of integers
 Trajectory.Tracing.WeaponDelay=           ; list of integers
-Trajectory.Tracing.WeaponTimer=0          ; integer
+Trajectory.Tracing.WeaponInitialDelay=0   ; integer
 Trajectory.Tracing.WeaponCycle=-1         ; integer
 Trajectory.Tracing.WeaponCheck=no         ; boolean
 Trajectory.Tracing.Synchronize=yes        ; boolean
