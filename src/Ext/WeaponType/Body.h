@@ -65,6 +65,8 @@ public:
 		Valueable<bool> KeepRange_AllowPlayer;
 		Valueable<bool> Burst_NoDelay;
 		Valueable<int> NoRepeatFire;
+		Valueable<int> NoRepeatFire_IgnoreSameFirer;
+		Valueable<int> NoRepeatFire_OnlySameWarhead;
 		Valueable<bool> KickOutPassengers;
 
 		Nullable<ColorStruct> Beam_Color;
@@ -117,6 +119,8 @@ public:
 			, KeepRange_AllowPlayer { false }
 			, Burst_NoDelay { false }
 			, NoRepeatFire { 0 }
+			, NoRepeatFire_IgnoreSameFirer { true }
+			, NoRepeatFire_OnlySameWarhead { true }
 			, KickOutPassengers { true }
 			, Beam_Color {}
 			, Beam_Duration { 15 }
