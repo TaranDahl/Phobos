@@ -470,7 +470,7 @@ DEFINE_HOOK(0x6FDDC0, TechnoClass_FireAt_DiscardAEOnFire, 0x6)
 			if (const auto pTargetTechno = abstract_cast<TechnoClass*>(pTarget))
 			{
 				auto const& info = pWeaponExt->AttachEffects;
-				AttachEffectClass::Attach(pTargetTechno, pThis->Owner, pThis, pWeapon, info);
+				AttachEffectClass::Attach(pTargetTechno, pThis->Owner, pThis, pWeapon->Warhead, info);
 				AttachEffectClass::Detach(pTargetTechno, info);
 				AttachEffectClass::DetachByGroups(pTargetTechno, info);
 			}
