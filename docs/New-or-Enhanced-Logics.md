@@ -750,7 +750,7 @@ Currently interceptor weapons with projectiles that do not have `Inviso=true` wi
     - In `Trajectory=Disperse`, it refers to the maximum speed of the projectile and it cannot exceed 256. `Trajectory.Speed` will be fixed at 192 by setting `Trajectory.Disperse.UniqueCurve=true`.
     - In `Trajectory=Engrave`, it refers to the engrave speed of the projectile and it cannot exceed 128. Recommend set as about 40.
     - In `Trajectory=Parabola`, it refers to the horizontal velocity of the projectile and is only used for modes 0, 3, or 5 and it has no restrictions.
-    - In `Trajectory=Tracing`, it refers to the tracing speed of the projectile and Negative numbers are considered infinite.
+    - In `Trajectory=Tracing`, it refers to the speed of tracing and turning around of the projectile.
 
   In `rulesmd.ini`:
 ```ini
