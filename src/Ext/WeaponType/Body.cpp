@@ -122,6 +122,8 @@ void WeaponTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->AttackIronCurtain.Read(exINI, pSection, "AttackIronCurtain");
 	this->Burst_NoDelay.Read(exINI, pSection, "Burst.NoDelay");
 	this->NoRepeatFire.Read(exINI, pSection, "NoRepeatFire");
+	this->NoRepeatFire_IgnoreSameFirer.Read(exINI, pSection, "NoRepeatFire.IgnoreSameFirer");
+	this->NoRepeatFire_OnlySameWarhead.Read(exINI, pSection, "NoRepeatFire.OnlySameWarhead");
 	this->UnlimboDetonate.Read(exINI, pSection, "UnlimboDetonate");
 	this->UnlimboDetonate_Force.Read(exINI, pSection, "UnlimboDetonate.Force");
 	this->ResetGattlingValue.Read(exINI, pSection, "ResetGattlingValue");
@@ -185,6 +187,8 @@ void WeaponTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AttackIronCurtain)
 		.Process(this->Burst_NoDelay)
 		.Process(this->NoRepeatFire)
+		.Process(this->NoRepeatFire_IgnoreSameFirer)
+		.Process(this->NoRepeatFire_OnlySameWarhead)
 		.Process(this->UnlimboDetonate)
 		.Process(this->UnlimboDetonate_Force)
 		.Process(this->ResetGattlingValue)

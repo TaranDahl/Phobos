@@ -67,6 +67,8 @@ public:
 		Nullable<bool> AttackIronCurtain;
 		Valueable<bool> Burst_NoDelay;
 		Valueable<int> NoRepeatFire;
+		Valueable<int> NoRepeatFire_IgnoreSameFirer;
+		Valueable<int> NoRepeatFire_OnlySameWarhead;
 		Valueable<bool> UnlimboDetonate;
 		Valueable<bool> UnlimboDetonate_Force;
 		Valueable<bool> ResetGattlingValue;
@@ -126,6 +128,8 @@ public:
 			, AttackIronCurtain {}
 			, Burst_NoDelay { false }
 			, NoRepeatFire { 0 }
+			, NoRepeatFire_IgnoreSameFirer { true }
+			, NoRepeatFire_OnlySameWarhead { true }
 			, UnlimboDetonate { false }
 			, UnlimboDetonate_Force { false }
 			, ResetGattlingValue { false }

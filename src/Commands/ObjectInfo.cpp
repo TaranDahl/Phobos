@@ -93,7 +93,7 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		// Basic Status
 		append("Dump ObjectInfo runs. Current Frame: %d\n", Unsorted::CurrentFrame());
 		auto pType = pFoot->GetTechnoType();
-		append("ID = %s, ", pType->ID);
+		append("ID = %s, UniqueID = %d", pType->ID, pFoot->UniqueID);
 		append("Owner = %s (%s), ", pFoot->Owner->get_ID(), pFoot->Owner->PlainName);
 		const auto cell = pFoot->GetMapCoords();
 		append("Location = (%d, %d), ", cell.X, cell.Y);
@@ -253,7 +253,7 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		// Basic Status
 		append("Dump ObjectInfo runs. Current Frame: %d\n", Unsorted::CurrentFrame());
 		auto pType = pBuilding->Type;
-		append("ID = %s, ", pType->ID);
+		append("ID = %s, UniqueID = %d", pType->ID, pBuilding->UniqueID);
 		append("Owner = %s (%s), ", pBuilding->Owner->get_ID(), pBuilding->Owner->PlainName);
 		const auto cell = pBuilding->GetMapCoords();
 		append("Location = (%d, %d), ", cell.X, cell.Y);
