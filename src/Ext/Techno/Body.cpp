@@ -522,6 +522,10 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->LastHurtFrame)
 		.Process(this->LastBeLockedFrame)
 		.Process(this->MyTargetingFrame)
+		.Process(this->HasCachedClick)
+		.Process(this->CachedMission)
+		.Process(this->CachedCell)
+		.Process(this->CachedTarget)
 		.Process(this->FiringObstacleCell)
 		.Process(this->KeepTargetOnMove)
 		.Process(this->IsDetachingForCloak)
@@ -530,6 +534,14 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->LastWarpInDelay)
 		.Process(this->IsBeingChronoSphered)
 		;
+}
+
+void TechnoExt::ExtData::InvalidatePointer(void* ptr, bool bRemoved)
+{
+	if (this->HasCachedClick && this->CachedTarget == ptr)
+	{
+		this->ClearCachedClick();
+	}
 }
 
 void TechnoExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
