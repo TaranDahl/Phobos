@@ -50,6 +50,8 @@ public:
 		ValueableVector<bool> ExtraWarheads_FullDetonation;
 		Nullable<WarheadTypeClass*> AmbientDamage_Warhead;
 		Valueable<bool> AmbientDamage_IgnoreTarget;
+		AEAttachInfoTypeClass AttachEffects;
+		Valueable<bool> AttachEffect_Enable;
 		ValueableVector<AttachEffectTypeClass*> AttachEffect_RequiredTypes;
 		ValueableVector<AttachEffectTypeClass*> AttachEffect_DisallowedTypes;
 		std::vector<std::string> AttachEffect_RequiredGroups;
@@ -66,9 +68,6 @@ public:
 		Nullable<bool> CylinderRangefinding;
 		Nullable<bool> AttackIronCurtain;
 		Valueable<bool> Burst_NoDelay;
-		Valueable<int> NoRepeatFire;
-		Valueable<int> NoRepeatFire_IgnoreSameFirer;
-		Valueable<int> NoRepeatFire_OnlySameWarhead;
 		Valueable<bool> UnlimboDetonate;
 		Valueable<bool> UnlimboDetonate_Force;
 		Valueable<bool> ResetGattlingValue;
@@ -111,6 +110,8 @@ public:
 			, ExtraWarheads_FullDetonation {}
 			, AmbientDamage_Warhead {}
 			, AmbientDamage_IgnoreTarget { false }
+			, AttachEffects {}
+			, AttachEffect_Enable { false }
 			, AttachEffect_RequiredTypes {}
 			, AttachEffect_DisallowedTypes {}
 			, AttachEffect_RequiredGroups {}
@@ -127,9 +128,6 @@ public:
 			, CylinderRangefinding {}
 			, AttackIronCurtain {}
 			, Burst_NoDelay { false }
-			, NoRepeatFire { 0 }
-			, NoRepeatFire_IgnoreSameFirer { true }
-			, NoRepeatFire_OnlySameWarhead { true }
 			, UnlimboDetonate { false }
 			, UnlimboDetonate_Force { false }
 			, ResetGattlingValue { false }

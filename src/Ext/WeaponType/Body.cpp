@@ -105,6 +105,11 @@ void WeaponTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->ExtraWarheads_FullDetonation.Read(exINI, pSection, "ExtraWarheads.FullDetonation");
 	this->AmbientDamage_Warhead.Read<true>(exINI, pSection, "AmbientDamage.Warhead");
 	this->AmbientDamage_IgnoreTarget.Read(exINI, pSection, "AmbientDamage.IgnoreTarget");
+
+	// AttachEffect
+	this->AttachEffects.LoadFromINI(pINI, pSection);
+	this->AttachEffect_Enable = (this->AttachEffects.AttachTypes.size() > 0 || this->AttachEffects.RemoveTypes.size() > 0 || this->AttachEffects.RemoveGroups.size() > 0);
+
 	this->AttachEffect_RequiredTypes.Read(exINI, pSection, "AttachEffect.RequiredTypes");
 	this->AttachEffect_DisallowedTypes.Read(exINI, pSection, "AttachEffect.DisallowedTypes");
 	exINI.ParseStringList(this->AttachEffect_RequiredGroups, pSection, "AttachEffect.RequiredGroups");
@@ -121,9 +126,6 @@ void WeaponTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->CylinderRangefinding.Read(exINI, pSection, "CylinderRangefinding");
 	this->AttackIronCurtain.Read(exINI, pSection, "AttackIronCurtain");
 	this->Burst_NoDelay.Read(exINI, pSection, "Burst.NoDelay");
-	this->NoRepeatFire.Read(exINI, pSection, "NoRepeatFire");
-	this->NoRepeatFire_IgnoreSameFirer.Read(exINI, pSection, "NoRepeatFire.IgnoreSameFirer");
-	this->NoRepeatFire_OnlySameWarhead.Read(exINI, pSection, "NoRepeatFire.OnlySameWarhead");
 	this->UnlimboDetonate.Read(exINI, pSection, "UnlimboDetonate");
 	this->UnlimboDetonate_Force.Read(exINI, pSection, "UnlimboDetonate.Force");
 	this->ResetGattlingValue.Read(exINI, pSection, "ResetGattlingValue");
@@ -170,6 +172,8 @@ void WeaponTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ExtraWarheads_FullDetonation)
 		.Process(this->AmbientDamage_Warhead)
 		.Process(this->AmbientDamage_IgnoreTarget)
+		.Process(this->AttachEffects)
+		.Process(this->AttachEffect_Enable)
 		.Process(this->AttachEffect_RequiredTypes)
 		.Process(this->AttachEffect_DisallowedTypes)
 		.Process(this->AttachEffect_RequiredGroups)
@@ -186,9 +190,6 @@ void WeaponTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->CylinderRangefinding)
 		.Process(this->AttackIronCurtain)
 		.Process(this->Burst_NoDelay)
-		.Process(this->NoRepeatFire)
-		.Process(this->NoRepeatFire_IgnoreSameFirer)
-		.Process(this->NoRepeatFire_OnlySameWarhead)
 		.Process(this->UnlimboDetonate)
 		.Process(this->UnlimboDetonate_Force)
 		.Process(this->ResetGattlingValue)

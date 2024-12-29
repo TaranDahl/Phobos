@@ -56,9 +56,6 @@ public:
 		WeaponTypeClass* LastWeaponType;
 		CoordStruct LastWeaponFLH;
 		int LastHurtFrame;
-		int LastBeLockedFrame;
-		DWORD LastLockedMeID;
-		WarheadTypeClass* LastLockedMeWH;
 		int LastBeControlledFrame;
 		DWORD LastTargetID;
 		int AccumulatedGattlingValue;
@@ -115,9 +112,6 @@ public:
 			, LastWeaponType {}
 			, LastWeaponFLH {}
 			, LastHurtFrame { 0 }
-			, LastBeLockedFrame { 0 }
-			, LastLockedMeID { 0xFFFFFFFF }
-			, LastLockedMeWH { nullptr }
 			, LastBeControlledFrame { 0 }
 			, LastTargetID { 0xFFFFFFFF }
 			, AccumulatedGattlingValue { 0 }

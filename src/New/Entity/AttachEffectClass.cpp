@@ -483,7 +483,7 @@ bool AttachEffectClass::IsFromSource(TechnoClass* pInvoker, AbstractClass* pSour
 /// <param name="pTarget">Target techno.</param>
 /// <param name="pInvokerHouse">House that invoked the attachment.</param>
 /// <param name="pInvoker">Techno that invoked the attachment.</param>
-/// <param name="pSource">Source object for the attachment e.g a Warhead or Techno.</param>
+/// <param name="pSource">Source object for the attachment e.g a Weapon, Warhead or Techno.</param>
 /// <param name="attachEffectInfo">AttachEffect attach info.</param>
 /// <returns>Number of AttachEffect instances created and attached.</returns>
 int AttachEffectClass::Attach(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker, AbstractClass* pSource, AEAttachInfoTypeClass const& attachEffectInfo)
@@ -547,7 +547,7 @@ int AttachEffectClass::Attach(TechnoClass* pTarget, HouseClass* pInvokerHouse, T
 /// <param name="targetAEs">Target's AttachEffect vector</param>
 /// <param name="pInvokerHouse">House that invoked the attachment.</param>
 /// <param name="pInvoker">Techno that invoked the attachment.</param>
-/// <param name="pSource">Source object for the attachment e.g a Warhead or Techno.</param>
+/// <param name="pSource">Source object for the attachment e.g a Weapon, Warhead or Techno.</param>
 /// <param name="attachParams">Attachment parameters.</param>
 /// <returns>The created and attached AttachEffect if successful, nullptr if not.</returns>
 AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pType, TechnoClass* pTarget, std::vector<std::unique_ptr<AttachEffectClass>>& targetAEs,
