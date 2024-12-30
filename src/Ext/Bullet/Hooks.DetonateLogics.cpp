@@ -543,8 +543,8 @@ DEFINE_HOOK(0x469EC0, BulletClass_Logics_AirburstWeapon, 0x6)
 		auto const pTypeSplits = pWeapon->Projectile;
 		int damage = pWeapon->Damage;
 
-		if (pTypeExt->AirburstWeapon_ApplyFirepowerMult && pThis->Owner)
-			damage = static_cast<int>(damage * pThis->Owner->FirepowerMultiplier * TechnoExt::ExtMap.Find(pThis->Owner)->AE.FirepowerMultiplier);
+		if (pTypeExt->AirburstWeapon_ApplyFirepowerMult && pSource)
+			damage = static_cast<int>(damage * pSource->FirepowerMultiplier * TechnoExt::ExtMap.Find(pSource)->AE.FirepowerMultiplier);
 
 		for (int i = 0; i < clusterCount; ++i)
 		{
@@ -559,7 +559,7 @@ DEFINE_HOOK(0x469EC0, BulletClass_Logics_AirburstWeapon, 0x6)
 				int index = random.RandomRanged(0, targets.Count - 1);
 				pTarget = targets.GetItem(index);
 
-				if (pTarget == pThis->Owner)
+				if (pTarget == pSource)
 				{
 					if (random.RandomDouble() > pTypeExt->RetargetSelf_Probability)
 					{
@@ -573,8 +573,7 @@ DEFINE_HOOK(0x469EC0, BulletClass_Logics_AirburstWeapon, 0x6)
 
 			if (pTarget)
 			{
-
-				if (auto const pBullet = pTypeSplits->CreateBullet(pTarget, pThis->Owner, damage, pWeapon->Warhead, pWeapon->Speed, pWeapon->Bright))
+				if (auto const pBullet = pTypeSplits->CreateBullet(pTarget, pSource, damage, pWeapon->Warhead, pWeapon->Speed, pWeapon->Bright))
 				{
 					BulletExt::ExtMap.Find(pBullet)->FirerHouse = pOwner;
 					pBullet->WeaponType = pWeapon;

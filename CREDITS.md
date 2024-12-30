@@ -393,6 +393,7 @@ This page lists all the individual contributions to the project by their author.
   - Building placing and deploying logic enhancement
   - Unit base normal and new placing grids
   - Grey cameo preview and cameo overlays
+  - Draw visual effects for airburst weapons
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
