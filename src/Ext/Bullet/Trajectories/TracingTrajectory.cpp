@@ -734,7 +734,7 @@ void TracingTrajectory::CreateTracingBullets(BulletClass* pBullet, WeaponTypeCla
 	if (const auto pCreateBullet = pWeapon->Projectile->CreateBullet(pTarget, pTechno, finalDamage, pWeapon->Warhead, pWeapon->Speed, pWeapon->Bright))
 	{
 		BulletExt::SimulatedFiringInfos(pCreateBullet, pWeapon, pOwner, WeaponTypeExt::ExtMap.Find(pWeapon)->ProjectileRange.Get());
-		BulletExt::SimulatedFiringVelocity(pCreateBullet, pBullet->Location, false);
+		BulletExt::SimulatedFiringVelocity(pCreateBullet, fireCoord, false);
 
 		const auto pBulletExt = BulletExt::ExtMap.Find(pCreateBullet);
 		const auto pTraj = pBulletExt->Trajectory.get();
