@@ -766,7 +766,7 @@ void TracingTrajectory::CreateTracingBullets(BulletClass* pBullet, WeaponTypeCla
 			}
 		}
 
-		BulletExt::SimulatedFiringAnim(pCreateBullet, pWeapon, pOwner, pTraj, pType->TraceTheTarget);
+		BulletExt::SimulatedFiringAnim(pCreateBullet, pWeapon, pOwner, pTraj, (pType->TraceTheTarget && !this->NotMainWeapon));
 		BulletExt::SimulatedFiringReport(pCreateBullet, pWeapon);
 		BulletExt::SimulatedFiringLaser(pCreateBullet, pWeapon, pOwner);
 		BulletExt::SimulatedFiringElectricBolt(pCreateBullet, pWeapon);
