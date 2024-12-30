@@ -93,7 +93,7 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		// Basic Status
 		append("Dump ObjectInfo runs. Current Frame: %d\n", Unsorted::CurrentFrame());
 		auto pType = pFoot->GetTechnoType();
-		append("ID = %s, UniqueID = %d", pType->ID, pFoot->UniqueID);
+		append("ID = %s, UniqueID = %d, ", pType->ID, pFoot->UniqueID);
 		append("Owner = %s (%s), ", pFoot->Owner->get_ID(), pFoot->Owner->PlainName);
 		const auto cell = pFoot->GetMapCoords();
 		append("Location = (%d, %d), ", cell.X, cell.Y);
@@ -122,6 +122,9 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 
 		if (pFoot->MegaMission != Mission::None)
 			append(", MegaMission = %d (%s)", pFoot->MegaMission, MissionControlClass::FindName(pFoot->MegaMission));
+
+		if (pFoot->PlanningPathIdx != -1)
+			append(", PlanningPathIdx = %d", pFoot->PlanningPathIdx);
 
 		append("\n");
 
@@ -182,6 +185,12 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		getTargetInfo(pFoot, pFoot->MegaTarget, "MegaTarget");
 		getTargetInfo(pFoot, pFoot->MegaDestination, "MegaDestination");
 		getTargetInfo(pFoot, pFoot->ParasiteEatingMe, "Parasite");
+
+		if (pFoot->unknown_abstract_array_588.Count > 0)
+			getTargetInfo(pFoot, pFoot->unknown_abstract_array_588.GetItem(0), "ArrayTarget");
+
+		if (pFoot->NavQueue.Count > 0)
+			getTargetInfo(pFoot, pFoot->NavQueue.GetItem(0), "NavQueue");
 
 		if (const auto pUnit = abstract_cast<UnitClass*>(pFoot))
 			getTargetInfo(pUnit, pUnit->FollowerCar, "Follower");
@@ -253,7 +262,7 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 		// Basic Status
 		append("Dump ObjectInfo runs. Current Frame: %d\n", Unsorted::CurrentFrame());
 		auto pType = pBuilding->Type;
-		append("ID = %s, UniqueID = %d", pType->ID, pBuilding->UniqueID);
+		append("ID = %s, UniqueID = %d, ", pType->ID, pBuilding->UniqueID);
 		append("Owner = %s (%s), ", pBuilding->Owner->get_ID(), pBuilding->Owner->PlainName);
 		const auto cell = pBuilding->GetMapCoords();
 		append("Location = (%d, %d), ", cell.X, cell.Y);
