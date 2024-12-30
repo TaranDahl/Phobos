@@ -185,7 +185,7 @@ inline void BulletExt::SimulatedFiringVelocity(BulletClass* pBullet, const Coord
 }
 
 // Make sure pBullet and pWeapon is not empty before call
-inline void BulletExt::SimulatedFiringAnim(BulletClass* pBullet, WeaponTypeClass* pWeapon, HouseClass* pHouse, bool attach)
+inline void BulletExt::SimulatedFiringAnim(BulletClass* pBullet, WeaponTypeClass* pWeapon, HouseClass* pHouse, bool trajectory, bool attach)
 {
 	const auto animCounts = pWeapon->Anim.Count;
 
@@ -193,7 +193,7 @@ inline void BulletExt::SimulatedFiringAnim(BulletClass* pBullet, WeaponTypeClass
 		return;
 
 	const auto pAnimType = pWeapon->Anim[(animCounts % 8 == 0) ? // Have direction ?
-		(static_cast<int>(((BulletExt::ExtMap.Find(pBullet)->Trajectory ? // (Trajectory ?
+		(static_cast<int>(((trajectory ? // (Trajectory ?
 			Math::atan2(pBullet->Velocity.Y , pBullet->Velocity.X) : // Velocity :
 			Math::atan2(pBullet->TargetCoords.Y - pBullet->SourceCoords.Y , pBullet->TargetCoords.X - pBullet->SourceCoords.X)) // Connection)
 		/ Math::TwoPi + 1.5) * animCounts - (animCounts / 8) + 0.5) % animCounts) : // Calculate direction :
