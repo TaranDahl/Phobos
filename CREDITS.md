@@ -400,6 +400,7 @@ This page lists all the individual contributions to the project by their author.
   - Optimize aircrafts stop action and allow they using area guard and attack moving
   - Exclusive Sidebar for Superweapons
   - Observer sidebar in skirmish game mode
+  - Draw visual effects for airburst weapons
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
