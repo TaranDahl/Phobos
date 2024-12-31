@@ -15,6 +15,7 @@
 #include "HerosInfo.h"
 #include "FPSNewCounter.h"
 #include "DistributionMode.h"
+#include "ShowCurrentInfo.h"
 
 DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 {
@@ -46,6 +47,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 		MakeCommand<DamageDisplayCommandClass>();
 		MakeCommand<SaveVariablesToFileCommandClass>();
 		MakeCommand<ObjectInfoCommandClass>();
+		MakeCommand<ShowCurrentInfoCommandClass>();
 		MakeCommand<FrameByFrameCommandClass>();
 		MakeCommand<FrameStepCommandClass<1>>(); // Single step in
 		MakeCommand<FrameStepCommandClass<5>>(); // Speed 1
