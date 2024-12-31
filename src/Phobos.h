@@ -30,6 +30,7 @@ public:
 
 	static const char* AppIconPath;
 	static const wchar_t* VersionDescription;
+	static bool ShowCurrentInfo;
 	static bool DisplayDamageNumbers;
 	static bool IsLoadingSaveGame;
 	static bool ShouldQuickSave;
