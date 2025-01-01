@@ -528,6 +528,278 @@ void TacticalButtonsClass::FPSCounterDraw()
 	DSurface::Composite->DrawText(fpsBuffer, &location, color);
 }
 
+// Button index N/A : Show Current Info
+void TacticalButtonsClass::CurrentSelectInfoDraw()
+{
+	if (!Phobos::ShowCurrentInfo)
+		return;
+
+	TechnoClass* pTechno = nullptr;
+
+	if (ObjectClass::CurrentObjects->Count > 0)
+	{
+		for (const auto& pCurrent : ObjectClass::CurrentObjects())
+		{
+			if (const auto pCurrentTechno = abstract_cast<TechnoClass*>(pCurrent))
+			{
+				pTechno = pCurrentTechno;
+				break;
+			}
+		}
+	}
+
+	ColorStruct fillColor { 0, 0, 0 };
+	RectangleStruct drawRect { 0, 0, 300, DSurface::Composite->GetHeight() - 32 };
+	DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 30);
+	Point2D textLocation { 15, 15 };
+
+	auto drawText = [&drawRect, &textLocation](const char* pFormat, ...)
+	{
+		char buffer[0x40] = {0};
+		va_list args;
+		va_start(args, pFormat);
+		vsprintf_s(buffer, pFormat, args);
+		va_end(args);
+		wchar_t wBuffer[0x40] = {0};
+		CRT::mbstowcs(wBuffer, buffer, strlen(buffer));
+		constexpr TextPrintType printType = TextPrintType::FullShadow | TextPrintType::Point8;
+		DSurface::Composite->DrawTextA(wBuffer, &drawRect, &textLocation, COLOR_WHITE, 0, printType);
+		textLocation.Y += 12;
+	};
+
+	auto drawInfo = [&drawText](const char* pInfoName, TechnoClass* pCurrent, AbstractClass* pTarget)
+	{
+		if (pTarget)
+		{
+			auto mapCoords = CellStruct::Empty;
+			auto ID = "N/A";
+
+			if (auto const pObject = abstract_cast<ObjectClass*>(pTarget))
+			{
+				mapCoords = pObject->GetMapCoords();
+				ID = pObject->GetType()->get_ID();
+			}
+			else if (auto const pCell = abstract_cast<CellClass*>(pTarget))
+			{
+				mapCoords = pCell->MapCoords;
+				ID = "Cell";
+			}
+
+			const auto distance = (pCurrent->DistanceFrom(pTarget) / Unsorted::LeptonsPerCell);
+			drawText("%s: %s , At( %d , %d )", pInfoName, ID, mapCoords.X, mapCoords.Y);
+		}
+		else
+		{
+			drawText("%s: %s , At( %d , %d )", pInfoName, "N/A", -1, -1);
+		}
+	};
+
+	auto drawTask = [&drawText](const char* pInfoName, Mission mission)
+	{
+		drawText("%s = %d ( %s )", pInfoName, mission, MissionControlClass::FindName(mission));
+	};
+
+	drawText("Current Frame: %d", Unsorted::CurrentFrame());
+
+	if (pTechno)
+	{
+		const auto pType = pTechno->GetTechnoType();
+		const auto absType = pTechno->WhatAmI();
+		const auto cell = pTechno->GetMapCoords();
+		const auto pExt = TechnoExt::ExtMap.Find(pTechno);
+
+		if (absType == AbstractType::Unit)
+			drawText("%s: %s , UniqueID: %d", "Vehicle", pType->ID, pTechno->UniqueID);
+		else if (absType == AbstractType::Infantry)
+			drawText("%s: %s , UniqueID: %d", "Infantry", pType->ID, pTechno->UniqueID);
+		else if (absType == AbstractType::Aircraft)
+			drawText("%s: %s , UniqueID: %d", "Aircraft", pType->ID, pTechno->UniqueID);
+		else if (absType == AbstractType::Building)
+			drawText("%s: %s , UniqueID: %d", "Building", pType->ID, pTechno->UniqueID);
+		else
+			drawText("%s: %s , UniqueID: %d", "Unknown", pType->ID, pTechno->UniqueID);
+
+		if (const auto pOwner = pTechno->Owner)
+			drawText("Owner = %s ( %s )", pOwner->get_ID(), pOwner->PlainName);
+		else
+			drawText("Owner = %s ( %s )", "N/A", "N/A");
+
+		drawText("Location = ( %d , %d , %d )", cell.X, cell.Y, pTechno->GetCell()->Level);
+
+		constexpr const char* facingTypes[8] = { "North", "NorthEast", "East", "SouthEast", "South", "SouthWest", "West", "NorthWest" };
+		const auto facing1 = pTechno->PrimaryFacing.Current();
+		const auto facing2 = pTechno->SecondaryFacing.Current();
+
+		drawText("PriFacing = %d ( %s )", facing1.Raw, facingTypes[facing1.GetValue<3>()]);
+		drawText("SecFacing = %d ( %s )", facing2.Raw, facingTypes[facing2.GetValue<3>()]);
+
+		drawText("Tether = ( %s , %s )", (pTechno->IsTether ? "Yes" : "No"), (pTechno->IsAlternativeTether ? "Yes" : "No"));
+		drawText("Health = ( %d / %d )", pTechno->Health, pType->Strength);
+		drawText("Shield = ( %d / %d )", (pExt->Shield ? pExt->Shield->GetHP() : -1), (pExt->CurrentShieldType ? pExt->CurrentShieldType->Strength : -1));
+		drawText("Ammo = ( %d / %d )", pTechno->Ammo, pType->Ammo);
+
+		if (pTechno->Passengers.NumPassengers > 0)
+		{
+			drawText("%d Passengers", pTechno->Passengers.NumPassengers);
+			drawText("First Passenger = %s", pTechno->Passengers.FirstPassenger->GetTechnoType()->ID);
+		}
+		else
+		{
+			drawText("%d Passengers", 0);
+			drawText("First Passenger = %s", "N/A");
+		}
+
+		drawInfo("Target", pTechno, pTechno->Target);
+		drawInfo("Last Target", pTechno, pTechno->LastTarget);
+		drawInfo("Nth Link", pTechno, pTechno->GetNthLink());
+		drawInfo("Archive Target", pTechno, pTechno->ArchiveTarget);
+		drawInfo("Transporter", pTechno, pTechno->Transporter);
+		drawInfo("Enter", pTechno, pTechno->QueueUpToEnter);
+
+		drawText("Status = %d , StartFrame = %d", pTechno->MissionStatus, pTechno->CurrentMissionStartTime);
+		drawTask("CurrentMission", pTechno->CurrentMission);
+		drawTask("SuspendMission", pTechno->SuspendedMission);
+		drawTask("TheNextMission", pTechno->QueuedMission);
+
+		if (pTechno->AbstractFlags & AbstractFlags::Foot)
+		{
+			const auto pFoot = static_cast<FootClass*>(pTechno);
+
+			drawTask("TheMegaMission", pFoot->MegaMission);
+			drawText("PlanningPathIdx = %d", pFoot->PlanningPathIdx);
+			drawText("FootCell = ( %d , %d )", pFoot->CurrentMapCoords.X, pFoot->CurrentMapCoords.Y);
+			drawText("LastCell = ( %d , %d )", pFoot->LastMapCoords.X, pFoot->LastMapCoords.Y);
+
+			drawInfo("Destination", pFoot, pFoot->Destination);
+			drawInfo("Last Destination", pFoot, pFoot->LastDestination);
+			drawInfo("Follow", pFoot, pFoot->unknown_5A0);
+			drawInfo("Mega Target", pFoot, pFoot->MegaTarget);
+			drawInfo("Mega Destination", pFoot, pFoot->MegaDestination);
+			drawInfo("Parasite", pFoot, pFoot->ParasiteEatingMe);
+
+			if (pFoot->unknown_abstract_array_588.Count > 0)
+				drawInfo("First ArrayItem", pFoot, pFoot->unknown_abstract_array_588.GetItem(0));
+			else
+				drawInfo("First ArrayItem", pFoot, nullptr);
+
+			if (pFoot->NavQueue.Count > 0)
+				drawInfo("First Nav-Queue", pFoot, pFoot->NavQueue.GetItem(0));
+			else
+				drawInfo("First Nav-Queue", pFoot, nullptr);
+
+			if (pFoot->BelongsToATeam())
+			{
+				const auto pTeam = pFoot->Team;
+				const auto pTeamType = pTeam->Type;
+				bool found = false;
+
+				for (int i = 0; i < AITriggerTypeClass::Array->Count; i++)
+				{
+					const auto pTriggerType = AITriggerTypeClass::Array->GetItem(i);
+
+					if (pTeamType && (pTriggerType->Team1 == pTeamType || pTriggerType->Team2 == pTeamType))
+					{
+						found = true;
+						drawText("Trigger = %s", pTriggerType->ID);
+						drawText("weights [ Cur , Min , Max ]:");
+						drawText(" [ %.2f , %.2f , %.2f ]", pTriggerType->Weight_Current, pTriggerType->Weight_Minimum, pTriggerType->Weight_Maximum);
+						break;
+					}
+				}
+
+				if (!found)
+				{
+					drawText("Trigger = %s", "N/A");
+					drawText("weights [ Cur , Min , Max ]:");
+					drawText(" [ %.2f , %.2f , %.2f ]", -1, -1, -1);
+				}
+
+				const auto pScriptType = pTeam->CurrentScript->Type;
+				const auto mission = pTeam->CurrentScript->CurrentMission;
+
+				drawText("Team    = %s", pTeamType->ID);
+				drawText("Task    = %s", pTeamType->TaskForce->ID);
+				drawText("Script  = %s", pScriptType->get_ID());
+				drawText(" [ Line = Action , Argument ]:");
+
+				if (mission >= 0)
+					drawText(" [ %d = %d , %d ]", mission, pScriptType->ScriptActions[mission].Action, pScriptType->ScriptActions[mission].Argument);
+				else
+					drawText(" [ %d = %d , %d ]", mission, -1, -1);
+			}
+			else
+			{
+				drawText("Trigger = %s", "N/A");
+				drawText("weights [ Cur , Min , Max ]:");
+				drawText(" [ %.2f , %.2f , %.2f ]", -1, -1, -1);
+				drawText("Team    = %s", "N/A");
+				drawText("Task    = %s", "N/A");
+				drawText("Script  = %s", "N/A");
+				drawText(" [ Line = Action , Argument ]:");
+				drawText(" [ %d = %d , %d ]", -1, -1, -1);
+			}
+
+			if (absType == AbstractType::Unit)
+			{
+				const auto pUnit = static_cast<UnitClass*>(pTechno);
+
+				drawInfo("Follower", pUnit, pUnit->FollowerCar);
+			}/*
+			else if (absType == AbstractType::Infantry)
+			{
+				const auto pInfantry = static_cast<InfantryClass*>(pTechno);
+
+
+			}*/
+			else if (absType == AbstractType::Aircraft)
+			{
+				const auto pAircraft = static_cast<AircraftClass*>(pTechno);
+
+				drawInfo("Dock", pAircraft, pAircraft->DockNowHeadingTo);
+			}
+		}
+		else if (absType == AbstractType::Building)
+		{
+			const auto pBuilding = static_cast<BuildingClass*>(pTechno);
+
+			if (pBuilding->Occupants.Count > 0)
+			{
+				drawText("%d Occupants", pBuilding->Occupants.Count);
+				drawText("First Occupant = %s", pBuilding->Occupants.GetItem(0)->Type->ID);
+			}
+			else
+			{
+				drawText("%d Occupants", 0);
+				drawText("First Occupant = %s", "N/A");
+			}
+
+			// Upgrade Status
+			if (const auto upgrades = pBuilding->Type->Upgrades)
+			{
+				const auto pType1 = pBuilding->Upgrades[0];
+				const auto pType2 = pBuilding->Upgrades[1];
+				const auto pType3 = pBuilding->Upgrades[2];
+
+				drawText("Upgrades ( %d / %d ):", pBuilding->UpgradeLevel, upgrades);
+				drawText("Slot 1 = %s", (pType1 ? pType1->get_ID() : "N/A"));
+				drawText("Slot 2 = %s", (pType2 ? pType2->get_ID() : "N/A"));
+				drawText("Slot 3 = %s", (pType3 ? pType3->get_ID() : "N/A"));
+			}
+			else
+			{
+				drawText("Upgrades ( %d / %d ):", -1, -1);
+				drawText("Slot 1 = %s", "N/A");
+				drawText("Slot 2 = %s", "N/A");
+				drawText("Slot 3 = %s", "N/A");
+			}
+		}
+	}
+	else
+	{
+		drawText("N/A");
+	}
+}
+
 // Button index 1-10 : Super weapons buttons
 inline bool TacticalButtonsClass::IndexInSWButtons()
 {
@@ -1586,277 +1858,6 @@ void TacticalButtonsClass::SelectedUpdate()
 
 void TacticalButtonsClass::SelectedDraw()
 {
-	if (Phobos::ShowCurrentInfo)
-	{
-		TechnoClass* pTechno = nullptr;
-
-		if (ObjectClass::CurrentObjects->Count > 0)
-		{
-			for (const auto& pCurrent : ObjectClass::CurrentObjects())
-			{
-				if (const auto pCurrentTechno = abstract_cast<TechnoClass*>(pCurrent))
-				{
-					pTechno = pCurrentTechno;
-					break;
-				}
-			}
-		}
-
-		ColorStruct fillColor { 0, 0, 0 };
-		RectangleStruct drawRect { 0, 0, 300, DSurface::Composite->GetHeight() - 32 };
-		DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 40);
-		Point2D textLocation { 5, 5 };
-
-		auto drawText = [&drawRect, &textLocation](const char* pFormat, ...)
-		{
-			char buffer[0x40] = {0};
-			va_list args;
-			va_start(args, pFormat);
-			vsprintf_s(buffer, pFormat, args);
-			va_end(args);
-			wchar_t wBuffer[0x40] = {0};
-			CRT::mbstowcs(wBuffer, buffer, strlen(buffer));
-			constexpr TextPrintType printType = TextPrintType::FullShadow | TextPrintType::Point8;
-			DSurface::Composite->DrawTextA(wBuffer, &drawRect, &textLocation, COLOR_WHITE, 0, printType);
-			textLocation.Y += 12;
-		};
-
-		auto getTargetInfo = [&drawText](const char* pInfoName, TechnoClass* pCurrent, AbstractClass* pTarget)
-		{
-			if (pTarget)
-			{
-				auto mapCoords = CellStruct::Empty;
-				auto ID = "N/A";
-
-				if (auto const pObject = abstract_cast<ObjectClass*>(pTarget))
-				{
-					mapCoords = pObject->GetMapCoords();
-					ID = pObject->GetType()->get_ID();
-				}
-				else if (auto const pCell = abstract_cast<CellClass*>(pTarget))
-				{
-					mapCoords = pCell->MapCoords;
-					ID = "Cell";
-				}
-
-				const auto distance = (pCurrent->DistanceFrom(pTarget) / Unsorted::LeptonsPerCell);
-				drawText("%s: %s , At( %d , %d )", pInfoName, ID, mapCoords.X, mapCoords.Y);
-			}
-			else
-			{
-				drawText("%s: N/A , At( -- , -- )", pInfoName);
-			}
-		};
-
-		drawText("Current Frame: %d", Unsorted::CurrentFrame());
-
-		if (pTechno)
-		{
-			const auto pType = pTechno->GetTechnoType();
-			const auto absType = pTechno->WhatAmI();
-			const auto cell = pTechno->GetMapCoords();
-			const auto pExt = TechnoExt::ExtMap.Find(pTechno);
-
-			if (absType == AbstractType::Unit)
-				drawText("Vehicle: %s , UniqueID: %d", pType->ID, pTechno->UniqueID);
-			else if (absType == AbstractType::Infantry)
-				drawText("Infantry: %s , UniqueID: %d", pType->ID, pTechno->UniqueID);
-			else if (absType == AbstractType::Aircraft)
-				drawText("Aircraft: %s , UniqueID: %d", pType->ID, pTechno->UniqueID);
-			else if (absType == AbstractType::Building)
-				drawText("Building: %s , UniqueID: %d", pType->ID, pTechno->UniqueID);
-			else
-				drawText("Unknown: %s , UniqueID: %d", pType->ID, pTechno->UniqueID);
-
-			if (const auto pOwner = pTechno->Owner)
-				drawText("Owner = %s ( %s )", pOwner->get_ID(), pOwner->PlainName);
-			else
-				drawText("Owner = N/A ( N/A )");
-
-			drawText("Location = ( %d , %d , %d )", cell.X, cell.Y, pTechno->GetCell()->Level);
-
-			constexpr const char* facingTypes[8] = { "North", "NorthEast", "East", "SouthEast", "South", "SouthWest", "West", "NorthWest" };
-			const auto facing1 = pTechno->PrimaryFacing.Current().GetValue<3>();
-			const auto facing2 = pTechno->SecondaryFacing.Current().GetValue<3>();
-
-			drawText("PriFacing = %d ( %s )", facing1, facingTypes[facing1]);
-			drawText("SecFacing = %d ( %s )", facing2, facingTypes[facing2]);
-
-			drawText("Tether = ( %s , %s )", (pTechno->IsTether ? "Yes" : "No"), (pTechno->IsAlternativeTether ? "Yes" : "No"));
-			drawText("Health = ( %d / %d )", pTechno->Health, pType->Strength);
-
-			if (pExt->CurrentShieldType && pExt->Shield)
-				drawText("Shield = ( %d / %d )", pExt->Shield->GetHP(), pExt->CurrentShieldType->Strength);
-			else
-				drawText("Shield = ( -- / -- )");
-
-			if (pType->Ammo > 0)
-				drawText("Ammo = ( %d / %d )", pTechno->Ammo, pType->Ammo);
-			else
-				drawText("Ammo = ( -- / -- )");
-
-			if (pTechno->Passengers.NumPassengers > 0)
-			{
-				drawText("%d Passengers", pTechno->Passengers.NumPassengers);
-				drawText("First Passenger = %s", pTechno->Passengers.FirstPassenger->GetTechnoType()->ID);
-			}
-			else
-			{
-				drawText("0 Passengers");
-				drawText("First Passenger = N/A");
-			}
-
-			getTargetInfo("Target", pTechno, pTechno->Target);
-			getTargetInfo("Last Target", pTechno, pTechno->LastTarget);
-			getTargetInfo("Nth Link", pTechno, pTechno->GetNthLink());
-			getTargetInfo("Archive Target", pTechno, pTechno->ArchiveTarget);
-			getTargetInfo("Transporter", pTechno, pTechno->Transporter);
-			getTargetInfo("Enter Target", pTechno, pTechno->QueueUpToEnter);
-
-			drawText("Status = %d , StartFrame = %d", pTechno->MissionStatus, pTechno->CurrentMissionStartTime);
-			drawText("CurrentMission = %d ( %s )", pTechno->CurrentMission, MissionControlClass::FindName(pTechno->CurrentMission));
-			drawText("SuspendMission = %d ( %s )", pTechno->SuspendedMission, MissionControlClass::FindName(pTechno->SuspendedMission));
-			drawText("TheNextMission = %d ( %s )", pTechno->QueuedMission, MissionControlClass::FindName(pTechno->QueuedMission));
-
-			if (pTechno->AbstractFlags & AbstractFlags::Foot)
-			{
-				const auto pFoot = static_cast<FootClass*>(pTechno);
-
-				drawText("TheMegaMission = %d ( %s )", pFoot->MegaMission, MissionControlClass::FindName(pFoot->MegaMission));
-				drawText("PlanningPathIdx = %d", pFoot->PlanningPathIdx);
-				drawText("FootCell = ( %d , %d )", pFoot->CurrentMapCoords.X, pFoot->CurrentMapCoords.Y);
-				drawText("LastCell = ( %d , %d )", pFoot->LastMapCoords.X, pFoot->LastMapCoords.Y);
-
-				getTargetInfo("Destination", pFoot, pFoot->Destination);
-				getTargetInfo("Last Destination", pFoot, pFoot->LastDestination);
-				getTargetInfo("Follow Target", pFoot, pFoot->unknown_5A0);
-				getTargetInfo("Mega Target", pFoot, pFoot->MegaTarget);
-				getTargetInfo("Mega Destination", pFoot, pFoot->MegaDestination);
-				getTargetInfo("Parasite", pFoot, pFoot->ParasiteEatingMe);
-
-				if (pFoot->unknown_abstract_array_588.Count > 0)
-					getTargetInfo("First ArrayItem", pFoot, pFoot->unknown_abstract_array_588.GetItem(0));
-				else
-					getTargetInfo("First ArrayItem", pFoot, nullptr);
-
-				if (pFoot->NavQueue.Count > 0)
-					getTargetInfo("First Nav-Queue", pFoot, pFoot->NavQueue.GetItem(0));
-				else
-					getTargetInfo("First Nav-Queue", pFoot, nullptr);
-
-				if (pFoot->BelongsToATeam())
-				{
-					const auto pTeam = pFoot->Team;
-					const auto pTeamType = pTeam->Type;
-					bool found = false;
-
-					for (int i = 0; i < AITriggerTypeClass::Array->Count; i++)
-					{
-						const auto pTriggerType = AITriggerTypeClass::Array->GetItem(i);
-
-						if (pTeamType && (pTriggerType->Team1 == pTeamType || pTriggerType->Team2 == pTeamType))
-						{
-							found = true;
-							drawText("Trigger ID = %s", pTriggerType->ID);
-							drawText("weights [ Cur , Min , Max ]:");
-							drawText(" [ %.2f , %.2f , %.2f ]", pTriggerType->ID, pTriggerType->Weight_Current, pTriggerType->Weight_Minimum, pTriggerType->Weight_Maximum);
-							break;
-						}
-					}
-
-					if (!found)
-					{
-						drawText("Trigger = N/A");
-						drawText("weights [ Cur , Min , Max ]:");
-						drawText(" [ -- , -- , -- ]");
-					}
-
-					const auto pScriptType = pTeam->CurrentScript->Type;
-					const auto mission = pTeam->CurrentScript->CurrentMission;
-
-					drawText("Team    = %s", pTeamType->ID);
-					drawText("Task    = %s", pTeamType->TaskForce->ID);
-					drawText("Script  = %s", pScriptType->get_ID());
-					drawText(" [ Line = Action , Argument ]:");
-
-					if (mission >= 0)
-						drawText(" [ %d = %d , %d ]", mission, pScriptType->ScriptActions[mission].Action, pScriptType->ScriptActions[mission].Argument);
-					else
-						drawText(" [ %d = -- , -- ]", mission);
-				}
-				else
-				{
-					drawText("Trigger = N/A");
-					drawText("weights [ Cur , Min , Max ]:");
-					drawText(" [ -- , -- , -- ]");
-					drawText("Team    = N/A");
-					drawText("Task    = N/A");
-					drawText("Script  = N/A");
-					drawText(" [ Line = Action , Argument ]:");
-					drawText(" [ -- = -- , -- ]");
-				}
-
-				if (absType == AbstractType::Unit)
-				{
-					const auto pUnit = static_cast<UnitClass*>(pTechno);
-
-					getTargetInfo("Follower", pUnit, pUnit->FollowerCar);
-				}/*
-				else if (absType == AbstractType::Infantry)
-				{
-					const auto pInfantry = static_cast<InfantryClass*>(pTechno);
-
-
-				}*/
-				else if (absType == AbstractType::Aircraft)
-				{
-					const auto pAircraft = static_cast<AircraftClass*>(pTechno);
-
-					getTargetInfo("Dock", pAircraft, pAircraft->DockNowHeadingTo);
-				}
-			}
-			else if (absType == AbstractType::Building)
-			{
-				const auto pBuilding = static_cast<BuildingClass*>(pTechno);
-
-				if (pBuilding->Occupants.Count > 0)
-				{
-					drawText("%d Occupants", pBuilding->Occupants.Count);
-					drawText("First Occupant = %s", pBuilding->Occupants.GetItem(0)->Type->ID);
-				}
-				else
-				{
-					drawText("0 Occupants: ");
-					drawText("First Occupant = N/A");
-				}
-
-				// Upgrade Status
-				if (const auto upgrades = pBuilding->Type->Upgrades)
-				{
-					const auto pType1 = pBuilding->Upgrades[0];
-					const auto pType2 = pBuilding->Upgrades[1];
-					const auto pType3 = pBuilding->Upgrades[2];
-
-					drawText("Upgrades ( %d / %d ):", pBuilding->UpgradeLevel, upgrades);
-					drawText("Slot 1 = %s", (pType1 ? pType1->get_ID() : "N/A"));
-					drawText("Slot 2 = %s", (pType2 ? pType2->get_ID() : "N/A"));
-					drawText("Slot 3 = %s", (pType3 ? pType3->get_ID() : "N/A"));
-				}
-				else
-				{
-					drawText("Upgrades ( -- / -- ):");
-					drawText("Slot 1 = N/A");
-					drawText("Slot 2 = N/A");
-					drawText("Slot 3 = N/A");
-				}
-			}
-		}
-		else
-		{
-			drawText("--------: N/A , UniqueID: N/A");
-		}
-	}
-
 	if (!Phobos::Config::SelectedDisplay_Enable)
 		return;
 
@@ -2540,6 +2541,7 @@ DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 	pButtons->SelectedDraw();
 	pButtons->HerosDraw();
 	pButtons->SWSidebarDraw();
+	pButtons->CurrentSelectInfoDraw();
 
 	return 0;
 }

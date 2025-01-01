@@ -27,6 +27,9 @@ public:
 	// Button index N/A : FPS Counter
 	void FPSCounterDraw();
 
+	// Button index N/A : Show Current Info
+	void CurrentSelectInfoDraw();
+
 	// Button index 1-10 : Super weapons buttons
 	inline bool IndexInSWButtons();
 	void SWSidebarDraw();
@@ -81,6 +84,8 @@ public:
 	bool OnMessages { false };
 
 	// Button index N/A : FPS Counter
+
+	// Button index N/A : Show Current Info
 
 	// Button index 1-10 : Super weapons buttons
 	bool DummyAction { false };
