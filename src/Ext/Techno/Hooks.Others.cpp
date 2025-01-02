@@ -1150,13 +1150,12 @@ DEFINE_HOOK(0x6B77B4, SpawnManagerClass_Update_RecycleSpawned, 0x7)
 
 DEFINE_HOOK(0x481778, CellClass_ScatterContent_Fix, 0x6)
 {
-	enum { SkipGameCode = 0x481793 };
-	GET(ObjectClass* const, pObject, ESI);
+	enum { Continue = 0x481797, Scatter = 0x4817C3 };
 
-	auto const pTechno = abstract_cast<TechnoClass*>(pObject);
+	GET(TechnoClass* const, pTechno, ESI);
+	GET_STACK(bool, force, STACK_OFFSET(0x2C, 0xC));
 
-	R->CL(pTechno && pTechno->Owner->IsHumanPlayer && RulesClass::Instance()->PlayerScatter);
-	return SkipGameCode;
+	return ((pTechno && pTechno->Owner->IsControlledByHuman() && RulesClass::Instance()->PlayerScatter) || force) ? Scatter : Continue;
 }
 
 #pragma endregion
