@@ -623,10 +623,10 @@ void TechnoExt::ExtData::UpdateRearmInEMPState()
 	if (pThis->IsUnderEMP() && this->TypeExtData->NoRearmInEMPState.Get(RulesExt::Global()->NoRearmInEMPState))
 	{
 		if (pThis->RearmTimer.InProgress())
-			pThis->RearmTimer.TimeLeft++;
+			pThis->RearmTimer.StartTime++;
 
 		if (pThis->ReloadTimer.InProgress())
-			pThis->ReloadTimer.TimeLeft++;
+			pThis->ReloadTimer.StartTime++;
 	}
 }
 
@@ -637,10 +637,10 @@ void TechnoExt::ExtData::UpdateRearmInTemporal()
 	if (this->TypeExtData->NoRearmInTemporal.Get(RulesExt::Global()->NoRearmInTemporal))
 	{
 		if (pThis->RearmTimer.InProgress())
-			pThis->RearmTimer.TimeLeft++;
+			pThis->RearmTimer.StartTime++;
 
 		if (pThis->ReloadTimer.InProgress())
-			pThis->ReloadTimer.TimeLeft++;
+			pThis->ReloadTimer.StartTime++;
 	}
 }
 
