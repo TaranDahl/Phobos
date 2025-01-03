@@ -568,18 +568,18 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 	}
 
 	ColorStruct fillColor { 0, 0, 0 };
-	RectangleStruct drawRect { 0, 0, 300, DSurface::Composite->GetHeight() - 32 };
+	RectangleStruct drawRect { 0, 0, 360, DSurface::Composite->GetHeight() - 32 };
 	DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 30);
 	Point2D textLocation { 15, 15 };
 
 	auto drawText = [&drawRect, &textLocation](const char* pFormat, ...)
 	{
-		char buffer[0x40] = {0};
+		char buffer[0x60] = {0};
 		va_list args;
 		va_start(args, pFormat);
 		vsprintf_s(buffer, pFormat, args);
 		va_end(args);
-		wchar_t wBuffer[0x40] = {0};
+		wchar_t wBuffer[0x60] = {0};
 		CRT::mbstowcs(wBuffer, buffer, strlen(buffer));
 		constexpr TextPrintType printType = TextPrintType::FullShadow | TextPrintType::Point8;
 		DSurface::Composite->DrawTextA(wBuffer, &drawRect, &textLocation, COLOR_WHITE, 0, printType);
@@ -605,17 +605,26 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 			}
 
 			const auto distance = (pCurrent->DistanceFrom(pTarget) / Unsorted::LeptonsPerCell);
-			drawText("%s: %s , At( %d , %d )", pInfoName, ID, mapCoords.X, mapCoords.Y);
+			drawText("%s: %s , At( %d , %d ) , %d apart", pInfoName, ID, mapCoords.X, mapCoords.Y, distance);
 		}
 		else
 		{
-			drawText("%s: %s , At( %d , %d )", pInfoName, "N/A", -1, -1);
+			drawText("%s: %s", pInfoName, "N/A");
 		}
 	};
 
 	auto drawTask = [&drawText](const char* pInfoName, Mission mission)
 	{
 		drawText("%s = %d ( %s )", pInfoName, mission, MissionControlClass::FindName(mission));
+	};
+
+	auto drawTime = [&drawText](const char* pInfoName, CDTimerClass& timer)
+	{
+		const auto timeCeiling = timer.TimeLeft;
+		const auto timeCurrent = timeCeiling - timer.GetTimeLeft();
+		const auto timePercentage = (timeCeiling > 0) ? (timeCurrent * 100 / timeCeiling) : 0;
+
+		drawText("%s = %d / %d ( %d )", pInfoName, timeCurrent, timeCeiling, timePercentage);
 	};
 
 	drawText("Current Frame: %d", Unsorted::CurrentFrame());
@@ -626,6 +635,7 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		const auto absType = pTechno->WhatAmI();
 		const auto cell = pTechno->GetMapCoords();
 		const auto pExt = TechnoExt::ExtMap.Find(pTechno);
+		const auto pOwner = pTechno->Owner;
 
 		if (absType == AbstractType::Unit)
 			drawText("%s: %s , UniqueID: %d", "Vehicle", pType->ID, pTechno->UniqueID);
@@ -638,7 +648,7 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		else
 			drawText("%s: %s , UniqueID: %d", "Unknown", pType->ID, pTechno->UniqueID);
 
-		if (const auto pOwner = pTechno->Owner)
+		if (pOwner)
 			drawText("Owner = %s ( %s )", pOwner->get_ID(), pOwner->PlainName);
 		else
 			drawText("Owner = %s ( %s )", "N/A", "N/A");
@@ -656,6 +666,9 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		drawText("Health = ( %d / %d )", pTechno->Health, pType->Strength);
 		drawText("Shield = ( %d / %d )", (pExt->Shield ? pExt->Shield->GetHP() : -1), (pExt->CurrentShieldType ? pExt->CurrentShieldType->Strength : -1));
 		drawText("Ammo = ( %d / %d )", pTechno->Ammo, pType->Ammo);
+
+		drawTime("ReloadTimer", pTechno->ReloadTimer);
+		drawTime("RearmTimer", pTechno->RearmTimer);
 
 		if (pTechno->Passengers.NumPassengers > 0)
 		{
@@ -675,6 +688,16 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		drawInfo("Transporter", pTechno, pTechno->Transporter);
 		drawInfo("Enter", pTechno, pTechno->QueueUpToEnter);
 
+		if (pTechno->CurrentTargets.Count > 0)
+			drawInfo("First CurTarget", pTechno, pTechno->CurrentTargets.GetItem(0));
+		else
+			drawInfo("First CurTarget", pTechno, nullptr);
+
+		if (pTechno->AttackedTargets.Count > 0)
+			drawInfo("First OldTarget", pTechno, pTechno->AttackedTargets.GetItem(0));
+		else
+			drawInfo("First OldTarget", pTechno, nullptr);
+
 		drawText("Status = %d , StartFrame = %d", pTechno->MissionStatus, pTechno->CurrentMissionStartTime);
 		drawTask("CurrentMission", pTechno->CurrentMission);
 		drawTask("SuspendMission", pTechno->SuspendedMission);
@@ -688,7 +711,8 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 			drawText("PlanningPathIdx = %d", pFoot->PlanningPathIdx);
 			drawText("FootCell = ( %d , %d )", pFoot->CurrentMapCoords.X, pFoot->CurrentMapCoords.Y);
 			drawText("LastCell = ( %d , %d )", pFoot->LastMapCoords.X, pFoot->LastMapCoords.Y);
-			drawText("PathDirections = ( %d , %d , %d )", pFoot->PathDirections[0], pFoot->PathDirections[1], pFoot->PathDirections[2]);
+			drawText("PathDirections = %d , %d , %d", (pFoot->PathDirections[0] % 8), (pFoot->PathDirections[1] % 8), (pFoot->PathDirections[2] % 8));
+			drawText("SpeedPercentage = %d", static_cast<int>(pFoot->SpeedPercentage * 100));
 
 			drawInfo("Destination", pFoot, pFoot->Destination);
 			drawInfo("Last Destination", pFoot, pFoot->LastDestination);
@@ -781,6 +805,8 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		else if (absType == AbstractType::Building)
 		{
 			const auto pBuilding = static_cast<BuildingClass*>(pTechno);
+			const auto pBuildingType = pBuilding->Type;
+			const auto pBuildingTypeExt = BuildingTypeExt::ExtMap.Find(pBuildingType);
 
 			if (pBuilding->Occupants.Count > 0)
 			{
@@ -804,8 +830,48 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 				drawText("First Overpowerer = %s", "N/A");
 			}
 
+			FactoryClass* pFactory = nullptr;
+			TechnoClass* pProduct = nullptr;
+
+			if (!pBuilding->IsPrimaryFactory)
+			{
+				if (pFactory = pBuilding->Factory, pFactory)
+					pProduct = pFactory->Object;
+			}
+			else if (pOwner)
+			{
+				if (pFactory = pOwner->GetPrimaryFactory(pBuildingType->Factory, pType->Naval, BuildCat::DontCare), pFactory)
+					pProduct = pFactory->Object;
+
+				if ((!pFactory || !pProduct) && pBuildingType->Factory == AbstractType::BuildingType && (pFactory = pOwner->Primary_ForDefenses, pFactory))
+					pProduct = pFactory->Object;
+			}
+
+			if (pFactory && pProduct)
+				drawText("Product: %s ( %d )", pProduct->GetTechnoType()->ID, (pFactory->GetProgress() * 100 / 54));
+			else
+				drawText("Product: %s ( %d )", "N/A", 0);
+
+			drawTime("RetryProduction", pBuilding->FactoryRetryTimer);
+			drawTime("CashProduction", pBuilding->CashProductionTimer);
+			drawTime("BuildingGate", pBuilding->GateTimer);
+
+			SuperClass* pSuper = nullptr;
+
+			if (pBuildingType->SuperWeapon != -1)
+				pSuper = pOwner->Supers.GetItem(pBuildingType->SuperWeapon);
+			else if (pBuildingType->SuperWeapon2 != -1)
+				pSuper = pOwner->Supers.GetItem(pBuildingType->SuperWeapon2);
+			else if (pBuildingTypeExt->SuperWeapons.size() > 0)
+				pSuper = pOwner->Supers.GetItem(pBuildingTypeExt->SuperWeapons[0]);
+
+			if (pSuper)
+				drawTime(pSuper->Type->ID, pSuper->RechargeTimer);
+			else
+				drawText("SuperWeapon: 0 / -1 ( 0.0 )");
+
 			// Upgrade Status
-			if (const auto upgrades = pBuilding->Type->Upgrades)
+			if (const auto upgrades = pBuildingType->Upgrades)
 			{
 				const auto pType1 = pBuilding->Upgrades[0];
 				const auto pType2 = pBuilding->Upgrades[1];
