@@ -164,7 +164,8 @@ PhobosMap<int , const wchar_t*> TacticalButtonsClass::KeyboardCodeTextMap = Crea
 
 // Functions
 
-// Private functions
+#pragma region PrivateFunctions
+
 int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 {
 	if (Phobos::Config::MessageDisplayInCenter)
@@ -344,7 +345,10 @@ bool TacticalButtonsClass::CheckMouseOverBackground(const Point2D* pMousePositio
 	return false;
 }
 
-// Inline functions
+#pragma endregion
+
+#pragma region InlineFunctions
+
 inline bool TacticalButtonsClass::MouseIsOverButtons()
 {
 	return this->ButtonIndex > 0;
@@ -355,13 +359,19 @@ inline bool TacticalButtonsClass::MouseIsOverTactical()
 	return this->ButtonIndex < 0;
 }
 
-// Cite functions
+#pragma endregion
+
+#pragma region CiteFunctions
+
 int TacticalButtonsClass::GetButtonIndex()
 {
 	return this->ButtonIndex;
 }
 
-// General functions
+#pragma endregion
+
+#pragma region GeneralFunctions
+
 void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 {
 	this->ButtonIndex = this->CheckMouseOverButtons(pMousePosition);
@@ -458,7 +468,10 @@ void TacticalButtonsClass::PressDesignatedButton(int triggerIndex)
 	}
 }
 
-// Button index N/A : Message Lists
+#pragma endregion
+
+#pragma region MessageLists
+
 bool TacticalButtonsClass::MouseIsOverMessageLists(const Point2D* pMousePosition)
 {
 	const auto pMessages = &MessageListClass::Instance();
@@ -481,7 +494,10 @@ bool TacticalButtonsClass::MouseIsOverMessageLists(const Point2D* pMousePosition
 	return false;
 }
 
-// Button index N/A : FPS Counter
+#pragma endregion
+
+#pragma region FPSCounter
+
 void TacticalButtonsClass::FPSCounterDraw()
 {
 	if (!Phobos::Config::FPSCounter_Enable)
@@ -528,7 +544,10 @@ void TacticalButtonsClass::FPSCounterDraw()
 	DSurface::Composite->DrawText(fpsBuffer, &location, color);
 }
 
-// Button index N/A : Show Current Info
+#pragma endregion
+
+#pragma region ShowCurrentInfo
+
 void TacticalButtonsClass::CurrentSelectInfoDraw()
 {
 	if (!Phobos::ShowCurrentInfo)
@@ -669,6 +688,7 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 			drawText("PlanningPathIdx = %d", pFoot->PlanningPathIdx);
 			drawText("FootCell = ( %d , %d )", pFoot->CurrentMapCoords.X, pFoot->CurrentMapCoords.Y);
 			drawText("LastCell = ( %d , %d )", pFoot->LastMapCoords.X, pFoot->LastMapCoords.Y);
+			drawText("PathDirections = ( %d , %d , %d )", pFoot->PathDirections[0], pFoot->PathDirections[1], pFoot->PathDirections[2]);
 
 			drawInfo("Destination", pFoot, pFoot->Destination);
 			drawInfo("Last Destination", pFoot, pFoot->LastDestination);
@@ -773,6 +793,17 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 				drawText("First Occupant = %s", "N/A");
 			}
 
+			if (pBuilding->Overpowerers.Count > 0)
+			{
+				drawText("%d Overpowerers", pBuilding->Overpowerers.Count);
+				drawText("First Overpowerer = %s", pBuilding->Overpowerers.GetItem(0)->Type->ID);
+			}
+			else
+			{
+				drawText("%d Overpowerers", 0);
+				drawText("First Overpowerer = %s", "N/A");
+			}
+
 			// Upgrade Status
 			if (const auto upgrades = pBuilding->Type->Upgrades)
 			{
@@ -800,7 +831,10 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 	}
 }
 
-// Button index 1-10 : Super weapons buttons
+#pragma endregion
+
+#pragma region SWSidebarButtons
+
 inline bool TacticalButtonsClass::IndexInSWButtons()
 {
 	return this->ButtonIndex > 0 && this->ButtonIndex <= 10;
@@ -1167,7 +1201,10 @@ void TacticalButtonsClass::SWSidebarRecord(int buttonIndex, int key)
 	this->KeyCodeText[index] = oss.str();*/
 }
 
-// Button index 11 : SW sidebar switch
+#pragma endregion
+
+#pragma region SWSidebarSwitch
+
 inline bool TacticalButtonsClass::IndexIsSWSwitch()
 {
 	return this->ButtonIndex == 11;
@@ -1196,7 +1233,10 @@ void TacticalButtonsClass::SWSidebarSwitch()
 	);
 }
 
-// Extra functions for SW
+#pragma endregion
+
+#pragma region SWExtraFunctions
+
 bool TacticalButtonsClass::SWQuickLaunch(int superIndex)
 {
 	bool keyboardCall = false;
@@ -1252,7 +1292,10 @@ bool TacticalButtonsClass::SWQuickLaunch(int superIndex)
 	return false;
 }
 
-// Button index 61-68 : Heros buttons
+#pragma endregion
+
+#pragma region HerosButtons
+
 inline bool TacticalButtonsClass::IndexInHerosButtons()
 {
 	return this->ButtonIndex > 60 && this->ButtonIndex <= 68;
@@ -1640,7 +1683,10 @@ void TacticalButtonsClass::HeroSwitch()
 	);
 }
 
-// Button index 71-100 : Select buttons
+#pragma endregion
+
+#pragma region SelectButtons
+
 inline bool TacticalButtonsClass::IndexInSelectButtons()
 {
 	return this->ButtonIndex > 70 && this->ButtonIndex <= 100;
@@ -2400,6 +2446,10 @@ void TacticalButtonsClass::SelectedDraw()
 	}
 }
 
+#pragma endregion
+
+#pragma region SelectSwitch
+
 void TacticalButtonsClass::SelectedSwitch()
 {
 	Phobos::Config::SelectedDisplay_Enable = !Phobos::Config::SelectedDisplay_Enable;
@@ -2428,9 +2478,12 @@ void TacticalButtonsClass::SelectedSwitch()
 	}
 }
 
+#pragma endregion
+
 // Hooks
 
-// Mouse trigger hooks
+#pragma region MouseTriggerHooks
+
 DEFINE_HOOK(0x6931A5, ScrollClass_WindowsProcedure_PressLeftMouseButton, 0x6)
 {
 	enum { SkipGameCode = 0x6931B4 };
@@ -2503,7 +2556,10 @@ DEFINE_HOOK(0x693397, ScrollClass_WindowsProcedure_ReleaseRightMouseButton, 0x6)
 	return 0;
 }
 
-// Mouse suspend hooks
+#pragma endregion
+
+#pragma region MouseSuspendHooks
+
 DEFINE_HOOK(0x692F85, ScrollClass_MouseUpdate_SkipMouseLongPress, 0x7)
 {
 	enum { CheckMousePress = 0x692F8E, CheckMouseNoPress = 0x692FDC };
@@ -2530,7 +2586,10 @@ DEFINE_HOOK(0x69300B, ScrollClass_MouseUpdate_SkipMouseActionUpdate, 0x6)
 	return SkipGameCode;
 }
 
-// Buttons display hooks
+#pragma endregion
+
+#pragma region ButtonsDisplayHooks
+
 DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 {
 	const auto pButtons = &TacticalButtonsClass::Instance;
@@ -2546,7 +2605,10 @@ DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 	return 0;
 }
 
-// SW buttons update hooks
+#pragma endregion
+
+#pragma region SWButtonsUpdateHooks
+
 DEFINE_HOOK(0x4F9283, HouseClass_Update_RecheckTechTree, 0x5)
 {
 	GET(HouseClass*, pHouse, ESI);
@@ -2567,7 +2629,10 @@ DEFINE_HOOK(0x6A6314, SidebarClass_AddCameo_SupportSWButtons, 0x8)
 	return (absType != AbstractType::Special || SuperWeaponTypeClass::Array->Count <= index || TacticalButtonsClass::Instance.SWSidebarAdd(index)) ? 0 : SkipThisCameo;
 }
 
-// Extra function hooks
+#pragma endregion
+
+#pragma region SWExtraFunctionHooks
+
 DEFINE_HOOK(0x6AAF46, SelectClass_Action_ButtonClick1, 0x6)
 {
 	enum { SkipClearMouse = 0x6AB95A };
@@ -2577,7 +2642,10 @@ DEFINE_HOOK(0x6AAF46, SelectClass_Action_ButtonClick1, 0x6)
 	return TacticalButtonsClass::Instance.SWQuickLaunch(index) ? SkipClearMouse : 0;
 }
 
-// SW buttons trigger hooks
+#pragma endregion
+
+#pragma region SWButtonsTriggerHooks
+
 DEFINE_HOOK_AGAIN(0x6AAD2F, SelectClass_Action_ButtonClick2, 0x7)
 DEFINE_HOOK(0x6AB94F, SelectClass_Action_ButtonClick2, 0xB)
 {
@@ -2606,7 +2674,10 @@ DEFINE_HOOK(0x6AB961, SelectClass_Action_ButtonClick3, 0x7)
 	return SkipControlAction;
 }
 
-// Heros hooks
+#pragma endregion
+
+#pragma region HerosHooks
+
 DEFINE_HOOK(0x7015C9, TechnoClass_SetOwningHouse_ChangeHeroOwner, 0x6)
 {
 	GET(TechnoClass* const, pThis, ESI);
@@ -2638,7 +2709,10 @@ DEFINE_HOOK(0x7015C9, TechnoClass_SetOwningHouse_ChangeHeroOwner, 0x6)
 	return 0;
 }
 
-// Select hooks
+#pragma endregion
+
+#pragma region SelectHooks
+
 DEFINE_HOOK_AGAIN(0x5F4718, ObjectClass_Select, 0x7)
 DEFINE_HOOK(0x5F46AE, ObjectClass_Select, 0x7)
 {
@@ -2665,7 +2739,10 @@ DEFINE_HOOK(0x5F44FC, ObjectClass_Deselect, 0x7)
 	return 0;
 }
 
-// Shortcuts keys hooks
+#pragma endregion
+
+#pragma region SWShortcutsKeysHooks
+
 DEFINE_HOOK(0x533E69, UnknownClass_sub_533D20_LoadKeyboardCodeFromINI, 0x6)
 {
 	GET(CommandClass*, pCommand, ESI);
@@ -2705,3 +2782,5 @@ DEFINE_HOOK(0x5FB992, UnknownClass_sub_5FB320_SaveKeyboardCodeToINI, 0x6)
 
 	return 0;
 }
+
+#pragma endregion
