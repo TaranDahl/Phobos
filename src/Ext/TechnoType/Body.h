@@ -132,6 +132,11 @@ public:
 		Valueable<bool> AutoFire;
 		Valueable<bool> AutoFire_TargetSelf;
 
+		Valueable<bool> AggressiveStance;
+		Nullable<bool> AggressiveStance_Togglable;
+		NullableIdx<VocClass> VoiceEnterAggressiveStance;
+		NullableIdx<VocClass> VoiceExitAggressiveStance;
+
 		Valueable<bool> NoSecondaryWeaponFallback;
 		Valueable<bool> NoSecondaryWeaponFallback_AllowAA;
 
@@ -417,6 +422,12 @@ public:
 
 			, AutoFire { false }
 			, AutoFire_TargetSelf { false }
+
+			, AggressiveStance { false }
+			, AggressiveStance_Togglable {}
+			, VoiceEnterAggressiveStance {}
+			, VoiceExitAggressiveStance {}
+
 			, NoSecondaryWeaponFallback { false }
 			, NoSecondaryWeaponFallback_AllowAA { false }
 			, NoAmmoWeapon { -1 }
@@ -658,6 +669,8 @@ public:
 		void SetTurretLimitedDir(FootClass* pThis, DirStruct desiredDir);
 		short GetTurretLimitedRaw(short currentDirectionRaw);
 		DirStruct GetBodyDesiredDir(DirStruct currentDir, DirStruct defaultDir);
+
+		bool CanToggleAggressiveStance(TechnoClass* pTechno);
 
 		// Ares 0.A
 		const char* GetSelectionGroupID() const;
