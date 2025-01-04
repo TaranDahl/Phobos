@@ -302,18 +302,19 @@ DEFINE_JUMP(VTABLE, 0x7EB0CC, GET_OFFSET(InfantryClass__WhatAction_Wrapper))
 
 DEFINE_HOOK(0x6F858F, TechnoClass_EvaluateObject_AggressiveStance, 0x7)
 {
+	enum { SkipGameCode = 0x6F88BF };
+
 	GET(TechnoClass*, pThis, EDI);
 	GET(TechnoClass*, pTarget, ESI);
-	if (pThis && pThis->Owner->IsHumanPlayer
-		&& pTarget && pTarget->WhatAmI() == AbstractType::Building)
+
+	if (pThis && pThis->Owner->IsControlledByHuman() && pTarget && pTarget->WhatAmI() == AbstractType::Building)
 	{
 		if (auto pTechnoExt = TechnoExt::ExtMap.Find(pThis))
 		{
 			if (pTechnoExt->GetAggressiveStance())
-			{
-				return 0x6F88BF;
-			}
+				return SkipGameCode;
 		}
 	}
+
 	return 0;
 }

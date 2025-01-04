@@ -23,16 +23,6 @@ const wchar_t* AggressiveStanceClass::GetUIDescription() const
 	return GeneralUtils::LoadStringUnlessMissing("TXT_AGGRESSIVE_STANCE_DESC", L"Aggressive Stance");
 }
 
-const wchar_t* AggressiveStanceClass::GetToggleOnPopupMessage() const
-{
-	return GeneralUtils::LoadStringUnlessMissing("MSG:AGGRESSIVE_STANCE_ON", L"%i unit(s) entered Aggressive Stance.");
-}
-
-const wchar_t* AggressiveStanceClass::GetToggleOffPopupMessage() const
-{
-	return GeneralUtils::LoadStringUnlessMissing("MSG:AGGRESSIVE_STANCE_OFF", L"%i unit(s) ceased Aggressive Stance.");
-}
-
 void AggressiveStanceClass::Execute(WWKey eInput) const
 {
 	std::vector<TechnoClass*> TechnoVectorAggressive;
@@ -43,34 +33,32 @@ void AggressiveStanceClass::Execute(WWKey eInput) const
 	// Otherwise, we should turn them into aggressive stance.
 	bool isAnySelectedUnitArmed = false;
 	bool isAllSelectedUnitAggressiveStance = true;
+
 	for (const auto& pUnit : ObjectClass::CurrentObjects())
 	{
 		// try to cast to TechnoClass
 		TechnoClass* pTechno = abstract_cast<TechnoClass*>(pUnit);
 
 		// if not a techno or is in berserk or is not controlled by the local player then ignore it
-		if (!pTechno || pTechno->Berzerk || !pTechno->Owner->IsInPlayerControl)
+		if (!pTechno || pTechno->Berzerk || !pTechno->Owner->IsControlledByCurrentPlayer())
 			continue;
 
-		// If not togglable then exclude it from the iteration.
-		if (auto pTechnoTypeExt = TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType()))
-		{
-			if (!pTechnoTypeExt->CanToggleAggressiveStance(pTechno))
-				continue;
-		}
+		const auto pTechnoExt = TechnoExt::ExtMap.Find(pTechno);
 
-		if (auto pTechnoExt = TechnoExt::ExtMap.Find(pTechno))
+		// If not togglable then exclude it from the iteration.
+		if (!pTechnoExt->TypeExtData->CanToggleAggressiveStance(pTechno))
+			continue;
+
+		isAnySelectedUnitArmed = true;
+
+		if (pTechnoExt->GetAggressiveStance())
 		{
-			isAnySelectedUnitArmed = true;
-			if (pTechnoExt->GetAggressiveStance())
-			{
-				TechnoVectorAggressive.push_back(pTechno);
-			}
-			else
-			{
-				isAllSelectedUnitAggressiveStance = false;
-				TechnoVectorNonAggressive.push_back(pTechno);
-			}
+			TechnoVectorAggressive.push_back(pTechno);
+		}
+		else
+		{
+			isAllSelectedUnitAggressiveStance = false;
+			TechnoVectorNonAggressive.push_back(pTechno);
 		}
 	}
 
@@ -79,52 +67,40 @@ void AggressiveStanceClass::Execute(WWKey eInput) const
 	{
 		// If all selected units are aggressive stance, then cancel their aggressive stance;
 		// otherwise, make all selected units aggressive stance.
-		std::vector<TechnoClass*> TechnoVector;
-		const wchar_t* Message;
 		if (isAllSelectedUnitAggressiveStance)
 		{
-			TechnoVector = TechnoVectorAggressive;
-			Message = this->GetToggleOffPopupMessage();
+			for (auto pTechno : TechnoVectorAggressive)
+			{
+				EventExt::RaiseToggleAggressiveStance(pTechno);
+				pTechno->QueueVoice(TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType())->VoiceExitAggressiveStance.Get());
+			}
+
+			wchar_t buffer[0x100];
+			swprintf_s(buffer, GeneralUtils::LoadStringUnlessMissing("MSG:AGGRESSIVE_STANCE_OFF", L"%i unit(s) ceased Aggressive Stance."), TechnoVectorAggressive.size());
+			MessageListClass::Instance->PrintMessage(buffer);
 		}
 		else
 		{
-			TechnoVector = TechnoVectorNonAggressive;
-			Message = this->GetToggleOnPopupMessage();
-		}
-		for (auto pTechno : TechnoVector)
-		{
-			EventExt::RaiseToggleAggressiveStance(pTechno);
-
-			auto pTechnoType = pTechno->GetTechnoType();
-			auto pTechnoTypeExt = TechnoTypeExt::ExtMap.Find(pTechnoType);
-			int voiceIndex;
-
-			if (isAllSelectedUnitAggressiveStance)
+			for (auto pTechno : TechnoVectorNonAggressive)
 			{
-				voiceIndex = pTechnoTypeExt->VoiceExitAggressiveStance.Get(-1);
-			}
-			else
-			{
-				voiceIndex = pTechnoTypeExt->VoiceEnterAggressiveStance.Get(-1);
+				EventExt::RaiseToggleAggressiveStance(pTechno);
+				const auto pTechnoType = pTechno->GetTechnoType();
+				int voiceIndex = TechnoTypeExt::ExtMap.Find(pTechnoType)->VoiceEnterAggressiveStance.Get();
+
 				if (voiceIndex < 0)
 				{
-					TypeList<int> voiceList = pTechnoType->VoiceAttack.Count ? pTechnoType->VoiceAttack : pTechnoType->VoiceMove;
-					if (voiceList.Count)
-					{
-						unsigned int idxRandom = Randomizer::Global().Random();
-						auto index = idxRandom % voiceList.Count;
-						voiceIndex = voiceList.GetItem(index);
-					}
-				}
-			}
+					const auto& voiceList = pTechnoType->VoiceAttack.Count ? pTechnoType->VoiceAttack : pTechnoType->VoiceMove;
 
-			if (voiceIndex > 0)
-			{
+					if (const auto count = voiceList.Count)
+						voiceIndex = voiceList.GetItem(Randomizer::Global().Random() % count);
+				}
+
 				pTechno->QueueVoice(voiceIndex);
 			}
+
+			wchar_t buffer[0x100];
+			swprintf_s(buffer, GeneralUtils::LoadStringUnlessMissing("MSG:AGGRESSIVE_STANCE_ON", L"%i unit(s) entered Aggressive Stance."), TechnoVectorNonAggressive.size());
+			MessageListClass::Instance->PrintMessage(buffer);
 		}
-		wchar_t buffer[0x1000];
-		wsprintfW(buffer, Message, TechnoVector.size());
-		MessageListClass::Instance->PrintMessage(buffer);
 	}
 }

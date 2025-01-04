@@ -565,29 +565,17 @@ bool TechnoExt::ExtData::GetAggressiveStance() const
 {
 	// if this is a passenger then obey the configuration of the transport
 	if (auto pTransport = this->OwnerObject()->Transporter)
-	{
-		auto pTransportExt = TechnoExt::ExtMap.Find(pTransport);
-		return pTransportExt->GetAggressiveStance();
-	}
+		return TechnoExt::ExtMap.Find(pTransport)->GetAggressiveStance();
 
 	return this->AggressiveStance;
 }
 
 void TechnoExt::ExtData::ToggleAggressiveStance()
 {
-	
-	if (this->AggressiveStance)
-	{
-		// toggle off aggressive stance
-		this->AggressiveStance = false;
-		// stop current target
+	this->AggressiveStance = !this->AggressiveStance;
+
+	if (!this->AggressiveStance)
 		this->OwnerObject()->QueueMission(Mission::Guard, false);
-	}
-	else
-	{
-		// toggle on aggressive stance
-		this->AggressiveStance = true;
-	}
 }
 
 bool TechnoExt::LoadGlobals(PhobosStreamReader& Stm)
