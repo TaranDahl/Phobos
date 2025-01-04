@@ -69,7 +69,7 @@ void AggressiveStanceClass::Execute(WWKey eInput) const
 		// otherwise, make all selected units aggressive stance.
 		if (isAllSelectedUnitAggressiveStance)
 		{
-			for (auto pTechno : TechnoVectorAggressive)
+			for (const auto& pTechno : TechnoVectorAggressive)
 			{
 				EventExt::RaiseToggleAggressiveStance(pTechno);
 				pTechno->QueueVoice(TechnoTypeExt::ExtMap.Find(pTechno->GetTechnoType())->VoiceExitAggressiveStance.Get());
@@ -81,7 +81,7 @@ void AggressiveStanceClass::Execute(WWKey eInput) const
 		}
 		else
 		{
-			for (auto pTechno : TechnoVectorNonAggressive)
+			for (const auto& pTechno : TechnoVectorNonAggressive)
 			{
 				EventExt::RaiseToggleAggressiveStance(pTechno);
 				const auto pTechnoType = pTechno->GetTechnoType();
