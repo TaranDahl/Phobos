@@ -711,7 +711,28 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 			drawText("PlanningPathIdx = %d", pFoot->PlanningPathIdx);
 			drawText("FootCell = ( %d , %d )", pFoot->CurrentMapCoords.X, pFoot->CurrentMapCoords.Y);
 			drawText("LastCell = ( %d , %d )", pFoot->LastMapCoords.X, pFoot->LastMapCoords.Y);
-			drawText("PathDirections = %d , %d , %d", (pFoot->PathDirections[0] % 8), (pFoot->PathDirections[1] % 8), (pFoot->PathDirections[2] % 8));
+
+			const auto& pD = pFoot->PathDirections;
+
+			if (pD[0] == -1)
+				drawText("PathDir = N/A");
+			else if (pD[1] == -1)
+				drawText("PathDir = %d", pD[0]);
+			else if (pD[2] == -1)
+				drawText("PathDir = %d , %d", pD[0], pD[1]);
+			else if (pD[3] == -1)
+				drawText("PathDir = %d , %d , %d", pD[0], pD[1], pD[2]);
+			else if (pD[4] == -1)
+				drawText("PathDir = %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3]);
+			else if (pD[5] == -1)
+				drawText("PathDir = %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4]);
+			else if (pD[6] == -1)
+				drawText("PathDir = %d , %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4], pD[5]);
+			else if (pD[7] == -1)
+				drawText("PathDir = %d , %d , %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4], pD[5], pD[6]);
+			else
+				drawText("PathDir = %d , %d , %d , %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4], pD[5], pD[6], pD[7]);
+
 			drawText("SpeedPercentage = %d", static_cast<int>(pFoot->SpeedPercentage * 100));
 
 			drawInfo("Destination", pFoot, pFoot->Destination);

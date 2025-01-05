@@ -401,6 +401,7 @@ This page lists all the individual contributions to the project by their author.
   - Exclusive Sidebar for Superweapons
   - Observer sidebar in skirmish game mode
   - Draw visual effects for airburst weapons
+  - Use 2D distance instead of 3D distance to check whether team members have arrived destination
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
