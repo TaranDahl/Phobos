@@ -21,10 +21,6 @@ static void __fastcall CallEnhancedScatterContent(CellClass* pCell, TechnoClass*
 
 		pNearCell->ScatterContent(coords, true, true, false);
 	}
-
-/*
-	TODO
-*/
 }
 
 DEFINE_HOOK(0x4495DF, BuildingClass_CheckWeaponFactoryOutsideBusy_ScatterEntranceContent, 0x5)
@@ -50,9 +46,10 @@ DEFINE_HOOK(0x4495DF, BuildingClass_CheckWeaponFactoryOutsideBusy_ScatterEntranc
 	return Busy;
 }
 
-DEFINE_HOOK(0x4B1F2C, DriveLocomotionClass_MovingProcess_ScatterForwardContent, 0x5)
+DEFINE_HOOK_AGAIN(0x6A156F, LocomotionClass_MovingProcess_ScatterForwardContent, 0x5) // Ship
+DEFINE_HOOK(0x4B1F2C, LocomotionClass_MovingProcess_ScatterForwardContent, 0x5) // Dirve
 {
-	enum { SkipGameCode = 0x4B1F48 };
+	enum { SkipGameCodeDrive = 0x4B1F48, SkipGameCodeShip = 0x6A158B };
 
 	GET(LocomotionClass* const, pThis, EBP);
 	GET(Point2D* const, pCoords, ESI);
@@ -62,12 +59,13 @@ DEFINE_HOOK(0x4B1F2C, DriveLocomotionClass_MovingProcess_ScatterForwardContent, 
 	const auto pCell = MapClass::Instance->GetTargetCell(*pCoords);
 	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location);
 
-	return SkipGameCode;
+	return R->Origin() == 0x4B1F2C ? SkipGameCodeDrive : SkipGameCodeShip;
 }
 
-DEFINE_HOOK(0x4B2DB4, DriveLocomotionClass_MovingProcess2_ScatterForwardContent1, 0x5)
+DEFINE_HOOK_AGAIN(0x6A2404, LocomotionClass_MovingProcess2_ScatterForwardContent1, 0x5) // Ship
+DEFINE_HOOK(0x4B2DB4, LocomotionClass_MovingProcess2_ScatterForwardContent1, 0x5) // Dirve
 {
-	enum { SkipGameCode = 0x4B2DC5 };
+	enum { SkipGameCodeDrive = 0x4B2DC5, SkipGameCodeShip = 0x6A2415 };
 
 	GET(LocomotionClass* const, pThis, EBP);
 	GET(CellClass* const, pCell, EDI);
@@ -76,12 +74,13 @@ DEFINE_HOOK(0x4B2DB4, DriveLocomotionClass_MovingProcess2_ScatterForwardContent1
 	const auto pLinkTo = pThis->LinkedTo;
 	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location);
 
-	return SkipGameCode;
+	return R->Origin() == 0x4B2DB4 ? SkipGameCodeDrive : SkipGameCodeShip;
 }
 
-DEFINE_HOOK(0x4B3271, DriveLocomotionClass_MovingProcess2_ScatterForwardContent2, 0x5)
+DEFINE_HOOK_AGAIN(0x6A28C1, LocomotionClass_MovingProcess2_ScatterForwardContent2, 0x5) // Ship
+DEFINE_HOOK(0x4B3271, LocomotionClass_MovingProcess2_ScatterForwardContent2, 0x5) // Dirve
 {
-	enum { SkipGameCode = 0x4B3282 };
+	enum { SkipGameCodeDrive = 0x4B3282, SkipGameCodeShip = 0x6A28D2 };
 
 	GET(LocomotionClass* const, pThis, EBP);
 	GET(CellClass* const, pCell, ESI);
@@ -90,12 +89,13 @@ DEFINE_HOOK(0x4B3271, DriveLocomotionClass_MovingProcess2_ScatterForwardContent2
 	const auto pLinkTo = pThis->LinkedTo;
 	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location);
 
-	return SkipGameCode;
+	return R->Origin() == 0x4B3271 ? SkipGameCodeDrive : SkipGameCodeShip;
 }
 
-DEFINE_HOOK(0x4B391F, DriveLocomotionClass_MovingProcess2_ScatterForwardContent3, 0x5)
+DEFINE_HOOK_AGAIN(0x6A2F6E, LocomotionClass_MovingProcess2_ScatterForwardContent3, 0x5) // Ship
+DEFINE_HOOK(0x4B391F, LocomotionClass_MovingProcess2_ScatterForwardContent3, 0x5) // Dirve
 {
-	enum { SkipGameCode = 0x4B3607 };
+	enum { SkipGameCodeDrive = 0x4B3607, SkipGameCodeShip = 0x6A2C56 };
 
 	GET(LocomotionClass* const, pThis, EBP);
 	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x5C, -0x48));
@@ -105,12 +105,13 @@ DEFINE_HOOK(0x4B391F, DriveLocomotionClass_MovingProcess2_ScatterForwardContent3
 	const auto pCell = MapClass::Instance->GetCellAt(cell);
 	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location);
 
-	return SkipGameCode;
+	return R->Origin() == 0x4B391F ? SkipGameCodeDrive : SkipGameCodeShip;
 }
 
-DEFINE_HOOK(0x4B442D, DriveLocomotionClass_MovingProcess2_ScatterForwardContent4, 0x5)
+DEFINE_HOOK_AGAIN(0x6A3A59, LocomotionClass_MovingProcess2_ScatterForwardContent4, 0x5) // Ship
+DEFINE_HOOK(0x4B442D, LocomotionClass_MovingProcess2_ScatterForwardContent4, 0x5) // Dirve
 {
-	enum { SkipGameCode = 0x4B41B3 };
+	enum { SkipGameCodeDrive = 0x4B41B3, SkipGameCodeShip = 0x6A37DF };
 
 	GET(LocomotionClass* const, pThis, EBP);
 	GET(CellClass* const, pCell, ECX);
@@ -119,7 +120,7 @@ DEFINE_HOOK(0x4B442D, DriveLocomotionClass_MovingProcess2_ScatterForwardContent4
 	const auto pLinkTo = pThis->LinkedTo;
 	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location);
 
-	return SkipGameCode;
+	return R->Origin() == 0x4B442D ? SkipGameCodeDrive : SkipGameCodeShip;
 }
 
 DEFINE_HOOK(0x515966, HoverLocomotionClass_MovingProcess_ScatterForwardContent, 0x5)
@@ -157,78 +158,6 @@ DEFINE_HOOK(0x5B0BA4, MechLocomotionClass_MovingProcess_ScatterForwardContent, 0
 
 	GET(LocomotionClass* const, pThis, EBX);
 	GET(CellClass* const, pCell, ESI);
-	GET(const bool, alt, EDX);
-
-	const auto pLinkTo = pThis->LinkedTo;
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location);
-
-	return SkipGameCode;
-}
-
-DEFINE_HOOK(0x6A156F, ShipLocomotionClass_MovingProcess_ScatterForwardContent, 0x5)
-{
-	enum { SkipGameCode = 0x6A158B };
-
-	GET(LocomotionClass* const, pThis, EBP);
-	GET(Point2D* const, pCoords, ESI);
-	GET(const bool, alt, EDX);
-
-	const auto pLinkTo = pThis->LinkedTo;
-	const auto pCell = MapClass::Instance->GetTargetCell(*pCoords);
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location);
-
-	return SkipGameCode;
-}
-
-DEFINE_HOOK(0x6A2404, ShipLocomotionClass_MovingProcess2_ScatterForwardContent1, 0x5)
-{
-	enum { SkipGameCode = 0x6A2415 };
-
-	GET(LocomotionClass* const, pThis, EBP);
-	GET(CellClass* const, pCell, EDI);
-	GET(const bool, alt, EDX);
-
-	const auto pLinkTo = pThis->LinkedTo;
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location);
-
-	return SkipGameCode;
-}
-
-DEFINE_HOOK(0x6A28C1, ShipLocomotionClass_MovingProcess2_ScatterForwardContent2, 0x5)
-{
-	enum { SkipGameCode = 0x6A28D2 };
-
-	GET(LocomotionClass* const, pThis, EBP);
-	GET(CellClass* const, pCell, ESI);
-	GET(const bool, alt, EDX);
-
-	const auto pLinkTo = pThis->LinkedTo;
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location);
-
-	return SkipGameCode;
-}
-
-DEFINE_HOOK(0x6A2F6E, ShipLocomotionClass_MovingProcess2_ScatterForwardContent3, 0x5)
-{
-	enum { SkipGameCode = 0x6A2C56 };
-
-	GET(LocomotionClass* const, pThis, EBP);
-	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x5C, -0x48));
-	GET(const bool, alt, EDX);
-
-	const auto pLinkTo = pThis->LinkedTo;
-	const auto pCell = MapClass::Instance->GetCellAt(cell);
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location);
-
-	return SkipGameCode;
-}
-
-DEFINE_HOOK(0x6A3A59, ShipLocomotionClass_MovingProcess2_ScatterForwardContent4, 0x5)
-{
-	enum { SkipGameCode = 0x6A37DF };
-
-	GET(LocomotionClass* const, pThis, EBP);
-	GET(CellClass* const, pCell, ECX);
 	GET(const bool, alt, EDX);
 
 	const auto pLinkTo = pThis->LinkedTo;
