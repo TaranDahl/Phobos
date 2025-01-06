@@ -394,7 +394,7 @@ This page lists all the individual contributions to the project by their author.
   - Unit base normal and new placing grids
   - Grey cameo preview and cameo overlays
   - Draw visual effects for airburst weapons
-  - Use 2D distance instead of 3D distance to check whether team members have arrived destination
+  - Use 2D distance instead of 3D to check whether in air team members have arrived destination
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
