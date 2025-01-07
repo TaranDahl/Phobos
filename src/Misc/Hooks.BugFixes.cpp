@@ -28,7 +28,6 @@
 #include <Ext/AnimType/Body.h>
 #include <Ext/SWType/Body.h>
 #include <Ext/WarheadType/Body.h>
-#include <Ext/WeaponType/Body.h>
 
 #include <Utilities/Macro.h>
 #include <Utilities/Debug.h>

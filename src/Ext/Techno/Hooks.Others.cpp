@@ -779,7 +779,12 @@ DEFINE_HOOK(0x4D621D, FootClass_ApproachTarget_InRangeSourceCoordsFix, 0x6)
 	GET(WeaponTypeClass*, pWeapon, ECX);
 	REF_STACK(CoordStruct, sourceCoords, STACK_OFFSET(0x158, -0x12C));
 
-	if (pThis->IsInAir())
+	bool cylinder = RulesExt::Global()->CylinderRangefinding;
+
+	if (auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
+		cylinder = pWeaponExt->CylinderRangefinding.Get(cylinder);
+
+	if (cylinder || pThis->IsInAir())
 	{
 		sourceCoords.Z = pThis->Target->GetCoords().Z;
 	}
