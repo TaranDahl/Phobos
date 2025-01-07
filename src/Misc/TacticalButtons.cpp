@@ -429,9 +429,7 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		}
 	}
 
-	ColorStruct fillColor { 0, 0, 0 };
 	RectangleStruct drawRect { 0, 0, 360, DSurface::Composite->GetHeight() - 32 };
-	DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 30);
 	Point2D textLocation { 15, 15 };
 
 	auto drawText = [&drawRect, &textLocation](const char* pFormat, ...)
@@ -488,6 +486,56 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 
 		drawText("%s = %d / %d ( %d )", pInfoName, timeCurrent, timeCeiling, timePercentage);
 	};
+
+	if (const auto pFoot = abstract_cast<FootClass*>(pTechno))
+	{
+		if (pFoot->CurrentMapCoords != CellStruct::Empty)
+		{
+			auto pCell = MapClass::Instance->GetCellAt(pFoot->CurrentMapCoords);
+			std::vector<CellClass*> pathCells;
+
+			const auto& pD = pFoot->PathDirections;
+
+			for (int i = 0; i < 24; ++i)
+			{
+				const auto face = pD[i];
+
+				if (face == -1)
+					break;
+
+				pCell = pCell->GetNeighbourCell(static_cast<FacingType>(face));
+				pathCells.push_back(pCell);
+			}
+
+			if (const auto cellsSize = pathCells.size())
+			{
+				std::sort(&pathCells[0], &pathCells[cellsSize],[](CellClass* pCellA, CellClass* pCellB)
+				{
+					if (pCellA->MapCoords.X != pCellB->MapCoords.X)
+						return pCellA->MapCoords.X < pCellB->MapCoords.X;
+
+					return pCellA->MapCoords.Y < pCellB->MapCoords.Y;
+				});
+
+				for (const auto& pPathCell : pathCells)
+				{
+					const auto location = CoordStruct { (pPathCell->MapCoords.X << 8), (pPathCell->MapCoords.Y << 8), 0 };
+					const auto height = pPathCell->Level * 15;
+					const auto position = TacticalClass::Instance->CoordsToScreen(location) - TacticalClass::Instance->TacticalPos - Point2D { 0, (1 + height) };
+
+					DSurface::Composite->DrawSHP(
+						FileSystem::PALETTE_PAL, Make_Global<SHPStruct*>(0x8A03FC),
+						(pPathCell->SlopeIndex + 2), &position, &DSurface::ViewBounds,
+						(BlitterFlags::Centered | BlitterFlags::TransLucent50 | BlitterFlags::bf_400 | BlitterFlags::Zero),
+						0, (-height - (pPathCell->SlopeIndex ? 12 : 2)), ZGradient::Ground, 1000, 0, 0, 0, 0, 0
+					);
+				}
+			}
+		}
+	}
+
+	ColorStruct fillColor { 0, 0, 0 };
+	DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 30);
 
 	drawText("Current Frame: %d", Unsorted::CurrentFrame());
 
@@ -691,59 +739,6 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 				drawText("PathDir = %d , %d , %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4], pD[5], pD[6]);
 			else
 				drawText("PathDir = %d , %d , %d , %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4], pD[5], pD[6], pD[7]);
-
-			if (pFoot->CurrentMapCoords != CellStruct::Empty)
-			{
-				auto pCell = MapClass::Instance->GetCellAt(pFoot->CurrentMapCoords);
-				std::vector<CellClass*> pathCells;
-
-				for (int i = 0; i < 24; ++i)
-				{
-					const auto face = pD[i];
-
-					if (face == -1)
-						break;
-
-					pCell = pCell->GetNeighbourCell(static_cast<FacingType>(face));
-					pathCells.push_back(pCell);
-				}
-
-				if (const auto cellsSize = pathCells.size())
-				{
-					std::sort(&pathCells[0], &pathCells[cellsSize],[](CellClass* pCellA, CellClass* pCellB)
-					{
-						if (pCellA->MapCoords.X != pCellB->MapCoords.X)
-							return pCellA->MapCoords.X < pCellB->MapCoords.X;
-
-						return pCellA->MapCoords.Y < pCellB->MapCoords.Y;
-					});
-
-					for (const auto& pPathCell : pathCells)
-					{
-						const auto location = CoordStruct { (pPathCell->MapCoords.X << 8), (pPathCell->MapCoords.Y << 8), 0 };
-						const auto height = pPathCell->Level * 15;
-						const auto position = TacticalClass::Instance->CoordsToScreen(location) - TacticalClass::Instance->TacticalPos - Point2D { 0, (1 + height) };
-
-						DSurface::Composite->DrawSHP(
-							FileSystem::PALETTE_PAL,
-							Make_Global<SHPStruct*>(0x8A03FC),
-							(pPathCell->SlopeIndex + 2),
-							&position,
-							&DSurface::ViewBounds,
-							(BlitterFlags::Centered | BlitterFlags::TransLucent50 | BlitterFlags::bf_400 | BlitterFlags::Zero),
-							0,
-							(-height - (pPathCell->SlopeIndex ? 12 : 2)),
-							ZGradient::Ground,
-							1000,
-							0,
-							0,
-							0,
-							0,
-							0
-						);
-					}
-				}
-			}
 		}
 		else if (absType == AbstractType::Building)
 		{
