@@ -739,6 +739,41 @@ DEFINE_HOOK(0x44733A, BuildingClass_MouseOverObject_BuildingCheckDeploy, 0xA)
 */
 #pragma endregion
 
+#pragma region TechnoInRangeFix
+
+DEFINE_HOOK_AGAIN(0x4D6541, FootClass_ApproachTarget_InRangeSourceCoordsFix, 0x6)
+DEFINE_HOOK(0x4D621D, FootClass_ApproachTarget_InRangeSourceCoordsFix, 0x6)
+{
+	GET(FootClass*, pThis, EBX);
+	GET(WeaponTypeClass*, pWeapon, ECX);
+	REF_STACK(CoordStruct, sourceCoords, STACK_OFFSET(0x158, -0x12C));
+
+	if (pThis->IsInAir())
+	{
+		sourceCoords.Z = pThis->Target->GetCoords().Z;
+	}
+	else if (pWeapon && pWeapon->CellRangefinding)
+	{
+		const auto pCell = MapClass::Instance->GetCellAt(sourceCoords);
+		sourceCoords = pCell->GetCoords();
+
+		if (pCell->ContainsBridge())
+			sourceCoords.Z += CellClass::BridgeHeight;
+	}
+	else if (R->Origin() == 0x4D6541)
+	{
+		const auto pCell = MapClass::Instance->GetCellAt(sourceCoords);
+		sourceCoords.Z = pCell->GetFloorHeight(Point2D { sourceCoords.X, sourceCoords.Y });
+
+		if (pCell->ContainsBridge())
+			sourceCoords.Z += CellClass::BridgeHeight;
+	}
+
+	return 0;
+}
+
+#pragma endregion
+
 #pragma region AggressiveAttackMove
 
 static inline bool CheckAttackMoveCanResetTarget(FootClass* pThis)
