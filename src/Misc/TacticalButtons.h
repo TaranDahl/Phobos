@@ -27,6 +27,7 @@ public:
 	void FPSCounterDraw();
 
 	// Button index N/A : Show Current Info
+	void CurrentSelectPathDraw();
 	void CurrentSelectInfoDraw();
 
 	// Button index 1-10 : Super weapons buttons
