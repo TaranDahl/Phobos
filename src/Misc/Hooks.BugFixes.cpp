@@ -1221,6 +1221,41 @@ DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6)
 
 #pragma endregion
 
+#pragma region TechnoInRangeFix
+
+DEFINE_HOOK_AGAIN(0x4D6541, FootClass_FindAttackLocation_InRangeSourceCoordsFix, 0x6)
+DEFINE_HOOK(0x4D621D, FootClass_FindAttackLocation_InRangeSourceCoordsFix, 0x6)
+{
+	GET(FootClass*, pThis, EBX);
+	GET(WeaponTypeClass*, pWeapon, ECX);
+	REF_STACK(CoordStruct, sourceCoords, STACK_OFFSET(0x158, -0x12C));
+
+	if (pThis->IsInAir())
+	{
+		sourceCoords.Z = pThis->Target->GetCoords().Z;
+	}
+	else if (pWeapon && pWeapon->CellRangefinding)
+	{
+		const auto pCell = MapClass::Instance->GetCellAt(sourceCoords);
+		sourceCoords = pCell->GetCoords();
+
+		if (pCell->ContainsBridge())
+			sourceCoords.Z += CellClass::BridgeHeight;
+	}
+	else if (R->Origin() == 0x4D6541)
+	{
+		const auto pCell = MapClass::Instance->GetCellAt(sourceCoords);
+		sourceCoords.Z = pCell->GetFloorHeight(Point2D { sourceCoords.X, sourceCoords.Y });
+
+		if (pCell->ContainsBridge())
+			sourceCoords.Z += CellClass::BridgeHeight;
+	}
+
+	return 0;
+}
+
+#pragma endregion
+
 #pragma region TeamCloseRangeFix
 
 int __fastcall Check2DDistanceInsteadOf3D(AbstractClass* pSource, void* _, AbstractClass* pTarget)
