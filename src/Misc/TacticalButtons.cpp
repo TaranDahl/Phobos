@@ -633,9 +633,6 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 	{
 		const auto pType = pTechno->GetTechnoType();
 		const auto absType = pTechno->WhatAmI();
-		const auto cell = pTechno->GetMapCoords();
-		const auto pExt = TechnoExt::ExtMap.Find(pTechno);
-		const auto pOwner = pTechno->Owner;
 
 		if (absType == AbstractType::Unit)
 			drawText("%s: %s , UniqueID: %d", "Vehicle", pType->ID, pTechno->UniqueID);
@@ -648,22 +645,30 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		else
 			drawText("%s: %s , UniqueID: %d", "Unknown", pType->ID, pTechno->UniqueID);
 
+		const auto pOwner = pTechno->Owner;
+
 		if (pOwner)
 			drawText("Owner = %s ( %s )", pOwner->get_ID(), pOwner->PlainName);
 		else
 			drawText("Owner = %s ( %s )", "N/A", "N/A");
 
-		drawText("Location = ( %d , %d , %d )", cell.X, cell.Y, pTechno->GetCell()->Level);
+		const auto cell = pTechno->GetMapCoords();
+		const auto coords = pTechno->GetCoords();
+
+		drawText("Location = [ %d , %d , %d ]( %d , %d , %d )", coords.X, coords.Y, coords.Z, cell.X, cell.Y, pTechno->GetCell()->Level);
 
 		constexpr const char* facingTypes[8] = { "North", "NorthEast", "East", "SouthEast", "South", "SouthWest", "West", "NorthWest" };
 		const auto facing1 = pTechno->PrimaryFacing.Current();
 		const auto facing2 = pTechno->SecondaryFacing.Current();
 
-		drawText("PriFacing = %d ( %s )", facing1.Raw, facingTypes[facing1.GetValue<3>()]);
-		drawText("SecFacing = %d ( %s )", facing2.Raw, facingTypes[facing2.GetValue<3>()]);
+		drawText("PriFacing = [ %d ( %d )]( %s )", facing1.Raw, facing1.GetValue<5>(), facingTypes[facing1.GetValue<3>()]);
+		drawText("SecFacing = [ %d ( %d )]( %s )", facing2.Raw, facing2.GetValue<5>(), facingTypes[facing2.GetValue<3>()]);
 
 		drawText("Tether = ( %s , %s )", (pTechno->IsTether ? "Yes" : "No"), (pTechno->IsAlternativeTether ? "Yes" : "No"));
 		drawText("Health = ( %d / %d )", pTechno->Health, pType->Strength);
+
+		const auto pExt = TechnoExt::ExtMap.Find(pTechno);
+
 		drawText("Shield = ( %d / %d )", (pExt->Shield ? pExt->Shield->GetHP() : -1), (pExt->CurrentShieldType ? pExt->CurrentShieldType->Strength : -1));
 		drawText("Ammo = ( %d / %d )", pTechno->Ammo, pType->Ammo);
 
@@ -686,7 +691,7 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		drawInfo("Nth Link", pTechno, pTechno->GetNthLink());
 		drawInfo("Archive Target", pTechno, pTechno->ArchiveTarget);
 		drawInfo("Transporter", pTechno, pTechno->Transporter);
-		drawInfo("Enter", pTechno, pTechno->QueueUpToEnter);
+		drawInfo("Enter Target", pTechno, pTechno->QueueUpToEnter);
 
 		if (pTechno->CurrentTargets.Count > 0)
 			drawInfo("First CurTarget", pTechno, pTechno->CurrentTargets.GetItem(0));
@@ -733,11 +738,33 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 			else
 				drawText("PathDir = %d , %d , %d , %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4], pD[5], pD[6], pD[7]);
 
+			if (pFoot->CurrentMapCoords != CellStruct::Empty)
+			{
+				auto pCell = MapClass::Instance->GetCellAt(pFoot->CurrentMapCoords);
+
+				for (int i = 0; i < 24; ++i)
+				{
+					const auto face = pD[i];
+
+					if (face == -1)
+						break;
+
+					pCell = pCell->GetNeighbourCell(static_cast<FacingType>(face));
+					const auto location = CoordStruct { (pCell->MapCoords.X << 8), (pCell->MapCoords.Y << 8), 0 };
+					const auto height = pCell->Level * 15;
+					const auto position = TacticalClass::Instance->CoordsToScreen(location) - TacticalClass::Instance->TacticalPos - Point2D { 0, (1 + height) };
+
+					DSurface::Composite->DrawSHP( FileSystem::PALETTE_PAL, Make_Global<SHPStruct*>(0x8A03FC), (pCell->SlopeIndex + 2), &position, &DSurface::ViewBounds,
+						(BlitterFlags::Centered | BlitterFlags::bf_400 | BlitterFlags::Zero), 0, (-height - (pCell->SlopeIndex ? 12 : 2)), ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
+				}
+			}
+
 			drawText("SpeedPercentage = %d", static_cast<int>(pFoot->SpeedPercentage * 100));
 
 			drawInfo("Destination", pFoot, pFoot->Destination);
 			drawInfo("Last Destination", pFoot, pFoot->LastDestination);
-			drawInfo("Follow", pFoot, pFoot->unknown_5A0);
+			drawInfo("Follow Target", pFoot, pFoot->unknown_5A0);
+			drawInfo("Patrol Target", pFoot, reinterpret_cast<AbstractClass*>(pFoot->unknown_5DC));
 			drawInfo("Mega Target", pFoot, pFoot->MegaTarget);
 			drawInfo("Mega Destination", pFoot, pFoot->MegaDestination);
 			drawInfo("Parasite", pFoot, pFoot->ParasiteEatingMe);
@@ -751,6 +778,8 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 				drawInfo("First Nav-Queue", pFoot, pFoot->NavQueue.GetItem(0));
 			else
 				drawInfo("First Nav-Queue", pFoot, nullptr);
+
+			drawText("Scattering = %s", (pExt->IsScattering ? "Yes" : "No"));
 
 			if (pFoot->BelongsToATeam())
 			{
