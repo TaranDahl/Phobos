@@ -28,6 +28,7 @@
 #include <Ext/AnimType/Body.h>
 #include <Ext/SWType/Body.h>
 #include <Ext/WarheadType/Body.h>
+#include <Ext/WeaponType/Body.h>
 
 #include <Utilities/Macro.h>
 #include <Utilities/Debug.h>
@@ -1230,7 +1231,12 @@ DEFINE_HOOK(0x4D621D, FootClass_FindAttackLocation_InRangeSourceCoordsFix, 0x6)
 	GET(WeaponTypeClass*, pWeapon, ECX);
 	REF_STACK(CoordStruct, sourceCoords, STACK_OFFSET(0x158, -0x12C));
 
-	if (pThis->IsInAir())
+	bool cylinder = RulesExt::Global()->CylinderRangefinding;
+
+	if (auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon))
+		cylinder = pWeaponExt->CylinderRangefinding.Get(cylinder);
+
+	if (cylinder || pThis->IsInAir())
 	{
 		sourceCoords.Z = pThis->Target->GetCoords().Z;
 	}
