@@ -578,49 +578,6 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 			drawText("PlanningPathIdx = %d", pFoot->PlanningPathIdx);
 			drawText("FootCell = ( %d , %d )", pFoot->CurrentMapCoords.X, pFoot->CurrentMapCoords.Y);
 			drawText("LastCell = ( %d , %d )", pFoot->LastMapCoords.X, pFoot->LastMapCoords.Y);
-
-			const auto& pD = pFoot->PathDirections;
-
-			if (pD[0] == -1)
-				drawText("PathDir = N/A");
-			else if (pD[1] == -1)
-				drawText("PathDir = %d", pD[0]);
-			else if (pD[2] == -1)
-				drawText("PathDir = %d , %d", pD[0], pD[1]);
-			else if (pD[3] == -1)
-				drawText("PathDir = %d , %d , %d", pD[0], pD[1], pD[2]);
-			else if (pD[4] == -1)
-				drawText("PathDir = %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3]);
-			else if (pD[5] == -1)
-				drawText("PathDir = %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4]);
-			else if (pD[6] == -1)
-				drawText("PathDir = %d , %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4], pD[5]);
-			else if (pD[7] == -1)
-				drawText("PathDir = %d , %d , %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4], pD[5], pD[6]);
-			else
-				drawText("PathDir = %d , %d , %d , %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4], pD[5], pD[6], pD[7]);
-
-			if (pFoot->CurrentMapCoords != CellStruct::Empty)
-			{
-				auto pCell = MapClass::Instance->GetCellAt(pFoot->CurrentMapCoords);
-
-				for (int i = 0; i < 24; ++i)
-				{
-					const auto face = pD[i];
-
-					if (face == -1)
-						break;
-
-					pCell = pCell->GetNeighbourCell(static_cast<FacingType>(face));
-					const auto location = CoordStruct { (pCell->MapCoords.X << 8), (pCell->MapCoords.Y << 8), 0 };
-					const auto height = pCell->Level * 15;
-					const auto position = TacticalClass::Instance->CoordsToScreen(location) - TacticalClass::Instance->TacticalPos - Point2D { 0, (1 + height) };
-
-					DSurface::Composite->DrawSHP(FileSystem::PALETTE_PAL, Make_Global<SHPStruct*>(0x8A03FC), (pCell->SlopeIndex + 2), &position, &DSurface::ViewBounds,
-						(BlitterFlags::Centered | BlitterFlags::bf_400 | BlitterFlags::Zero), 0, (-height - (pCell->SlopeIndex ? 12 : 2)), ZGradient::Ground, 1000, 0, 0, 0, 0, 0);
-				}
-			}
-
 			drawText("SpeedPercentage = %d", static_cast<int>(pFoot->SpeedPercentage * 100));
 
 			drawInfo("Destination", pFoot, pFoot->Destination);
@@ -712,6 +669,80 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 				const auto pAircraft = static_cast<AircraftClass*>(pTechno);
 
 				drawInfo("Dock", pAircraft, pAircraft->DockNowHeadingTo);
+			}
+
+			const auto& pD = pFoot->PathDirections;
+
+			if (pD[0] == -1)
+				drawText("PathDir = N/A");
+			else if (pD[1] == -1)
+				drawText("PathDir = %d", pD[0]);
+			else if (pD[2] == -1)
+				drawText("PathDir = %d , %d", pD[0], pD[1]);
+			else if (pD[3] == -1)
+				drawText("PathDir = %d , %d , %d", pD[0], pD[1], pD[2]);
+			else if (pD[4] == -1)
+				drawText("PathDir = %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3]);
+			else if (pD[5] == -1)
+				drawText("PathDir = %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4]);
+			else if (pD[6] == -1)
+				drawText("PathDir = %d , %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4], pD[5]);
+			else if (pD[7] == -1)
+				drawText("PathDir = %d , %d , %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4], pD[5], pD[6]);
+			else
+				drawText("PathDir = %d , %d , %d , %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4], pD[5], pD[6], pD[7]);
+
+			if (pFoot->CurrentMapCoords != CellStruct::Empty)
+			{
+				auto pCell = MapClass::Instance->GetCellAt(pFoot->CurrentMapCoords);
+				std::vector<CellClass*> pathCells;
+
+				for (int i = 0; i < 24; ++i)
+				{
+					const auto face = pD[i];
+
+					if (face == -1)
+						break;
+
+					pCell = pCell->GetNeighbourCell(static_cast<FacingType>(face));
+					pathCells.push_back(pCell);
+				}
+
+				if (const auto cellsSize = pathCells.size())
+				{
+					std::sort(&pathCells[0], &pathCells[cellsSize],[](CellClass* pCellA, CellClass* pCellB)
+					{
+						if (pCellA->MapCoords.X != pCellB->MapCoords.X)
+							return pCellA->MapCoords.X < pCellB->MapCoords.X;
+
+						return pCellA->MapCoords.Y < pCellB->MapCoords.Y;
+					});
+
+					for (const auto& pPathCell : pathCells)
+					{
+						const auto location = CoordStruct { (pPathCell->MapCoords.X << 8), (pPathCell->MapCoords.Y << 8), 0 };
+						const auto height = pPathCell->Level * 15;
+						const auto position = TacticalClass::Instance->CoordsToScreen(location) - TacticalClass::Instance->TacticalPos - Point2D { 0, (1 + height) };
+
+						DSurface::Composite->DrawSHP(
+							FileSystem::PALETTE_PAL,
+							Make_Global<SHPStruct*>(0x8A03FC),
+							(pPathCell->SlopeIndex + 2),
+							&position,
+							&DSurface::ViewBounds,
+							(BlitterFlags::Centered | BlitterFlags::TransLucent50 | BlitterFlags::bf_400 | BlitterFlags::Zero),
+							0,
+							(-height - (pPathCell->SlopeIndex ? 12 : 2)),
+							ZGradient::Ground,
+							1000,
+							0,
+							0,
+							0,
+							0,
+							0
+						);
+					}
+				}
 			}
 		}
 		else if (absType == AbstractType::Building)
