@@ -60,6 +60,7 @@ public:
 		DWORD LastTargetID;
 		int AccumulatedGattlingValue;
 		bool ShouldUpdateGattlingValue;
+		bool IsScattering;
 		int MyTargetingFrame;
 		int AttackMoveFollowerTempCount;
 		CellClass* AutoTargetedWallCell;
@@ -118,6 +119,7 @@ public:
 			, LastTargetID { 0xFFFFFFFF }
 			, AccumulatedGattlingValue { 0 }
 			, ShouldUpdateGattlingValue { false }
+			, IsScattering { false }
 			, MyTargetingFrame { ScenarioClass::Instance->Random.RandomRanged(0,15) }
 			, AttackMoveFollowerTempCount { 0 }
 			, AutoTargetedWallCell{ nullptr }
