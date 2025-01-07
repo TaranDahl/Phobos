@@ -8,7 +8,6 @@ class TacticalButtonsClass
 {
 public:
 	static TacticalButtonsClass Instance;
-//	static PhobosMap<int, const wchar_t*> KeyboardCodeTextMap;
 
 private:
 	int CheckMouseOverButtons(const Point2D* pMousePosition);
@@ -53,6 +52,7 @@ public:
 	void SWSidebarSwitch();
 
 	// Extra functions for SW
+	BSurface* GetMissingCameo(SHPStruct* pSHP);
 	bool SWQuickLaunch(int superIndex);
 
 	// TODO New buttons
@@ -66,6 +66,7 @@ public:
 	// Button index 71-100 : Select buttons
 	inline bool IndexInSelectButtons();
 	inline void AddToCurrentSelect(TechnoTypeExt::ExtData* pTypeExt, int count, int checkIndex);
+	BSurface* SearchMissingCameo(AbstractType absType, SHPStruct* pSHP);
 	void SelectedTrigger(int buttonIndex, bool select);
 	void SelectedUpdate();
 	void SelectedDraw();
