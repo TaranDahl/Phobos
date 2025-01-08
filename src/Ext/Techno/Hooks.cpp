@@ -550,7 +550,7 @@ namespace JumpjetSpeedType
 	int speedType;
 }
 
-DEFINE_HOOK(0x54B2DE, JumpjetLocomotionClass_MoveTo_JumpjetSpeedType, 0x6)
+DEFINE_HOOK(0x54B255, JumpjetLocomotionClass_MoveTo_JumpjetSpeedType, 0x5)
 {
 	GET(ILocomotionPtr, pThis, ESI);
 
