@@ -500,6 +500,7 @@ New:
 - `<Player @ X>` can now be used as owner for pre-placed objects on skirmish and multiplayer maps (by Starkku)
 - Allow customizing charge turret delays per burst on a weapon (by Starkku)
 - Draw visual effects for airburst weapons (by CrimRecya)
+- Delay automatic attack on the controlled unit (by CrimRecya)
 - Unit `Speed` setting now accepts floating point values (by Starkku)
 - Aggressive stance toggle command (auto target unarmed enemy buildings) (by Aephiex)
 

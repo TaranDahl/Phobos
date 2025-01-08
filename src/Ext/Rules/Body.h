@@ -150,6 +150,7 @@ public:
 		Valueable<bool> NoQueueUpToEnter;
 		Valueable<bool> NoQueueUpToUnload;
 		Valueable<bool> AttackMove_Aggressive;
+		Valueable<bool> ExtendedScatterAction;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -389,6 +390,7 @@ public:
 			, NoQueueUpToEnter { false }
 			, NoQueueUpToUnload { false }
 			, AttackMove_Aggressive { false }
+			, ExtendedScatterAction { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }

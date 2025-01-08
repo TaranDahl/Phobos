@@ -1847,6 +1847,19 @@ RecountBurst=false  ; boolean
 RecountBurst=       ; boolean
 ```
 
+### Delay automatic attack on the controlled unit
+
+- Now you can make the techno that has just been mind controlled not be automatically attacked by its original friendly forces for a period of time defined by `MindControl.ThreatDelay` on the mind control warhead, default to `[General]->AttackMindControlledDelay`. This will not affect the manual selection of attacks and is useless with permanent mind control.
+
+In `rulesmd.ini`:
+```ini
+[General]
+AttackMindControlledDelay=0   ; integer, game frames
+
+[SOMEWARHEAD]                 ; Warhead
+MindControl.ThreatDelay=      ; integer, game frames
+```
+
 ## Terrain
 
 ### Destroy animation & sound
