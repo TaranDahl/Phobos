@@ -56,7 +56,7 @@ public:
 		WeaponTypeClass* LastWeaponType;
 		CoordStruct LastWeaponFLH;
 		int LastHurtFrame;
-		int LastBeControlledFrame;
+		int BeControlledThreatFrame;
 		DWORD LastTargetID;
 		int AccumulatedGattlingValue;
 		bool ShouldUpdateGattlingValue;
@@ -71,7 +71,6 @@ public:
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 		bool KeepTargetOnMove;
 		bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
-		int BeControlledThreatFrame;
 
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
 		// as neither is guaranteed to point to the house the TechnoClass had prior to entering transport and cannot be safely overridden.
@@ -116,7 +115,7 @@ public:
 			, LastWeaponType {}
 			, LastWeaponFLH {}
 			, LastHurtFrame { 0 }
-			, LastBeControlledFrame { 0 }
+			, BeControlledThreatFrame { 0 }
 			, LastTargetID { 0xFFFFFFFF }
 			, AccumulatedGattlingValue { 0 }
 			, ShouldUpdateGattlingValue { false }
@@ -131,7 +130,6 @@ public:
 			, FiringObstacleCell {}
 			, KeepTargetOnMove { false }
 			, IsDetachingForCloak { false }
-			, BeControlledThreatFrame { 0 }
 			, OriginalPassengerOwner {}
 			, HasRemainingWarpInDelay { false }
 			, LastWarpInDelay { 0 }
