@@ -194,6 +194,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->NoQueueUpToEnter.Read(exINI, GameStrings::General, "NoQueueUpToEnter");
 	this->NoQueueUpToUnload.Read(exINI, GameStrings::General, "NoQueueUpToUnload");
 	this->AttackMove_Aggressive.Read(exINI, GameStrings::General, "AttackMove.Aggressive");
+	this->ExtendedScatterAction.Read(exINI, GameStrings::General, "ExtendedScatterAction");
 
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
 	this->ForbidParallelAIQueues_Aircraft.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Aircraft");
@@ -445,6 +446,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->NoQueueUpToEnter)
 		.Process(this->NoQueueUpToUnload)
 		.Process(this->AttackMove_Aggressive)
+		.Process(this->ExtendedScatterAction)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
 		.Process(this->ForbidParallelAIQueues_Building)

@@ -45,8 +45,11 @@ DEFINE_HOOK(0x51D43F, InfantryClass_Scatter_ScatterRecord1, 0x6)
 
 	pThis->SetDestination(MapClass::Instance->GetCellAt(cell), true);
 
-	if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-		pExt->IsScattering = true;
+	if (RulesExt::Global()->ExtendedScatterAction)
+	{
+		if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
+			pExt->IsScattering = true;
+	}
 
 	return SkipGameCode;
 }
@@ -60,8 +63,11 @@ DEFINE_HOOK(0x51D6CA, InfantryClass_Scatter_ScatterRecord2, 0x6)
 
 	pThis->SetDestination(MapClass::Instance->GetCellAt(cell), true);
 
-	if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-		pExt->IsScattering = true;
+	if (RulesExt::Global()->ExtendedScatterAction)
+	{
+		if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
+			pExt->IsScattering = true;
+	}
 
 	return SkipGameCode;
 }
@@ -75,8 +81,11 @@ DEFINE_HOOK(0x743C91, UnitClass_Scatter_ScatterRecord1, 0x7)
 
 	pThis->SetDestination(MapClass::Instance->GetCellAt(cell), true);
 
-	if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-		pExt->IsScattering = true;
+	if (RulesExt::Global()->ExtendedScatterAction)
+	{
+		if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
+			pExt->IsScattering = true;
+	}
 
 	return SkipGameCode;
 }
@@ -90,8 +99,11 @@ DEFINE_HOOK(0x744059, UnitClass_Scatter_ScatterRecord2, 0x7)
 
 	pThis->SetDestination(MapClass::Instance->GetCellAt(cell), true);
 
-	if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-		pExt->IsScattering = true;
+	if (RulesExt::Global()->ExtendedScatterAction)
+	{
+		if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
+			pExt->IsScattering = true;
+	}
 
 	return SkipGameCode;
 }
@@ -129,38 +141,58 @@ static void __fastcall CallEnhancedScatterContent(CellClass* pCell, TechnoClass*
 {
 	if (const auto pFoot = abstract_cast<FootClass*>(pCaller))
 	{
-		pCell->ScatterContent(coords, true, true, alt);
-
-		if (pFoot->CurrentMapCoords != CellStruct::Empty)
+		if (RulesExt::Global()->ExtendedScatterAction)
 		{
-			pCell = MapClass::Instance->GetCellAt(pFoot->CurrentMapCoords);
+			pCell->ScatterContent(coords, true, true, alt);
 
-			for (int i = 0; i < 24; ++i)
+			if (pFoot->CurrentMapCoords != CellStruct::Empty)
 			{
-				const auto face = pFoot->PathDirections[i];
+				pCell = MapClass::Instance->GetCellAt(pFoot->CurrentMapCoords);
 
-				if (face == -1)
-					break;
+				for (int i = 0; i < 24; ++i)
+				{
+					const auto face = pFoot->PathDirections[i];
 
-				pCell = pCell->GetNeighbourCell(static_cast<FacingType>(face));
+					if (face == -1)
+						break;
 
-				if (!CanEnhancedScatterContent(pCell, pFoot))
-					break;
+					pCell = pCell->GetNeighbourCell(static_cast<FacingType>(face));
 
-				pCell->ScatterContent(coords, true, true, alt);
+					if (!CanEnhancedScatterContent(pCell, pFoot))
+						break;
+
+					pCell->ScatterContent(coords, true, true, alt);
+				}
 			}
+		}
+		else
+		{
+			pCell->ScatterContent(CoordStruct::Empty, true, true, alt);
 		}
 	}
 	else
 	{
 		pCell->ScatterContent(CoordStruct::Empty, true, true, alt);
 
-		for (int i = 0; i < 8; ++i)
+		if (RulesExt::Global()->ExtendedScatterAction)
 		{
-			const auto pNearCell = pCell->GetNeighbourCell(static_cast<FacingType>(i));
+			for (int i = 0; i < 8; ++i)
+			{
+				const auto pNearCell = pCell->GetNeighbourCell(static_cast<FacingType>(i));
 
-			if (CanEnhancedScatterContent(pNearCell, pCaller))
-				pNearCell->ScatterContent(coords, true, true, alt);
+				if (CanEnhancedScatterContent(pNearCell, pCaller))
+					pNearCell->ScatterContent(coords, true, true, alt);
+			}
+		}
+		else
+		{
+			for (int i = 0; i < 8; ++i)
+			{
+				const auto pNearCell = pCell->GetNeighbourCell(static_cast<FacingType>(i));
+
+				if (pNearCell->FindTechnoNearestTo(Point2D::Empty, false, pCaller))
+					pNearCell->ScatterContent(coords, true, true, alt);
+			}
 		}
 	}
 }
@@ -179,10 +211,13 @@ DEFINE_HOOK(0x4495DF, BuildingClass_CheckWeaponFactoryOutsideBusy_ScatterEntranc
 	if (!pTechno)
 		return NotBusy;
 
-	const auto pOwner = pTechno->Owner;
+	if (RulesExt::Global()->ExtendedScatterAction)
+	{
+		const auto pOwner = pTechno->Owner;
 
-	if (!pOwner || !pOwner->IsAlliedWith(pThis))
-		return Busy;
+		if (!pOwner || !pOwner->IsAlliedWith(pThis))
+			return Busy;
+	}
 
 	CallEnhancedScatterContent(pCell, pThis, coords, false);
 
