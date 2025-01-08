@@ -507,7 +507,7 @@ void TacticalButtonsClass::CurrentSelectPathDraw()
 						const auto height = pPathCell->Level * 15;
 						const auto position = TacticalClass::Instance->CoordsToScreen(location) - TacticalClass::Instance->TacticalPos - Point2D { 0, (1 + height) };
 
-						DSurface::Composite->DrawSHP(
+						DSurface::Temp->DrawSHP(
 							FileSystem::PALETTE_PAL, Make_Global<SHPStruct*>(0x8A03FC),
 							(pPathCell->SlopeIndex + 2), &position, &DSurface::ViewBounds,
 							(BlitterFlags::Centered | BlitterFlags::TransLucent50 | BlitterFlags::bf_400 | BlitterFlags::Zero),
