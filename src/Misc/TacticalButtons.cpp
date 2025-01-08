@@ -12,6 +12,7 @@
 #include <InputManagerClass.h>
 #include <FPSCounter.h>
 #include <AITriggerTypeClass.h>
+#include <JumpjetLocomotionClass.h>
 
 #include <Ext/Side/Body.h>
 #include <Ext/House/Body.h>
@@ -418,12 +419,62 @@ void TacticalButtonsClass::CurrentSelectPathDraw()
 		{
 			if (const auto pTechno = abstract_cast<TechnoClass*>(pCurrent))
 			{
+				std::vector<CellClass*> pathCells;
+
 				if (const auto pFoot = abstract_cast<FootClass*>(pTechno))
 				{
-					if (pFoot->CurrentMapCoords != CellStruct::Empty)
+					JumpjetLocomotionClass* pJjLoco = nullptr;
+					FlyLocomotionClass* pFlyLoco = nullptr;
+
+					if ((pJjLoco = locomotion_cast<JumpjetLocomotionClass*>(pFoot->Locomotor), (pJjLoco && pJjLoco->CurrentSpeed > 0.0))
+						|| (pFlyLoco = locomotion_cast<FlyLocomotionClass*>(pFoot->Locomotor), (pFlyLoco && pFlyLoco->CurrentSpeed > 0.0)))
+					{
+						auto curCoord = Point2D { pFoot->Location.X, pFoot->Location.Y };
+						auto pCurCell = MapClass::Instance->GetCellAt(CellStruct { static_cast<short>(curCoord.X >> 8), static_cast<short>(curCoord.Y >> 8) });
+						const auto checkLength = Math::min((Unsorted::LeptonsPerCell * 6), pFoot->DistanceFrom(pFoot->Destination));
+						const auto angle = pJjLoco ? (-pJjLoco->LocomotionFacing.Current().GetRadian<65536>()) : (-pFoot->PrimaryFacing.Current().GetRadian<65536>());
+						const auto checkCoord = Point2D { static_cast<int>(checkLength * cos(angle) + 0.5), static_cast<int>(checkLength * sin(angle) + 0.5) };
+						const auto largeStep = Math::max(abs(checkCoord.X), abs(checkCoord.Y));
+						const auto checkSteps = (largeStep > Unsorted::LeptonsPerCell) ? (largeStep / Unsorted::LeptonsPerCell + 1) : 1;
+						const auto stepCoord = Point2D { (checkCoord.X / checkSteps), (checkCoord.Y / checkSteps) };
+
+						for (int i = 0; i < checkSteps; ++i)
+						{
+							const auto lastCoord = curCoord;
+							curCoord += stepCoord;
+							pCurCell = MapClass::Instance->TryGetCellAt(CellStruct { static_cast<short>(curCoord.X >> 8), static_cast<short>(curCoord.Y >> 8) });
+
+							if (!pCurCell)
+								break;
+
+							if (std::find(pathCells.begin(), pathCells.end(), pCurCell) == pathCells.end())
+								pathCells.push_back(pCurCell);
+
+							if ((curCoord.X >> 8) != (lastCoord.X >> 8) && (curCoord.Y >> 8) != (lastCoord.Y >> 8))
+							{
+								bool lastX = (abs(stepCoord.X) > abs(stepCoord.Y)) ?
+									(((curCoord.Y - static_cast<int>(((stepCoord.X > 0) ?
+										(curCoord.X & 0XFF) :
+										((curCoord.X & 0XFF) - Unsorted::LeptonsPerCell)) *
+									checkCoord.Y / checkCoord.X)) >> 8) == (curCoord.Y >> 8)) :
+									(((curCoord.X - static_cast<int>(((stepCoord.Y > 0) ?
+										(curCoord.Y & 0XFF) :
+										((curCoord.Y & 0XFF) - Unsorted::LeptonsPerCell)) *
+									checkCoord.X / checkCoord.Y)) >> 8) != (curCoord.X >> 8));
+
+								if (const auto pCheckCell = MapClass::Instance->TryGetCellAt(lastX ?
+									CellStruct { static_cast<short>(lastCoord.X >> 8), static_cast<short>(curCoord.Y >> 8) } :
+									CellStruct { static_cast<short>(curCoord.X >> 8), static_cast<short>(lastCoord.Y >> 8) }))
+								{
+									if (std::find(pathCells.begin(), pathCells.end(), pCheckCell) == pathCells.end())
+										pathCells.push_back(pCheckCell);
+								}
+							}
+						}
+					}
+					else if (pFoot->CurrentMapCoords != CellStruct::Empty)
 					{
 						auto pCell = MapClass::Instance->GetCellAt(pFoot->CurrentMapCoords);
-						std::vector<CellClass*> pathCells;
 
 						const auto& pD = pFoot->PathDirections;
 
@@ -437,31 +488,31 @@ void TacticalButtonsClass::CurrentSelectPathDraw()
 							pCell = pCell->GetNeighbourCell(static_cast<FacingType>(face));
 							pathCells.push_back(pCell);
 						}
+					}
+				}
 
-						if (const auto cellsSize = pathCells.size())
-						{
-							std::sort(&pathCells[0], &pathCells[cellsSize],[](CellClass* pCellA, CellClass* pCellB)
-							{
-								if (pCellA->MapCoords.X != pCellB->MapCoords.X)
-									return pCellA->MapCoords.X < pCellB->MapCoords.X;
+				if (const auto cellsSize = pathCells.size())
+				{
+					std::sort(&pathCells[0], &pathCells[cellsSize],[](CellClass* pCellA, CellClass* pCellB)
+					{
+						if (pCellA->MapCoords.X != pCellB->MapCoords.X)
+							return pCellA->MapCoords.X < pCellB->MapCoords.X;
 
-								return pCellA->MapCoords.Y < pCellB->MapCoords.Y;
-							});
+						return pCellA->MapCoords.Y < pCellB->MapCoords.Y;
+					});
 
-							for (const auto& pPathCell : pathCells)
-							{
-								const auto location = CoordStruct { (pPathCell->MapCoords.X << 8), (pPathCell->MapCoords.Y << 8), 0 };
-								const auto height = pPathCell->Level * 15;
-								const auto position = TacticalClass::Instance->CoordsToScreen(location) - TacticalClass::Instance->TacticalPos - Point2D { 0, (1 + height) };
+					for (const auto& pPathCell : pathCells)
+					{
+						const auto location = CoordStruct { (pPathCell->MapCoords.X << 8), (pPathCell->MapCoords.Y << 8), 0 };
+						const auto height = pPathCell->Level * 15;
+						const auto position = TacticalClass::Instance->CoordsToScreen(location) - TacticalClass::Instance->TacticalPos - Point2D { 0, (1 + height) };
 
-								DSurface::Composite->DrawSHP(
-									FileSystem::PALETTE_PAL, Make_Global<SHPStruct*>(0x8A03FC),
-									(pPathCell->SlopeIndex + 2), &position, &DSurface::ViewBounds,
-									(BlitterFlags::Centered | BlitterFlags::TransLucent50 | BlitterFlags::bf_400 | BlitterFlags::Zero),
-									0, (-height - (pPathCell->SlopeIndex ? 12 : 2)), ZGradient::Ground, 1000, 0, 0, 0, 0, 0
-								);
-							}
-						}
+						DSurface::Composite->DrawSHP(
+							FileSystem::PALETTE_PAL, Make_Global<SHPStruct*>(0x8A03FC),
+							(pPathCell->SlopeIndex + 2), &position, &DSurface::ViewBounds,
+							(BlitterFlags::Centered | BlitterFlags::TransLucent50 | BlitterFlags::bf_400 | BlitterFlags::Zero),
+							0, (-height - (pPathCell->SlopeIndex ? 12 : 2)), ZGradient::Ground, 1000, 0, 0, 0, 0, 0
+						);
 					}
 				}
 
