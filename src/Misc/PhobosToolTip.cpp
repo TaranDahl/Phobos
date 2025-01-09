@@ -1,7 +1,6 @@
 #include <Helpers/Macro.h>
 
 #include "PhobosToolTip.h"
-#include "TacticalButtons.h"
 
 #include <AircraftClass.h>
 #include <BuildingClass.h>
@@ -19,6 +18,7 @@
 #include <Ext/Surface/Body.h>
 #include <Ext/House/Body.h>
 #include <Ext/Scenario/Body.h>
+#include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
 
 #include <sstream>
 #include <iomanip>
@@ -234,29 +234,59 @@ DEFINE_HOOK(0x6A9316, SidebarClass_StripClass_HelpText, 0x6)
 	return 0x6A93DE;
 }
 
-DEFINE_HOOK(0x4AE511, DisplayClass_GetToolTip_SkipTacticalTip, 0x5)
+DEFINE_HOOK(0x4AE51E, DisplayClass_GetToolTip_HelpText, 0x6)
 {
-	enum { UseButtonTip = 0x4AE5F8, SkipGameCode = 0x4AE69B };
+	enum { ApplyToolTip = 0x4AE69D };
 
-	const auto pButtons = &TacticalButtonsClass::Instance;
-	const auto buttonIndex = pButtons->GetButtonIndex();
-
-	if (buttonIndex < 0)
+	if (!SWSidebarClass::IsEnabled())
 		return 0;
 
-	if (!buttonIndex)
-		return SkipGameCode;
+	const auto button = SWSidebarClass::Instance.CurrentButton;
 
-	if (buttonIndex <= 10) // Button index 1-10 : Super weapons buttons
+	if (!button)
+		return 0;
+
+	PhobosToolTip::Instance.IsCameo = true;
+
+	if (PhobosToolTip::Instance.IsEnabled())
+	{
+		PhobosToolTip::Instance.HelpText_Super(button->SuperIndex);
 		R->EAX(PhobosToolTip::Instance.GetBuffer());
-	else if (buttonIndex > 60 && buttonIndex <= 68) // Button index 61-68 : Hero buttons
-		R->EAX(0);
-	else if (buttonIndex > 70 && buttonIndex <= 100) // Button index 71-100 : Select buttons
-		R->EAX(pButtons->HoveredSelected);
+	}
 	else
-		R->EAX(0);
+	{
+		const auto pSuper = HouseClass::CurrentPlayer->Supers[button->SuperIndex];
+		R->EAX(pSuper->Type->UIName);
+	}
 
-	return UseButtonTip;
+	return ApplyToolTip;
+}
+
+DEFINE_HOOK(0x72426F, ToolTipManager_ProcessMessage_SetDelay, 0x5)
+{
+	if (SWSidebarClass::IsEnabled() && SWSidebarClass::Instance.CurrentButton)
+		R->EDX(0);
+
+	return 0;
+}
+
+DEFINE_HOOK(0x72428C, ToolTipManager_ProcessMessage_Redraw, 0x5)
+{
+	return SWSidebarClass::IsEnabled() && SWSidebarClass::Instance.CurrentButton ? 0x724297 : 0;
+}
+
+DEFINE_HOOK(0x724B2E, ToolTipManager_SetX, 0x6)
+{
+	if (SWSidebarClass::IsEnabled())
+	{
+		if (const auto button = SWSidebarClass::Instance.CurrentButton)
+		{
+			R->EDX(button->X + button->Width);
+			R->EAX(button->Y + SWButtonClass::Magic_Align_Y);
+		}
+	}
+
+	return 0;
 }
 
 // TODO: reimplement CCToolTip::Draw2 completely

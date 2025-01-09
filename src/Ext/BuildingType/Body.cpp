@@ -2,7 +2,6 @@
 
 #include <EventClass.h>
 #include <TacticalClass.h>
-#include <TunnelLocomotionClass.h>
 
 #include <Utilities/GeneralUtils.h>
 #include <Ext/TechnoType/Body.h>
@@ -255,7 +254,7 @@ bool BuildingTypeExt::CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, Cel
 					{
 						const auto pFoot = static_cast<FootClass*>(pCellTechno);
 
-						if (pFoot->GetCurrentSpeed() <= 0 || (locomotion_cast<TunnelLocomotionClass*>(pFoot->Locomotor) && !pFoot->Locomotor->Is_Moving()))
+						if (pFoot->GetCurrentSpeed() <= 0 || !pFoot->Locomotor->Is_Moving())
 						{
 							if (absType == AbstractType::Infantry)
 								++infantryCount.X;
@@ -553,7 +552,6 @@ bool BuildingTypeExt::CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, Cel
 				pUnit->Undeploy();
 
 			pUnit->SetDestination(pDestinationCell, false);
-			pUnit->QueueMission(Mission::Move, false);
 		}
 	}
 
