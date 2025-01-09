@@ -629,7 +629,8 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 			else
 				drawText("PathDir = %d , %d , %d , %d , %d , %d , %d , %d", pD[0], pD[1], pD[2], pD[3], pD[4], pD[5], pD[6], pD[7]);
 
-			drawText("SpeedPercentage = %d", static_cast<int>(pFoot->SpeedPercentage * 100));
+			drawText("CurrentSpeed = %d", static_cast<int>(pFoot->GetCurrentSpeed()));
+			drawText("PercentSpeed = %d", static_cast<int>(pFoot->SpeedPercentage * 100));
 
 			drawInfo("Destination", pFoot, pFoot->Destination);
 			drawInfo("Last Destination", pFoot, pFoot->LastDestination);
