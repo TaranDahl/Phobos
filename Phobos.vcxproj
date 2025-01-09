@@ -28,7 +28,6 @@
     <ClCompile Include="src\Commands\NextIdleHarvester.cpp" />
     <ClCompile Include="src\Commands\ObjectInfo.cpp" />
     <ClCompile Include="src\Commands\QuickSave.cpp" />
-    <ClCompile Include="src\Commands\SWShortcuts.cpp" />
     <ClCompile Include="src\Commands\SelectedInfo.cpp" />
     <ClCompile Include="src\Commands\HerosInfo.cpp" />
     <ClCompile Include="src\Commands\FPSNewCounter.cpp" />
@@ -209,7 +208,6 @@
     <ClInclude Include="src\Commands\Commands.h" />
     <ClInclude Include="src\Commands\DamageDisplay.h" />
     <ClInclude Include="src\Commands\QuickSave.h" />
-    <ClInclude Include="src\Commands\SWShortcuts.h" />
     <ClInclude Include="src\Commands\SelectedInfo.h" />
     <ClInclude Include="src\Commands\HerosInfo.h" />
     <ClInclude Include="src\Commands\FPSNewCounter.h" />

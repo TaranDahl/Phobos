@@ -30,36 +30,11 @@ public:
 	void CurrentSelectPathDraw();
 	void CurrentSelectInfoDraw();
 
-	// Button index 1-10 : Super weapons buttons
-	inline bool IndexInSWButtons();
-	void SWSidebarDraw();
-	void SWSidebarRecheck();
-	bool SWSidebarAdd(int& superIndex);
-	bool SWSidebarSort(SuperWeaponTypeClass* pDataType, SuperWeaponTypeClass* pAddType, SWTypeExt::ExtData* pAddTypeExt, unsigned int ownerBits);
-	void SWSidebarTrigger(int buttonIndex);
-	void SWSidebarRecord(int buttonIndex, int key);
-
-	struct DummySelectClass
-	{
-		char _[0x2C] {}; // : ControlClass
-		StripClass *LinkTo { nullptr };
-		int unknown_int_30 { 0 };
-		bool MouseEntered { false };
-		int SWIndex { -1 }; // New
-	};
-
-	// Button index 11 : SW sidebar switch
-	inline bool IndexIsSWSwitch();
-	void SWSidebarSwitch();
-
-	// Extra functions for SW
-	BSurface* GetMissingCameo(SHPStruct* pSHP);
-	bool SWQuickLaunch(int superIndex);
-
 	// TODO New buttons
 
 	// Button index 61-68 : Heros buttons
 	inline bool IndexInHerosButtons();
+	BSurface* GetMissingCameo(SHPStruct* pSHP);
 	void HerosDraw();
 	void HeroSelect(int buttonIndex);
 	void HeroSwitch();
@@ -88,16 +63,6 @@ public:
 	// Button index N/A : FPS Counter
 
 	// Button index N/A : Show Current Info
-
-	// Button index 1-10 : Super weapons buttons
-	bool DummyAction { false };
-	bool KeyboardCall { false };
-	int RecordSuperIndex { -1 };
-	std::wstring KeyCodeText[10] {};
-	int KeyCodeData[10] {};
-
-	// Button index 11 : SW sidebar switch
-	bool SuperVisible { true };
 
 	// TODO New buttons
 

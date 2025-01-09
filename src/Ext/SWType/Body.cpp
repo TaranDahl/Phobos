@@ -51,11 +51,6 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ShowTimer_Priority)
 		.Process(this->Convert_Pairs)
 		.Process(this->ShowDesignatorRange)
-		.Process(this->SW_QuickFireAtMouse)
-		.Process(this->SW_QuickFireInScreen)
-		.Process(this->SW_InScreen_Show)
-		.Process(this->SW_InScreen_PriorityHouses)
-		.Process(this->SW_InScreen_RequiredHouses)
 		.Process(this->TabIndex)
 		.Process(this->UseWeeds)
 		.Process(this->UseWeeds_Amount)
@@ -182,12 +177,6 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	TypeConvertGroup::Parse(this->Convert_Pairs, exINI, pSection, AffectedHouse::Owner);
 
 	this->ShowDesignatorRange.Read(exINI, pSection, "ShowDesignatorRange");
-
-	this->SW_QuickFireAtMouse.Read(exINI, pSection, "SW.QuickFireAtMouse");
-	this->SW_QuickFireInScreen.Read(exINI, pSection, "SW.QuickFireInScreen");
-	this->SW_InScreen_Show.Read(exINI, pSection, "SW.InScreen.Show");
-	this->SW_InScreen_PriorityHouses = pINI->ReadHouseTypesList(pSection, "SW.InScreen.PriorityHouses", this->SW_InScreen_PriorityHouses);
-	this->SW_InScreen_RequiredHouses = pINI->ReadHouseTypesList(pSection, "SW.InScreen.RequiredHouses", this->SW_InScreen_RequiredHouses);
 
 	this->TabIndex.Read(exINI, pSection, "TabIndex");
 	GeneralUtils::IntValidCheck(&this->TabIndex, pSection, "TabIndex", 1, 0, 3);

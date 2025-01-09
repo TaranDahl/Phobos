@@ -65,12 +65,6 @@ public:
 		Valueable<bool> Detonate_AtFirer;
 		Valueable<bool> ShowDesignatorRange;
 
-		Valueable<bool> SW_QuickFireAtMouse;
-		Valueable<bool> SW_QuickFireInScreen;
-		Valueable<bool> SW_InScreen_Show;
-		DWORD SW_InScreen_PriorityHouses;
-		DWORD SW_InScreen_RequiredHouses;
-
 		Valueable<int> TabIndex;
 
 		std::vector<ValueableVector<int>> LimboDelivery_RandomWeightsData;
@@ -130,11 +124,6 @@ public:
 			, ShowTimer_Priority { 0 }
 			, Convert_Pairs {}
 			, ShowDesignatorRange { true }
-			, SW_QuickFireAtMouse { false }
-			, SW_QuickFireInScreen { false }
-			, SW_InScreen_Show { false }
-			, SW_InScreen_PriorityHouses { 0u }
-			, SW_InScreen_RequiredHouses { 0xFFFFFFFFu }
 			, TabIndex { 1 }
 			, UseWeeds { false }
 			, UseWeeds_Amount { RulesClass::Instance->WeedCapacity }

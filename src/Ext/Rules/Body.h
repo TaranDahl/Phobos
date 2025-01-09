@@ -134,7 +134,6 @@ public:
 		Valueable<bool> PlacementGrid_Expand;
 		Valueable<Vector3D<int>> PlacementGrid_LandFrames;
 		Valueable<Vector3D<int>> PlacementGrid_WaterFrames;
-		Valueable<bool> SWSidebarBackground;
 		PhobosPCXFile SelectedInfantryMissingPCX;
 		PhobosPCXFile SelectedVehicleMissingPCX;
 		PhobosPCXFile SelectedAircraftMissingPCX;
@@ -323,7 +322,6 @@ public:
 			, PlacementGrid_Expand { false }
 			, PlacementGrid_LandFrames { { 1, 0, 0 } }
 			, PlacementGrid_WaterFrames { { 1, 0, 0 } }
-			, SWSidebarBackground { true }
 			, AIAutoDeployMCV { true }
 			, AISetBaseCenter { true }
 			, AIBiasSpawnCell { false }
