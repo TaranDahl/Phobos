@@ -30,16 +30,14 @@ public:
 	void CurrentSelectPathDraw();
 	void CurrentSelectInfoDraw();
 
-	// TODO New buttons
-
-	// Button index 61-68 : Heros buttons
+	// Button index 1-8 : Heros buttons
 	inline bool IndexInHerosButtons();
 	BSurface* GetMissingCameo(SHPStruct* pSHP);
 	void HerosDraw();
 	void HeroSelect(int buttonIndex);
 	void HeroSwitch();
 
-	// Button index 71-100 : Select buttons
+	// Button index 11-100 : Select buttons
 	inline bool IndexInSelectButtons();
 	inline void AddToCurrentSelect(TechnoTypeExt::ExtData* pTypeExt, int count, int checkIndex);
 	BSurface* SearchMissingCameo(AbstractType absType, SHPStruct* pSHP);
@@ -54,6 +52,8 @@ public:
 		int Count { 0 };
 	};
 
+	// TODO New buttons
+
 public:
 	bool PressedInButtonsLayer { false }; // Check press
 
@@ -64,16 +64,17 @@ public:
 
 	// Button index N/A : Show Current Info
 
-	// TODO New buttons
-
-	// Button index 61-68 : Heros buttons
+	// Button index 1-8 : Heros buttons
 	bool HeroVisible { true };
+	const wchar_t* HoveredHero { nullptr };
 
-	// Button index 71-100 : Select buttons
+	// Button index 11-100 : Select buttons
 	bool UpdateSelect { false };
-	int RecordIndex { 71 };
+	int RecordIndex { 11 };
 	std::vector<SelectRecordStruct> CurrentSelectCameo {};
 	const wchar_t* HoveredSelected { nullptr };
+
+	// TODO New buttons
 
 private:
 	int ButtonIndex { -1 }; // -1 -> above no buttons, 0 -> above buttons background, POSITIVE -> above button who have this index

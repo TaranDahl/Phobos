@@ -44,9 +44,7 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 		}
 	}
 
-	// TODO New buttons
-
-	if (this->HeroVisible) // Button index 61-68 : Heros buttons
+	if (this->HeroVisible) // Button index 1-8 : Heros buttons
 	{
 		auto& vec = ScenarioExt::Global()->OwnedHeros;
 
@@ -66,7 +64,7 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 					checkHight += 48;
 
 					if (pMousePosition->Y < checkHight)
-						return i + 61;
+						return i + 1;
 
 					checkHight += 2;
 				}
@@ -74,7 +72,7 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 		}
 	}
 
-	if (Phobos::Config::SelectedDisplay_Enable) // Button index 71-100 : Select buttons
+	if (Phobos::Config::SelectedDisplay_Enable) // Button index 11-100 : Select buttons
 	{
 		if (const int currentCounts = Math::min(30, static_cast<int>(this->CurrentSelectCameo.size())))
 		{
@@ -86,10 +84,10 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 
 				if (pMousePosition->X < (gap * (currentCounts - 1) + 60))
 				{
-					const int index = currentCounts + 71;
+					const int index = currentCounts + 11;
 					int checkWidth = 0;
 
-					for (int i = 71; i < index; ++i)
+					for (int i = 11; i < index; ++i)
 					{
 						if (this->RecordIndex == i)
 						{
@@ -124,6 +122,8 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 			}
 		}
 	}
+
+	// TODO New buttons
 
 	if (this->CheckMouseOverBackground(pMousePosition))
 		return 0; // Button index 0 : Background
@@ -184,23 +184,35 @@ void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 {
 	this->ButtonIndex = this->CheckMouseOverButtons(pMousePosition);
 
-	// TODO New buttons
+	// Hero ToolTip And Button Record
+	if (this->IndexInHerosButtons())
+	{
+		const wchar_t* name = ScenarioExt::Global()->OwnedHeros[this->ButtonIndex - 1]->TypeExtData->OwnerObject()->UIName;
+
+		if (!name)
+			this->HoveredHero = nullptr;
+		else if (name != this->HoveredHero)
+			this->HoveredHero = name;
+	}
+	else if (this->HoveredHero)
+	{
+		this->HoveredHero = nullptr;
+	}
 
 	// Select ToolTip And Button Record
-	if (this->IndexInSelectButtons()) // Button index 71-100 : Select buttons
+	if (this->IndexInSelectButtons())
 	{
 		this->RecordIndex = this->ButtonIndex;
 		const int currentCounts = this->CurrentSelectCameo.size();
 
 		if (currentCounts > 1 || (currentCounts && this->CurrentSelectCameo[0].Count > 1))
 		{
-			if (TechnoTypeClass* const pType = this->CurrentSelectCameo[this->ButtonIndex - 71].TypeExt->OwnerObject())
-			{
-				const wchar_t* name = pType->UIName;
+			const wchar_t* name = this->CurrentSelectCameo[this->ButtonIndex - 11].TypeExt->OwnerObject()->UIName;
 
-				if (name && name != this->HoveredSelected)
-					this->HoveredSelected = name;
-			}
+			if (!name)
+				this->HoveredSelected = nullptr;
+			else if (name != this->HoveredSelected)
+				this->HoveredSelected = name;
 		}
 		else if (this->HoveredSelected)
 		{
@@ -211,6 +223,8 @@ void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 	{
 		this->HoveredSelected = nullptr;
 	}
+
+	// TODO New buttons
 }
 
 void TacticalButtonsClass::PressDesignatedButton(int triggerIndex)
@@ -218,7 +232,6 @@ void TacticalButtonsClass::PressDesignatedButton(int triggerIndex)
 	if (!this->MouseIsOverButtons()) // In buttons background
 		return;
 
-	// TODO New buttons
 	if (this->IndexInHerosButtons())
 	{
 		if (!triggerIndex)
@@ -231,6 +244,7 @@ void TacticalButtonsClass::PressDesignatedButton(int triggerIndex)
 		else if (triggerIndex == 2)
 			this->SelectedTrigger(this->ButtonIndex, false);
 	}
+	// TODO New buttons
 }
 
 #pragma endregion
@@ -809,7 +823,7 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 
 inline bool TacticalButtonsClass::IndexInHerosButtons()
 {
-	return this->ButtonIndex > 60 && this->ButtonIndex <= 68;
+	return this->ButtonIndex > 0 && this->ButtonIndex <= 8;
 }
 
 BSurface* TacticalButtonsClass::GetMissingCameo(SHPStruct* pSHP)
@@ -843,7 +857,7 @@ void TacticalButtonsClass::HerosDraw()
 
 	Point2D position { DSurface::Composite->GetWidth() - 65, 35 };
 	RectangleStruct drawRect { position.X, position.Y, 60, 48 };
-	const int recordIndex = this->ButtonIndex - 61;
+	const int recordIndex = this->ButtonIndex - 1;
 	int counts = Math::min(8, size);
 
 	for (int i = 0; i < counts; ++i, position.Y += 50, drawRect.Y = position.Y)
@@ -1166,7 +1180,7 @@ void TacticalButtonsClass::HeroSelect(int buttonIndex)
 		return;
 
 	auto& vec = ScenarioExt::Global()->OwnedHeros;
-	const int index = buttonIndex - 61;
+	const int index = buttonIndex - 1;
 
 	if (index >= static_cast<int>(vec.size()))
 		return;
@@ -1183,7 +1197,7 @@ void TacticalButtonsClass::HeroSelect(int buttonIndex)
 		if (ObjectClass::CurrentObjects->Count != 1 || !pSelect->IsSelected)
 			MapClass::UnselectAll();
 
-		if (!pSelect->Select())
+		if (!pSelect->InLimbo && !pSelect->Select())
 			TacticalClass::Instance->SetTacticalPosition(&pSelect->Location);
 	}
 }
@@ -1209,7 +1223,7 @@ void TacticalButtonsClass::HeroSwitch()
 
 inline bool TacticalButtonsClass::IndexInSelectButtons()
 {
-	return this->ButtonIndex > 70 && this->ButtonIndex <= 100;
+	return this->ButtonIndex > 10 && this->ButtonIndex <= 100;
 }
 
 inline void TacticalButtonsClass::AddToCurrentSelect(TechnoTypeExt::ExtData* pTypeExt, int count, int checkIndex)
@@ -1280,10 +1294,10 @@ void TacticalButtonsClass::SelectedTrigger(int buttonIndex, bool select)
 
 	const int currentCounts = this->CurrentSelectCameo.size();
 
-	if (buttonIndex > (currentCounts + 70))
+	if (buttonIndex > (currentCounts + 10))
 		return;
 
-	const auto pTypeExt = this->CurrentSelectCameo[buttonIndex - 71].TypeExt;
+	const auto pTypeExt = this->CurrentSelectCameo[buttonIndex - 11].TypeExt;
 	const auto groupID = pTypeExt->GetSelectionGroupID();
 	const auto shiftPressed = InputManagerClass::Instance->IsForceSelectKeyPressed();
 
@@ -1392,7 +1406,7 @@ void TacticalButtonsClass::SelectedUpdate()
 
 	if (ObjectClass::CurrentObjects->Count <= 0)
 	{
-		this->RecordIndex = 71;
+		this->RecordIndex = 11;
 		return;
 	}
 
@@ -1459,7 +1473,7 @@ void TacticalButtonsClass::SelectedUpdate()
 		}
 	}
 
-	const int maxIndex = this->CurrentSelectCameo.size() + 70;
+	const int maxIndex = this->CurrentSelectCameo.size() + 10;
 
 	if (this->RecordIndex > maxIndex)
 		this->RecordIndex = maxIndex;
@@ -1484,13 +1498,13 @@ void TacticalButtonsClass::SelectedDraw()
 		const int gap = Math::min(60, ((DSurface::Composite->GetWidth() << 1) / (5 * currentCounts)));
 		RectangleStruct surfaceRect { 0, 0, (gap * (currentCounts - 1) + 60), (position.Y + 48) };
 
-		const int maxIndex = currentCounts + 70;
+		const int maxIndex = currentCounts + 10;
 		const COLORREF color = Drawing::RGB_To_Int(Drawing::TooltipColor);
 		TextPrintType printType = TextPrintType::Background | TextPrintType::FullShadow | TextPrintType::Point8;
 
-		for (int i = 71; i < this->RecordIndex && i <= maxIndex; ++i, position.X += gap, drawRect.X = position.X, textPosition.X += gap)
+		for (int i = 11; i < this->RecordIndex && i <= maxIndex; ++i, position.X += gap, drawRect.X = position.X, textPosition.X += gap)
 		{
-			const auto pSelect = this->CurrentSelectCameo[i - 71];
+			const auto pSelect = this->CurrentSelectCameo[i - 11];
 			const auto pTypeExt = pSelect.TypeExt;
 
 			if (const auto CameoPCX = pTypeExt->CameoPCX.GetSurface())
@@ -1529,7 +1543,7 @@ void TacticalButtonsClass::SelectedDraw()
 
 		for (int i = maxIndex; i > this->RecordIndex; --i, position.X -= gap, drawRect.X = position.X, textPosition.X -= gap)
 		{
-			const auto pSelect = this->CurrentSelectCameo[i - 71];
+			const auto pSelect = this->CurrentSelectCameo[i - 11];
 			const auto pTypeExt = pSelect.TypeExt;
 
 			if (const auto CameoPCX = pTypeExt->CameoPCX.GetSurface())
@@ -1575,7 +1589,7 @@ void TacticalButtonsClass::SelectedDraw()
 
 		if (this->RecordIndex <= maxIndex)
 		{
-			const auto pSelect = this->CurrentSelectCameo[this->RecordIndex - 71];
+			const auto pSelect = this->CurrentSelectCameo[this->RecordIndex - 11];
 			const auto pTypeExt = pSelect.TypeExt;
 
 			if (const auto CameoPCX = pTypeExt->CameoPCX.GetSurface())
@@ -1879,7 +1893,7 @@ void TacticalButtonsClass::SelectedSwitch()
 	}
 	else
 	{
-		this->RecordIndex = 71;
+		this->RecordIndex = 11;
 		MessageListClass::Instance->PrintMessage
 		(
 			GeneralUtils::LoadStringUnlessMissing("TXT_SELECT_INVISIBLE", L"Set select info invisible."),
@@ -2087,6 +2101,33 @@ DEFINE_HOOK(0x5F44FC, ObjectClass_Deselect, 0x7)
 	TacticalButtonsClass::Instance.UpdateSelect = true;
 
 	return 0;
+}
+
+#pragma endregion
+
+#pragma region ToolTips
+
+DEFINE_HOOK(0x4AE511, DisplayClass_GetToolTip_SkipTacticalTip, 0x5)
+{
+	enum { UseButtonTip = 0x4AE5F8, SkipGameCode = 0x4AE69B };
+
+	const auto pButtons = &TacticalButtonsClass::Instance;
+	const auto buttonIndex = pButtons->GetButtonIndex();
+
+	if (buttonIndex < 0)
+		return 0;
+
+	if (!buttonIndex)
+		return SkipGameCode;
+
+	if (pButtons->IndexInHerosButtons())
+		R->EAX(pButtons->HoveredHero);
+	else if (pButtons->IndexInSelectButtons())
+		R->EAX(pButtons->HoveredSelected);
+	else
+		R->EAX(0);
+
+	return UseButtonTip;
 }
 
 #pragma endregion
