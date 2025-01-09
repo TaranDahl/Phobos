@@ -489,6 +489,7 @@ New:
 - Draw visual effects for airburst weapons (by CrimRecya)
 - Delay automatic attack on the controlled unit (by CrimRecya)
 - Unit `Speed` setting now accepts floating point values (by Starkku)
+- Exclusive SuperWeapon Sidebar (by NetsuNegi & CrimRecya)
 
 Vanilla fixes:
 - Allow AI to repair structures built from base nodes/trigger action 125/SW delivery in single player missions (by Trsdy)

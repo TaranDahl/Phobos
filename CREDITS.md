@@ -346,6 +346,7 @@ This page lists all the individual contributions to the project by their author.
    - Disguised units not using the correct palette if target has custom palette bugfix
    - Tunnel/Walk/Mech locomotor being stuck when moving too fast bugfix
    - Assign Super Weapon cameo to any sidebar tab
+   - Exclusive SuperWeapon Sidebar
 - **Apollo** - Translucent SHP drawing patches
 - **ststl**
    - Customizable ShowTimer priority of superweapons
@@ -373,6 +374,7 @@ This page lists all the individual contributions to the project by their author.
   - Allow to change the speed of gas particles
 - **CrimRecya**
   - Fix `LimboKill` not working reliably
+  - Exclusive SuperWeapon Sidebar
   - Allow using waypoints, area guard and attack move with aircraft
   - Fix `Stop` command not working so well in some cases
   - Projectile subject to ground check before firing
