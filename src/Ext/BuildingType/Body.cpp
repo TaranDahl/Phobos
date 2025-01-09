@@ -552,7 +552,6 @@ bool BuildingTypeExt::CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, Cel
 				pUnit->Undeploy();
 
 			pUnit->SetDestination(pDestinationCell, false);
-			pUnit->QueueMission(Mission::Move, false);
 		}
 	}
 
