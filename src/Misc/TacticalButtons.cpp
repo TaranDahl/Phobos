@@ -792,18 +792,18 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 				const auto pUnit = static_cast<UnitClass*>(pTechno);
 
 				drawInfo("Follower", pUnit, pUnit->FollowerCar);
-			}/*
+			}
 			else if (absType == AbstractType::Infantry)
 			{
 				const auto pInfantry = static_cast<InfantryClass*>(pTechno);
 
-
-			}*/
+				drawTime("UnknownTimer", pInfantry->unknown_Timer_6C8);
+			}
 			else if (absType == AbstractType::Aircraft)
 			{
 				const auto pAircraft = static_cast<AircraftClass*>(pTechno);
 
-				drawInfo("Dock", pAircraft, pAircraft->DockNowHeadingTo);
+				drawInfo("Dock Building", pAircraft, pAircraft->DockNowHeadingTo);
 			}
 		}
 		else if (absType == AbstractType::Building)
