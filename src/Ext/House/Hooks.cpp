@@ -413,6 +413,43 @@ DEFINE_HOOK(0x4FD8F7, HouseClass_UpdateAI_OnLastLegs, 0x10)
 	return ret;
 }
 
+namespace SpyEffectRadarJamContext
+{
+	HouseClass* pThis;
+}
+
+DEFINE_HOOK(0x4F8440, HouseCLass_Update_SpyEffectRadarJam, 0x5)
+{
+	GET(HouseClass*, pThis, ECX);
+
+	auto pExt = HouseExt::ExtMap.Find(pThis);
+
+	int StartTime = pExt->SpyEffect_RadarJamTimer.StartTime;
+	int TimeLeft = pExt->SpyEffect_RadarJamTimer.TimeLeft;
+
+	if (StartTime != -1 && Unsorted::CurrentFrame - StartTime == TimeLeft)
+	{
+		pExt->SpyEffect_RadarJamTimer.Stop();
+		pThis->RecheckRadar = true;
+	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x508DF0, HouseClass_UpdateRadar_SetContext, 0x7)
+{
+	GET(HouseClass*, pThis, ECX);
+	SpyEffectRadarJamContext::pThis = pThis;
+	return 0;
+}
+
+DEFINE_HOOK(0x508F2A, HouseClass_UpdateRadar_CheckSpyEffectRadarJam, 0x5)
+{
+	enum { RadarUnavailable = 0x508F2F };
+	auto const pExt = HouseExt::ExtMap.Find(SpyEffectRadarJamContext::pThis);
+	return pExt->SpyEffect_RadarJamTimer.IsTicking() ? RadarUnavailable : 0;
+}
+
 // WW's code set anger on every houses, even on the allies.
 DEFINE_HOOK(0x4FD616, HouseClass_sub4FD500_DontAngerOnAlly, 0x9)
 {
