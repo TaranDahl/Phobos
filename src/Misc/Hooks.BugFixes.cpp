@@ -47,6 +47,29 @@
 DEFINE_JUMP(LJMP, 0x545CE2, 0x545CE9) //Phobos_BugFixes_Tileset255_RemoveNonMMArrayFill
 DEFINE_JUMP(LJMP, 0x546C23, 0x546C8B) //Phobos_BugFixes_Tileset255_RefNonMMArray
 
+//Fix the bug that parasite will vanish if it missed its target when its previous cell is occupied.
+DEFINE_HOOK(0x62AA32, ParasiteClass_TryInfect_MissBehaviorFix, 0x5)
+{
+	GET(bool, isReturnSuccess, EAX);
+	GET(ParasiteClass*, pParasite, ESI);
+
+	auto const pParasiteTechno = pParasite->Owner;
+
+	if (isReturnSuccess || !pParasiteTechno)
+		return 0;
+
+	auto const pType = pParasiteTechno->GetTechnoType();
+
+	if (!pType)
+		return 0;
+
+	isReturnSuccess = pParasiteTechno->Unlimbo(CellClass::Cell2Coord(MapClass::Instance->NearByLocation(pParasiteTechno->LastMapCoords, pType->SpeedType, -1,
+		pType->MovementZone, false, 1, 1, false, false, false, true, CellStruct::Empty, false, false)), DirType::North);
+
+	R->AL(isReturnSuccess);
+	return 0;
+}
+
 // Patches TechnoClass::Kill_Cargo/KillPassengers (push ESI -> push EBP)
 // Fixes recursive passenger kills not being accredited
 // to proper techno but to their transports
@@ -943,6 +966,60 @@ DEFINE_HOOK(0x5B11DD, MechLocomotionClass_ProcessMoving_SlowdownDistance, 0x9)
 	return distance >= pLinkedTo->GetCurrentSpeed() ? KeepMoving : CloseEnough;
 }
 
+// Skip the Disappear func calling in cloak process.
+// Disappear announces the techno's pointer invalid and make the references in bullet or missile spawns null.
+DEFINE_JUMP(LJMP, 0x703789, 0x703795);
+DEFINE_JUMP(LJMP, 0x6FBBC3, 0x6FBBCE);
+
+// Jumpjet infantry will no longer acts stupid when assigned a attack mission.
+DEFINE_HOOK(0x51AB5C, InfantryClass_SetDestination_JJInfFix, 0x6)
+{
+	enum { FuncRet = 0x51B1D7 };
+
+	GET(InfantryClass* const, pThis, EBP);
+	GET(AbstractClass* const, pDest, EBX);
+
+	auto pJumpjetLoco = locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor);
+
+	if (pThis->Type->BalloonHover && !pDest && pThis->Destination && pJumpjetLoco && pThis->Target)
+	{
+		if (pThis->IsCloseEnoughToAttack(pThis->Target))
+		{
+			auto crd = pThis->GetCoords();
+			pJumpjetLoco->DestinationCoords.X = crd.X;
+			pJumpjetLoco->DestinationCoords.Y = crd.Y;
+			pJumpjetLoco->CurrentSpeed = 0;
+			pJumpjetLoco->MaxSpeed = 0;
+			pThis->AbortMotion();
+		}
+
+		pThis->ForceMission(Mission::Attack);
+		return FuncRet;
+	}
+
+	return 0;
+}
+
+// For vehicles. If in range, then stop.
+DEFINE_HOOK(0x741A66, UnitClass_SetDestination_JJVehFix, 0x5)
+{
+	GET(UnitClass* const, pThis, EBP);
+
+	auto pJumpjetLoco = locomotion_cast<JumpjetLocomotionClass*>(pThis->Locomotor);
+
+	if (pThis->IsCloseEnough(pThis->Target, pThis->SelectWeapon(pThis->Target)) && pJumpjetLoco)
+	{
+		auto crd = pThis->GetCoords();
+		pJumpjetLoco->DestinationCoords.X = crd.X;
+		pJumpjetLoco->DestinationCoords.Y = crd.Y;
+		pJumpjetLoco->CurrentSpeed = 0;
+		pJumpjetLoco->MaxSpeed = 0;
+		pThis->AbortMotion();
+	}
+
+	return 0;
+}
+
 DEFINE_JUMP(LJMP, 0x517FF5, 0x518016); // Warhead with InfDeath=9 versus infantry in air
 
 // Fixes docks not repairing docked aircraft unless they enter the dock first e.g just built ones.
@@ -1141,6 +1218,18 @@ DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6)
 
 	return SkipGameCode;
 }
+
+#pragma endregion
+
+#pragma region TeamCloseRangeFix
+
+int __fastcall Check2DDistanceInsteadOf3D(ObjectClass* pSource, void* _, AbstractClass* pTarget)
+{
+	return (pSource->IsInAir() && pSource->WhatAmI() != AbstractType::Aircraft) // Jumpjets or sth in the air
+		? (pSource->DistanceFrom(pTarget) * 2) // 2D distance (2x is the bonus to units in the air)
+		: pSource->DistanceFrom3D(pTarget); // 3D distance (vanilla)
+}
+DEFINE_JUMP(CALL, 0x6EBCC9, GET_OFFSET(Check2DDistanceInsteadOf3D));
 
 #pragma endregion
 

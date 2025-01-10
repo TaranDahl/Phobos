@@ -351,13 +351,30 @@ DEFINE_HOOK(0x416A0A, AircraftClass_Mission_Move_SmoothMoving, 0x5)
 	const int distance = Game::F2I(Point2D { pCoords->X, pCoords->Y }.DistanceFrom(Point2D { pThis->Location.X, pThis->Location.Y }));
 
 	// When the horizontal distance between the aircraft and its destination is greater than half of its deceleration distance
-	// or its turning radius, continue to move forward, otherwise return to airbase or execute the next planning path
+	// or its turning radius, continue to move forward, otherwise return to airbase or execute the next planning waypoint
 	if (distance > std::max((pType->SlowdownDistance >> 1), (2048 / pType->ROT)))
 		return (R->Origin() == 0x4168C7 ? ContinueMoving1 : ContinueMoving2);
 
-	pThis->EnterIdleMode(false, true);
+	// Try next planning waypoint first, then return to air base if it does not exist or cannot be taken
+	if (!pThis->TryNextPlanningTokenNode())
+		pThis->EnterIdleMode(false, true);
 
 	return EnterIdleAndReturn;
+}
+
+DEFINE_HOOK(0x4DDD66, FootClass_IsLandZoneClear_ReplaceHardcode, 0x6) // To avoid that the aircraft cannot fly towards the water surface normally
+{
+	enum { SkipGameCode = 0x4DDD8A };
+
+	GET(FootClass* const, pThis, EBP);
+	GET_STACK(CellStruct, cell, STACK_OFFSET(0x20, 0x4));
+
+	const auto pType = pThis->GetTechnoType();
+
+	// In vanilla, only aircrafts or `foots with fly locomotion` will call this virtual function
+	// So I don't know why WW use hard-coded `SpeedType::Track` and `MovementZone::Normal` to check this
+	R->AL(MapClass::Instance->GetCellAt(cell)->IsClearToMove(pType->SpeedType, false, false, -1, pType->MovementZone, -1, true));
+	return SkipGameCode;
 }
 
 // AreaGuard: return when no ammo or first target died
@@ -412,7 +429,13 @@ DEFINE_HOOK(0x4DF3BA, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget1, 
 	if (RulesExt::Global()->ExtendedAircraftMissions && pThis->WhatAmI() == AbstractType::Aircraft)
 		return HoldTarget;
 
-	return pThis->InAuxiliarySearchRange(pThis->Target) ? HoldTarget : LoseTarget;
+	const auto inSearchRange = pThis->InAuxiliarySearchRange(pThis->Target);
+	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	if (pTypeExt && pTypeExt->AttackMove_PursuitTarget && inSearchRange)
+		pThis->SetDestination(pThis->Target, true);
+
+	return inSearchRange ? HoldTarget : LoseTarget;
 }
 
 DEFINE_HOOK(0x4DF42A, FootClass_UpdateAttackMove_AircraftHoldAttackMoveTarget2, 0x6) // When it have MegaTarget
@@ -488,6 +511,93 @@ AbstractClass* __fastcall AircraftClass_GreatestThreat(AircraftClass* pThis, voi
 	return pThis->FootClass::GreatestThreat(threatType, pSelectCoords, onlyTargetHouseEnemy);
 }
 DEFINE_JUMP(VTABLE, 0x7E2668, GET_OFFSET(AircraftClass_GreatestThreat))
+
+#pragma endregion
+
+#pragma region AircraftScatterCell
+
+DEFINE_HOOK(0x41847E, AircraftClass_MissionAttack_ScatterCell1, 0x6)
+{
+	enum { SkipScatter = 0x4184C2, Scatter = 0 };
+	return RulesExt::Global()->StrafingTargetScatter ? Scatter : SkipScatter;
+}
+
+DEFINE_HOOK(0x4186DD, AircraftClass_MissionAttack_ScatterCell2, 0x5)
+{
+	enum { SkipScatter = 0x418720, Scatter = 0 };
+	return RulesExt::Global()->StrafingTargetScatter ? Scatter : SkipScatter;
+}
+
+DEFINE_HOOK(0x41882C, AircraftClass_MissionAttack_ScatterCell3, 0x6)
+{
+	enum { SkipScatter = 0x418870, Scatter = 0 };
+	return RulesExt::Global()->StrafingTargetScatter ? Scatter : SkipScatter;
+}
+
+DEFINE_HOOK(0x41893B, AircraftClass_MissionAttack_ScatterCell4, 0x6)
+{
+	enum { SkipScatter = 0x41897F, Scatter = 0 };
+	return RulesExt::Global()->StrafingTargetScatter ? Scatter : SkipScatter;
+}
+
+DEFINE_HOOK(0x418A4A, AircraftClass_MissionAttack_ScatterCell5, 0x6)
+{
+	enum { SkipScatter = 0x418A8E, Scatter = 0 };
+	return RulesExt::Global()->StrafingTargetScatter ? Scatter : SkipScatter;
+}
+
+DEFINE_HOOK(0x418B46, AircraftClass_MissionAttack_ScatterCell6, 0x6)
+{
+	enum { SkipScatter = 0x418B8A, Scatter = 0 };
+	return RulesExt::Global()->StrafingTargetScatter ? Scatter : SkipScatter;
+}
+
+#pragma endregion
+
+#pragma region AircraftFlight
+
+DEFINE_HOOK(0x4CDF84, FlyLocomotionClass_UpdateLoaction_FlightCrash, 0x5)
+{
+	GET(int, deltaZ, ECX);
+	GET(FootClass* const, pLinkedTo, EAX);
+
+	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pLinkedTo->GetTechnoType()))
+	{
+		const int crashSpeed = pTypeExt->FlightCrash;
+
+		if (crashSpeed >= 0)
+			deltaZ = crashSpeed;
+	}
+
+	R->ECX(deltaZ);
+	return 0;
+}
+
+DEFINE_HOOK(0x4CDE96, FlyLocomotionClass_UpdateLoaction_FlightClimb, 0x6)
+{
+	GET(int, deltaZ, EAX);
+	GET(const int, bridgeHeight, EBX);
+	GET(const int, technoHeight, EDI);
+	GET(FootClass* const, pLinkedTo, ECX);
+
+	auto const pType = pLinkedTo->GetTechnoType();
+
+	if (auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType))
+	{
+		const int climbSpeed = pTypeExt->FlightClimb;
+
+		if (climbSpeed >= 0)
+			deltaZ = climbSpeed;
+	}
+
+	const int extraHeight = bridgeHeight + technoHeight + deltaZ - pType->GetFlightLevel();
+
+	if (extraHeight > 0)
+		deltaZ -= extraHeight;
+
+	R->EAX(deltaZ);
+	return 0;
+}
 
 #pragma endregion
 

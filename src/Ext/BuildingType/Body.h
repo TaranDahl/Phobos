@@ -3,6 +3,7 @@
 #include <SuperClass.h>
 #include <SuperWeaponTypeClass.h>
 
+#include <Ext/TechnoType/Body.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
@@ -65,6 +66,17 @@ public:
 		Valueable<int> SellBuildupLength;
 		Valueable<bool> IsDestroyableObstacle;
 
+		Valueable<bool> JustHasRallyPoint;
+		Nullable<CoordStruct> JumpjetExitCoord;
+		Valueable<bool> AnimDontDelayBurst;
+		Nullable<int> RallySpeedType;
+		Nullable<int> RallyMovementZone;
+
+		Valueable<bool> AutoUpgrade;
+		Valueable<bool> LimboBuild;
+		Valueable<int> LimboBuildID;
+		Valueable<BuildingTypeClass*> LaserFencePost_Fence;
+
 		std::vector<std::optional<DirType>> AircraftDockingDirs;
 
 		ValueableVector<TechnoTypeClass*> FactoryPlant_AllowTypes;
@@ -117,6 +129,15 @@ public:
 			, ConsideredVehicle {}
 			, ZShapePointMove_OnBuildup { false }
 			, SellBuildupLength { 23 }
+			, JustHasRallyPoint { false }
+			, JumpjetExitCoord { }
+			, AnimDontDelayBurst { false }
+			, RallySpeedType { }
+			, RallyMovementZone { }
+			, AutoUpgrade { false }
+			, LimboBuild { false }
+			, LimboBuildID { -1 }
+			, LaserFencePost_Fence {}
 			, AircraftDockingDirs {}
 			, FactoryPlant_AllowTypes {}
 			, FactoryPlant_DisallowTypes {}
@@ -167,4 +188,13 @@ public:
 	static int GetEnhancedPower(BuildingClass* pBuilding, HouseClass* pHouse);
 	static bool CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner);
 	static int GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass* pHouse);
+	static bool ShouldExistGreyCameo(const TechnoTypeExt::ExtData* const pTypeExt);
+	static CanBuildResult CheckAlwaysExistCameo(const TechnoTypeClass* const pType, CanBuildResult canBuild);
+	static bool CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseClass* pOccupierHouse);
+	static bool CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, CellStruct topLeftCell, HouseClass* pHouse, TechnoClass* pExceptTechno = nullptr);
+	static void DrawAdjacentLines();
+	static bool AutoUpgradeBuilding(BuildingClass* pBuilding);
+	static bool BuildLimboBuilding(BuildingClass* pBuilding);
+	static void CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID);
+	static bool DeleteLimboBuilding(BuildingClass* pBuilding, int ID);
 };

@@ -36,6 +36,12 @@ public:
 		std::vector<TechnoExt::ExtData*> AutoDeathObjects;
 		std::vector<TechnoExt::ExtData*> TransportReloaders; // Objects that can reload ammo in limbo
 
+		std::vector<TechnoTypeExt::ExtData*> OwnedExistCameoTechnoTypes;
+		std::vector<CellStruct> BaseNormalCells;
+
+		std::vector<int> SWButtonData;
+		std::vector<TechnoExt::ExtData*> OwnedHeros;
+
 		ExtData(ScenarioClass* OwnerObject) : Extension<ScenarioClass>(OwnerObject)
 			, ShowBriefing { false }
 			, BriefingTheme { -1 }
@@ -43,6 +49,10 @@ public:
 			, Variables { }
 			, AutoDeathObjects {}
 			, TransportReloaders {}
+			, OwnedExistCameoTechnoTypes {}
+			, BaseNormalCells {}
+			, SWButtonData {}
+			, OwnedHeros {}
 		{ }
 
 		void SetVariableToByID(bool bIsGlobal, int nIndex, char bState);

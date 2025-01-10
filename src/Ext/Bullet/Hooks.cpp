@@ -290,6 +290,17 @@ DEFINE_HOOK(0x46902C, BulletClass_Explode_Cluster, 0x6)
 	return SkipGameCode;
 }
 
+constexpr bool CheckTrajectoryCanNotAlwaysSnap(const TrajectoryFlag flag)
+{
+	return flag != TrajectoryFlag::Invalid;
+/*	return flag == TrajectoryFlag::Straight
+		|| flag == TrajectoryFlag::Bombard
+		|| flag == TrajectoryFlag::Disperse
+		|| flag == TrajectoryFlag::Engrave
+		|| flag == TrajectoryFlag::Parabola
+		|| flag == TrajectoryFlag::Tracing;*/
+}
+
 DEFINE_HOOK(0x467CCA, BulletClass_AI_TargetSnapChecks, 0x6)
 {
 	enum { SkipChecks = 0x467CDE };
@@ -304,13 +315,10 @@ DEFINE_HOOK(0x467CCA, BulletClass_AI_TargetSnapChecks, 0x6)
 	}
 	else if (auto const pExt = BulletAITemp::ExtData)
 	{
-		if (auto pTraj = pExt->Trajectory.get())
+		if (pExt->Trajectory && CheckTrajectoryCanNotAlwaysSnap(pExt->Trajectory->Flag()))
 		{
-			if (pTraj->Flag() == TrajectoryFlag::Straight)
-			{
-				R->EAX(pThis->Type);
-				return SkipChecks;
-			}
+			R->EAX(pThis->Type);
+			return SkipChecks;
 		}
 	}
 
@@ -335,7 +343,7 @@ DEFINE_HOOK(0x468E61, BulletClass_Explode_TargetSnapChecks1, 0x6)
 	}
 	else if (auto const pExt = BulletExt::ExtMap.Find(pThis))
 	{
-		if (pExt->Trajectory && pExt->Trajectory->Flag() == TrajectoryFlag::Straight && !pExt->SnappedToTarget)
+		if (pExt->Trajectory && CheckTrajectoryCanNotAlwaysSnap(pExt->Trajectory->Flag()) && !pExt->SnappedToTarget)
 		{
 			R->EAX(pThis->Type);
 			return SkipChecks;
@@ -366,7 +374,7 @@ DEFINE_HOOK(0x468E9F, BulletClass_Explode_TargetSnapChecks2, 0x6)
 	// Fixes issues with walls etc.
 	if (auto const pExt = BulletExt::ExtMap.Find(pThis))
 	{
-		if (pExt->Trajectory && pExt->Trajectory->Flag() == TrajectoryFlag::Straight && !pExt->SnappedToTarget)
+		if (pExt->Trajectory && CheckTrajectoryCanNotAlwaysSnap(pExt->Trajectory->Flag()) && !pExt->SnappedToTarget)
 			return SkipSetCoordinate;
 	}
 
@@ -381,7 +389,7 @@ DEFINE_HOOK(0x468D3F, BulletClass_ShouldExplode_AirTarget, 0x6)
 
 	if (auto const pExt = BulletExt::ExtMap.Find(pThis))
 	{
-		if (pExt->Trajectory && pExt->Trajectory->Flag() == TrajectoryFlag::Straight)
+		if (pExt->Trajectory && CheckTrajectoryCanNotAlwaysSnap(pExt->Trajectory->Flag()))
 			return SkipCheck;
 	}
 
@@ -397,11 +405,38 @@ DEFINE_HOOK(0x4687F8, BulletClass_Unlimbo_FlakScatter, 0x6)
 	{
 		if (auto const pTypeExt = BulletTypeExt::ExtMap.Find(pThis->Type))
 		{
-			int defaultValue = RulesClass::Instance->BallisticScatter;
+			if (!(ScenarioClass::Instance->Random.RandomRanged(0, 100) <= pTypeExt->BallisticScatter_Chance * 100))
+			{
+				R->EAX(0);
+				return 0;
+			}
+
+			const int defaultValue = RulesClass::Instance->BallisticScatter;
 			int min = pTypeExt->BallisticScatter_Min.Get(Leptons(0));
 			int max = pTypeExt->BallisticScatter_Max.Get(Leptons(defaultValue));
+			int result;
 
-			int result = (int)((mult * ScenarioClass::Instance->Random.RandomRanged(2 * min, 2 * max)) / pThis->WeaponType->Range);
+			if (pTypeExt->BallisticScatter_IncreaseByRange)
+			{
+				auto const pWeapon = pThis->WeaponType;
+				const int minInMinRange = pTypeExt->BallisticScatter_Min_InMinRange.Get(Leptons(min));
+				const int minInMaxRange = pTypeExt->BallisticScatter_Min_InMaxRange.Get(Leptons(min));
+				const int maxInMinRange = pTypeExt->BallisticScatter_Max_InMinRange.Get(Leptons(max));
+				const int maxInMaxRange = pTypeExt->BallisticScatter_Max_InMaxRange.Get(Leptons(max));
+				const int minRange = pTypeExt->BallisticScatter_MinRange.Get(Leptons(pWeapon->MinimumRange));
+				const int maxRange = pTypeExt->BallisticScatter_MaxRange.Get(Leptons(pWeapon->Range));
+				const int deltaRange = maxRange - minRange;
+				const int deltaRangeReal = static_cast<int>(mult) - minRange;
+				const double rangePercent = Math::clamp((deltaRange == 0 ? 0.5 : deltaRangeReal / static_cast<double>(deltaRange)), 0, 1);
+				min = minInMinRange + static_cast<int>(rangePercent * (minInMaxRange - minInMinRange));
+				max = maxInMinRange + static_cast<int>(rangePercent * (maxInMaxRange - maxInMinRange));
+				result = ScenarioClass::Instance->Random.RandomRanged(min, max);
+			}
+			else
+			{
+				result = static_cast<int>((mult * ScenarioClass::Instance->Random.RandomRanged(2 * min, 2 * max)) / pThis->WeaponType->Range);
+			}
+
 			R->EAX(result);
 		}
 	}
@@ -444,6 +479,19 @@ DEFINE_HOOK(0x44D23C, BuildingClass_Mission_Missile_ArcingFix, 0x7)
 		if (!pBulletTypeExt->Arcing_AllowElevationInaccuracy)
 			R->EAX(targetHeight);
 	}
+
+	return 0;
+}
+
+// Vanilla inertia effect only for bullets with ROT=0
+DEFINE_HOOK(0x415F25, AircraftClass_Fire_TrajectorySkipInertiaEffect, 0x6)
+{
+	enum { SkipCheck = 0x4160BC };
+
+	GET(BulletClass*, pThis, ESI);
+
+	if (BulletExt::ExtMap.Find(pThis)->Trajectory)
+		return SkipCheck;
 
 	return 0;
 }

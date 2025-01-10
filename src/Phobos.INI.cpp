@@ -5,6 +5,7 @@
 #include <SessionClass.h>
 #include <MessageListClass.h>
 #include <HouseClass.h>
+#include <GameOptionsClass.h>
 
 #include <Utilities/Parser.h>
 #include <Utilities/GeneralUtils.h>
@@ -32,6 +33,12 @@ bool Phobos::UI::PowerDelta_Show = false;
 double Phobos::UI::PowerDelta_ConditionYellow = 0.75;
 double Phobos::UI::PowerDelta_ConditionRed = 1.0;
 bool Phobos::UI::CenterPauseMenuBackground = false;
+bool Phobos::UI::SuperWeaponSidebar = false;
+int Phobos::UI::SuperWeaponSidebar_Interval = 0;
+int Phobos::UI::SuperWeaponSidebar_LeftOffset = 0;
+int Phobos::UI::SuperWeaponSidebar_CameoHeight = 48;
+int Phobos::UI::SuperWeaponSidebar_Max = 0;
+int Phobos::UI::SuperWeaponSidebar_MaxColumns = INT32_MAX;
 bool Phobos::UI::WeedsCounter_Show = false;
 bool Phobos::UI::AnchoredToolTips = false;
 
@@ -43,6 +50,11 @@ bool Phobos::Config::ShowPlanningPath = false;
 bool Phobos::Config::ArtImageSwap = false;
 bool Phobos::Config::ShowPlacementPreview = false;
 bool Phobos::Config::DigitalDisplay_Enable = false;
+bool Phobos::Config::SelectedDisplay_Enable = false;
+bool Phobos::Config::FPSCounter_Enable = false;
+bool Phobos::Config::MessageDisplayInCenter = false;
+bool Phobos::Config::ShowBuildingStatistics = false;
+bool Phobos::Config::DrawAdjacentBoundary = false;
 bool Phobos::Config::RealTimeTimers = false;
 bool Phobos::Config::RealTimeTimers_Adaptive = false;
 int Phobos::Config::CampaignDefaultGameSpeed = 2;
@@ -70,6 +82,11 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 	Phobos::Config::RealTimeTimers = CCINIClass::INI_RA2MD->ReadBool("Phobos", "RealTimeTimers", false);
 	Phobos::Config::RealTimeTimers_Adaptive = CCINIClass::INI_RA2MD->ReadBool("Phobos", "RealTimeTimers.Adaptive", false);
 	Phobos::Config::DigitalDisplay_Enable = CCINIClass::INI_RA2MD->ReadBool("Phobos", "DigitalDisplay.Enable", false);
+	Phobos::Config::SelectedDisplay_Enable = CCINIClass::INI_RA2MD->ReadBool("Phobos", "SelectedDisplay.Enable", false);
+	Phobos::Config::FPSCounter_Enable = CCINIClass::INI_RA2MD->ReadBool("Phobos", "FPSCounter.Enable", false);
+	Phobos::Config::MessageDisplayInCenter = CCINIClass::INI_RA2MD->ReadBool("Phobos", "MessageDisplayInCenter", false);
+	Phobos::Config::ShowBuildingStatistics = CCINIClass::INI_RA2MD->ReadBool("Phobos", "ShowBuildingStatistics", false);
+	Phobos::Config::DrawAdjacentBoundary = CCINIClass::INI_RA2MD->ReadBool("Phobos", "DrawAdjacentBoundary", false);
 	Phobos::Config::SaveGameOnScenarioStart = CCINIClass::INI_RA2MD->ReadBool("Phobos", "SaveGameOnScenarioStart", true);
 	Phobos::Config::ShowBriefing = CCINIClass::INI_RA2MD->ReadBool("Phobos", "ShowBriefing", true);
 	Phobos::Config::ShowPowerDelta = CCINIClass::INI_RA2MD->ReadBool("Phobos", "ShowPowerDelta", true);
@@ -160,6 +177,35 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 
 		Phobos::UI::CenterPauseMenuBackground =
 			ini_uimd.ReadBool(SIDEBAR_SECTION, "CenterPauseMenuBackground", Phobos::UI::CenterPauseMenuBackground);
+
+		Phobos::UI::SuperWeaponSidebar =
+			ini_uimd.ReadBool(SIDEBAR_SECTION, "SuperWeaponSidebar", Phobos::UI::SuperWeaponSidebar);
+
+		Phobos::UI::SuperWeaponSidebar_Interval =
+			ini_uimd.ReadInteger(SIDEBAR_SECTION, "SuperWeaponSidebar.Interval", Phobos::UI::SuperWeaponSidebar_Interval);
+
+		Phobos::UI::SuperWeaponSidebar_LeftOffset =
+			ini_uimd.ReadInteger(SIDEBAR_SECTION, "SuperWeaponSidebar.LeftOffset", Phobos::UI::SuperWeaponSidebar_LeftOffset);
+
+		Phobos::UI::SuperWeaponSidebar_LeftOffset = std::min(Phobos::UI::SuperWeaponSidebar_Interval, Phobos::UI::SuperWeaponSidebar_LeftOffset);
+
+		Phobos::UI::SuperWeaponSidebar_CameoHeight =
+			ini_uimd.ReadInteger(SIDEBAR_SECTION, "SuperWeaponSidebar.CameoHeight", Phobos::UI::SuperWeaponSidebar_CameoHeight);
+
+		Phobos::UI::SuperWeaponSidebar_CameoHeight = std::max(48, Phobos::UI::SuperWeaponSidebar_CameoHeight);
+
+		Phobos::UI::SuperWeaponSidebar_Max =
+			ini_uimd.ReadInteger(SIDEBAR_SECTION, "SuperWeaponSidebar.Max", Phobos::UI::SuperWeaponSidebar_Max);
+
+		const int screenHeight = GameOptionsClass::Instance->ScreenHeight;
+
+		if (Phobos::UI::SuperWeaponSidebar_Max > 0)
+			Phobos::UI::SuperWeaponSidebar_Max = std::min(Phobos::UI::SuperWeaponSidebar_Max, screenHeight / Phobos::UI::SuperWeaponSidebar_CameoHeight);
+		else
+			Phobos::UI::SuperWeaponSidebar_Max = (screenHeight - 40) / Phobos::UI::SuperWeaponSidebar_CameoHeight;
+
+		Phobos::UI::SuperWeaponSidebar_MaxColumns =
+			ini_uimd.ReadInteger(SIDEBAR_SECTION, "SuperWeaponSidebar.MaxColumns", Phobos::UI::SuperWeaponSidebar_MaxColumns);
 	}
 
 	// UISettings

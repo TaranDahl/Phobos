@@ -193,6 +193,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Crit_SuppressWhenIntercepted.Read(exINI, pSection, "Crit.SuppressWhenIntercepted");
 
 	this->MindControl_Anim.Read(exINI, pSection, "MindControl.Anim");
+	this->MindControl_ThreatDelay.Read(exINI, pSection, "MindControl.ThreatDelay");
 
 	// Shields
 	this->Shield_Penetrate.Read(exINI, pSection, "Shield.Penetrate");
@@ -218,7 +219,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Shield_SelfHealing_Rate_InMinutes.Read(exINI, pSection, "Shield.SelfHealing.Rate");
 	this->Shield_SelfHealing_Rate = (int)(this->Shield_SelfHealing_Rate_InMinutes * 900);
 	this->Shield_SelfHealing_RestartInCombat.Read(exINI, pSection, "Shield.SelfHealing.RestartInCombat");
-	this->Shield_SelfHealing_RestartInCombat.Read(exINI, pSection, "Shield.SelfHealing.RestartInCombatDelay");
+	this->Shield_SelfHealing_RestartInCombatDelay.Read(exINI, pSection, "Shield.SelfHealing.RestartInCombatDelay");
 	this->Shield_SelfHealing_RestartTimer.Read(exINI, pSection, "Shield.SelfHealing.RestartTimer");
 	this->Shield_AttachTypes.Read(exINI, pSection, "Shield.AttachTypes");
 	this->Shield_RemoveTypes.Read(exINI, pSection, "Shield.RemoveTypes");
@@ -254,12 +255,32 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->DetonateOnAllMapObjects_AffectTypes.Read(exINI, pSection, "DetonateOnAllMapObjects.AffectTypes");
 	this->DetonateOnAllMapObjects_IgnoreTypes.Read(exINI, pSection, "DetonateOnAllMapObjects.IgnoreTypes");
 
+	this->CombatAlert_Suppress.Read(exINI, pSection, "CombatAlert.Suppress");
+	this->AffectsOnFloor.Read(exINI, pSection, "AffectsOnFloor");
+	this->AffectsInAir.Read(exINI, pSection, "AffectsInAir");
+	this->AffectsUnderground.Read(exINI, pSection, "AffectsUnderground");
+	this->PlayAnimUnderground.Read(exINI, pSection, "PlayAnimUnderground");
+	this->PlayAnimAboveSurface.Read(exINI, pSection, "PlayAnimAboveSurface");
+	this->CellSpread_Cylinder.Read(exINI, pSection, "CellSpread.Cylinder");
+	this->LightChanging.Read(exINI, pSection, "LightChanging");
+	this->SetAmbientLight.Read(exINI, pSection, "SetAmbientLight");
+	this->SetAmbientRed.Read(exINI, pSection, "SetAmbientRed");
+	this->SetAmbientGreen.Read(exINI, pSection, "SetAmbientGreen");
+	this->SetAmbientBlue.Read(exINI, pSection, "SetAmbientBlue");
+	this->ReduceTiberium.Read(exINI, pSection, "ReduceTiberium");
+
 	this->Nonprovocative.Read(exINI, pSection, "Nonprovocative");
 
 	this->CombatLightDetailLevel.Read(exINI, pSection, "CombatLightDetailLevel");
 	this->CombatLightChance.Read(exINI, pSection, "CombatLightChance");
 	this->CLIsBlack.Read(exINI, pSection, "CLIsBlack");
 	this->Particle_AlphaImageIsLightFlash.Read(exINI, pSection, "Particle.AlphaImageIsLightFlash");
+
+	this->BuildingUndeploy.Read(exINI, pSection, "BuildingUndeploy");
+	this->BuildingUndeploy_Leave.Read(exINI, pSection, "BuildingUndeploy.Leave");
+	this->DamageOwnerMultiplier.Read(exINI, pSection, "DamageOwnerMultiplier");
+	this->DamageAlliesMultiplier.Read(exINI, pSection, "DamageAlliesMultiplier");
+	this->DamageEnemiesMultiplier.Read(exINI, pSection, "DamageEnemiesMultiplier");
 
 	this->SuppressRevengeWeapons.Read(exINI, pSection, "SuppressRevengeWeapons");
 	this->SuppressRevengeWeapons_Types.Read(exINI, pSection, "SuppressRevengeWeapons.Types");
@@ -300,6 +321,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->AffectsEnemies.Read(exINI, pSection, "AffectsEnemies");
 	this->AffectsOwner.Read(exINI, pSection, "AffectsOwner");
 	this->EffectsRequireVerses.Read(exINI, pSection, "EffectsRequireVerses");
+	this->Malicious.Read(exINI, pSection, "Malicious");
 
 	// List all Warheads here that respect CellSpread
 	// Used in WarheadTypeExt::ExtData::Detonate
@@ -313,6 +335,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 		|| this->Shield_RemoveTypes.size() > 0
 		|| this->Shield_RemoveAll
 		|| this->Convert_Pairs.size() > 0
+		|| this->BuildingUndeploy
 		|| this->InflictLocomotor
 		|| this->RemoveInflictedLocomotor
 		|| this->AttachEffects.AttachTypes.size() > 0
@@ -410,6 +433,7 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Crit_SuppressWhenIntercepted)
 
 		.Process(this->MindControl_Anim)
+		.Process(this->MindControl_ThreatDelay)
 
 		.Process(this->Shield_Penetrate)
 		.Process(this->Shield_Break)
@@ -471,7 +495,22 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->DetonateOnAllMapObjects_AffectTypes)
 		.Process(this->DetonateOnAllMapObjects_IgnoreTypes)
 
+		.Process(this->CombatAlert_Suppress)
+		.Process(this->AffectsOnFloor)
+		.Process(this->AffectsInAir)
+		.Process(this->AffectsUnderground)
+		.Process(this->PlayAnimUnderground)
+		.Process(this->PlayAnimAboveSurface)
+		.Process(this->CellSpread_Cylinder)
+		.Process(this->LightChanging)
+		.Process(this->SetAmbientLight)
+		.Process(this->SetAmbientRed)
+		.Process(this->SetAmbientGreen)
+		.Process(this->SetAmbientBlue)
+		.Process(this->ReduceTiberium)
+
 		.Process(this->Convert_Pairs)
+
 		.Process(this->AttachEffects)
 
 		.Process(this->SuppressRevengeWeapons)
@@ -481,6 +520,12 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 
 		.Process(this->InflictLocomotor)
 		.Process(this->RemoveInflictedLocomotor)
+
+		.Process(this->BuildingUndeploy)
+		.Process(this->BuildingUndeploy_Leave)
+		.Process(this->DamageOwnerMultiplier)
+		.Process(this->DamageAlliesMultiplier)
+		.Process(this->DamageEnemiesMultiplier)
 
 		.Process(this->Nonprovocative)
 
@@ -493,6 +538,7 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AffectsEnemies)
 		.Process(this->AffectsOwner)
 		.Process(this->EffectsRequireVerses)
+		.Process(this->Malicious)
 
 		.Process(this->WasDetonatedOnAllMapObjects)
 		.Process(this->RemainingAnimCreationInterval)

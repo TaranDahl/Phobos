@@ -68,6 +68,7 @@ public:
 		Valueable<bool> Crit_SuppressWhenIntercepted;
 
 		Nullable<AnimTypeClass*> MindControl_Anim;
+		Nullable<int> MindControl_ThreatDelay;
 
 		Valueable<bool> Shield_Penetrate;
 		Valueable<bool> Shield_Break;
@@ -138,12 +139,32 @@ public:
 		Valueable<bool> InflictLocomotor;
 		Valueable<bool> RemoveInflictedLocomotor;
 
+		Nullable<bool> CombatAlert_Suppress;
+		Valueable<bool> AffectsOnFloor;
+		Valueable<bool> AffectsInAir;
+		Valueable<bool> AffectsUnderground;
+		Valueable<bool> PlayAnimUnderground;
+		Valueable<bool> PlayAnimAboveSurface;
+		Valueable<bool> CellSpread_Cylinder;
+		Valueable<bool> LightChanging;
+		Valueable<int> SetAmbientLight;
+		Valueable<int> SetAmbientRed;
+		Valueable<int> SetAmbientGreen;
+		Valueable<int> SetAmbientBlue;
+		Valueable<bool> ReduceTiberium;
+
 		Valueable<bool> Nonprovocative;
 
 		Nullable<int> CombatLightDetailLevel;
 		Valueable<double> CombatLightChance;
 		Valueable<bool> CLIsBlack;
 		Nullable<bool> Particle_AlphaImageIsLightFlash;
+
+		Valueable<bool> BuildingUndeploy;
+		Valueable<bool> BuildingUndeploy_Leave;
+		Nullable<double> DamageOwnerMultiplier;
+		Nullable<double> DamageAlliesMultiplier;
+		Nullable<double> DamageEnemiesMultiplier;
 
 		Valueable<bool> SuppressRevengeWeapons;
 		ValueableVector<WeaponTypeClass*> SuppressRevengeWeapons_Types;
@@ -155,6 +176,7 @@ public:
 		Valueable<bool> AffectsEnemies;
 		Nullable<bool> AffectsOwner;
 		Valueable<bool> EffectsRequireVerses;
+		Valueable<bool> Malicious;
 
 		double Crit_RandomBuffer;
 		double Crit_CurrentChance;
@@ -220,6 +242,7 @@ public:
 			, Crit_SuppressWhenIntercepted { false }
 
 			, MindControl_Anim {}
+			, MindControl_ThreatDelay {}
 
 			, Shield_Penetrate { false }
 			, Shield_Break { false }
@@ -290,12 +313,32 @@ public:
 			, InflictLocomotor { false }
 			, RemoveInflictedLocomotor { false }
 
+			, CombatAlert_Suppress {}
+			, AffectsOnFloor { true }
+			, AffectsInAir { true }
+			, AffectsUnderground { false }
+			, PlayAnimUnderground { true }
+			, PlayAnimAboveSurface { false }
+			, CellSpread_Cylinder { false }
+			, LightChanging { false }
+			, SetAmbientLight { -1 }
+			, SetAmbientRed { -1 }
+			, SetAmbientGreen { -1 }
+			, SetAmbientBlue { -1 }
+			, ReduceTiberium { false }
+
 			, Nonprovocative { false }
 
 			, CombatLightDetailLevel {}
 			, CombatLightChance { 1.0 }
 		    , CLIsBlack { false }
 			, Particle_AlphaImageIsLightFlash {}
+
+			, BuildingUndeploy { false }
+			, BuildingUndeploy_Leave { false }
+			, DamageOwnerMultiplier {}
+			, DamageAlliesMultiplier {}
+			, DamageEnemiesMultiplier {}
 
 			, SuppressRevengeWeapons { false }
 			, SuppressRevengeWeapons_Types {}
@@ -305,6 +348,7 @@ public:
 			, AffectsEnemies { true }
 			, AffectsOwner {}
 			, EffectsRequireVerses { true }
+			, Malicious { true }
 
 			, Crit_RandomBuffer { 0.0 }
 			, Crit_CurrentChance { 0.0 }
@@ -349,6 +393,7 @@ public:
 		void ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* Owner, TechnoExt::ExtData* pTargetExt);
 		void ApplyShieldModifiers(TechnoClass* pTarget, TechnoExt::ExtData* pTargetExt);
 		void ApplyAttachEffects(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker);
+		void ApplyBuildingUndeploy(TechnoClass* pTarget);
 		double GetCritChance(TechnoClass* pFirer) const;
 	};
 

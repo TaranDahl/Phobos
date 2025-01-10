@@ -133,6 +133,7 @@ This page lists all the individual contributions to the project by their author.
   - Shared ammo logic
   - Customizable FLH when infantry is prone or deployed
   - Initial strength for cloned infantry
+  - Grant new superweapons in superweapons
   - Map Events 604 & 605 for checking if a specific Techno enters in a cell
 - **Starkku**:
   - Misc. minor bugfixes & improvements
@@ -241,6 +242,8 @@ This page lists all the individual contributions to the project by their author.
   - Customizable ChronoSphere teleport delays for units
   - Allowed and disallowed types for `FactoryPlant`
   - Forbidding parallel AI queues for specific TechnoTypes
+  - Vehicles keeping target on move command
+  - Reimplemented `Airburst` & `Splits` logic with more customization options
   - Nonprovocative Warheads
   - Customizing effect of level lighting on air units
   - Reimplemented `Airburst` & `Splits` logic with more customization options
@@ -346,6 +349,7 @@ This page lists all the individual contributions to the project by their author.
    - Disguised units not using the correct palette if target has custom palette bugfix
    - Tunnel/Walk/Mech locomotor being stuck when moving too fast bugfix
    - Assign Super Weapon cameo to any sidebar tab
+   - Exclusive SuperWeapon Sidebar
 - **Apollo** - Translucent SHP drawing patches
 - **ststl**
    - Customizable ShowTimer priority of superweapons
@@ -371,20 +375,61 @@ This page lists all the individual contributions to the project by their author.
   - Re-enable the Veinhole Monster and Weeds from TS
   - Recreate the weed-charging of SWs like the TS Chemical Missile
   - Allow to change the speed of gas particles
+- **NaotoYuuki**
+  - Vertical & meteor trajectory projectile prototypes
 - **CrimRecya**
   - Fix `LimboKill` not working reliably
+  - Exclusive SuperWeapon Sidebar
   - Allow using waypoints, area guard and attack move with aircraft
   - Fix `Stop` command not working so well in some cases
+  - Technos will maintain a suitable distance after firing
+  - Several new Infotypes, no display in specific status and a new single frame display method
+  - Projectile subject to ground check before firing
+  - Technos recount current burst index when change the firing weapon
+  - Enhanced Straight trajectory
+  - New Disperse trajectory
+  - New Engrave trajectory
+  - New Parabola trajectory
+  - New Tracing trajectory
+  - Display factories, superweapons, iron curtain and temporal progress on specific technos
+  - Damage multiplier for different houses
+  - Units Rotate Turret When in Idle Action
+  - Jumpjet climbing logic enhancement
+  - Building placing and deploying logic enhancement
+  - Unit base normal and new placing grids
+  - Grey cameo preview and cameo overlays
+  - Units will not always stuck in the factory
+  - Optimize aircrafts stop action and allow they using area guard and attack moving
+  - Exclusive Sidebar for Superweapons
+  - Observer sidebar in skirmish game mode
+  - Draw visual effects for airburst weapons
+  - Use 2D distance instead of 3D to check whether in air team members have arrived destination
+  - Delay automatic attack on the controlled unit
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
+  - Enhance bombard trajectory with vertical & meteor trajectory
 - **handama** - AI script action to jump back to previous script
 - **TaranDahl (航味麻酱)**
   - Skirmish AI "sell all buildings and set all technos to hunt" behavior dehardcode
   - Skirmish AI "gather when MCV deploy" behavior dehardcode
   - Global value of `RepairBaseNodes`
+  - Raise alert when technos are taking damage
+  - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller
+  - `Spawner.RecycleRange`
+  - `Spawner.RecycleAnim`
+  - Fixed the bug that spawned can not return to buildings with foundation bigger than 1x1
+  - `CellSpread.Cylinder`
+  - `AffectsInAir` and `AffectsOnFloor`
+  - Infantry fire while moving
+  - Parasite returning bug fix
+  - Toggle waypoint for building and aircraft
+  - Weapon range finding in cylinder
+  - Units are now unable to kick out from a factory that is in construction process
 - **tyuah8** - Drive/Jumpjet/Ship/Teleport locomotor did not power on when it is un-piggybacked bugfix
-- **Aephiex** - initial fix for Ares academy not working on the initial payloads of vehicles built from a war factory
+- **Aephiex**
+  - initial fix for Ares academy not working on the initial payloads of vehicles built from a war factory
+  - Aggressive stance toggle command (auto target unarmed enemy buildings)
 - **Ares developers**
   - YRpp and Syringe which are used, save/load, project foundation and generally useful code from Ares
   - unfinished RadTypes code

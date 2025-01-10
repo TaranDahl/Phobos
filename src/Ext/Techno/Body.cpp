@@ -7,6 +7,7 @@
 #include <Ext/Anim/Body.h>
 #include <Ext/Scenario/Body.h>
 #include <Ext/WeaponType/Body.h>
+#include <Ext/House/Body.h>
 
 #include <Utilities/AresFunctions.h>
 
@@ -21,6 +22,18 @@ TechnoExt::ExtData::~ExtData()
 	if (pTypeExt->AutoDeath_Behavior.isset())
 	{
 		auto& vec = ScenarioExt::Global()->AutoDeathObjects;
+		vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
+	}
+
+	if (RulesExt::Global()->ExpandBuildingPlace && pThis->WhatAmI() == AbstractType::Unit && pType->DeploysInto)
+	{
+		auto& vec = HouseExt::ExtMap.Find(pThis->Owner)->OwnedDeployingUnits;
+		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
+	}
+
+	if (pTypeExt->UniqueTechno)
+	{
+		auto& vec = ScenarioExt::Global()->OwnedHeros;
 		vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
 	}
 
@@ -496,13 +509,40 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->LastRearmWasFullDelay)
 		.Process(this->CanCloakDuringRearm)
 		.Process(this->WHAnimRemainingCreationInterval)
+		.Process(this->UnitIdleIsSelected)
+		.Process(this->UnitIdleActionTimer)
+		.Process(this->UnitIdleActionGapTimer)
+		.Process(this->UnitAutoDeployTimer)
+		.Process(this->LastWeaponType)
+		.Process(this->LastWeaponFLH)
+		.Process(this->LastHurtFrame)
+		.Process(this->BeControlledThreatFrame)
+		.Process(this->LastTargetID)
+		.Process(this->AccumulatedGattlingValue)
+		.Process(this->ShouldUpdateGattlingValue)
+		.Process(this->IsScattering)
+		.Process(this->MyTargetingFrame)
+		.Process(this->AttackMoveFollowerTempCount)
+		.Process(this->AutoTargetedWallCell)
+		.Process(this->HasCachedClick)
+		.Process(this->CachedMission)
+		.Process(this->CachedCell)
+		.Process(this->CachedTarget)
 		.Process(this->FiringObstacleCell)
+		.Process(this->KeepTargetOnMove)
 		.Process(this->IsDetachingForCloak)
 		.Process(this->OriginalPassengerOwner)
 		.Process(this->HasRemainingWarpInDelay)
 		.Process(this->LastWarpInDelay)
 		.Process(this->IsBeingChronoSphered)
+		.Process(this->AggressiveStance)
 		;
+}
+
+void TechnoExt::ExtData::InvalidatePointer(void* ptr, bool bRemoved)
+{
+	if (this->HasCachedClick && this->CachedTarget == ptr)
+		this->ClearCachedClick();
 }
 
 void TechnoExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
@@ -515,6 +555,28 @@ void TechnoExt::ExtData::SaveToStream(PhobosStreamWriter& Stm)
 {
 	Extension<TechnoClass>::SaveToStream(Stm);
 	this->Serialize(Stm);
+}
+
+void TechnoExt::ExtData::InitAggressiveStance()
+{
+	this->AggressiveStance = this->TypeExtData->AggressiveStance.Get();
+}
+
+bool TechnoExt::ExtData::GetAggressiveStance() const
+{
+	// if this is a passenger then obey the configuration of the transport
+	if (auto pTransport = this->OwnerObject()->Transporter)
+		return TechnoExt::ExtMap.Find(pTransport)->GetAggressiveStance();
+
+	return this->AggressiveStance;
+}
+
+void TechnoExt::ExtData::ToggleAggressiveStance()
+{
+	this->AggressiveStance = !this->AggressiveStance;
+
+	if (!this->AggressiveStance)
+		this->OwnerObject()->QueueMission(Mission::Guard, false);
 }
 
 bool TechnoExt::LoadGlobals(PhobosStreamReader& Stm)

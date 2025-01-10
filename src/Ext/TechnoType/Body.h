@@ -132,6 +132,11 @@ public:
 		Valueable<bool> AutoFire;
 		Valueable<bool> AutoFire_TargetSelf;
 
+		Valueable<bool> AggressiveStance;
+		Nullable<bool> AggressiveStance_Togglable;
+		ValueableIdx<VocClass> VoiceEnterAggressiveStance;
+		ValueableIdx<VocClass> VoiceExitAggressiveStance;
+
 		Valueable<bool> NoSecondaryWeaponFallback;
 		Valueable<bool> NoSecondaryWeaponFallback_AllowAA;
 
@@ -225,6 +230,101 @@ public:
 		ValueableVector<int> BuildLimitGroup_ExtraLimit_Nums;
 		ValueableVector<int> BuildLimitGroup_ExtraLimit_MaxCount;
 		Valueable<int> BuildLimitGroup_ExtraLimit_MaxNum;
+
+		Nullable<bool> RecountBurst;
+		Nullable<bool> Turret_IdleRotate;
+		Nullable<bool> Turret_PointToMouse;
+		Nullable<int> TurretROT;
+		Valueable<double> Turret_Restriction;
+		Valueable<double> Turret_ExtraAngle;
+		Valueable<bool> Turret_BodyOrientation;
+		Valueable<double> Turret_BodyOrientationAngle;
+		Valueable<bool> Turret_BodyOrientationSymmetric;
+		Valueable<bool> CanBeBuiltOn;
+		Valueable<bool> UnitBaseNormal;
+		Valueable<bool> UnitBaseForAllyBuilding;
+		Nullable<bool> Cameo_AlwaysExist;
+		ValueableVector<TechnoTypeClass*> Cameo_AuxTechnos;
+		ValueableVector<TechnoTypeClass*> Cameo_NegTechnos;
+		bool CameoCheckMutex; // Not read from ini
+		Valueable<CSFText> UIDescription_Unbuildable;
+		PhobosPCXFile CameoPCX;
+		PhobosPCXFile GreyCameoPCX;
+		Valueable<DisplayInfoType> SelectedInfo_UpperType;
+		Valueable<ColorStruct> SelectedInfo_UpperColor;
+		Valueable<DisplayInfoType> SelectedInfo_BelowType;
+		Valueable<ColorStruct> SelectedInfo_BelowColor;
+		Valueable<TechnoTypeClass*> FakeOf;
+		CustomPalette CameoPal;
+		Nullable<bool> NoRearmInEMPState;
+		Nullable<bool> NoRearmInTemporal;
+		Valueable<int> RateDown_Ammo;
+		Valueable<int> RateDown_Delay;
+		Valueable<int> RateDown_Cover;
+		Valueable<bool> RateDown_Reset;
+		Valueable<bool> UniqueTechno;
+		Nullable<bool> NoQueueUpToEnter;
+		Nullable<bool> NoQueueUpToUnload;
+
+		Nullable<bool> CombatAlert;
+		Nullable<bool> CombatAlert_NotBuilding;
+		Nullable<bool> CombatAlert_UseFeedbackVoice;
+		Nullable<bool> CombatAlert_UseAttackVoice;
+		Nullable<bool> CombatAlert_UseEVA;
+		NullableIdx<VoxClass> CombatAlert_EVA;
+		Valueable<int> Spawner_RecycleRange;
+		Valueable<AnimTypeClass*> Spawner_RecycleAnim;
+		Nullable<int> AINormalTargetingDelay;
+		Nullable<int> PlayerNormalTargetingDelay;
+		Nullable<int> AIGuardAreaTargetingDelay;
+		Nullable<int> PlayerGuardAreaTargetingDelay;
+		Valueable<bool> KeepWarping;
+		Nullable<int> KeepWarping_Distance;
+		Valueable<bool> FiringByPassMovingCheck;
+		Valueable<bool> SkipCrushSlowdown;
+		Nullable<bool> PlayerGuardModePursuit;
+		Nullable<Leptons> PlayerGuardModeStray;
+		Nullable<double> PlayerGuardModeGuardRangeMultiplier;
+		Nullable<Leptons> PlayerGuardModeGuardRangeAddend;
+		Nullable<Leptons> PlayerGuardStationaryStray;
+		Nullable<bool> AIGuardModePursuit;
+		Nullable<Leptons> AIGuardModeStray;
+		Nullable<double> AIGuardModeGuardRangeMultiplier;
+		Nullable<Leptons> AIGuardModeGuardRangeAddend;
+		Nullable<Leptons> AIGuardStationaryStray;
+		Valueable<bool> Engineer_CanAutoFire;
+		Valueable<bool> BunkerableAnyWay;
+		Valueable<bool> Harvester_CanGuardArea;
+		Valueable<int> DigStartROT;
+		Valueable<int> DigInSpeed;
+		Valueable<int> DigOutSpeed;
+		Valueable<int> DigEndROT;
+		Valueable<int> FlightClimb;
+		Valueable<int> FlightCrash;
+		Nullable<bool> ExplodeOnDestroy;
+		Nullable<bool> FireDeathWeaponOnCrushed;
+		Nullable<CoordStruct> ExitCoord;
+		Valueable<bool> MissileSpawnUseOtherFLHs;
+		Valueable<bool> HarvesterQuickUnloader;
+		Nullable<bool> DistributeTargetingFrame;
+		Valueable<bool> AttackMove_Follow;
+		Valueable<bool> AttackMove_Follow_IncludeAir;
+		Nullable<bool> AttackMove_StopWhenTargetAcquired;
+		Valueable<bool> AttackMove_PursuitTarget;
+		Valueable<TechnoTypeClass*> ThisIsAJumpjet;
+		Valueable<bool> ImAJumpjetFromAirport;
+		Valueable<bool> IgnoreRallyPoint;
+		Nullable<bool> Sinkable;
+		Valueable<int> SinkSpeed;
+		Valueable<int> JumpjetSpeedType;
+
+		Nullable<bool> KeepAlive;
+
+		Valueable<double> FallingDownDamage;
+		Nullable<double> FallingDownDamage_Water;
+
+		Valueable<bool> KeepTargetOnMove;
+		Valueable<Leptons> KeepTargetOnMove_ExtraDistance;
 
 		Nullable<AnimTypeClass*> Wake;
 		Nullable<AnimTypeClass*> Wake_Grapple;
@@ -322,6 +422,12 @@ public:
 
 			, AutoFire { false }
 			, AutoFire_TargetSelf { false }
+
+			, AggressiveStance { false }
+			, AggressiveStance_Togglable {}
+			, VoiceEnterAggressiveStance { -1 }
+			, VoiceExitAggressiveStance { -1 }
+
 			, NoSecondaryWeaponFallback { false }
 			, NoSecondaryWeaponFallback_AllowAA { false }
 			, NoAmmoWeapon { -1 }
@@ -449,6 +555,101 @@ public:
 			, BuildLimitGroup_ExtraLimit_MaxCount {}
 			, BuildLimitGroup_ExtraLimit_MaxNum { 0 }
 
+			, RecountBurst {}
+			, Turret_IdleRotate {}
+			, Turret_PointToMouse {}
+			, TurretROT {}
+			, Turret_Restriction { 180.0 }
+			, Turret_ExtraAngle { 0.0 }
+			, Turret_BodyOrientation { false }
+			, Turret_BodyOrientationAngle { 0.0 }
+			, Turret_BodyOrientationSymmetric { true }
+			, CanBeBuiltOn { false }
+			, UnitBaseNormal { false }
+			, UnitBaseForAllyBuilding { false }
+			, Cameo_AlwaysExist {}
+			, Cameo_AuxTechnos {}
+			, Cameo_NegTechnos {}
+			, CameoCheckMutex { false }
+			, UIDescription_Unbuildable {}
+			, CameoPCX {}
+			, GreyCameoPCX {}
+			, SelectedInfo_UpperType { DisplayInfoType::Shield }
+			, SelectedInfo_UpperColor { { 153, 153, 255 } }
+			, SelectedInfo_BelowType { DisplayInfoType::Health }
+			, SelectedInfo_BelowColor { { 0, 0, 0 } }
+			, FakeOf {}
+			, CameoPal {}
+			, NoRearmInEMPState {}
+			, NoRearmInTemporal {}
+			, RateDown_Ammo { -2 }
+			, RateDown_Delay { 0 }
+			, RateDown_Cover { 0 }
+			, RateDown_Reset { false }
+			, UniqueTechno { false }
+			, NoQueueUpToEnter {}
+			, NoQueueUpToUnload {}
+
+			, CombatAlert {}
+			, CombatAlert_NotBuilding {}
+			, CombatAlert_UseFeedbackVoice {}
+			, CombatAlert_UseAttackVoice {}
+			, CombatAlert_UseEVA {}
+			, CombatAlert_EVA {}
+			, Spawner_RecycleRange { -1 }
+			, Spawner_RecycleAnim { nullptr }
+			, AINormalTargetingDelay {}
+			, PlayerNormalTargetingDelay {}
+			, AIGuardAreaTargetingDelay {}
+			, PlayerGuardAreaTargetingDelay {}
+			, KeepWarping { false }
+			, KeepWarping_Distance {}
+			, FiringByPassMovingCheck { false }
+			, SkipCrushSlowdown { false }
+			, PlayerGuardModePursuit {}
+			, PlayerGuardModeStray {}
+			, PlayerGuardModeGuardRangeMultiplier {}
+			, PlayerGuardModeGuardRangeAddend {}
+			, PlayerGuardStationaryStray {}
+			, AIGuardModePursuit {}
+			, AIGuardModeStray {}
+			, AIGuardModeGuardRangeMultiplier {}
+			, AIGuardModeGuardRangeAddend {}
+			, AIGuardStationaryStray {}
+			, Engineer_CanAutoFire { false }
+			, BunkerableAnyWay { false }
+			, Harvester_CanGuardArea { false }
+			, DigStartROT { -1 }
+			, DigInSpeed { -1 }
+			, DigOutSpeed { -1 }
+			, DigEndROT { -1 }
+			, FlightClimb { -1 }
+			, FlightCrash { -1 }
+			, ExplodeOnDestroy {}
+			, FireDeathWeaponOnCrushed {}
+			, ExitCoord {}
+			, MissileSpawnUseOtherFLHs { false }
+			, HarvesterQuickUnloader { false }
+			, DistributeTargetingFrame {}
+			, AttackMove_Follow { false }
+			, AttackMove_Follow_IncludeAir { false }
+			, AttackMove_StopWhenTargetAcquired {}
+			, AttackMove_PursuitTarget { false }
+			, ThisIsAJumpjet { nullptr }
+			, ImAJumpjetFromAirport { false }
+			, IgnoreRallyPoint { false }
+			, Sinkable { }
+			, SinkSpeed { 5 }
+			, JumpjetSpeedType { 3 }
+
+			, KeepAlive {}
+
+			, FallingDownDamage { 1.0 }
+			, FallingDownDamage_Water {}
+
+			, KeepTargetOnMove { false }
+			, KeepTargetOnMove_ExtraDistance { Leptons(0) }
+
 			, Wake { }
 			, Wake_Grapple { }
 			, Wake_Sinking { }
@@ -464,6 +665,12 @@ public:
 		virtual void SaveToStream(PhobosStreamWriter& Stm) override;
 
 		void ApplyTurretOffset(Matrix3D* mtx, double factor = 1.0);
+		DirStruct GetTurretDesiredDir(DirStruct defaultDir);
+		void SetTurretLimitedDir(FootClass* pThis, DirStruct desiredDir);
+		short GetTurretLimitedRaw(short currentDirectionRaw);
+		DirStruct GetBodyDesiredDir(DirStruct currentDir, DirStruct defaultDir);
+
+		bool CanToggleAggressiveStance(TechnoClass* pTechno);
 
 		// Ares 0.A
 		const char* GetSelectionGroupID() const;
@@ -484,6 +691,8 @@ public:
 	};
 
 	static ExtContainer ExtMap;
+
+	static constexpr double AngleToRaw = (65536.0 / 360);
 
 	static void ApplyTurretOffset(TechnoTypeClass* pType, Matrix3D* mtx, double factor = 1.0);
 	static TechnoTypeClass* GetTechnoType(ObjectTypeClass* pType);

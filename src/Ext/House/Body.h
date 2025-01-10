@@ -24,6 +24,13 @@ public:
 		std::map<BuildingTypeExt::ExtData*, int> PowerPlantEnhancers;
 		std::vector<BuildingClass*> OwnedLimboDeliveredBuildings;
 
+		std::vector<UnitClass*> OwnedDeployingUnits;
+		BuildingTypeClass* CurrentBuildingType;
+		CellStruct CurrentBuildingTopLeft;
+		CDTimerClass CurrentBuildingTimer;
+		int CurrentBuildingTimes;
+		int LastRefineryBuildFrame;
+
 		CounterClass LimboAircraft;  // Currently owned aircraft in limbo
 		CounterClass LimboBuildings; // Currently owned buildings in limbo
 		CounterClass LimboInfantry;  // Currently owned infantry in limbo
@@ -35,6 +42,7 @@ public:
 		BuildingClass* Factory_NavyType;
 		BuildingClass* Factory_AircraftType;
 
+		CDTimerClass CombatAlertTimer;
 		CDTimerClass AISuperWeaponDelayTimer;
 		CDTimerClass AIFireSaleDelayTimer;
 
@@ -67,6 +75,12 @@ public:
 		ExtData(HouseClass* OwnerObject) : Extension<HouseClass>(OwnerObject)
 			, PowerPlantEnhancers {}
 			, OwnedLimboDeliveredBuildings {}
+			, OwnedDeployingUnits {}
+			, CurrentBuildingType { nullptr }
+			, CurrentBuildingTopLeft {}
+			, CurrentBuildingTimer {}
+			, CurrentBuildingTimes { 0 }
+			, LastRefineryBuildFrame { 0 }
 			, LimboAircraft {}
 			, LimboBuildings {}
 			, LimboInfantry {}
@@ -76,6 +90,7 @@ public:
 			, Factory_VehicleType { nullptr }
 			, Factory_NavyType { nullptr }
 			, Factory_AircraftType { nullptr }
+			, CombatAlertTimer {}
 			, AISuperWeaponDelayTimer {}
 			, RepairBaseNodes { }
 			, RestrictedFactoryPlants {}

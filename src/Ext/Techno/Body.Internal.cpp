@@ -1,7 +1,7 @@
 #include "Body.h"
 
 #include <AirstrikeClass.h>
-
+#include <SpawnManagerClass.h>
 #include <Utilities/EnumFunctions.h>
 
 // Unsorted methods
@@ -142,6 +142,27 @@ CoordStruct TechnoExt::GetSimpleFLH(InfantryClass* pThis, int weaponIndex, bool&
 	}
 
 	return FLH;
+}
+
+void TechnoExt::ExtData::InitializeDisplayInfo()
+{
+	const auto pThis = this->OwnerObject();
+	const auto pType = pThis->GetTechnoType();
+	const auto pPrimary = pThis->GetWeapon(0);
+	const auto pSecondary = pThis->GetWeapon(1);
+
+	if (pPrimary && pPrimary->WeaponType && pType->LandTargeting != LandTargetingType::Land_Not_OK)
+		pThis->ChargeTurretDelay = pPrimary->WeaponType->ROF;
+	else if (pSecondary && pSecondary->WeaponType)
+		pThis->ChargeTurretDelay = pSecondary->WeaponType->ROF;
+
+	if (const auto pTypeExt = this->TypeExtData)
+	{
+		const auto pDelType = pTypeExt->PassengerDeletionType.get();
+
+		if (pDelType && !pThis->Passengers.GetFirstPassenger())
+			this->PassengerDeletionTimer.TimeLeft = pDelType->Rate;
+	}
 }
 
 void TechnoExt::ExtData::InitializeAttachEffects()

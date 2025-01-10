@@ -1,8 +1,9 @@
-/*
 #include "Body.h"
 
 #include <Helpers/Macro.h>
 #include <EventClass.h>
+#include <HouseClass.h>
+#include "../Techno/Body.h"
 
 bool EventExt::AddEvent()
 {
@@ -13,18 +14,34 @@ void EventExt::RespondEvent()
 {
 	switch (this->Type)
 	{
-	case EventTypeExt::Sample:
-		// Place the handler here
+	case EventTypeExt::ToggleAggressiveStance:
+		RespondToToggleAggressiveStance();
 		break;
 	}
+}
+
+void EventExt::RaiseToggleAggressiveStance(TechnoClass* pTechno)
+{
+	EventExt eventExt {};
+	eventExt.Type = EventTypeExt::ToggleAggressiveStance;
+	eventExt.HouseIndex = static_cast<char>(pTechno->Owner->ArrayIndex);
+	eventExt.Frame = Unsorted::CurrentFrame;
+	eventExt.ToggleAggressiveStance.Who = TargetClass(pTechno);
+	eventExt.AddEvent();
+}
+
+void EventExt::RespondToToggleAggressiveStance()
+{
+	if (const auto pTechnoExt = TechnoExt::ExtMap.Find(this->ToggleAggressiveStance.Who.As_Techno()))
+		pTechnoExt->ToggleAggressiveStance();
 }
 
 size_t EventExt::GetDataSize(EventTypeExt type)
 {
 	switch (type)
 	{
-	case EventTypeExt::Sample:
-		return sizeof(EventExt::Sample);
+	case EventTypeExt::ToggleAggressiveStance:
+		return sizeof(EventExt::ToggleAggressiveStance);
 	}
 
 	return 0;
@@ -98,4 +115,3 @@ DEFINE_HOOK(0x64C30E, sub_64BDD0_GetEventSize2, 0x6)
 
 	return 0;
 }
-*/
