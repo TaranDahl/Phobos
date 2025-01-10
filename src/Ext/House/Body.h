@@ -62,6 +62,8 @@ public:
 		};
 		std::vector<SWExt> SuperExts;
 
+		CDTimerClass SpyEffect_RadarJamTimer;
+
 		ExtData(HouseClass* OwnerObject) : Extension<HouseClass>(OwnerObject)
 			, PowerPlantEnhancers {}
 			, OwnedLimboDeliveredBuildings {}
@@ -87,6 +89,7 @@ public:
 			, AIFireSaleDelayTimer {}
 			, SuspendedEMPulseSWs {}
 			, SuperExts(SuperWeaponTypeClass::Array->Count)
+			, SpyEffect_RadarJamTimer {}
 		{ }
 
 		bool OwnsLimboDeliveredBuilding(BuildingClass* pBuilding);

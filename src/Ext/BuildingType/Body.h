@@ -58,6 +58,7 @@ public:
 		Valueable<bool> SpyEffect_Custom;
 		ValueableIdx<SuperWeaponTypeClass> SpyEffect_VictimSuperWeapon;
 		ValueableIdx<SuperWeaponTypeClass> SpyEffect_InfiltratorSuperWeapon;
+		Valueable<int> SpyEffect_RadarJamDuration;
 
 		Nullable<bool> ConsideredVehicle;
 		Valueable<bool> ZShapePointMove_OnBuildup;
@@ -112,6 +113,7 @@ public:
 			, SpyEffect_Custom { false }
 			, SpyEffect_VictimSuperWeapon {}
 			, SpyEffect_InfiltratorSuperWeapon {}
+			, SpyEffect_RadarJamDuration { 0 }
 			, ConsideredVehicle {}
 			, ZShapePointMove_OnBuildup { false }
 			, SellBuildupLength { 23 }
