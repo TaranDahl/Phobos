@@ -139,12 +139,12 @@ static inline bool CanEnhancedScatterContent(CellClass* pCell, TechnoClass* pCal
 
 static void __fastcall CallEnhancedScatterContent(CellClass* pCell, TechnoClass* pCaller, const CoordStruct& coords, bool alt)
 {
+	pCell->ScatterContent(CoordStruct::Empty, true, true, alt);
+
 	if (const auto pFoot = abstract_cast<FootClass*>(pCaller))
 	{
 		if (RulesExt::Global()->ExtendedScatterAction)
 		{
-			pCell->ScatterContent(coords, true, true, alt);
-
 			if (pFoot->CurrentMapCoords != CellStruct::Empty)
 			{
 				pCell = MapClass::Instance->GetCellAt(pFoot->CurrentMapCoords);
@@ -165,15 +165,9 @@ static void __fastcall CallEnhancedScatterContent(CellClass* pCell, TechnoClass*
 				}
 			}
 		}
-		else
-		{
-			pCell->ScatterContent(CoordStruct::Empty, true, true, alt);
-		}
 	}
-	else
+	else // Building
 	{
-		pCell->ScatterContent(CoordStruct::Empty, true, true, alt);
-
 		if (RulesExt::Global()->ExtendedScatterAction)
 		{
 			for (int i = 0; i < 8; ++i)
