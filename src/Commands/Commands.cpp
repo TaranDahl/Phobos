@@ -15,6 +15,7 @@
 #include "FPSNewCounter.h"
 #include "DistributionMode.h"
 #include "ShowCurrentInfo.h"
+#include "ManualReloadAmmo.h"
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
@@ -32,6 +33,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<FPSNewCounterCommandClass>();
 	MakeCommand<DistributionMode1CommandClass>();
 	MakeCommand<DistributionMode2CommandClass>();
+	MakeCommand<ManualReloadAmmoCommandClass>();
 	MakeCommand<ToggleSWSidebar>();
 
 	SWSidebarClass::Commands[0] = MakeCommand<FireTacticalSWCommandClass<0>>();

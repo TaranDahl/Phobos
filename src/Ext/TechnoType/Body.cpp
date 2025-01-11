@@ -594,6 +594,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->HarvesterQuickUnloader.Read(exINI, pSection, "HarvesterQuickUnloader");
 	this->NoQueueUpToEnter.Read(exINI, pSection, "NoQueueUpToEnter");
 	this->NoQueueUpToUnload.Read(exINI, pSection, "NoQueueUpToUnload");
+	this->CanManualReload.Read(exINI, pSection, "CanManualReload");
 
 	this->Wake.Read(exINI, pSection, "Wake");
 	this->Wake_Grapple.Read(exINI, pSection, "Wake.Grapple");
@@ -1005,6 +1006,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->HarvesterQuickUnloader)
 		.Process(this->NoQueueUpToEnter)
 		.Process(this->NoQueueUpToUnload)
+		.Process(this->CanManualReload)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)
