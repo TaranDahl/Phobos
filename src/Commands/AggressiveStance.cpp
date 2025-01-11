@@ -1,6 +1,6 @@
 #include "AggressiveStance.h"
+
 #include "Ext/Techno/Body.h"
-#include <EventClass.h>
 #include <Ext/Event/Body.h>
 
 const char* AggressiveStanceClass::GetName() const
