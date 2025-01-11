@@ -37,14 +37,14 @@ bool TechnoTypeExt::ExtData::CanToggleAggressiveStance(TechnoClass* pTechno)
 	if (!this->AggressiveStance_Togglable.isset())
 	{
 		// Only techno that are armed and open-topped can be aggressive stance.
-		if (!(pTechno->IsArmed() || pTechno->GetTechnoType()->OpenTopped))
+		if (!(pTechno->IsArmed() || this->OwnerObject()->OpenTopped))
 		{
 			this->AggressiveStance_Togglable = false;
 			return false;
 		}
 
 		// Engineers and Agents are default to not allow aggressive stance.
-		if (auto pInfantryTypeClass = abstract_cast<InfantryTypeClass*>(pTechno->GetTechnoType()))
+		if (auto pInfantryTypeClass = abstract_cast<InfantryTypeClass*>(this->OwnerObject()))
 		{
 			if (pInfantryTypeClass->Engineer || pInfantryTypeClass->Agent)
 			{

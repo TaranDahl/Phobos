@@ -32,8 +32,17 @@ void EventExt::RaiseToggleAggressiveStance(TechnoClass* pTechno)
 
 void EventExt::RespondToToggleAggressiveStance()
 {
-	if (const auto pTechnoExt = TechnoExt::ExtMap.Find(this->ToggleAggressiveStance.Who.As_Techno()))
-		pTechnoExt->ToggleAggressiveStance();
+	if (const auto pTechno = this->ToggleAggressiveStance.Who.As_Techno())
+	{
+		if (pTechno->IsAlive && !pTechno->Berzerk && pTechno->Owner->ArrayIndex == this->HouseIndex)
+		{
+			if (const auto pTechnoExt = TechnoExt::ExtMap.Find(pTechno))
+			{
+				if (pTechnoExt->TypeExtData->CanToggleAggressiveStance(pTechno))
+					pTechnoExt->ToggleAggressiveStance();
+			}
+		}
+	}
 }
 
 size_t EventExt::GetDataSize(EventTypeExt type)
