@@ -626,6 +626,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->UniqueTechno.Read(exINI, pSection, "UniqueTechno");
 	this->NoQueueUpToEnter.Read(exINI, pSection, "NoQueueUpToEnter");
 	this->NoQueueUpToUnload.Read(exINI, pSection, "NoQueueUpToUnload");
+	this->CanManualReload.Read(exINI, pSection, "CanManualReload");
 
 	this->CombatAlert.Read(exINI, pSection, "CombatAlert");
 	this->CombatAlert_NotBuilding.Read(exINI, pSection, "CombatAlert.NotBuilding");
@@ -1103,6 +1104,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->UniqueTechno)
 		.Process(this->NoQueueUpToEnter)
 		.Process(this->NoQueueUpToUnload)
+		.Process(this->CanManualReload)
 
 		.Process(this->CombatAlert)
 		.Process(this->CombatAlert_NotBuilding)

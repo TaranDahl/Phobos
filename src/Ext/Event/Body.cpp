@@ -3,7 +3,8 @@
 #include <Helpers/Macro.h>
 #include <EventClass.h>
 #include <HouseClass.h>
-#include "../Techno/Body.h"
+
+#include "Ext/Techno/Body.h"
 
 bool EventExt::AddEvent()
 {
@@ -15,7 +16,9 @@ void EventExt::RespondEvent()
 	switch (this->Type)
 	{
 	case EventTypeExt::ToggleAggressiveStance:
-		RespondToToggleAggressiveStance();
+		this->RespondToToggleAggressiveStance();
+	case EventTypeExt::ManualReload:
+		this->RespondToManualReloadEvent();
 		break;
 	}
 }
@@ -45,12 +48,41 @@ void EventExt::RespondToToggleAggressiveStance()
 	}
 }
 
+void EventExt::RaiseManualReloadEvent(TechnoClass* pTechno)
+{
+	EventExt eventExt {};
+	eventExt.Type = EventTypeExt::ManualReload;
+	eventExt.HouseIndex = static_cast<char>(pTechno->Owner->ArrayIndex);
+	eventExt.Frame = Unsorted::CurrentFrame;
+	eventExt.ManualReloadEvent.Who = TargetClass(pTechno);
+	eventExt.AddEvent();
+}
+
+void EventExt::RespondToManualReloadEvent()
+{
+	if (const auto pTechno = this->ManualReloadEvent.Who.As_Techno())
+	{
+		if (pTechno->Ammo > 0 && pTechno->IsAlive && !pTechno->Berzerk && pTechno->WhatAmI() != AbstractType::Aircraft && pTechno->Owner->ArrayIndex == this->HouseIndex)
+		{
+			const auto pType = pTechno->GetTechnoType();
+
+			if (pType && pTechno->Ammo != pType->Ammo && TechnoTypeExt::ExtMap.Find(pType)->CanManualReload)
+			{
+				pTechno->Ammo = 0;
+				pTechno->StartReloading();
+			}
+		}
+	}
+}
+
 size_t EventExt::GetDataSize(EventTypeExt type)
 {
 	switch (type)
 	{
 	case EventTypeExt::ToggleAggressiveStance:
 		return sizeof(EventExt::ToggleAggressiveStance);
+	case EventTypeExt::ManualReload:
+		return sizeof(EventExt::ManualReloadEvent);
 	}
 
 	return 0;
@@ -68,9 +100,7 @@ DEFINE_HOOK(0x4C6CC8, Networking_RespondToEvent, 0x5)
 	GET(EventExt*, pEvent, ESI);
 
 	if (EventExt::IsValidType(pEvent->Type))
-	{
 		pEvent->RespondEvent();
-	}
 
 	return 0;
 }

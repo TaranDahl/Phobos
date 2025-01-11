@@ -265,6 +265,7 @@ public:
 		Valueable<bool> UniqueTechno;
 		Nullable<bool> NoQueueUpToEnter;
 		Nullable<bool> NoQueueUpToUnload;
+		Valueable<bool> CanManualReload;
 
 		Nullable<bool> CombatAlert;
 		Nullable<bool> CombatAlert_NotBuilding;
@@ -589,6 +590,7 @@ public:
 			, UniqueTechno { false }
 			, NoQueueUpToEnter {}
 			, NoQueueUpToUnload {}
+			, CanManualReload { true }
 
 			, CombatAlert {}
 			, CombatAlert_NotBuilding {}

@@ -12,9 +12,10 @@ enum class EventTypeExt : uint8_t
 	// Ares used Events 0x60 and 0x61
 
 	ToggleAggressiveStance = 0x80,
+	ManualReload = 0x81,
 
 	FIRST = ToggleAggressiveStance,
-	LAST = ToggleAggressiveStance
+	LAST = ManualReload
 };
 
 #pragma pack(push, 1)
@@ -33,6 +34,11 @@ public:
 		{
 			TargetClass Who;
 		} ToggleAggressiveStance;
+
+		struct ManualReloadEvent
+		{
+			TargetClass Who;
+		} ManualReloadEvent;
 	};
 
 	bool AddEvent();
@@ -41,6 +47,9 @@ public:
 	static void RaiseToggleAggressiveStance(TechnoClass* pTechno);
 	void RespondToToggleAggressiveStance();
 
+	static void RaiseManualReloadEvent(TechnoClass* pTechno);
+	void RespondToManualReloadEvent();
+
 	static size_t GetDataSize(EventTypeExt type);
 	static bool IsValidType(EventTypeExt type);
 };
@@ -48,4 +57,3 @@ public:
 static_assert(sizeof(EventExt) == 111);
 static_assert(offsetof(EventExt, DataBuffer) == 7);
 #pragma pack(pop)
-
