@@ -29,11 +29,6 @@ public:
 	{
 		char DataBuffer[104];
 
-		struct Sample
-		{
-			char DataBuffer[104];
-		} Sample;
-
 		struct ManualReloadEvent
 		{
 			TargetClass Who;
