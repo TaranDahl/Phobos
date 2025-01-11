@@ -197,12 +197,13 @@ DEFINE_HOOK(0x5FACDF, OptionsClass_LoadSettings_LoadPhobosSettings, 0x5)
 		Phobos::UI::SuperWeaponSidebar_Max =
 			ini_uimd.ReadInteger(SIDEBAR_SECTION, "SuperWeaponSidebar.Max", Phobos::UI::SuperWeaponSidebar_Max);
 
-		const int screenHeight = GameOptionsClass::Instance->ScreenHeight;
+		const int reserveHeight = 96;
+		const int screenHeight = GameOptionsClass::Instance->ScreenHeight - reserveHeight;
 
 		if (Phobos::UI::SuperWeaponSidebar_Max > 0)
-			Phobos::UI::SuperWeaponSidebar_Max = std::min(Phobos::UI::SuperWeaponSidebar_Max, (screenHeight - 96) / Phobos::UI::SuperWeaponSidebar_CameoHeight);
+			Phobos::UI::SuperWeaponSidebar_Max = std::min(Phobos::UI::SuperWeaponSidebar_Max, screenHeight / Phobos::UI::SuperWeaponSidebar_CameoHeight);
 		else
-			Phobos::UI::SuperWeaponSidebar_Max = (screenHeight - 96) / Phobos::UI::SuperWeaponSidebar_CameoHeight;
+			Phobos::UI::SuperWeaponSidebar_Max = screenHeight / Phobos::UI::SuperWeaponSidebar_CameoHeight;
 
 		Phobos::UI::SuperWeaponSidebar_MaxColumns =
 			ini_uimd.ReadInteger(SIDEBAR_SECTION, "SuperWeaponSidebar.MaxColumns", Phobos::UI::SuperWeaponSidebar_MaxColumns);
