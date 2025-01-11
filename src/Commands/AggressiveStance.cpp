@@ -46,7 +46,7 @@ void AggressiveStanceClass::Execute(WWKey eInput) const
 		const auto pTechnoExt = TechnoExt::ExtMap.Find(pTechno);
 
 		// If not togglable then exclude it from the iteration.
-		if (!pTechnoExt->TypeExtData->CanToggleAggressiveStance(pTechno))
+		if (!pTechnoExt->CanToggleAggressiveStance())
 			continue;
 
 		isAnySelectedUnitArmed = true;

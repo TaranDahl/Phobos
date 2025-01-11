@@ -579,6 +579,36 @@ void TechnoExt::ExtData::ToggleAggressiveStance()
 		this->OwnerObject()->QueueMission(Mission::Guard, false);
 }
 
+bool TechnoExt::ExtData::CanToggleAggressiveStance()
+{
+	const auto pTypeExt = this->TypeExtData;
+
+	if (!pTypeExt->AggressiveStance_Togglable.isset())
+	{
+		// Only techno that are armed and open-topped can be aggressive stance.
+		if (!(this->OwnerObject()->IsArmed() || pTypeExt->OwnerObject()->OpenTopped))
+		{
+			pTypeExt->AggressiveStance_Togglable = false;
+			return false;
+		}
+
+		// Engineers and Agents are default to not allow aggressive stance.
+		if (auto pInfantryTypeClass = abstract_cast<InfantryTypeClass*>(pTypeExt->OwnerObject()))
+		{
+			if (pInfantryTypeClass->Engineer || pInfantryTypeClass->Agent)
+			{
+				pTypeExt->AggressiveStance_Togglable = false;
+				return false;
+			}
+		}
+
+		pTypeExt->AggressiveStance_Togglable = true;
+		return true;
+	}
+
+	return pTypeExt->AggressiveStance_Togglable.Get(true);
+}
+
 bool TechnoExt::LoadGlobals(PhobosStreamReader& Stm)
 {
 	return Stm

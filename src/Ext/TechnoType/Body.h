@@ -672,8 +672,6 @@ public:
 		short GetTurretLimitedRaw(short currentDirectionRaw);
 		DirStruct GetBodyDesiredDir(DirStruct currentDir, DirStruct defaultDir);
 
-		bool CanToggleAggressiveStance(TechnoClass* pTechno);
-
 		// Ares 0.A
 		const char* GetSelectionGroupID() const;
 

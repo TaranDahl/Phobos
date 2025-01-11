@@ -39,11 +39,10 @@ void EventExt::RespondToToggleAggressiveStance()
 	{
 		if (pTechno->IsAlive && !pTechno->Berzerk && pTechno->Owner->ArrayIndex == this->HouseIndex)
 		{
-			if (const auto pTechnoExt = TechnoExt::ExtMap.Find(pTechno))
-			{
-				if (pTechnoExt->TypeExtData->CanToggleAggressiveStance(pTechno))
-					pTechnoExt->ToggleAggressiveStance();
-			}
+			const auto pTechnoExt = TechnoExt::ExtMap.Find(pTechno);
+
+			if (pTechnoExt->CanToggleAggressiveStance())
+				pTechnoExt->ToggleAggressiveStance();
 		}
 	}
 }
