@@ -2019,9 +2019,7 @@ DEFINE_HOOK(0x69300B, ScrollClass_MouseUpdate_SkipMouseActionUpdate, 0x6)
 
 DEFINE_HOOK(0x6D462C, TacticalClass_Render_DrawBelowTechno, 0x5)
 {
-	const auto pButtons = &TacticalButtonsClass::Instance;
-	pButtons->CurrentSelectPathDraw();
-
+	TacticalButtonsClass::Instance.CurrentSelectPathDraw();
 	return 0;
 }
 
@@ -2034,8 +2032,13 @@ DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 
 	pButtons->SelectedDraw();
 	pButtons->HerosDraw();
-	pButtons->CurrentSelectInfoDraw();
 
+	return 0;
+}
+
+DEFINE_HOOK(0x4F4583, GScreenClass_DrawCurrentSelectInfo, 0x6)
+{
+	TacticalButtonsClass::Instance.CurrentSelectInfoDraw();
 	return 0;
 }
 
