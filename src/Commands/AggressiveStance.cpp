@@ -31,7 +31,7 @@ void AggressiveStanceClass::Execute(WWKey eInput) const
 	// Get current selected units.
 	// If all selected units are at aggressive stance, we should cancel their aggressive stance.
 	// Otherwise, we should turn them into aggressive stance.
-	bool isAnySelectedUnitArmed = false;
+	bool isAnySelectedUnitTogglable = false;
 	bool isAllSelectedUnitAggressiveStance = true;
 
 	for (const auto& pUnit : ObjectClass::CurrentObjects())
@@ -49,7 +49,7 @@ void AggressiveStanceClass::Execute(WWKey eInput) const
 		if (!pTechnoExt->CanToggleAggressiveStance())
 			continue;
 
-		isAnySelectedUnitArmed = true;
+		isAnySelectedUnitTogglable = true;
 
 		if (pTechnoExt->GetAggressiveStance())
 		{
@@ -62,8 +62,8 @@ void AggressiveStanceClass::Execute(WWKey eInput) const
 		}
 	}
 
-	// If this boolean is false, then none of the selected units are armed, meaning this hotket doesn't need to do anything.
-	if (isAnySelectedUnitArmed)
+	// If this boolean is false, then none of the selected units are togglable, meaning this hotket doesn't need to do anything.
+	if (isAnySelectedUnitTogglable)
 	{
 		// If all selected units are aggressive stance, then cancel their aggressive stance;
 		// otherwise, make all selected units aggressive stance.
