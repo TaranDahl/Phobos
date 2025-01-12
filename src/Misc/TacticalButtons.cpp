@@ -399,7 +399,7 @@ void TacticalButtonsClass::CurrentSelectPathDraw()
 						{
 							const auto face = pD[i];
 
-							if (face == -1)
+							if (face <= -1 || face >= 8)
 								break;
 
 							pCell = pCell->GetNeighbourCell(static_cast<FacingType>(face));
@@ -546,13 +546,14 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		const auto cell = pTechno->GetMapCoords();
 		const auto coords = pTechno->GetCoords();
 
-		drawText("Location = [ %d , %d , %d ]( %d , %d , %d )", coords.X, coords.Y, coords.Z, cell.X, cell.Y, pTechno->GetCell()->Level);
+		drawText("Location = [ %d , %d , %d ]( %d , %d , %d )", coords.X, coords.Y, coords.Z, cell.X, cell.Y, pTechno->GetCellLevel());
 
 		constexpr const char* facingTypes[8] = { "North", "NorthEast", "East", "SouthEast", "South", "SouthWest", "West", "NorthWest" };
 		const auto facing1 = pTechno->PrimaryFacing.Current();
 		const auto facing2 = pTechno->SecondaryFacing.Current();
+		const auto primaryFacing = facing1.GetValue<3>();
 
-		drawText("PriFacing = [ %d ( %d )]( %s )", facing1.Raw, facing1.GetValue<5>(), facingTypes[facing1.GetValue<3>()]);
+		drawText("PriFacing = [ %d ( %d )]( %s )", facing1.Raw, facing1.GetValue<5>(), facingTypes[primaryFacing]);
 		drawText("SecFacing = [ %d ( %d )]( %s )", facing2.Raw, facing2.GetValue<5>(), facingTypes[facing2.GetValue<3>()]);
 
 		drawText("Tether = ( %s , %s )", (pTechno->IsTether ? "Yes" : "No"), (pTechno->IsAlternativeTether ? "Yes" : "No"));
@@ -607,6 +608,15 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 			drawText("PlanningPathIdx = %d", pFoot->PlanningPathIdx);
 			drawText("FootCell = ( %d , %d )", pFoot->CurrentMapCoords.X, pFoot->CurrentMapCoords.Y);
 			drawText("LastCell = ( %d , %d )", pFoot->LastMapCoords.X, pFoot->LastMapCoords.Y);
+
+			drawTime("PathFindTimer", pFoot->PathDelayTimer);
+			drawText("PathWaitTime = %d", pFoot->unknown_int_64C);
+
+			constexpr const char* moveTypes[8] = { "Clear", "Cloak", "Move", "Gate", "A-Block", "E-Block", "Temp", "Unable" };
+			const auto facingType = static_cast<FacingType>(primaryFacing);
+			const auto moveType = static_cast<int>(pFoot->IsCellOccupied(pFoot->GetCell()->GetNeighbourCell(facingType), facingType, pFoot->GetCellLevel(), nullptr, true));
+
+			drawText("FaceMoveType = ( %s )", (moveType >= 0 && moveType < 8) ? moveTypes[moveType] : "N/A");
 
 			const auto& pD = pFoot->PathDirections;
 
