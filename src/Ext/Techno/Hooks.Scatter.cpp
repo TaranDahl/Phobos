@@ -4,13 +4,27 @@
 
 #pragma region MarkScatterState
 
+static inline void StopMovingAndRevertMission(FootClass* pFoot)
+{
+	const auto pExt = TechnoExt::ExtMap.Find(pFoot);
+
+	if (!pExt->IsScattering)
+		return;
+
+	pExt->IsScattering = false;
+
+	if (!pFoot->MissionIsOverriden())
+		return;
+
+	pFoot->Mission_Revert();
+}
+
 // Unmark Flag
 DEFINE_HOOK(0x4D82B0, FootClass_EnterIdleMode_ScatterClear, 0x5)
 {
 	GET(FootClass* const, pThis, ECX);
 
-	if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-		pExt->IsScattering = false;
+	StopMovingAndRevertMission(pThis);
 
 	return 0;
 }
@@ -19,8 +33,7 @@ DEFINE_HOOK(0x51AA45, InfantryClass_SetDestination_ScatterClear, 0x7)
 {
 	GET(InfantryClass* const, pThis, ECX);
 
-	if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-		pExt->IsScattering = false;
+	StopMovingAndRevertMission(pThis);
 
 	return 0;
 }
@@ -29,8 +42,7 @@ DEFINE_HOOK(0x741978, UnitClass_SetDestination_ScatterClear, 0x9)
 {
 	GET(UnitClass* const, pThis, ECX);
 
-	if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-		pExt->IsScattering = false;
+	StopMovingAndRevertMission(pThis);
 
 	return 0;
 }
@@ -46,10 +58,7 @@ DEFINE_HOOK(0x51D43F, InfantryClass_Scatter_ScatterRecord1, 0x6)
 	pThis->SetDestination(MapClass::Instance->GetCellAt(cell), true);
 
 	if (RulesExt::Global()->ExtendedScatterAction)
-	{
-		if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-			pExt->IsScattering = true;
-	}
+		TechnoExt::ExtMap.Find(pThis)->IsScattering = true;
 
 	return SkipGameCode;
 }
@@ -64,10 +73,7 @@ DEFINE_HOOK(0x51D6CA, InfantryClass_Scatter_ScatterRecord2, 0x6)
 	pThis->SetDestination(MapClass::Instance->GetCellAt(cell), true);
 
 	if (RulesExt::Global()->ExtendedScatterAction)
-	{
-		if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-			pExt->IsScattering = true;
-	}
+		TechnoExt::ExtMap.Find(pThis)->IsScattering = true;
 
 	return SkipGameCode;
 }
@@ -82,10 +88,7 @@ DEFINE_HOOK(0x743C91, UnitClass_Scatter_ScatterRecord1, 0x7)
 	pThis->SetDestination(MapClass::Instance->GetCellAt(cell), true);
 
 	if (RulesExt::Global()->ExtendedScatterAction)
-	{
-		if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-			pExt->IsScattering = true;
-	}
+		TechnoExt::ExtMap.Find(pThis)->IsScattering = true;
 
 	return SkipGameCode;
 }
@@ -100,10 +103,7 @@ DEFINE_HOOK(0x744059, UnitClass_Scatter_ScatterRecord2, 0x7)
 	pThis->SetDestination(MapClass::Instance->GetCellAt(cell), true);
 
 	if (RulesExt::Global()->ExtendedScatterAction)
-	{
-		if (const auto pExt = TechnoExt::ExtMap.Find(pThis))
-			pExt->IsScattering = true;
-	}
+		TechnoExt::ExtMap.Find(pThis)->IsScattering = true;
 
 	return SkipGameCode;
 }
@@ -111,6 +111,17 @@ DEFINE_HOOK(0x744059, UnitClass_Scatter_ScatterRecord2, 0x7)
 #pragma endregion
 
 #pragma region EnhancedScatterContent
+
+static inline FootClass* GetFootOnCell(CellClass* pCell, FootClass* pCaller)
+{
+	for (auto pObject = pCell->GetContent(); pObject; pObject = pObject->NextObject)
+	{
+		if (const auto pFoot = abstract_cast<FootClass*>(pObject))
+			return pFoot;
+	}
+
+	return nullptr;
+}
 
 static inline bool CanEnhancedScatterContent(CellClass* pCell, TechnoClass* pCaller)
 {
@@ -139,12 +150,12 @@ static inline bool CanEnhancedScatterContent(CellClass* pCell, TechnoClass* pCal
 
 static void __fastcall CallEnhancedScatterContent(CellClass* pCell, TechnoClass* pCaller, const CoordStruct& coords, bool alt)
 {
-	pCell->ScatterContent(CoordStruct::Empty, true, true, alt);
-
 	if (const auto pFoot = abstract_cast<FootClass*>(pCaller))
 	{
 		if (RulesExt::Global()->ExtendedScatterAction)
 		{
+			pCell->ScatterContent((pFoot->WhatAmI() == AbstractType::Infantry ? CoordStruct::Empty : coords), true, true, alt);
+
 			if (pFoot->CurrentMapCoords != CellStruct::Empty)
 			{
 				pCell = MapClass::Instance->GetCellAt(pFoot->CurrentMapCoords);
@@ -153,7 +164,7 @@ static void __fastcall CallEnhancedScatterContent(CellClass* pCell, TechnoClass*
 				{
 					const auto face = pFoot->PathDirections[i];
 
-					if (face == -1)
+					if (face <= -1 || face >= 8)
 						break;
 
 					pCell = pCell->GetNeighbourCell(static_cast<FacingType>(face));
@@ -165,9 +176,15 @@ static void __fastcall CallEnhancedScatterContent(CellClass* pCell, TechnoClass*
 				}
 			}
 		}
+		else
+		{
+			pCell->ScatterContent(CoordStruct::Empty, true, true, alt);
+		}
 	}
 	else // Building
 	{
+		pCell->ScatterContent(CoordStruct::Empty, true, true, alt);
+
 		if (RulesExt::Global()->ExtendedScatterAction)
 		{
 			for (int i = 0; i < 8; ++i)
@@ -189,6 +206,11 @@ static void __fastcall CallEnhancedScatterContent(CellClass* pCell, TechnoClass*
 			}
 		}
 	}
+}
+
+static inline void CallEnhancedScatterContent(CellClass* pCell, FootClass* pFoot, bool alt)
+{
+	CallEnhancedScatterContent(pCell, pFoot, pFoot->Location, alt);
 }
 
 // Factory Entrance
@@ -227,9 +249,7 @@ DEFINE_HOOK(0x4B1F2C, DriveLocomotionClass_MovingProcess_ScatterForwardContent, 
 	GET(Point2D* const, pCoords, ESI);
 	GET(const bool, alt, EDX);
 
-	const auto pLinkTo = pThis->LinkedTo;
-	const auto pCell = MapClass::Instance->GetTargetCell(*pCoords);
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location, alt);
+	CallEnhancedScatterContent(MapClass::Instance->GetTargetCell(*pCoords), pThis->LinkedTo, alt);
 
 	return SkipGameCode;
 }
@@ -242,8 +262,7 @@ DEFINE_HOOK(0x4B2DB4, DriveLocomotionClass_MovingProcess2_ScatterForwardContent1
 	GET(CellClass* const, pCell, EDI);
 	GET(const bool, alt, EDX);
 
-	const auto pLinkTo = pThis->LinkedTo;
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location, alt);
+	CallEnhancedScatterContent(pCell, pThis->LinkedTo, alt);
 
 	return SkipGameCode;
 }
@@ -256,8 +275,7 @@ DEFINE_HOOK(0x4B3271, DriveLocomotionClass_MovingProcess2_ScatterForwardContent2
 	GET(CellClass* const, pCell, ESI);
 	GET(const bool, alt, EDX);
 
-	const auto pLinkTo = pThis->LinkedTo;
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location, alt);
+	CallEnhancedScatterContent(pCell, pThis->LinkedTo, alt);
 
 	return SkipGameCode;
 }
@@ -270,9 +288,7 @@ DEFINE_HOOK(0x4B391F, DriveLocomotionClass_MovingProcess2_ScatterForwardContent3
 	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x5C, -0x48));
 	GET(const bool, alt, EDX);
 
-	const auto pLinkTo = pThis->LinkedTo;
-	const auto pCell = MapClass::Instance->GetCellAt(cell);
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location, alt);
+	CallEnhancedScatterContent(MapClass::Instance->GetCellAt(cell), pThis->LinkedTo, alt);
 
 	return SkipGameCode;
 }
@@ -285,8 +301,7 @@ DEFINE_HOOK(0x4B442D, DriveLocomotionClass_MovingProcess2_ScatterForwardContent4
 	GET(CellClass* const, pCell, ECX);
 	GET(const bool, alt, EDX);
 
-	const auto pLinkTo = pThis->LinkedTo;
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location, alt);
+	CallEnhancedScatterContent(pCell, pThis->LinkedTo, alt);
 
 	return SkipGameCode;
 }
@@ -299,9 +314,7 @@ DEFINE_HOOK(0x515966, HoverLocomotionClass_MovingProcess_ScatterForwardContent, 
 	GET(Point2D* const, pCoords, ESI);
 	GET(const bool, alt, EDX);
 
-	const auto pLinkTo = pThis->LinkedTo;
-	const auto pCell = MapClass::Instance->GetTargetCell(*pCoords);
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location, alt);
+	CallEnhancedScatterContent(MapClass::Instance->GetTargetCell(*pCoords), pThis->LinkedTo, alt);
 
 	return SkipGameCode;
 }
@@ -314,8 +327,7 @@ DEFINE_HOOK(0x516BB9, HoverLocomotionClass_MovingProcess2_ScatterForwardContent,
 	GET(CellClass* const, pCell, EBX);
 	GET(const bool, alt, EDX);
 
-	const auto pLinkTo = pThis->LinkedTo;
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location, alt);
+	CallEnhancedScatterContent(pCell, pThis->LinkedTo, alt);
 
 	return SkipGameCode;
 }
@@ -328,8 +340,7 @@ DEFINE_HOOK(0x5B0BA4, MechLocomotionClass_MovingProcess_ScatterForwardContent, 0
 	GET(CellClass* const, pCell, ESI);
 	GET(const bool, alt, EDX);
 
-	const auto pLinkTo = pThis->LinkedTo;
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location, alt);
+	CallEnhancedScatterContent(pCell, pThis->LinkedTo, alt);
 
 	return SkipGameCode;
 }
@@ -342,9 +353,7 @@ DEFINE_HOOK(0x6A156F, ShipLocomotionClass_MovingProcess_ScatterForwardContent, 0
 	GET(Point2D* const, pCoords, ESI);
 	GET(const bool, alt, EDX);
 
-	const auto pLinkTo = pThis->LinkedTo;
-	const auto pCell = MapClass::Instance->GetTargetCell(*pCoords);
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location, alt);
+	CallEnhancedScatterContent(MapClass::Instance->GetTargetCell(*pCoords), pThis->LinkedTo, alt);
 
 	return SkipGameCode;
 }
@@ -357,8 +366,7 @@ DEFINE_HOOK(0x6A2404, ShipLocomotionClass_MovingProcess2_ScatterForwardContent1,
 	GET(CellClass* const, pCell, EDI);
 	GET(const bool, alt, EDX);
 
-	const auto pLinkTo = pThis->LinkedTo;
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location, alt);
+	CallEnhancedScatterContent(pCell, pThis->LinkedTo, alt);
 
 	return SkipGameCode;
 }
@@ -371,8 +379,7 @@ DEFINE_HOOK(0x6A28C1, ShipLocomotionClass_MovingProcess2_ScatterForwardContent2,
 	GET(CellClass* const, pCell, ESI);
 	GET(const bool, alt, EDX);
 
-	const auto pLinkTo = pThis->LinkedTo;
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location, alt);
+	CallEnhancedScatterContent(pCell, pThis->LinkedTo, alt);
 
 	return SkipGameCode;
 }
@@ -385,9 +392,7 @@ DEFINE_HOOK(0x6A2F6E, ShipLocomotionClass_MovingProcess2_ScatterForwardContent3,
 	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x5C, -0x48));
 	GET(const bool, alt, EDX);
 
-	const auto pLinkTo = pThis->LinkedTo;
-	const auto pCell = MapClass::Instance->GetCellAt(cell);
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location, alt);
+	CallEnhancedScatterContent(MapClass::Instance->GetCellAt(cell), pThis->LinkedTo, alt);
 
 	return SkipGameCode;
 }
@@ -400,8 +405,7 @@ DEFINE_HOOK(0x6A3A59, ShipLocomotionClass_MovingProcess2_ScatterForwardContent4,
 	GET(CellClass* const, pCell, ECX);
 	GET(const bool, alt, EDX);
 
-	const auto pLinkTo = pThis->LinkedTo;
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location, alt);
+	CallEnhancedScatterContent(pCell, pThis->LinkedTo, alt);
 
 	return SkipGameCode;
 }
@@ -414,8 +418,7 @@ DEFINE_HOOK(0x75B885, WalkLocomotionClass_MovingProcess_ScatterForwardContent, 0
 	GET(CellClass* const, pCell, ESI);
 	GET(const bool, alt, EDX);
 
-	const auto pLinkTo = pThis->LinkedTo;
-	CallEnhancedScatterContent(pCell, pLinkTo, pLinkTo->Location, alt);
+	CallEnhancedScatterContent(pCell, pThis->LinkedTo, alt);
 
 	return SkipGameCode;
 }
@@ -426,9 +429,7 @@ DEFINE_HOOK(0x75B885, WalkLocomotionClass_MovingProcess_ScatterForwardContent, 0
 
 static inline int GetTechnoCloseEnoughRange(TechnoClass* pCaller)
 {
-	const auto pExt = TechnoExt::ExtMap.Find(pCaller);
-
-	if (pExt && pExt->IsScattering)
+	if (TechnoExt::ExtMap.Find(pCaller)->IsScattering)
 		return pCaller->WhatAmI() == AbstractType::Infantry ? 128 : 0;
 
 	return RulesClass::Instance->CloseEnough;
