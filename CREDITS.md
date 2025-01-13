@@ -377,6 +377,8 @@ This page lists all the individual contributions to the project by their author.
   - Exclusive SuperWeapon Sidebar
   - Allow using waypoints, area guard and attack move with aircraft
   - Fix `Stop` command not working so well in some cases
+  - Fix aircraft `MovementZone` and `SpeedType` inconsistencies
+  - Use 2D distance instead of 3D to check whether in air team members have arrived destination
   - Projectile subject to ground check before firing
   - Enhanced Straight trajectory
   - New Disperse trajectory
@@ -396,7 +398,6 @@ This page lists all the individual contributions to the project by their author.
   - Unit base normal and new placing grids
   - Grey cameo preview and cameo overlays
   - Draw visual effects for airburst weapons
-  - Use 2D distance instead of 3D to check whether in air team members have arrived destination
   - Delay automatic attack on the controlled unit
 - **Ollerus**
   - Build limit group enhancement
