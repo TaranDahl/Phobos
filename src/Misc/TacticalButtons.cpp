@@ -609,8 +609,9 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 			drawText("FootCell = ( %d , %d )", pFoot->CurrentMapCoords.X, pFoot->CurrentMapCoords.Y);
 			drawText("LastCell = ( %d , %d )", pFoot->LastMapCoords.X, pFoot->LastMapCoords.Y);
 
+			drawText("PathWaitTime = %d , WaitingBlockage = %s", pFoot->unknown_int_64C, (pFoot->unknown_bool_6B7 ? "Yes" : "No"));
 			drawTime("PathFindTimer", pFoot->PathDelayTimer);
-			drawText("PathWaitTime = %d", pFoot->unknown_int_64C);
+			drawTime("BlockageTimer", pFoot->BlockagePathTimer);
 
 			constexpr const char* moveTypes[8] = { "Clear", "Cloak", "Move", "Gate", "A-Block", "E-Block", "Temp", "Unable" };
 			const auto facingType = static_cast<FacingType>(primaryFacing);
