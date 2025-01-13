@@ -112,6 +112,8 @@ DEFINE_HOOK(0x744059, UnitClass_Scatter_ScatterRecord2, 0x7)
 
 #pragma region EnhancedScatterContent
 
+DEFINE_JUMP(LJMP, 0x73F8E0, 0x73FA2C) // Skip face to face check. Why check this?
+
 static inline FootClass* GetFootOnCell(CellClass* pCell, FootClass* pCaller)
 {
 	for (auto pObject = pCell->GetContent(); pObject; pObject = pObject->NextObject)
