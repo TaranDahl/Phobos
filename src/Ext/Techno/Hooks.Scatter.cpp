@@ -1,5 +1,6 @@
 #include "Body.h"
 
+#include <TacticalClass.h>
 #include "LocomotionClass.h"
 
 #pragma region MarkScatterState
@@ -63,21 +64,6 @@ DEFINE_HOOK(0x51D43F, InfantryClass_Scatter_ScatterRecord1, 0x6)
 	return SkipGameCode;
 }
 
-DEFINE_HOOK(0x51D6CA, InfantryClass_Scatter_ScatterRecord2, 0x6)
-{
-	enum { SkipGameCode = 0x51D6E6 };
-
-	GET(InfantryClass* const, pThis, ESI);
-	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x50, -0x40));
-
-	pThis->SetDestination(MapClass::Instance->GetCellAt(cell), true);
-
-	if (RulesExt::Global()->ExtendedScatterAction)
-		TechnoExt::ExtMap.Find(pThis)->IsScattering = true;
-
-	return SkipGameCode;
-}
-
 DEFINE_HOOK(0x743C91, UnitClass_Scatter_ScatterRecord1, 0x7)
 {
 	enum { SkipGameCode = 0x744076 };
@@ -93,58 +79,33 @@ DEFINE_HOOK(0x743C91, UnitClass_Scatter_ScatterRecord1, 0x7)
 	return SkipGameCode;
 }
 
-DEFINE_HOOK(0x744059, UnitClass_Scatter_ScatterRecord2, 0x7)
-{
-	enum { SkipGameCode = 0x744076 };
-
-	GET(UnitClass* const, pThis, EBP);
-	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x58, -0x40));
-
-	pThis->SetDestination(MapClass::Instance->GetCellAt(cell), true);
-
-	if (RulesExt::Global()->ExtendedScatterAction)
-		TechnoExt::ExtMap.Find(pThis)->IsScattering = true;
-
-	return SkipGameCode;
-}
-
 #pragma endregion
 
 #pragma region EnhancedScatterContent
 
-DEFINE_JUMP(LJMP, 0x73F8E0, 0x73FA2C) // Skip face to face check. Why check this?
-
-static inline FootClass* GetFootOnCell(CellClass* pCell, FootClass* pCaller)
-{
-	for (auto pObject = pCell->GetContent(); pObject; pObject = pObject->NextObject)
-	{
-		if (const auto pFoot = abstract_cast<FootClass*>(pObject))
-			return pFoot;
-	}
-
-	return nullptr;
-}
-
-static inline bool CanEnhancedScatterContent(CellClass* pCell, TechnoClass* pCaller)
+static inline bool EnhancedScatterContent(CellClass* pCell, TechnoClass* pCaller, const CoordStruct& coords, bool alt)
 {
 	bool scatter = false;
 
-	for (auto pObject = pCell->GetContent(); pObject; pObject = pObject->NextObject)
+	for (auto pObject = (alt ? pCell->AltObject : pCell->FirstObject); pObject; pObject = pObject->NextObject)
 	{
 		const auto pFoot = abstract_cast<FootClass*>(pObject);
 
-		if (!pFoot)
+		if (!pFoot || pFoot == pCaller || pFoot->IsTether)
 			continue;
-
-		if (pFoot->IsTether || pFoot->Destination)
-			return false;
 
 		const auto pOwner = pFoot->Owner;
 
 		if (!pOwner || !pOwner->IsAlliedWith(pCaller))
-			return false;
+			continue;
+
+		const auto pDestination = pFoot->Destination;
+
+		if (pDestination && pFoot->DistanceFrom(pDestination) >= RulesClass::Instance->CloseEnough)
+			continue;
 
 		scatter = true;
+		pFoot->Scatter(coords, true, true);
 	}
 
 	return scatter;
@@ -155,33 +116,9 @@ static void __fastcall CallEnhancedScatterContent(CellClass* pCell, TechnoClass*
 	if (const auto pFoot = abstract_cast<FootClass*>(pCaller))
 	{
 		if (RulesExt::Global()->ExtendedScatterAction)
-		{
-			pCell->ScatterContent((pFoot->WhatAmI() == AbstractType::Infantry ? CoordStruct::Empty : coords), true, true, alt);
-
-			if (pFoot->CurrentMapCoords != CellStruct::Empty)
-			{
-				pCell = MapClass::Instance->GetCellAt(pFoot->CurrentMapCoords);
-
-				for (int i = 0; i < 24; ++i)
-				{
-					const auto face = pFoot->PathDirections[i];
-
-					if (face <= -1 || face >= 8)
-						break;
-
-					pCell = pCell->GetNeighbourCell(static_cast<FacingType>(face));
-
-					if (!CanEnhancedScatterContent(pCell, pFoot))
-						break;
-
-					pCell->ScatterContent(coords, true, true, alt);
-				}
-			}
-		}
+			EnhancedScatterContent(pCell, pFoot, (pFoot->WhatAmI() == AbstractType::Infantry ? CoordStruct::Empty : coords), alt);
 		else
-		{
 			pCell->ScatterContent(CoordStruct::Empty, true, true, alt);
-		}
 	}
 	else // Building
 	{
@@ -192,9 +129,7 @@ static void __fastcall CallEnhancedScatterContent(CellClass* pCell, TechnoClass*
 			for (int i = 0; i < 8; ++i)
 			{
 				const auto pNearCell = pCell->GetNeighbourCell(static_cast<FacingType>(i));
-
-				if (CanEnhancedScatterContent(pNearCell, pCaller))
-					pNearCell->ScatterContent(coords, true, true, alt);
+				EnhancedScatterContent(pNearCell, pCaller, coords, alt);
 			}
 		}
 		else
@@ -429,12 +364,99 @@ DEFINE_HOOK(0x75B885, WalkLocomotionClass_MovingProcess_ScatterForwardContent, 0
 
 #pragma region EnhancedScatterExecute
 
+static inline CellStruct GetScatterCell(FootClass* pThis, int face)
+{
+	const auto thisCoord = pThis->GetDestination();
+	const auto thisCell = CellClass::Coord2Cell(thisCoord);
+	const auto pThisCell = MapClass::Instance->GetCellAt(thisCell);
+	const auto height = (pThisCell->Level + (pThis->IsOnBridge() ? 4 : 0)) * Unsorted::LevelHeight;
+	auto alternativeCell = CellStruct::Empty;
+
+	for (int i = 0; i < 8; ++i)
+	{
+		const auto facing = static_cast<size_t>(face + i) & 7u;
+		const auto cell = thisCell + CellSpread::GetNeighbourOffset(facing);
+		const auto pCell = MapClass::Instance->GetCellAt(cell);
+
+		if (!MapClass::Instance->IsWithinUsableArea(cell, true))
+			continue;
+
+		const auto move = pThis->IsCellOccupied(pCell, static_cast<FacingType>(facing), pThis->GetCellLevel(), nullptr, true);
+
+		if (move != Move::OK)
+		{
+			if ((move == Move::Temp || move == Move::Cloak || move == Move::ClosedGate || move == Move::Destroyable) && alternativeCell == CellStruct::Empty)
+				alternativeCell = cell;
+
+			continue;
+		}
+
+		auto coords = CellClass::Cell2Coord(cell, height);
+		auto buffer = CellStruct::Empty;
+		const auto mapCell = *reinterpret_cast<CellStruct*(__thiscall*)(TacticalClass*, CellStruct*, CoordStruct*)>(0x6D6410)(TacticalClass::Instance(), &buffer, &coords);
+
+		if (cell != mapCell || pCell->ContainsBridge())
+			continue;
+
+		return cell;
+	}
+
+	return alternativeCell;
+}
+
 static inline int GetTechnoCloseEnoughRange(TechnoClass* pCaller)
 {
 	if (TechnoExt::ExtMap.Find(pCaller)->IsScattering)
 		return pCaller->WhatAmI() == AbstractType::Infantry ? 128 : 0;
 
 	return RulesClass::Instance->CloseEnough;
+}
+
+// Execute
+DEFINE_JUMP(LJMP, 0x73F8E0, 0x73FA2C) // Skip face to face check. Why check this?
+
+DEFINE_HOOK(0x51D487, InfantryClass_Scatter_EnhancedScatter, 0x6)
+{
+	if (!RulesExt::Global()->ExtendedScatterAction)
+		return 0;
+
+	enum { SkipGameCode = 0x51D6E6 };
+
+	GET(InfantryClass* const, pThis, ESI);
+	GET_STACK(const int, face, STACK_OFFSET(0x50, -0x34));
+
+	const auto cell = GetScatterCell(pThis, face);
+
+	if (cell != CellStruct::Empty)
+	{
+		pThis->QueueMission(Mission::Move, false);
+		pThis->SetDestination(MapClass::Instance->GetCellAt(cell), true);
+		TechnoExt::ExtMap.Find(pThis)->IsScattering = true;
+	}
+
+	return SkipGameCode;
+}
+
+DEFINE_HOOK(0x743E08, UnitClass_Scatter_EnhancedScatter, 0x7)
+{
+	if (!RulesExt::Global()->ExtendedScatterAction)
+		return 0;
+
+	enum { SkipGameCode = 0x744076 };
+
+	GET(UnitClass* const, pThis, EBP);
+	GET(const int, face, EDI);
+
+	const auto cell = GetScatterCell(pThis, face);
+
+	if (cell != CellStruct::Empty)
+	{
+		pThis->QueueMission(Mission::Move, false);
+		pThis->SetDestination(MapClass::Instance->GetCellAt(cell), true);
+		TechnoExt::ExtMap.Find(pThis)->IsScattering = true;
+	}
+
+	return SkipGameCode;
 }
 
 // Range Check
