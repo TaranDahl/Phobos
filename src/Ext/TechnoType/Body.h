@@ -521,7 +521,7 @@ public:
 			, HarvesterQuickUnloader { false }
 			, NoQueueUpToEnter {}
 			, NoQueueUpToUnload {}
-			, CanManualReload { true }
+			, CanManualReload { false }
 
 			, Wake { }
 			, Wake_Grapple { }

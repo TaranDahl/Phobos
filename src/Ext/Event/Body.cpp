@@ -29,6 +29,7 @@ void EventExt::RaiseManualReloadEvent(TechnoClass* pTechno)
 	eventExt.Frame = Unsorted::CurrentFrame;
 	eventExt.ManualReloadEvent.Who = TargetClass(pTechno);
 	eventExt.AddEvent();
+	Debug::LogGame("Adding event MANUAL_RELOAD\n");
 }
 
 void EventExt::RespondToManualReloadEvent()
