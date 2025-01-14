@@ -590,7 +590,7 @@ public:
 			, UniqueTechno { false }
 			, NoQueueUpToEnter {}
 			, NoQueueUpToUnload {}
-			, CanManualReload { true }
+			, CanManualReload { false }
 
 			, CombatAlert {}
 			, CombatAlert_NotBuilding {}
