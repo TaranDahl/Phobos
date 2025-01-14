@@ -31,6 +31,7 @@ void EventExt::RaiseToggleAggressiveStance(TechnoClass* pTechno)
 	eventExt.Frame = Unsorted::CurrentFrame;
 	eventExt.ToggleAggressiveStance.Who = TargetClass(pTechno);
 	eventExt.AddEvent();
+	Debug::LogGame("Adding event TOGGLE_AGGRESSIVE\n");
 }
 
 void EventExt::RespondToToggleAggressiveStance()
