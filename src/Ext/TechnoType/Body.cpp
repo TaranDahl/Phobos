@@ -589,8 +589,10 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SelectedInfo_BelowType.Read(exINI, pSection, "SelectedInfo.BelowType");
 	this->SelectedInfo_BelowColor.Read(exINI, pSection, "SelectedInfo.BelowColor");
 	this->FakeOf.Read(exINI, pSection, "FakeOf");
-	this->NoRearmInEMPState.Read(exINI, pSection, "NoRearmInEMPState");
-	this->NoRearmInTemporal.Read(exINI, pSection, "NoRearmInTemporal");
+	this->NoRearm_Inactive.Read(exINI, pSection, "NoRearm.Inactive");
+	this->NoRearm_Temporal.Read(exINI, pSection, "NoRearm.Temporal");
+	this->NoReload_Inactive.Read(exINI, pSection, "NoReload.Inactive");
+	this->NoReload_Temporal.Read(exINI, pSection, "NoReload.Temporal");
 	this->RateDown_Ammo.Read(exINI, pSection, "RateDown.Ammo");
 	this->RateDown_Delay.Read(exINI, pSection, "RateDown.Delay");
 	this->RateDown_Cover.Read(exINI, pSection, "RateDown.Cover");
@@ -1067,8 +1069,10 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SelectedInfo_BelowColor)
 		.Process(this->FakeOf)
 		.Process(this->CameoPal)
-		.Process(this->NoRearmInEMPState)
-		.Process(this->NoRearmInTemporal)
+		.Process(this->NoRearm_Inactive)
+		.Process(this->NoRearm_Temporal)
+		.Process(this->NoReload_Inactive)
+		.Process(this->NoReload_Temporal)
 		.Process(this->RateDown_Ammo)
 		.Process(this->RateDown_Delay)
 		.Process(this->RateDown_Cover)

@@ -633,34 +633,6 @@ void TechnoExt::ExtData::UpdateMindControlAnim()
 	}
 }
 
-void TechnoExt::ExtData::UpdateRearmInEMPState()
-{
-	const auto pThis = this->OwnerObject();
-
-	if (pThis->IsUnderEMP() && this->TypeExtData->NoRearmInEMPState.Get(RulesExt::Global()->NoRearmInEMPState))
-	{
-		if (pThis->RearmTimer.InProgress())
-			pThis->RearmTimer.StartTime++;
-
-		if (pThis->ReloadTimer.InProgress())
-			pThis->ReloadTimer.StartTime++;
-	}
-}
-
-void TechnoExt::ExtData::UpdateRearmInTemporal()
-{
-	const auto pThis = this->OwnerObject();
-
-	if (this->TypeExtData->NoRearmInTemporal.Get(RulesExt::Global()->NoRearmInTemporal))
-	{
-		if (pThis->RearmTimer.InProgress())
-			pThis->RearmTimer.StartTime++;
-
-		if (pThis->ReloadTimer.InProgress())
-			pThis->ReloadTimer.StartTime++;
-	}
-}
-
 void TechnoExt::ExtData::UpdateRecountBurst()
 {
 	const auto pThis = this->OwnerObject();
@@ -1026,6 +998,34 @@ void TechnoExt::ExtData::UpdateTemporal()
 		ae->AI_Temporal();
 
 	this->UpdateRearmInTemporal();
+}
+
+void TechnoExt::ExtData::UpdateRearmInEMPState()
+{
+	const auto pThis = this->OwnerObject();
+
+	if (!pThis->IsUnderEMP() && !pThis->Deactivated)
+		return;
+
+	const auto pTypeExt = this->TypeExtData;
+
+	if (pThis->RearmTimer.InProgress() && pTypeExt->NoRearm_Inactive.Get(RulesExt::Global()->NoRearm_Inactive))
+		pThis->RearmTimer.StartTime++;
+
+	if (pThis->ReloadTimer.InProgress() && pTypeExt->NoReload_Inactive.Get(RulesExt::Global()->NoReload_Inactive))
+		pThis->ReloadTimer.StartTime++;
+}
+
+void TechnoExt::ExtData::UpdateRearmInTemporal()
+{
+	const auto pThis = this->OwnerObject();
+	const auto pTypeExt = this->TypeExtData;
+
+	if (pThis->RearmTimer.InProgress() && pTypeExt->NoRearm_Temporal.Get(RulesExt::Global()->NoRearm_Temporal))
+		pThis->RearmTimer.StartTime++;
+
+	if (pThis->ReloadTimer.InProgress() && pTypeExt->NoReload_Temporal.Get(RulesExt::Global()->NoReload_Temporal))
+		pThis->ReloadTimer.StartTime++;
 }
 
 // Updates state of all AttachEffects on techno.

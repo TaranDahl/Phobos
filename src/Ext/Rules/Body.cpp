@@ -186,8 +186,10 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->AISetBaseCenter.Read(exINI, GameStrings::AI, "AISetBaseCenter");
 	this->AIBiasSpawnCell.Read(exINI, GameStrings::AI, "AIBiasSpawnCell");
 	this->AIForbidConYard.Read(exINI, GameStrings::AI, "AIForbidConYard");
-	this->NoRearmInEMPState.Read(exINI, GameStrings::General, "NoRearmInEMPState");
-	this->NoRearmInTemporal.Read(exINI, GameStrings::General, "NoRearmInTemporal");
+	this->NoRearm_Inactive.Read(exINI, GameStrings::General, "NoRearm.Inactive");
+	this->NoRearm_Temporal.Read(exINI, GameStrings::General, "NoRearm.Temporal");
+	this->NoReload_Inactive.Read(exINI, GameStrings::General, "NoReload.Inactive");
+	this->NoReload_Temporal.Read(exINI, GameStrings::General, "NoReload.Temporal");
 	this->CleanUpAirBarrier.Read(exINI, GameStrings::General, "CleanUpAirBarrier");
 	this->AttackMindControlledDelay.Read(exINI, GameStrings::General, "AttackMindControlledDelay");
 	this->NoQueueUpToEnter.Read(exINI, GameStrings::General, "NoQueueUpToEnter");
@@ -488,8 +490,10 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AISetBaseCenter)
 		.Process(this->AIBiasSpawnCell)
 		.Process(this->AIForbidConYard)
-		.Process(this->NoRearmInEMPState)
-		.Process(this->NoRearmInTemporal)
+		.Process(this->NoRearm_Inactive)
+		.Process(this->NoRearm_Temporal)
+		.Process(this->NoReload_Inactive)
+		.Process(this->NoReload_Temporal)
 		.Process(this->CleanUpAirBarrier)
 		.Process(this->AttackMindControlledDelay)
 		.Process(this->NoQueueUpToEnter)

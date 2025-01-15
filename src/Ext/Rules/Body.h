@@ -142,8 +142,10 @@ public:
 		Valueable<bool> AISetBaseCenter;
 		Valueable<bool> AIBiasSpawnCell;
 		Valueable<bool> AIForbidConYard;
-		Valueable<bool> NoRearmInEMPState;
-		Valueable<bool> NoRearmInTemporal;
+		Valueable<bool> NoRearm_Inactive;
+		Valueable<bool> NoRearm_Temporal;
+		Valueable<bool> NoReload_Inactive;
+		Valueable<bool> NoReload_Temporal;
 		Valueable<int> CleanUpAirBarrier;
 		Valueable<int> AttackMindControlledDelay;
 		Valueable<bool> NoQueueUpToEnter;
@@ -381,8 +383,10 @@ public:
 			, SelectedVehicleMissingPCX {}
 			, SelectedAircraftMissingPCX {}
 			, SelectedBuildingMissingPCX {}
-			, NoRearmInEMPState { false }
-			, NoRearmInTemporal { false }
+			, NoRearm_Inactive { false }
+			, NoRearm_Temporal { false }
+			, NoReload_Inactive { false }
+			, NoReload_Temporal { false }
 			, CleanUpAirBarrier { 0 }
 			, AttackMindControlledDelay { 0 }
 			, NoQueueUpToEnter { false }
