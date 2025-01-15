@@ -461,7 +461,7 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 	ColorStruct fillColor { 0, 0, 0 };
 	RectangleStruct drawRect { 0, 0, 360, DSurface::Composite->GetHeight() - 32 };
 	DSurface::Composite->FillRectTrans(&drawRect, &fillColor, 30);
-	Point2D textLocation { 15, 15 };
+	Point2D textLocation { 15, 5 };
 
 	auto drawText = [&drawRect, &textLocation](const char* pFormat, ...)
 	{
