@@ -1847,6 +1847,45 @@ RecountBurst=false  ; boolean
 RecountBurst=       ; boolean
 ```
 
+### Customized Vehicle Turret Rotation
+
+- When `ExpandTurretRotation` is set to true, the following functions will be enabled.
+- Units with turret without `TurretSpins=true` can looks more vivid when it is in idle.
+  - `Turret.IdleRotate` controls whether units can rotate their turrets when in idle. Defaults to `[AudioVisual]` -> `Turret.IdleRotate`.
+  - `Turret.PointToMouse` controls whether units will turn their turrets to your mouse when in idle. Defaults to `[AudioVisual]` -> `Turret.PointToMouse`.
+    - At the present moment, this only functions in singleplayer.
+  - `Turret.IdleRestartMin` and `Turret.IdleRestartMax` control the delay from idle to action occurrence together.
+  - `Turret.IdleIntervalMin` and `Turret.IdleIntervalMax` control the delay between every idle actions together.
+- The turret and body of the units can now be rotated under control.
+  - `Turret.Restriction` defines the angle at which the turret can be turned to both sides.
+  - `Turret.ExtraAngle` defines the additional rotation angle of the turret, and `Turret.Restriction` will also rotate with this value. The positive number is clockwise and the negative number is counterclockwise, that is, what angle the turret should use by default or face the target.
+  - `Turret.BodyOrientation` controls whether the body needs to aim at the target when firing.
+  - `Turret.BodyOrientationAngle` defines the additional rotation angle of the body when aiming at the target. The positive number is clockwise and the negative number is counterclockwise, that is, what angle the body should use to face the target.
+  - `Turret.BodyOrientationSymmetric` controls whether both sides of the additional body rotation angle can be used.
+
+In `rulesmd.ini`:
+```ini
+[General]
+ExpandTurretRotation=no             ; boolean
+
+[AudioVisual]
+Turret.IdleRotate=false             ; boolean
+Turret.PointToMouse=false           ; boolean
+Turret.IdleRestartMin=150           ; integer, number of frames
+Turret.IdleRestartMax=300           ; integer, number of frames
+Turret.IdleIntervalMin=150          ; integer, number of frames
+Turret.IdleIntervalMax=450          ; integer, number of frames
+
+[SOMEUNIT]                          ; VehicleType, `Turret=yes`
+Turret.IdleRotate=                  ; boolean
+Turret.PointToMouse=                ; boolean
+Turret.Restriction=180.0            ; floating point value
+Turret.ExtraAngle=0                 ; floating point value
+Turret.BodyOrientation=no           ; boolean
+Turret.BodyOrientationAngle=0       ; floating point value
+Turret.BodyOrientationSymmetric=yes ; boolean
+```
+
 ### Delay automatic attack on the controlled unit
 
 - Now you can make the techno that has just been mind controlled not be automatically attacked by its original friendly forces for a period of time defined by `MindControl.ThreatDelay` on the mind control warhead, default to `[General]->AttackMindControlledDelay`. This will not affect the manual selection of attacks and is useless with permanent mind control.

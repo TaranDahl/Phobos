@@ -395,7 +395,7 @@ This page lists all the individual contributions to the project by their author.
   - New Tracing trajectory
   - Display factories, superweapons, iron curtain and temporal progress on specific technos
   - Damage multiplier for different houses
-  - Units Rotate Turret When in Idle Action
+  - Customized Vehicle Turret Rotation
   - Jumpjet climbing logic enhancement
   - Building placing and deploying logic enhancement
   - Unit base normal and new placing grids
