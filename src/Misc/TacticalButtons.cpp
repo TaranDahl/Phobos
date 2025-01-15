@@ -562,7 +562,7 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		const auto pExt = TechnoExt::ExtMap.Find(pTechno);
 
 		drawText("Shield = ( %d / %d )", (pExt->Shield ? pExt->Shield->GetHP() : -1), (pExt->CurrentShieldType ? pExt->CurrentShieldType->Strength : -1));
-		drawText("Ammo = ( %d / %d )", pTechno->Ammo, pType->Ammo);
+		drawText("Ammo = ( %d / %d )( %s )", pTechno->Ammo, pType->Ammo, (pType->ManualReload ? "Yes" : "No"));
 
 		drawTime("ReloadTimer", pTechno->ReloadTimer);
 		drawTime("RearmTimer", pTechno->RearmTimer);
