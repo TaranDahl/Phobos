@@ -1798,7 +1798,7 @@ AttackMove.Aggressive=false   ; boolean
 
 ### No rearm and reload in EMP or temporal
 
-- Now you can make technos unable to rearm and reload when they are in EMP or locked by a temporal weapon. Defaults to values in `[General]`.
+- Now you can make technos unable to rearm and reload when they are in EMP or locked by a temporal weapon. Defaults to values in `[General]`. This will not affect the reloading of the airport aircraft.
 
 In `rulesmd.ini`:
 ```ini
