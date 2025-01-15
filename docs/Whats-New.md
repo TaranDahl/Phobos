@@ -417,7 +417,6 @@ New:
 - Revenge weapon (by Starkku)
 - AttachEffect types with new features like custom tint and weapon range modifier (by Starkku)
 - Projectile subject to ground check before firing (by CrimRecya)
-- Enhanced Straight trajectory (by CrimRecya)
 - New Disperse trajectory (by CrimRecya)
 - New Engrave trajectory (by CrimRecya)
 - New Parabola trajectory (by CrimRecya)
