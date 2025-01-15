@@ -36,7 +36,7 @@ void EventExt::RespondToManualReloadEvent()
 {
 	if (const auto pTechno = this->ManualReloadEvent.Who.As_Techno())
 	{
-		if (pTechno->Ammo > 0 && pTechno->IsAlive && !pTechno->Berzerk && pTechno->WhatAmI() != AbstractType::Aircraft && pTechno->Owner->ArrayIndex == this->HouseIndex)
+		if (pTechno->Ammo > 0 && pTechno->IsAlive && !pTechno->Berzerk && pTechno->WhatAmI() != AbstractType::Aircraft)
 		{
 			const auto pType = pTechno->GetTechnoType();
 
