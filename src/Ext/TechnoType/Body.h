@@ -251,6 +251,10 @@ public:
 		Valueable<ColorStruct> SelectedInfo_BelowColor;
 		Valueable<TechnoTypeClass*> FakeOf;
 		CustomPalette CameoPal;
+		Nullable<bool> NoRearm_Inactive;
+		Nullable<bool> NoRearm_Temporal;
+		Nullable<bool> NoReload_Inactive;
+		Nullable<bool> NoReload_Temporal;
 		Valueable<int> RateDown_Ammo;
 		Valueable<int> RateDown_Delay;
 		Valueable<int> RateDown_Cover;
@@ -260,10 +264,6 @@ public:
 		Nullable<bool> NoQueueUpToEnter;
 		Nullable<bool> NoQueueUpToUnload;
 		Valueable<bool> CanManualReload;
-		Nullable<bool> NoRearm_Inactive;
-		Nullable<bool> NoRearm_Temporal;
-		Nullable<bool> NoReload_Inactive;
-		Nullable<bool> NoReload_Temporal;
 
 		Nullable<AnimTypeClass*> Wake;
 		Nullable<AnimTypeClass*> Wake_Grapple;
@@ -513,6 +513,10 @@ public:
 			, SelectedInfo_BelowColor { { 0, 0, 0 } }
 			, FakeOf {}
 			, CameoPal {}
+			, NoRearm_Inactive {}
+			, NoRearm_Temporal {}
+			, NoReload_Inactive {}
+			, NoReload_Temporal {}
 			, RateDown_Ammo { -1 }
 			, RateDown_Delay { 0 }
 			, RateDown_Cover { 0 }
@@ -522,10 +526,6 @@ public:
 			, NoQueueUpToEnter {}
 			, NoQueueUpToUnload {}
 			, CanManualReload { false }
-			, NoRearm_Inactive {}
-			, NoRearm_Temporal {}
-			, NoReload_Inactive {}
-			, NoReload_Temporal {}
 
 			, Wake { }
 			, Wake_Grapple { }
