@@ -584,8 +584,6 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SelectedInfo_BelowType.Read(exINI, pSection, "SelectedInfo.BelowType");
 	this->SelectedInfo_BelowColor.Read(exINI, pSection, "SelectedInfo.BelowColor");
 	this->FakeOf.Read(exINI, pSection, "FakeOf");
-	this->NoRearmInEMPState.Read(exINI, pSection, "NoRearmInEMPState");
-	this->NoRearmInTemporal.Read(exINI, pSection, "NoRearmInTemporal");
 	this->RateDown_Ammo.Read(exINI, pSection, "RateDown.Ammo");
 	this->RateDown_Delay.Read(exINI, pSection, "RateDown.Delay");
 	this->RateDown_Cover.Read(exINI, pSection, "RateDown.Cover");
@@ -595,6 +593,10 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoQueueUpToEnter.Read(exINI, pSection, "NoQueueUpToEnter");
 	this->NoQueueUpToUnload.Read(exINI, pSection, "NoQueueUpToUnload");
 	this->CanManualReload.Read(exINI, pSection, "CanManualReload");
+	this->NoRearm_Inactive.Read(exINI, pSection, "NoRearm.Inactive");
+	this->NoRearm_Temporal.Read(exINI, pSection, "NoRearm.Temporal");
+	this->NoReload_Inactive.Read(exINI, pSection, "NoReload.Inactive");
+	this->NoReload_Temporal.Read(exINI, pSection, "NoReload.Temporal");
 
 	this->Wake.Read(exINI, pSection, "Wake");
 	this->Wake_Grapple.Read(exINI, pSection, "Wake.Grapple");
@@ -996,8 +998,6 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SelectedInfo_BelowColor)
 		.Process(this->FakeOf)
 		.Process(this->CameoPal)
-		.Process(this->NoRearmInEMPState)
-		.Process(this->NoRearmInTemporal)
 		.Process(this->RateDown_Ammo)
 		.Process(this->RateDown_Delay)
 		.Process(this->RateDown_Cover)
@@ -1007,6 +1007,10 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->NoQueueUpToEnter)
 		.Process(this->NoQueueUpToUnload)
 		.Process(this->CanManualReload)
+		.Process(this->NoRearm_Inactive)
+		.Process(this->NoRearm_Temporal)
+		.Process(this->NoReload_Inactive)
+		.Process(this->NoReload_Temporal)
 
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)

@@ -400,6 +400,7 @@ This page lists all the individual contributions to the project by their author.
   - Draw visual effects for airburst weapons
   - Delay automatic attack on the controlled unit
   - Aggressive attack move mission
+  - No rearm and reload in EMP or temporal
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude

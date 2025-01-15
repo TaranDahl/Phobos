@@ -213,6 +213,11 @@ public:
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
 		Valueable<bool> UseFixedVoxelLighting;
 
+		Valueable<bool> NoRearm_Inactive;
+		Valueable<bool> NoRearm_Temporal;
+		Valueable<bool> NoReload_Inactive;
+		Valueable<bool> NoReload_Temporal;
+
 		Valueable<bool> GatherWhenMCVDeploy;
 		Valueable<bool> AIFireSale;
 		Valueable<int> AIFireSaleDelay;
@@ -392,6 +397,10 @@ public:
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 			, UseFixedVoxelLighting { false }
+			, NoRearm_Inactive { false }
+			, NoRearm_Temporal { false }
+			, NoReload_Inactive { false }
+			, NoReload_Temporal { false }
 			, GatherWhenMCVDeploy { true }
 			, AIFireSale { true }
 			, AIFireSaleDelay { 0 }

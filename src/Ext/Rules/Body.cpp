@@ -255,6 +255,11 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->UseFixedVoxelLighting.Read(exINI, GameStrings::AudioVisual, "UseFixedVoxelLighting");
 
+	this->NoRearm_Inactive.Read(exINI, GameStrings::General, "NoRearm.Inactive");
+	this->NoRearm_Temporal.Read(exINI, GameStrings::General, "NoRearm.Temporal");
+	this->NoReload_Inactive.Read(exINI, GameStrings::General, "NoReload.Inactive");
+	this->NoReload_Temporal.Read(exINI, GameStrings::General, "NoReload.Temporal");
+
 	this->GatherWhenMCVDeploy.Read(exINI, GameStrings::General, "GatherWhenMCVDeploy");
 	this->AIFireSale.Read(exINI, GameStrings::General, "AIFireSale");
 	this->AIFireSaleDelay.Read(exINI, GameStrings::General, "AIFireSaleDelay");
@@ -496,6 +501,10 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->VoxelLightSource)
 		// .Process(this->VoxelShadowLightSource)
 		.Process(this->UseFixedVoxelLighting)
+		.Process(this->NoRearm_Inactive)
+		.Process(this->NoRearm_Temporal)
+		.Process(this->NoReload_Inactive)
+		.Process(this->NoReload_Temporal)
 		.Process(this->GatherWhenMCVDeploy)
 		.Process(this->AIFireSale)
 		.Process(this->AIFireSaleDelay)

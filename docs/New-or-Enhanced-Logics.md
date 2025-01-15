@@ -1796,6 +1796,25 @@ In `rulesmd.ini`:
 AttackMove.Aggressive=false   ; boolean
 ```
 
+### No rearm and reload in EMP or temporal
+
+- Now you can make technos unable to rearm and reload when they are in EMP or locked by a temporal weapon. Defaults to values in `[General]`.
+
+In `rulesmd.ini`:
+```ini
+[General]
+NoRearm.Inactive=false   ; boolean
+NoRearm.Temporal=false   ; boolean
+NoReload.Inactive=false  ; boolean
+NoReload.Temporal=false  ; boolean
+
+[SOMETECHNO]             ; TechnoType
+NoRearm.Inactive=        ; boolean
+NoRearm.Temporal=        ; boolean
+NoReload.Inactive=       ; boolean
+NoReload.Temporal=       ; boolean
+```
+
 ## Terrain
 
 ### Destroy animation & sound

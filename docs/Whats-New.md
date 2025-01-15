@@ -489,6 +489,7 @@ New:
 - Draw visual effects for airburst weapons (by CrimRecya)
 - Delay automatic attack on the controlled unit (by CrimRecya)
 - Aggressive attack move mission (by CrimRecya)
+- No rearm and reload in EMP or temporal (by CrimRecya)
 - Unit `Speed` setting now accepts floating point values (by Starkku)
 - Exclusive SuperWeapon Sidebar (by NetsuNegi & CrimRecya)
 
