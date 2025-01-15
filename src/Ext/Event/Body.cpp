@@ -43,7 +43,9 @@ void EventExt::RespondToManualReloadEvent()
 			if (pType && pTechno->Ammo != pType->Ammo && TechnoTypeExt::ExtMap.Find(pType)->CanManualReload)
 			{
 				pTechno->Ammo = 0;
-				pTechno->StartReloading();
+
+				if (pTechno->WhatAmI() != AbstractType::Aircraft)
+					pTechno->StartReloading();
 			}
 		}
 	}
