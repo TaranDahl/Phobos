@@ -392,7 +392,7 @@ This page lists all the individual contributions to the project by their author.
   - Jumpjet Climbing Logic Enhancement
   - Several new Infotypes, no display in specific status and a new single frame display method
   - Display factories, superweapons, iron curtain and temporal progress on specific technos
-  - Units Rotate Turret When in Idle Action
+  - Customized Vehicle Turret Rotation
   - Observer sidebar in skirmish game mode
   - Building placing and deploying logic enhancement
   - Unit base normal and new placing grids

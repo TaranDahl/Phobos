@@ -448,6 +448,7 @@ New:
 - Display factories, superweapons, iron curtain and temporal progress on specific technos (by CrimRecya)
 - Units Rotate Turret When in Idle Action (by CrimRecya)
 - Allow anchoring extended tooltips to the left side of the sidebar (by Trsdy)
+- Customized Vehicle Turret Rotation (by CrimRecya)
 - Toggle to allow spawned aircraft to attack immediately after being spawned (by Starkku)
 - `ZAdjust` for OverlayTypes (by Starkku)
 - Jumpjet Climbing Logic Enhancement (by CrimRecya)
