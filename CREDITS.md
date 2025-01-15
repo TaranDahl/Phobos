@@ -406,6 +406,7 @@ This page lists all the individual contributions to the project by their author.
   - Observer sidebar in skirmish game mode
   - Draw visual effects for airburst weapons
   - Delay automatic attack on the controlled unit
+  - Aggressive attack move mission
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
