@@ -408,6 +408,7 @@ This page lists all the individual contributions to the project by their author.
   - Delay automatic attack on the controlled unit
   - Aggressive attack move mission
   - No rearm and reload in EMP or temporal
+  - Manually empty and reload ammo
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude

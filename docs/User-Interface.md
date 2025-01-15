@@ -407,6 +407,11 @@ VoiceEnterAggressiveStance=            ; sound entry
 VoiceExitAggressiveStance=             ; sound entry
 ```
 
+### `[ ]` Manual Reload
+
+- Manually empty and reload ammo if [CanManualReload=true](New-or-Enhanced-Logics.md#Manually-empty-and-reload-ammo).
+- For localization add `TXT_MANUAL_RELOAD` and `TXT_MANUAL_RELOAD_DESC` into your `.csf` file.
+
 ## Loading screen
 
 - PCX files can now be used as loadscreen images.
