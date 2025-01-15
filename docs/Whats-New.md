@@ -368,7 +368,7 @@ New:
 - Chrono sparkle animation display customization and improvements (by Starkku)
 - Script action to Chronoshift teams to enemy base (by Starkku)
 - Customizable ElectricBolt Arcs (by Fryone, Kerbiter)
-- Digital display of HP and SP (by ststl, FlyStar, Saigyouji, JunJacobYoung)
+- Digital display of HP and SP (by ststl, FlyStar, NaotoYuuki, Saigyouji, JunJacobYoung, based on knowledge of DeathFish)
 - PipScale pip customizations (size, ammo / spawn / tiberium frames or offsets) (by Starkku)
 - Auto-deploy/Deploy block on ammo change (by Fryone)
 - `AltPalette` lighting toggle (by Starkku)
@@ -421,7 +421,7 @@ New:
 - Enhance bombard trajectory with vertical and meteor trajectory (by NaotoYuuki & Ollerus)
 - Allow different technos to share build limit in a group (by ststl & Ollerus)
 - Projectile subject to ground check before firing (by CrimRecya)
-- Enhanced Straight trajectory (by CrimRecya)
+- New Disperse trajectory (by CrimRecya)
 - New Engrave trajectory (by CrimRecya)
 - New Parabola trajectory (by CrimRecya)
 - New Tracing trajectory (by CrimRecya)
@@ -444,6 +444,7 @@ New:
 - Allow strafing weapons to deduct ammo per shot instead of per strafing run (by Starkku)
 - Technos recount current burst index when change the firing weapon (by CrimRecya)
 - Allow `CloakVisible=true` laser trails optinally be seen only if unit is detected (by Starkku)
+- Enhanced Straight trajectory (by CrimRecya)
 - Customizing whether passengers are kicked out when an aircraft fires (by ststl)
 - Shield hit flash (by Starkku)
 - Option to scatter `Anim/SplashList` animations around impact coordinates (by Starkku)
@@ -507,6 +508,7 @@ New:
 - Unit `Speed` setting now accepts floating point values (by Starkku)
 - Aggressive stance toggle command (auto target unarmed enemy buildings) (by Aephiex)
 - Exclusive SuperWeapon Sidebar (by NetsuNegi & CrimRecya)
+- Custom exit cell for infantry factory (by Starkku)
 
 Vanilla fixes:
 - Allow AI to repair structures built from base nodes/trigger action 125/SW delivery in single player missions (by Trsdy)
