@@ -380,8 +380,8 @@ This page lists all the individual contributions to the project by their author.
   - Fix `Stop` command not working so well in some cases
   - Fix aircraft `MovementZone` and `SpeedType` inconsistencies
   - Use 2D distance instead of 3D to check whether in air team members have arrived destination
-  - Projectile subject to ground check before firing
   - Enhanced Straight trajectory
+  - Projectile subject to ground check before firing
   - New Disperse trajectory
   - New Engrave trajectory
   - New Parabola trajectory
