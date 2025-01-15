@@ -306,29 +306,6 @@ ProgressDisplay.Others.PipsShape=PIPS.shp     ; filename - including the .shp ex
 ProgressDisplay.Buildings.PipsShape=PIPS.shp  ; filename - including the .shp extension
 ```
 
-### Units Rotate Turret When in Idle Action
-
-- Now unit with turret without `TurretSpins=true` can looks more vivid when it is in idle.
-  - `Turret.IdleRotate` controls whether units can rotate their turrets when in idle. Defaults to `[AudioVisual]` -> `Turret.IdleRotate`.
-  - `Turret.PointToMouse` controls whether units will turn their turrets to your mouse when in idle. Defaults to `[AudioVisual]` -> `Turret.PointToMouse`.
-  - `Turret.IdleRestartMin` and `Turret.IdleRestartMax` control the delay from idle to action occurrence together.
-  - `Turret.IdleIntervalMin` and `Turret.IdleIntervalMax` control the delay between every idle actions together.
-
-In `rulesmd.ini`:
-```ini
-[AudioVisual]
-Turret.IdleRotate=false      ; boolean
-Turret.PointToMouse=false      ; boolean
-Turret.IdleRestartMin=150    ; integer, number of frames
-Turret.IdleRestartMax=300    ; integer, number of frames
-Turret.IdleIntervalMin=150   ; integer, number of frames
-Turret.IdleIntervalMax=450   ; integer, number of frames
-
-[SOMETECHNO]                    ; TechnoType
-Turret.IdleRotate=           ; boolean
-Turret.PointToMouse=           ; boolean
-```
-
 ### More display styles for placing grids
 
 - This feature is highly compatible with `ExpandBuildingPlace`. If set `DrawAdjacentBoundary` to true, it will display the four corners of the `Adjacent` boundary. If set `PlacementGrid.Expand` to true, it will display the placing grids with `place.shp` and following corresponding frame number.
