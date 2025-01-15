@@ -18,9 +18,21 @@ static inline void StopMovingAndRevertMission(FootClass* pFoot)
 		return;
 
 	pFoot->Mission_Revert();
+	pFoot->LastDestination = nullptr;
+	pFoot->LastTarget = nullptr;
 }
 
 // Unmark Flag
+
+DEFINE_HOOK(0x4DF0D0, FootClass_AbortMotion_ScatterClear, 0x8)
+{
+	GET(FootClass* const, pThis, ECX);
+
+	StopMovingAndRevertMission(pThis);
+
+	return 0;
+}
+
 DEFINE_HOOK(0x4D82B0, FootClass_EnterIdleMode_ScatterClear, 0x5)
 {
 	GET(FootClass* const, pThis, ECX);
@@ -364,6 +376,77 @@ DEFINE_HOOK(0x75B885, WalkLocomotionClass_MovingProcess_ScatterForwardContent, 0
 
 #pragma region EnhancedScatterExecute
 
+static inline void CheckWhetherNeedOverrideMission(FootClass* pThis, CellClass* pCell)
+{
+	const auto pThisDestination = pThis->Destination;
+
+	if (!pThisDestination)
+		return;
+
+	const auto thisCell = pThis->GetMapCoords();
+	const auto difference = pCell->MapCoords - thisCell;
+	const auto pThisExt = TechnoExt::ExtMap.Find(pThis);
+
+	std::vector<FootClass*> foots;
+	bool priority = false;
+
+	for (auto pObject = pCell->GetContent(); pObject; pObject = pObject->NextObject)
+	{
+		const auto pFoot = abstract_cast<FootClass*>(pObject);
+
+		if (!pFoot || pFoot == pThis || pFoot->IsTether)
+			continue;
+
+		const auto pFootDestination = pFoot->Destination;
+
+		if (!pFootDestination)
+		{
+			pFoot->Scatter(pThis->Location, true, true);
+			continue;
+		}
+
+		if (pFoot->DistanceFrom(pFootDestination) >= pThis->DistanceFrom(pThisDestination))
+		{
+			if (pThisExt->IsScattering)
+			{
+				pThisExt->IsScattering = false;
+				pThis->Scatter(pFoot->Location, true, true);
+			}
+			else
+			{
+				pThis->Override_Mission(Mission::Move, nullptr, MapClass::Instance->GetCellAt(thisCell - difference));
+				pThisExt->IsScattering = true;
+			}
+
+			return;
+		}
+
+		foots.push_back(pFoot);
+		priority = true;
+	}
+
+	if (priority)
+	{
+		const auto destCell = pCell->MapCoords + difference;
+
+		for (const auto& pFoot : foots)
+		{
+			const auto pFootExt = TechnoExt::ExtMap.Find(pFoot);
+
+			if (pFootExt->IsScattering)
+			{
+				pFootExt->IsScattering = false;
+				pFoot->Scatter(pThis->Location, true, true);
+			}
+			else
+			{
+				pFoot->Override_Mission(Mission::Move, nullptr, MapClass::Instance->GetCellAt(destCell));
+				pFootExt->IsScattering = true;
+			}
+		}
+	}
+}
+
 static inline CellStruct GetScatterCell(FootClass* pThis, int face)
 {
 	const auto thisCoord = pThis->GetDestination();
@@ -412,9 +495,61 @@ static inline int GetTechnoCloseEnoughRange(TechnoClass* pCaller)
 	return RulesClass::Instance->CloseEnough;
 }
 
-// Execute
+// Check Clear
 DEFINE_JUMP(LJMP, 0x73F8E0, 0x73FA2C) // Skip face to face check. Why check this?
 
+// Override Mission
+DEFINE_HOOK(0x4B3659, DriveLocomotionClass_MovingProcess2_CheckOverrideMission, 0x6)
+{
+	GET(FootClass* const, pThis, EAX);
+	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x5C, -0x48));
+
+	CheckWhetherNeedOverrideMission(pThis, MapClass::Instance->GetCellAt(cell));
+
+	return 0;
+}
+
+DEFINE_HOOK(0x515D30, HoverLocomotionClass_MovingProcess_CheckOverrideMission, 0x6)
+{
+	GET(FootClass* const, pThis, EAX);
+	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x68, -0x5C));
+
+	CheckWhetherNeedOverrideMission(pThis, MapClass::Instance->GetCellAt(cell));
+
+	return 0;
+}
+
+DEFINE_HOOK(0x5B0BCA, MechLocomotionClass_MovingProcess_CheckOverrideMission, 0x6)
+{
+	GET(FootClass* const, pThis, EAX);
+	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x68, -0x54));
+
+	CheckWhetherNeedOverrideMission(pThis, MapClass::Instance->GetCellAt(cell));
+
+	return 0;
+}
+
+DEFINE_HOOK(0x6A2CA8, ShipLocomotionClass_MovingProcess2_CheckOverrideMission, 0x6)
+{
+	GET(FootClass* const, pThis, EAX);
+	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x5C, -0x48));
+
+	CheckWhetherNeedOverrideMission(pThis, MapClass::Instance->GetCellAt(cell));
+
+	return 0;
+}
+
+DEFINE_HOOK(0x75B8AC, WalkLocomotionClass_MovingProcess_CheckOverrideMission, 0x6)
+{
+	GET(FootClass* const, pThis, EAX);
+	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x48, -0x38));
+
+	CheckWhetherNeedOverrideMission(pThis, MapClass::Instance->GetCellAt(cell));
+
+	return 0;
+}
+
+// Execute Scatter
 DEFINE_HOOK(0x51D487, InfantryClass_Scatter_EnhancedScatter, 0x6)
 {
 	if (!RulesExt::Global()->ExtendedScatterAction)
