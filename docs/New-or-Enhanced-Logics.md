@@ -1786,6 +1786,16 @@ AttackMindControlledDelay=0   ; integer, game frames
 MindControl.ThreatDelay=      ; integer, game frames
 ```
 
+### Aggressive attack move mission
+
+- `AttackMove.Aggressive` allows your technos to attack the enemy's unarmed buildings more aggressively when in attack move mission (Ctrl+Shift). If a higher threat enemy techno is found in the range during this process, it will attack this enemy techno instead first.
+
+In `rulesmd.ini`:
+```ini
+[General]
+AttackMove.Aggressive=false   ; boolean
+```
+
 ## Terrain
 
 ### Destroy animation & sound

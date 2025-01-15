@@ -488,6 +488,7 @@ New:
 - Allow customizing charge turret delays per burst on a weapon (by Starkku)
 - Draw visual effects for airburst weapons (by CrimRecya)
 - Delay automatic attack on the controlled unit (by CrimRecya)
+- Aggressive attack move mission (by CrimRecya)
 - Unit `Speed` setting now accepts floating point values (by Starkku)
 - Exclusive SuperWeapon Sidebar (by NetsuNegi & CrimRecya)
 
