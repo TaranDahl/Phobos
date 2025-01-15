@@ -29,21 +29,10 @@ void ManualReloadAmmoCommandClass::Execute(WWKey eInput) const
 {
 	for (const auto& pObj : ObjectClass::CurrentObjects())
 	{
-		const auto pTechno = abstract_cast<TechnoClass*>(pObj);
-
-		if (!pTechno || pTechno->Ammo <= 0 || !pTechno->IsAlive || pTechno->Berzerk || pTechno->WhatAmI() == AbstractType::Aircraft)
-			continue;
-
-		const auto pType = pTechno->GetTechnoType();
-
-		if (!pType || pTechno->Ammo == pType->Ammo || !TechnoTypeExt::ExtMap.Find(pType)->CanManualReload)
-			continue;
-
-		const auto pOwner = pTechno->Owner;
-
-		if (!pOwner || !pOwner->IsControlledByCurrentPlayer())
-			continue;
-
-		EventExt::RaiseManualReloadEvent(pTechno);
+		if (const auto pTechno = abstract_cast<TechnoClass*>(pObj))
+		{
+			if (pTechno->Owner->IsControlledByCurrentPlayer())
+				EventExt::RaiseManualReloadEvent(pTechno);
+		}
 	}
 }
