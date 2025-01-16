@@ -1908,40 +1908,30 @@ namespace BuildingTypeSelectable
 	bool ProcessingIDMatches = false;
 }
 
-DEFINE_HOOK(0x732A85, TypeSelectExecute_SetContext1, 0x7)
+DEFINE_HOOK_AGAIN(0x732B28, TypeSelectExecute_SetContext, 0x6)
+DEFINE_HOOK(0x732A85, TypeSelectExecute_SetContext, 0x7)
 {
 	BuildingTypeSelectable::ProcessingIDMatches = true;
 	return 0;
 }
 
-DEFINE_HOOK(0x732B28, TypeSelectExecute_SetContext2, 0x6)
-{
-	BuildingTypeSelectable::ProcessingIDMatches = true;
-	return 0;
-}
-/*
-DEFINE_HOOK(0x732C97, TechnoClass_IDMatches_ResetContext, 0x5)
+DEFINE_HOOK_AGAIN(0x732C91, TechnoClass_IDMatches_ResetContext, 0x5)
+DEFINE_HOOK(0x732C8A, TechnoClass_IDMatches_ResetContext, 0x5)
 {
 	BuildingTypeSelectable::ProcessingIDMatches = false;
 	return 0;
 }
-*/
-DEFINE_HOOK(0x465D40, BuildingClass_IsVehicle_BuildingTypeSelectable, 0x6)
+
+// If the context is set as well as the flags is enabled, the vfunc IsStrange return true to enable the type selection.
+DEFINE_HOOK(0x465D40, BuildingClass_Is1x1AndUndeployable_BuildingMassSelectable, 0x6)
 {
-	enum { ReturnFromFunction = 0x465D6A };
+	enum { SkipGameCode = 0x465D6A };
 
-	if (BuildingTypeSelectable::ProcessingIDMatches)
-	{
-		BuildingTypeSelectable::ProcessingIDMatches = false;
+	if (!BuildingTypeSelectable::ProcessingIDMatches || !RulesExt::Global()->BuildingTypeSelectable)
+		return 0;
 
-		if (RulesExt::Global()->BuildingTypeSelectable)
-		{
-			R->EAX(true);
-			return ReturnFromFunction;
-		}
-	}
-
-	return 0;
+	R->EAX(true);
+	return SkipGameCode;
 }
 
 #pragma endregion
