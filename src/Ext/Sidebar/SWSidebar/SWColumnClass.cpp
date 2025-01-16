@@ -4,13 +4,11 @@
 #include <Ext/SWType/Body.h>
 #include <Ext/Side/Body.h>
 
-SWColumnClass::SWColumnClass(unsigned int id, int x, int y, int width, int height)
+SWColumnClass::SWColumnClass(unsigned int id, int maxButtons, int x, int y, int width, int height)
 	: ControlClass(id, x, y, width, height, static_cast<GadgetFlag>(0), true)
+	, MaxButtons(maxButtons)
 {
-	auto& columns = SWSidebarClass::Instance.Columns;
-	columns.emplace_back(this);
-
-	this->MaxButtons = Phobos::UI::SuperWeaponSidebar_Max - (static_cast<int>(columns.size()) - 1);
+	SWSidebarClass::Instance.Columns.emplace_back(this);
 }
 
 bool SWColumnClass::Draw(bool forced)
@@ -91,7 +89,7 @@ bool SWColumnClass::AddButton(int superIdx)
 		if (!Phobos::UI::SuperWeaponSidebar)
 			return false;
 
-		if (!pSWExt->SuperWeaponSidebar_Allow)
+		if (!pSWExt->SuperWeaponSidebar_Allow.Get(RulesExt::Global()->SuperWeaponSidebar_AllowByDefault))
 			return false;
 
 		const unsigned int ownerBits = 1u << HouseClass::CurrentPlayer->Type->ArrayIndex;
