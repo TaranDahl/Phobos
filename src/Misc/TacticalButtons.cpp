@@ -421,7 +421,7 @@ void TacticalButtonsClass::CurrentSelectPathDraw()
 					for (const auto& pPathCell : pathCells)
 					{
 						const auto location = CoordStruct { (pPathCell->MapCoords.X << 8), (pPathCell->MapCoords.Y << 8), 0 };
-						const auto height = pPathCell->Level * 15;
+						const auto height = pPathCell->GetLevel() * 15;
 						const auto position = TacticalClass::Instance->CoordsToScreen(location) - TacticalClass::Instance->TacticalPos - Point2D { 0, (1 + height) };
 
 						DSurface::Temp->DrawSHP(
@@ -477,7 +477,7 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		textLocation.Y += 12;
 	};
 
-	auto drawInfo = [&drawText](const char* pInfoName, TechnoClass* pCurrent, AbstractClass* pTarget)
+	auto drawInfo = [&drawText](const char* pInfoName, AbstractClass* pCurrent, AbstractClass* pTarget)
 	{
 		if (pTarget)
 		{
@@ -825,7 +825,87 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 	}
 	else
 	{
+		auto point = WWMouseClass::Instance->XY1 - Point2D { DSurface::ViewBounds->X, DSurface::ViewBounds->Y };
+		auto cell = CellStruct::Empty;
+		auto coords = CoordStruct::Empty;
+		ObjectClass* pObj = nullptr;
+		BYTE fogged = 0;
+		BYTE shrouded = 0;
+
+		DisplayClass::Instance->ProcessClickCoords(&point, &cell, &coords, &pObj, &fogged, &shrouded);
+
+		const auto pCell = MapClass::Instance->GetCellAt(cell);
+
+		drawText("Location = [ %d , %d , %d ]( %d , %d , %d )", coords.X, coords.Y, coords.Z, cell.X, cell.Y, pCell->GetLevel());
+
+		drawText("CellFlags:");
+		drawText("  CenterRevealed --------- %s", (pCell->Flags & CellFlags::CenterRevealed ? "Yes" : "No"));
+		drawText("  EdgeRevealed ----------- %s", (pCell->Flags & CellFlags::EdgeRevealed ? "Yes" : "No"));
+		drawText("  IsWaypoint ------------- %s", (pCell->Flags & CellFlags::IsWaypoint ? "Yes" : "No"));
+		drawText("  Explored --------------- %s", (pCell->Flags & CellFlags::Explored ? "Yes" : "No"));
+		drawText("  FlagPresent ------------ %s", (pCell->Flags & CellFlags::FlagPresent ? "Yes" : "No"));
+		drawText("  FlagToShroud ----------- %s", (pCell->Flags & CellFlags::FlagToShroud ? "Yes" : "No"));
+		drawText("  IsPlot ----------------- %s", (pCell->Flags & CellFlags::IsPlot ? "Yes" : "No"));
+		drawText("  BridgeOwner ------------ %s", (pCell->Flags & CellFlags::BridgeOwner ? "Yes" : "No"));
+		drawText("  BridgeHead ------------- %s", (pCell->Flags & CellFlags::BridgeHead ? "Yes" : "No"));
+		drawText("  Unknown_200 ------------ %s", (pCell->Flags & CellFlags::Unknown_200 ? "Yes" : "No"));
+		drawText("  BridgeBody ------------- %s", (pCell->Flags & CellFlags::BridgeBody ? "Yes" : "No"));
+		drawText("  BridgeDir -------------- %s", (pCell->Flags & CellFlags::BridgeDir ? "Yes" : "No"));
+		drawText("  PixelFX ---------------- %s", (pCell->Flags & CellFlags::PixelFX ? "Yes" : "No"));
+		drawText("  Unknown_2000 ----------- %s", (pCell->Flags & CellFlags::Unknown_2000 ? "Yes" : "No"));
+		drawText("  Unknown_4000 ----------- %s", (pCell->Flags & CellFlags::Unknown_4000 ? "Yes" : "No"));
+		drawText("  Veinhole --------------- %s", (pCell->Flags & CellFlags::Veinhole ? "Yes" : "No"));
+		drawText("  DrawDarkenIfInAir ------ %s", (pCell->Flags & CellFlags::DrawDarkenIfInAir ? "Yes" : "No"));
+		drawText("  AnimAttached ----------- %s", (pCell->Flags & CellFlags::AnimAttached ? "Yes" : "No"));
+		drawText("  Tube ------------------- %s", (pCell->Flags & CellFlags::Tube ? "Yes" : "No"));
+		drawText("  EMPPresent ------------- %s", (pCell->Flags & CellFlags::EMPPresent ? "Yes" : "No"));
+		drawText("  HorizontalLineEventTag - %s", (pCell->Flags & CellFlags::HorizontalLineEventTag ? "Yes" : "No"));
+		drawText("  VerticalLineEventTag --- %s", (pCell->Flags & CellFlags::VerticalLineEventTag ? "Yes" : "No"));
+		drawText("  Fogged ----------------- %s", (pCell->Flags & CellFlags::Fogged ? "Yes" : "No"));
+
+		drawText("AltCellFlags:");
+		drawText("  Unknown_1 -------------- %s", (pCell->AltFlags & AltCellFlags::Unknown_1 ? "Yes" : "No"));
+		drawText("  ContainsBuilding ------- %s", (pCell->AltFlags & AltCellFlags::ContainsBuilding ? "Yes" : "No"));
+		drawText("  ContainsBuildingBuffer - %s", (pCell->AltFlags & AltCellFlags::Unknown_4 ? "Yes" : "No"));
+		drawText("  Mapped ----------------- %s", (pCell->AltFlags & AltCellFlags::Mapped ? "Yes" : "No"));
+		drawText("  NoFog ------------------ %s", (pCell->AltFlags & AltCellFlags::NoFog ? "Yes" : "No"));
+		drawText("  Unknown_20 ------------- %s", (pCell->AltFlags & AltCellFlags::Unknown_20 ? "Yes" : "No"));
+		drawText("  Unknown_40 ------------- %s", (pCell->AltFlags & AltCellFlags::Unknown_40 ? "Yes" : "No"));
+		drawText("  Unknown_80 ------------- %s", (pCell->AltFlags & AltCellFlags::Unknown_80 ? "Yes" : "No"));
+		drawText("  Unknown_100 ------------ %s", (pCell->AltFlags & AltCellFlags::Unknown_100 ? "Yes" : "No"));
+
+		drawText("TheOccupationFlags: %u", pCell->OccupationFlags);
+		drawText("AltOccupationFlags: %u", pCell->AltOccupationFlags);
+
+		drawInfo("TheFirstObject", pCell, pCell->FirstObject);
+		drawInfo("AltFirstObject", pCell, pCell->AltObject);
+		drawInfo("CurrentJumpjet", pCell, pCell->Jumpjet);
+
+		drawText("TubeIndex = %d", pCell->TubeIndex);
+		drawText("Rad Level = %.2f", pCell->RadLevel);
+
+		drawText(" ");
+
+		if (pObj)
+		{
+			const auto pType = pObj->GetType();
+			drawText("%s: %s , UniqueID: %d", "Object", pType->get_ID(), pObj->UniqueID);
+			drawText("Health = ( %d / %d )", pObj->Health, pType->Strength);
+			return;
+		}
+
 		drawText("N/A");
+
+		const auto location = CoordStruct { (cell.X << 8), (cell.Y << 8), 0 };
+		const auto height = pCell->GetLevel() * 15;
+		const auto position = TacticalClass::Instance->CoordsToScreen(location) - TacticalClass::Instance->TacticalPos - Point2D { 0, (1 + height) };
+
+		DSurface::Temp->DrawSHP(
+			FileSystem::PALETTE_PAL, Make_Global<SHPStruct*>(0x8A03FC),
+			(pCell->SlopeIndex + 2), &position, &DSurface::ViewBounds,
+			(BlitterFlags::Centered | BlitterFlags::TransLucent50 | BlitterFlags::bf_400 | BlitterFlags::Zero),
+			0, (-height - (pCell->SlopeIndex ? 12 : 2)), ZGradient::Ground, 1000, 0, 0, 0, 0, 0
+		);
 	}
 }
 

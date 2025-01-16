@@ -5,30 +5,12 @@
 
 #pragma region MarkScatterState
 
-static inline void StopMovingAndRevertMission(FootClass* pFoot)
-{
-	const auto pExt = TechnoExt::ExtMap.Find(pFoot);
-
-	if (!pExt->IsScattering)
-		return;
-
-	pExt->IsScattering = false;
-
-	if (!pFoot->MissionIsOverriden())
-		return;
-
-	pFoot->Mission_Revert();
-	pFoot->LastDestination = nullptr;
-	pFoot->LastTarget = nullptr;
-}
-
 // Unmark Flag
-
 DEFINE_HOOK(0x4DF0D0, FootClass_AbortMotion_ScatterClear, 0x8)
 {
 	GET(FootClass* const, pThis, ECX);
 
-	StopMovingAndRevertMission(pThis);
+	TechnoExt::ExtMap.Find(pThis)->IsScattering = false;
 
 	return 0;
 }
@@ -37,7 +19,7 @@ DEFINE_HOOK(0x4D82B0, FootClass_EnterIdleMode_ScatterClear, 0x5)
 {
 	GET(FootClass* const, pThis, ECX);
 
-	StopMovingAndRevertMission(pThis);
+	TechnoExt::ExtMap.Find(pThis)->IsScattering = false;
 
 	return 0;
 }
@@ -46,7 +28,7 @@ DEFINE_HOOK(0x51AA45, InfantryClass_SetDestination_ScatterClear, 0x7)
 {
 	GET(InfantryClass* const, pThis, ECX);
 
-	StopMovingAndRevertMission(pThis);
+	TechnoExt::ExtMap.Find(pThis)->IsScattering = false;
 
 	return 0;
 }
@@ -55,7 +37,7 @@ DEFINE_HOOK(0x741978, UnitClass_SetDestination_ScatterClear, 0x9)
 {
 	GET(UnitClass* const, pThis, ECX);
 
-	StopMovingAndRevertMission(pThis);
+	TechnoExt::ExtMap.Find(pThis)->IsScattering = false;
 
 	return 0;
 }
@@ -95,32 +77,24 @@ DEFINE_HOOK(0x743C91, UnitClass_Scatter_ScatterRecord1, 0x7)
 
 #pragma region EnhancedScatterContent
 
-static inline bool EnhancedScatterContent(CellClass* pCell, TechnoClass* pCaller, const CoordStruct& coords, bool alt)
+static inline void EnhancedScatterContent(CellClass* pCell, TechnoClass* pCaller, const CoordStruct& coords, bool alt)
 {
-	bool scatter = false;
-
 	for (auto pObject = (alt ? pCell->AltObject : pCell->FirstObject); pObject; pObject = pObject->NextObject)
 	{
 		const auto pFoot = abstract_cast<FootClass*>(pObject);
 
-		if (!pFoot || pFoot == pCaller || pFoot->IsTether)
+		if (!pFoot || pFoot == pCaller || pFoot->IsTether || !pFoot->Owner->IsAlliedWith(pCaller))
 			continue;
 
-		const auto pOwner = pFoot->Owner;
+		const auto pFootExt = TechnoExt::ExtMap.Find(pFoot);
 
-		if (!pOwner || !pOwner->IsAlliedWith(pCaller))
-			continue;
+		if (pFootExt->IsScattering || pFoot->NavQueue.Count > 0)
+			pFootExt->IsScattering = false;
+		else if (const auto pFootDestination = pFoot->Destination)
+			pFoot->NavQueue.AddItem(pFootDestination);
 
-		const auto pDestination = pFoot->Destination;
-
-		if (pDestination && pFoot->DistanceFrom(pDestination) >= RulesClass::Instance->CloseEnough)
-			continue;
-
-		scatter = true;
 		pFoot->Scatter(coords, true, true);
 	}
-
-	return scatter;
 }
 
 static void __fastcall CallEnhancedScatterContent(CellClass* pCell, TechnoClass* pCaller, const CoordStruct& coords, bool alt)
@@ -176,13 +150,8 @@ DEFINE_HOOK(0x4495DF, BuildingClass_CheckWeaponFactoryOutsideBusy_ScatterEntranc
 	if (!pTechno)
 		return NotBusy;
 
-	if (RulesExt::Global()->ExtendedScatterAction)
-	{
-		const auto pOwner = pTechno->Owner;
-
-		if (!pOwner || !pOwner->IsAlliedWith(pThis))
-			return Busy;
-	}
+	if (RulesExt::Global()->ExtendedScatterAction && !pTechno->Owner->IsAlliedWith(pThis))
+		return Busy;
 
 	CallEnhancedScatterContent(pCell, pThis, coords, false);
 
@@ -376,74 +345,26 @@ DEFINE_HOOK(0x75B885, WalkLocomotionClass_MovingProcess_ScatterForwardContent, 0
 
 #pragma region EnhancedScatterExecute
 
-static inline void CheckWhetherNeedOverrideMission(FootClass* pThis, CellClass* pCell)
+static inline void ScatterPathCellContent(FootClass* pThis, CellClass* pCell)
 {
-	const auto pThisDestination = pThis->Destination;
-
-	if (!pThisDestination)
-		return;
-
-	const auto thisCell = pThis->GetMapCoords();
-	const auto difference = pCell->MapCoords - thisCell;
-	const auto pThisExt = TechnoExt::ExtMap.Find(pThis);
-
-	std::vector<FootClass*> foots;
-	bool priority = false;
-
 	for (auto pObject = pCell->GetContent(); pObject; pObject = pObject->NextObject)
 	{
 		const auto pFoot = abstract_cast<FootClass*>(pObject);
 
-		if (!pFoot || pFoot == pThis || pFoot->IsTether)
+		if (!pFoot || pFoot == pThis || pFoot->IsTether || !pFoot->Owner->IsAlliedWith(pThis))
 			continue;
 
-		const auto pFootDestination = pFoot->Destination;
-
-		if (!pFootDestination)
-		{
-			pFoot->Scatter(pThis->Location, true, true);
+		if (std::abs(static_cast<short>(static_cast<short>(pFoot->PrimaryFacing.Desired().Raw) - static_cast<short>(pThis->PrimaryFacing.Current().Raw))) < 24576)
 			continue;
-		}
 
-		if (pFoot->DistanceFrom(pFootDestination) >= pThis->DistanceFrom(pThisDestination))
-		{
-			if (pThisExt->IsScattering)
-			{
-				pThisExt->IsScattering = false;
-				pThis->Scatter(pFoot->Location, true, true);
-			}
-			else
-			{
-				pThis->Override_Mission(Mission::Move, nullptr, MapClass::Instance->GetCellAt(thisCell - difference));
-				pThisExt->IsScattering = true;
-			}
+		const auto pFootExt = TechnoExt::ExtMap.Find(pFoot);
 
-			return;
-		}
+		if (pFootExt->IsScattering || pFoot->NavQueue.Count > 0)
+			pFootExt->IsScattering = false;
+		else if (const auto pFootDestination = pFoot->Destination)
+			pFoot->NavQueue.AddItem(pFootDestination);
 
-		foots.push_back(pFoot);
-		priority = true;
-	}
-
-	if (priority)
-	{
-		const auto destCell = pCell->MapCoords + difference;
-
-		for (const auto& pFoot : foots)
-		{
-			const auto pFootExt = TechnoExt::ExtMap.Find(pFoot);
-
-			if (pFootExt->IsScattering)
-			{
-				pFootExt->IsScattering = false;
-				pFoot->Scatter(pThis->Location, true, true);
-			}
-			else
-			{
-				pFoot->Override_Mission(Mission::Move, nullptr, MapClass::Instance->GetCellAt(destCell));
-				pFootExt->IsScattering = true;
-			}
-		}
+		pFoot->Scatter(CoordStruct::Empty, true, true);
 	}
 }
 
@@ -454,6 +375,7 @@ static inline CellStruct GetScatterCell(FootClass* pThis, int face)
 	const auto pThisCell = MapClass::Instance->GetCellAt(thisCell);
 	const auto height = (pThisCell->Level + (pThis->IsOnBridge() ? 4 : 0)) * Unsorted::LevelHeight;
 	auto alternativeCell = CellStruct::Empty;
+	auto alternativeMove = Move::No;
 
 	for (int i = 0; i < 8; ++i)
 	{
@@ -466,10 +388,56 @@ static inline CellStruct GetScatterCell(FootClass* pThis, int face)
 
 		const auto move = pThis->IsCellOccupied(pCell, static_cast<FacingType>(facing), pThis->GetCellLevel(), nullptr, true);
 
-		if (move != Move::OK)
+		if (move != Move::OK) // More selects
 		{
-			if ((move == Move::Temp || move == Move::Cloak || move == Move::ClosedGate || move == Move::Destroyable) && alternativeCell == CellStruct::Empty)
-				alternativeCell = cell;
+			if (move == Move::Temp)
+			{
+				if (alternativeMove != Move::Temp)
+				{
+					alternativeCell = cell;
+					alternativeMove = move;
+				}
+			}
+			else if (move == Move::ClosedGate)
+			{
+				if (alternativeMove != Move::ClosedGate && alternativeMove != Move::Temp)
+				{
+					alternativeCell = cell;
+					alternativeMove = move;
+				}
+			}
+			else if (move == Move::Destroyable)
+			{
+				if (alternativeMove != Move::Destroyable && alternativeMove != Move::ClosedGate && alternativeMove != Move::Temp)
+				{
+					alternativeCell = cell;
+					alternativeMove = move;
+				}
+			}
+			else if (move == Move::Cloak)
+			{
+				if (alternativeMove == Move::No || alternativeMove == Move::FriendlyDestroyable || alternativeMove == Move::MovingBlock)
+				{
+					alternativeCell = cell;
+					alternativeMove = move;
+				}
+			}
+			else if (move == Move::MovingBlock)
+			{
+				if (alternativeMove == Move::No || alternativeMove == Move::FriendlyDestroyable)
+				{
+					alternativeCell = cell;
+					alternativeMove = move;
+				}
+			}
+			else if (move == Move::FriendlyDestroyable)
+			{
+				if (alternativeMove == Move::No)
+				{
+					alternativeCell = cell;
+					alternativeMove = move;
+				}
+			}
 
 			continue;
 		}
@@ -478,7 +446,7 @@ static inline CellStruct GetScatterCell(FootClass* pThis, int face)
 		auto buffer = CellStruct::Empty;
 		const auto mapCell = *reinterpret_cast<CellStruct*(__thiscall*)(TacticalClass*, CellStruct*, CoordStruct*)>(0x6D6410)(TacticalClass::Instance(), &buffer, &coords);
 
-		if (cell != mapCell || pCell->ContainsBridge())
+		if (cell != mapCell) // || pCell->ContainsBridge()
 			continue;
 
 		return cell;
@@ -504,7 +472,7 @@ DEFINE_HOOK(0x4B3659, DriveLocomotionClass_MovingProcess2_CheckOverrideMission, 
 	GET(FootClass* const, pThis, EAX);
 	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x5C, -0x48));
 
-	CheckWhetherNeedOverrideMission(pThis, MapClass::Instance->GetCellAt(cell));
+	ScatterPathCellContent(pThis, MapClass::Instance->GetCellAt(cell));
 
 	return 0;
 }
@@ -514,7 +482,7 @@ DEFINE_HOOK(0x515D30, HoverLocomotionClass_MovingProcess_CheckOverrideMission, 0
 	GET(FootClass* const, pThis, EAX);
 	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x68, -0x5C));
 
-	CheckWhetherNeedOverrideMission(pThis, MapClass::Instance->GetCellAt(cell));
+	ScatterPathCellContent(pThis, MapClass::Instance->GetCellAt(cell));
 
 	return 0;
 }
@@ -524,7 +492,7 @@ DEFINE_HOOK(0x5B0BCA, MechLocomotionClass_MovingProcess_CheckOverrideMission, 0x
 	GET(FootClass* const, pThis, EAX);
 	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x68, -0x54));
 
-	CheckWhetherNeedOverrideMission(pThis, MapClass::Instance->GetCellAt(cell));
+	ScatterPathCellContent(pThis, MapClass::Instance->GetCellAt(cell));
 
 	return 0;
 }
@@ -534,7 +502,7 @@ DEFINE_HOOK(0x6A2CA8, ShipLocomotionClass_MovingProcess2_CheckOverrideMission, 0
 	GET(FootClass* const, pThis, EAX);
 	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x5C, -0x48));
 
-	CheckWhetherNeedOverrideMission(pThis, MapClass::Instance->GetCellAt(cell));
+	ScatterPathCellContent(pThis, MapClass::Instance->GetCellAt(cell));
 
 	return 0;
 }
@@ -544,7 +512,7 @@ DEFINE_HOOK(0x75B8AC, WalkLocomotionClass_MovingProcess_CheckOverrideMission, 0x
 	GET(FootClass* const, pThis, EAX);
 	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x48, -0x38));
 
-	CheckWhetherNeedOverrideMission(pThis, MapClass::Instance->GetCellAt(cell));
+	ScatterPathCellContent(pThis, MapClass::Instance->GetCellAt(cell));
 
 	return 0;
 }
