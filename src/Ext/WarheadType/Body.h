@@ -146,6 +146,7 @@ public:
 		Valueable<bool> CLIsBlack;
 		Nullable<bool> Particle_AlphaImageIsLightFlash;
 
+		Valueable<bool> BuildingSell;
 		Valueable<bool> BuildingUndeploy;
 		Valueable<bool> BuildingUndeploy_Leave;
 		Nullable<double> DamageOwnerMultiplier;
@@ -156,10 +157,6 @@ public:
 		ValueableVector<WeaponTypeClass*> SuppressRevengeWeapons_Types;
 		Valueable<bool> SuppressReflectDamage;
 		ValueableVector<AttachEffectTypeClass*> SuppressReflectDamage_Types;
-
-		Valueable<bool> BuildingSell;
-		Valueable<bool> BuildingUndeploy;
-		Valueable<bool> BuildingUndeploy_Leave;
 
 		// Ares tags
 		// http://ares-developers.github.io/Ares-docs/new/warheads/general.html
@@ -309,6 +306,7 @@ public:
 		    , CLIsBlack { false }
 			, Particle_AlphaImageIsLightFlash {}
 
+			, BuildingSell { false }
 			, BuildingUndeploy { false }
 			, BuildingUndeploy_Leave { false }
 			, DamageOwnerMultiplier {}
@@ -319,10 +317,6 @@ public:
 			, SuppressRevengeWeapons_Types {}
 			, SuppressReflectDamage { false }
 			, SuppressReflectDamage_Types {}
-
-			, BuildingSell { false }
-			, BuildingUndeploy { false }
-			, BuildingUndeploy_Leave { false }
 
 			, AffectsEnemies { true }
 			, AffectsOwner {}
