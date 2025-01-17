@@ -1915,8 +1915,7 @@ DEFINE_HOOK(0x732A85, TypeSelectExecute_SetContext, 0x7)
 	return 0;
 }
 
-DEFINE_HOOK_AGAIN(0x732C91, TechnoClass_IDMatches_ResetContext, 0x5)
-DEFINE_HOOK(0x732C8A, TechnoClass_IDMatches_ResetContext, 0x5)
+DEFINE_HOOK(0x732C97, TechnoClass_IDMatches_ResetContext, 0x5) // Ares hook return
 {
 	BuildingTypeSelectable::ProcessingIDMatches = false;
 	return 0;
