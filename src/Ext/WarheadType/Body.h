@@ -160,6 +160,7 @@ public:
 		Valueable<bool> CLIsBlack;
 		Nullable<bool> Particle_AlphaImageIsLightFlash;
 
+		Valueable<bool> BuildingSell;
 		Valueable<bool> BuildingUndeploy;
 		Valueable<bool> BuildingUndeploy_Leave;
 		Nullable<double> DamageOwnerMultiplier;
@@ -334,6 +335,7 @@ public:
 		    , CLIsBlack { false }
 			, Particle_AlphaImageIsLightFlash {}
 
+			, BuildingSell { false }
 			, BuildingUndeploy { false }
 			, BuildingUndeploy_Leave { false }
 			, DamageOwnerMultiplier {}

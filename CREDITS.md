@@ -410,6 +410,8 @@ This page lists all the individual contributions to the project by their author.
   - Aggressive attack move mission
   - No rearm and reload in EMP or temporal
   - Manually empty and reload ammo
+  - No turret unit turn to the target
+  - Sell or undeploy building on impact
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
@@ -431,6 +433,7 @@ This page lists all the individual contributions to the project by their author.
   - Toggle waypoint for building and aircraft
   - Weapon range finding in cylinder
   - Units are now unable to kick out from a factory that is in construction process
+  - No turret unit turn to the target
 - **tyuah8** - Drive/Jumpjet/Ship/Teleport locomotor did not power on when it is un-piggybacked bugfix
 - **Aephiex**
   - initial fix for Ares academy not working on the initial payloads of vehicles built from a war factory

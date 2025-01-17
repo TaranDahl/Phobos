@@ -143,20 +143,6 @@ DEFINE_HOOK(0x736AEA, UnitClass_UpdateRotation_ApplyUnitIdleAction, 0x6)
 
 #pragma region CheckFacing
 
-DEFINE_HOOK(0x7410BB, UnitClass_GetFireError_CheckFacingError, 0x8)
-{
-	enum { NoNeedToCheck = 0x74132B, ContinueCheck = 0x7410C3 };
-
-	GET(const FireError, fireError, EAX);
-
-	if (fireError == FireError::OK)
-		return ContinueCheck;
-
-	GET(UnitClass* const, pThis, ESI);
-
-	return (fireError == FireError::REARM && !pThis->Type->Turret && !pThis->IsWarpingIn()) ? ContinueCheck : NoNeedToCheck;
-}
-
 DEFINE_HOOK(0x7412BB, UnitClass_GetFireError_CheckFacingDeviation, 0x7)
 {
 	enum { SkipGameCode = 0x7412D4 };

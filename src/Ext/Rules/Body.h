@@ -154,6 +154,7 @@ public:
 		Valueable<bool> NoQueueUpToUnload;
 		Valueable<bool> AttackMove_Aggressive;
 		Valueable<bool> ExtendedScatterAction;
+		Valueable<bool> UnitWithoutTurretAlwaysTurnToTarget;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -397,6 +398,7 @@ public:
 			, NoQueueUpToUnload { false }
 			, AttackMove_Aggressive { false }
 			, ExtendedScatterAction { false }
+			, UnitWithoutTurretAlwaysTurnToTarget { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }

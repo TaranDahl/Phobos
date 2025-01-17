@@ -276,6 +276,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->CLIsBlack.Read(exINI, pSection, "CLIsBlack");
 	this->Particle_AlphaImageIsLightFlash.Read(exINI, pSection, "Particle.AlphaImageIsLightFlash");
 
+	this->BuildingSell.Read(exINI, pSection, "BuildingSell");
 	this->BuildingUndeploy.Read(exINI, pSection, "BuildingUndeploy");
 	this->BuildingUndeploy_Leave.Read(exINI, pSection, "BuildingUndeploy.Leave");
 	this->DamageOwnerMultiplier.Read(exINI, pSection, "DamageOwnerMultiplier");
@@ -335,12 +336,13 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 		|| this->Shield_RemoveTypes.size() > 0
 		|| this->Shield_RemoveAll
 		|| this->Convert_Pairs.size() > 0
-		|| this->BuildingUndeploy
 		|| this->InflictLocomotor
 		|| this->RemoveInflictedLocomotor
 		|| this->AttachEffects.AttachTypes.size() > 0
 		|| this->AttachEffects.RemoveTypes.size() > 0
 		|| this->AttachEffects.RemoveGroups.size() > 0
+		|| this->BuildingSell
+		|| this->BuildingUndeploy
 	);
 
 	char tempBuffer[32];
@@ -521,6 +523,7 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->InflictLocomotor)
 		.Process(this->RemoveInflictedLocomotor)
 
+		.Process(this->BuildingSell)
 		.Process(this->BuildingUndeploy)
 		.Process(this->BuildingUndeploy_Leave)
 		.Process(this->DamageOwnerMultiplier)
