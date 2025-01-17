@@ -661,7 +661,7 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 			else
 				drawInfo("First Nav-Queue", pFoot, nullptr);
 
-			drawText("Scattering = %s", (pExt->IsScattering ? "Yes" : "No"));
+			drawText("Scattering = %s", (pExt->ScatteringStopFrame >= Unsorted::CurrentFrame() ? "Yes" : "No"));
 
 			if (pFoot->BelongsToATeam())
 			{

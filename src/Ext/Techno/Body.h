@@ -60,7 +60,7 @@ public:
 		DWORD LastTargetID;
 		int AccumulatedGattlingValue;
 		bool ShouldUpdateGattlingValue;
-		bool IsScattering;
+		int ScatteringStopFrame;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 		bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
 
@@ -109,7 +109,7 @@ public:
 			, LastTargetID { 0xFFFFFFFF }
 			, AccumulatedGattlingValue { 0 }
 			, ShouldUpdateGattlingValue { false }
-			, IsScattering { false }
+			, ScatteringStopFrame { 0 }
 			, FiringObstacleCell {}
 			, IsDetachingForCloak { false }
 			, OriginalPassengerOwner {}
