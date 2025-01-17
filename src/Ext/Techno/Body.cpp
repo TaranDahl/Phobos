@@ -576,7 +576,11 @@ void TechnoExt::ExtData::ToggleAggressiveStance()
 	this->AggressiveStance = !this->AggressiveStance;
 
 	if (!this->AggressiveStance)
-		this->OwnerObject()->QueueMission(Mission::Guard, false);
+	{
+		const auto pThis = this->OwnerObject();
+		pThis->QueueMission(Mission::Guard, false);
+		pThis->SetTarget(nullptr);
+	}
 }
 
 bool TechnoExt::ExtData::CanToggleAggressiveStance()
