@@ -217,6 +217,8 @@ public:
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
 		Valueable<bool> UseFixedVoxelLighting;
 
+		Valueable<bool> UnitWithoutTurretAlwaysTurnToTarget;
+
 		Valueable<bool> GatherWhenMCVDeploy;
 		Valueable<bool> AIFireSale;
 		Valueable<int> AIFireSaleDelay;
@@ -400,6 +402,7 @@ public:
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 			, UseFixedVoxelLighting { false }
+			, UnitWithoutTurretAlwaysTurnToTarget { false }
 			, GatherWhenMCVDeploy { true }
 			, AIFireSale { true }
 			, AIFireSaleDelay { 0 }

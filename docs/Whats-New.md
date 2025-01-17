@@ -491,6 +491,7 @@ New:
 - Aggressive attack move mission (by CrimRecya)
 - No rearm and reload in EMP or temporal (by CrimRecya)
 - Manually empty and reload ammo (by CrimRecya)
+- No turret unit turn to the target (by CrimRecya & TaranDahl)
 - Unit `Speed` setting now accepts floating point values (by Starkku)
 - Exclusive SuperWeapon Sidebar (by NetsuNegi & CrimRecya)
 - Custom exit cell for infantry factory (by Starkku)
