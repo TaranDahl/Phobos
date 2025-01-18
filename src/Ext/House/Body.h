@@ -26,6 +26,7 @@ public:
 
 		std::vector<UnitClass*> OwnedDeployingUnits;
 		BuildingTypeClass* CurrentBuildingType;
+		BuildingTypeClass* CurrentBuildingDrawType;
 		CellStruct CurrentBuildingTopLeft;
 		CDTimerClass CurrentBuildingTimer;
 		int CurrentBuildingTimes;
@@ -77,6 +78,7 @@ public:
 			, OwnedLimboDeliveredBuildings {}
 			, OwnedDeployingUnits {}
 			, CurrentBuildingType { nullptr }
+			, CurrentBuildingDrawType { nullptr }
 			, CurrentBuildingTopLeft {}
 			, CurrentBuildingTimer {}
 			, CurrentBuildingTimes { 0 }

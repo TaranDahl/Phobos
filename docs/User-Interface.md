@@ -352,7 +352,7 @@ PlacementGrid.WaterFrames=1,0,0  ; integer, zero-based frame index - have techno
 
 ### `[ ]` Save Variables
 
-- Save local & global variables to an INI file. See [this](Miscellanous.html#save-variables-to-file) for details.
+- Save local & global variables to an INI file. See [this](Miscellanous.md#save-variables-to-file) for details.
 - For localization add `TXT_SAVE_VARIABLES` and `TXT_SAVE_VARIABLES_DESC` into your `.csf` file.
 
 ### `[ ]` Toggle Designator Range
@@ -369,7 +369,7 @@ PlacementGrid.WaterFrames=1,0,0  ; integer, zero-based frame index - have techno
 - For localization add `MSG:SelectCaptured`, `TXT_SELECT_CAPTURED` and `TXT_SELECT_CAPTURED_DESC` into your `.csf` file.
 
 ### `[ ]` Toggle Frame By Frame Mode
-- Switches on/off [frame by frame mode](Miscellanous.html#frame-step-in).
+- Switches on/off [frame by frame mode](Miscellanous.md#frame-step-in).
 - For localization add `TXT_FRAME_BY_FRAME` and `TXT_FRAME_BY_FRAME_DESC` into your `.csf` file.
 
 ### `[ ]` Exclusive SW Sidebar Shortcuts
