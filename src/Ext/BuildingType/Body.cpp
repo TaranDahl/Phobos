@@ -561,12 +561,11 @@ bool BuildingTypeExt::CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, Cel
 
 void BuildingTypeExt::DrawAdjacentLines()
 {
-	const auto pBuilding = abstract_cast<BuildingClass*>(DisplayClass::Instance->CurrentBuilding);
+	const auto pType = abstract_cast<BuildingTypeClass*>(DisplayClass::Instance->CurrentBuildingType);
 
-	if (!pBuilding)
+	if (!pType)
 		return;
 
-	const auto pType = pBuilding->Type;
 	const auto adjacent = static_cast<short>(pType->Adjacent + 1);
 
 	if (adjacent <= 0)
@@ -866,6 +865,8 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->LimboBuild.Read(exINI, pSection, "LimboBuild");
 	this->LimboBuildID.Read(exINI, pSection, "LimboBuildID");
 	this->LaserFencePost_Fence.Read(exINI, pSection, "LaserFencePost.Fence");
+	this->PlaceBuilding_OnLand.Read(exINI, pSection, "PlaceBuilding.OnLand");
+	this->PlaceBuilding_OnWater.Read(exINI, pSection, "PlaceBuilding.OnWater");
 
 	this->FactoryPlant_AllowTypes.Read(exINI, pSection, "FactoryPlant.AllowTypes");
 	this->FactoryPlant_DisallowTypes.Read(exINI, pSection, "FactoryPlant.DisallowTypes");
@@ -996,6 +997,8 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->LimboBuild)
 		.Process(this->LimboBuildID)
 		.Process(this->LaserFencePost_Fence)
+		.Process(this->PlaceBuilding_OnLand)
+		.Process(this->PlaceBuilding_OnWater)
 		.Process(this->AircraftDockingDirs)
 		.Process(this->FactoryPlant_AllowTypes)
 		.Process(this->FactoryPlant_DisallowTypes)

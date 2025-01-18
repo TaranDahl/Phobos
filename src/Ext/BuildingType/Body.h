@@ -69,6 +69,8 @@ public:
 		Valueable<bool> LimboBuild;
 		Valueable<int> LimboBuildID;
 		Valueable<BuildingTypeClass*> LaserFencePost_Fence;
+		Valueable<BuildingTypeClass*> PlaceBuilding_OnLand;
+		Valueable<BuildingTypeClass*> PlaceBuilding_OnWater;
 
 		std::vector<std::optional<DirType>> AircraftDockingDirs;
 
@@ -127,6 +129,8 @@ public:
 			, LimboBuild { false }
 			, LimboBuildID { -1 }
 			, LaserFencePost_Fence {}
+			, PlaceBuilding_OnLand {}
+			, PlaceBuilding_OnWater {}
 			, AircraftDockingDirs {}
 			, FactoryPlant_AllowTypes {}
 			, FactoryPlant_DisallowTypes {}
