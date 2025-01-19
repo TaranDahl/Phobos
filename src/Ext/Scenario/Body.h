@@ -38,8 +38,6 @@ public:
 
 		std::vector<TechnoTypeExt::ExtData*> OwnedExistCameoTechnoTypes;
 		std::vector<CellStruct> BaseNormalCells;
-
-		std::vector<int> SWButtonData;
 		std::vector<TechnoExt::ExtData*> OwnedHeros;
 
 		ExtData(ScenarioClass* OwnerObject) : Extension<ScenarioClass>(OwnerObject)
@@ -51,7 +49,6 @@ public:
 			, TransportReloaders {}
 			, OwnedExistCameoTechnoTypes {}
 			, BaseNormalCells {}
-			, SWButtonData {}
 			, OwnedHeros {}
 		{ }
 
