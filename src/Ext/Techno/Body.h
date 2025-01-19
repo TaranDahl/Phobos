@@ -149,6 +149,7 @@ public:
 		void UpdateTypeData(TechnoTypeClass* currentType);
 		void UpdateLaserTrails();
 		void UpdateAttachEffects();
+		void UpdateGattlingRateDownReset();
 		void UpdateCumulativeAttachEffects(AttachEffectTypeClass* pAttachEffectType, AttachEffectClass* pRemoved = nullptr);
 		void RecalculateStatMultipliers();
 		void UpdateTemporal();
@@ -156,7 +157,6 @@ public:
 		void UpdateRecountBurst();
 		void UpdateRearmInEMPState();
 		void UpdateRearmInTemporal();
-		void UpdateGattlingRateDownReset();
 		void InitializeLaserTrails();
 		void InitializeAttachEffects();
 		void UpdateSelfOwnedAttachEffects();

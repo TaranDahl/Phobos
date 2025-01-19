@@ -507,6 +507,7 @@ New:
 - Manually empty and reload ammo (by CrimRecya)
 - No turret unit turn to the target (by CrimRecya & TaranDahl)
 - Sell or undeploy building on impact (by CrimRecya)
+- Extended gattling rate down logic (by CrimRecya)
 - Unit `Speed` setting now accepts floating point values (by Starkku)
 - Aggressive stance toggle command (auto target unarmed enemy buildings) (by Aephiex)
 - Exclusive SuperWeapon Sidebar (by NetsuNegi & CrimRecya)
