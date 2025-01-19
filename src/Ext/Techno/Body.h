@@ -63,9 +63,6 @@ public:
 		int ScatteringStopFrame;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
 		bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
-		DWORD LastTargetID;
-		int AccumulatedGattlingValue;
-		bool ShouldUpdateGattlingValue;
 
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
 		// as neither is guaranteed to point to the house the TechnoClass had prior to entering transport and cannot be safely overridden.
@@ -115,9 +112,6 @@ public:
 			, ScatteringStopFrame { 0 }
 			, FiringObstacleCell {}
 			, IsDetachingForCloak { false }
-			, LastTargetID { 0xFFFFFFFF }
-			, AccumulatedGattlingValue { 0 }
-			, ShouldUpdateGattlingValue { false }
 			, OriginalPassengerOwner {}
 			, HasRemainingWarpInDelay { false }
 			, LastWarpInDelay { 0 }
@@ -144,7 +138,6 @@ public:
 		void UpdateRecountBurst();
 		void UpdateRearmInEMPState();
 		void UpdateRearmInTemporal();
-		void UpdateGattlingRateDownReset();
 		void InitializeLaserTrails();
 		void InitializeAttachEffects();
 		void UpdateSelfOwnedAttachEffects();
