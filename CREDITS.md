@@ -405,6 +405,7 @@ This page lists all the individual contributions to the project by their author.
   - Manually empty and reload ammo
   - No turret unit turn to the target
   - Sell or undeploy building on impact
+  - Extended gattling rate down logic
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
