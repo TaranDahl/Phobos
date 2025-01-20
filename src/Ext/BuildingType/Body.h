@@ -72,7 +72,8 @@ public:
 		Nullable<int> RallySpeedType;
 		Nullable<int> RallyMovementZone;
 
-		Valueable<bool> AutoUpgrade;
+		Valueable<bool> AutoBuilding;
+		Valueable<int> AutoBuilding_Gap;
 		Valueable<bool> LimboBuild;
 		Valueable<int> LimboBuildID;
 		Valueable<BuildingTypeClass*> LaserFencePost_Fence;
@@ -138,7 +139,8 @@ public:
 			, AnimDontDelayBurst { false }
 			, RallySpeedType { }
 			, RallyMovementZone { }
-			, AutoUpgrade { false }
+			, AutoBuilding { false }
+			, AutoBuilding_Gap { 1 }
 			, LimboBuild { false }
 			, LimboBuildID { -1 }
 			, LaserFencePost_Fence {}
@@ -200,7 +202,7 @@ public:
 	static bool CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseClass* pOccupierHouse);
 	static bool CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, CellStruct topLeftCell, HouseClass* pHouse, TechnoClass* pExceptTechno = nullptr);
 	static void DrawAdjacentLines();
-	static bool AutoUpgradeBuilding(BuildingClass* pBuilding);
+	static bool AutoPlaceBuilding(BuildingClass* pBuilding);
 	static bool BuildLimboBuilding(BuildingClass* pBuilding);
 	static void CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID);
 	static bool DeleteLimboBuilding(BuildingClass* pBuilding, int ID);

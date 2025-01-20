@@ -642,46 +642,98 @@ void BuildingTypeExt::DrawAdjacentLines()
 	}
 }
 
-bool BuildingTypeExt::AutoUpgradeBuilding(BuildingClass* pBuilding)
+bool BuildingTypeExt::AutoPlaceBuilding(BuildingClass* pBuilding)
 {
-	const auto pBuildingType = pBuilding->Type;
+	const auto pType = pBuilding->Type;
+	const auto pTypeExt = BuildingTypeExt::ExtMap.Find(pType);
 
-	if (!pBuildingType->PowersUpBuilding[0])
+	if (!pTypeExt->AutoBuilding)
 		return false;
 
-	if (const auto pTypeExt = BuildingTypeExt::ExtMap.Find(pBuildingType))
+	const auto pHouse = pBuilding->Owner;
+
+	if (pHouse->Buildings.Count <= 0)
+		return false;
+
+	const auto pHouseExt = HouseExt::ExtMap.Find(pHouse);
+
+	if (pType->PowersUpBuilding[0])
 	{
-		if (pTypeExt->AutoUpgrade)
+		for (const auto& pOwned : pHouse->Buildings)
 		{
-			const auto pHouse = pBuilding->Owner;
-			const auto pHouseExt = HouseExt::ExtMap.Find(pHouse);
+			if (!reinterpret_cast<bool(__thiscall*)(BuildingClass*, BuildingTypeClass*, HouseClass*)>(0x452670)(pOwned, pType, pHouse)) // CanUpgradeBuilding
+				continue;
 
-			for (const auto& pOwned : pHouse->Buildings)
+			if (!pOwned->IsAlive || pOwned->Health <= 0 || !pOwned->IsOnMap || pOwned->InLimbo || pOwned->CurrentMission == Mission::Selling)
+				continue;
+
+			const auto cell = pOwned->GetMapCoords();
+
+			if (cell == CellStruct::Empty || pHouseExt->OwnsLimboDeliveredBuilding(pOwned))
+				continue;
+
+			const EventClass event
+			(
+				pHouse->ArrayIndex,
+				EventType::Place,
+				AbstractType::Building,
+				pType->GetArrayIndex(),
+				pType->Naval,
+				cell
+			);
+			EventClass::AddEvent(event);
+
+			return true;
+		}
+	}
+	else
+	{
+		const auto speedType = pType->Naval ? SpeedType::Float : SpeedType::Track;
+		const auto buildGap = pTypeExt->AutoBuilding_Gap * 2;
+		const auto width = pType->GetFoundationWidth() + buildGap;
+		const auto height = pType->GetFoundationHeight(false) + buildGap;
+		const auto offset = CellSpread::GetNeighbourOffset(Unsorted::CurrentFrame() & 7u);
+		const auto buildOffset = CellStruct { static_cast<short>(pTypeExt->AutoBuilding_Gap), static_cast<short>(pTypeExt->AutoBuilding_Gap) };
+		const auto foundation = pType->GetFoundationData(true);
+
+		for (const auto& pOwned : pHouse->Buildings)
+		{
+			if (!pOwned->IsAlive || pOwned->Health <= 0 || !pOwned->IsOnMap || pOwned->InLimbo || pOwned->CurrentMission == Mission::Selling)
+				continue;
+
+			const auto baseCell = pOwned->GetMapCoords();
+
+			if (baseCell == CellStruct::Empty || !pOwned->Type->BaseNormal || pHouseExt->OwnsLimboDeliveredBuilding(pOwned))
+				continue;
+
+			auto cell = pType->PlaceAnywhere ? baseCell : MapClass::Instance->NearByLocation(baseCell, speedType, -1, MovementZone::Normal, false,
+				width, height, false, false, false, false, (baseCell + offset), false, true);
+
+			if (cell == CellStruct::Empty)
+				break;
+
+			cell += buildOffset;
+
+			if (!reinterpret_cast<bool(__thiscall*)(MapClass*, BuildingTypeClass*, int, CellStruct*, CellStruct*)>(0x4A8EB0)(MapClass::Instance(),
+				pType, pHouse->ArrayIndex, foundation, &cell) // Adjacent
+				|| !reinterpret_cast<bool(__thiscall*)(MapClass*, BuildingTypeClass*, int, CellStruct*, CellStruct*)>(0x4A9070)(MapClass::Instance(),
+				pType, pHouse->ArrayIndex, foundation, &cell)) // NoShroud
 			{
-				if (reinterpret_cast<bool(__thiscall*)(BuildingClass*, BuildingTypeClass*, HouseClass*)>(0x452670)(pOwned, pBuildingType, pHouse)) // CanUpgradeBuilding
-				{
-					if (pOwned->IsAlive && pOwned->Health > 0 && pOwned->IsOnMap && !pOwned->InLimbo && pOwned->CurrentMission != Mission::Selling)
-					{
-						const auto cell = pOwned->GetMapCoords();
-
-						if (cell != CellStruct::Empty && !pHouseExt->OwnsLimboDeliveredBuilding(pOwned))
-						{
-							const EventClass event
-							(
-								pHouse->ArrayIndex,
-								EventType::Place,
-								AbstractType::Building,
-								pBuildingType->GetArrayIndex(),
-								pBuildingType->Naval,
-								cell
-							);
-							EventClass::AddEvent(event);
-
-							return true;
-						}
-					}
-				}
+				continue;
 			}
+
+			const EventClass event
+			(
+				pHouse->ArrayIndex,
+				EventType::Place,
+				AbstractType::Building,
+				pType->GetArrayIndex(),
+				pType->Naval,
+				cell
+			);
+			EventClass::AddEvent(event);
+
+			return true;
 		}
 	}
 
@@ -692,23 +744,20 @@ bool BuildingTypeExt::BuildLimboBuilding(BuildingClass* pBuilding)
 {
 	const auto pBuildingType = pBuilding->Type;
 
-	if (const auto pTypeExt = BuildingTypeExt::ExtMap.Find(pBuildingType))
+	if (BuildingTypeExt::ExtMap.Find(pBuildingType)->LimboBuild)
 	{
-		if (pTypeExt->LimboBuild)
-		{
-			const EventClass event
-			(
-				pBuilding->Owner->ArrayIndex,
-				EventType::Place,
-				AbstractType::Building,
-				pBuildingType->GetArrayIndex(),
-				pBuildingType->Naval,
-				CellStruct { 1, 1 }
-			);
-			EventClass::AddEvent(event);
+		const EventClass event
+		(
+			pBuilding->Owner->ArrayIndex,
+			EventType::Place,
+			AbstractType::Building,
+			pBuildingType->GetArrayIndex(),
+			pBuildingType->Naval,
+			CellStruct { 1, 1 }
+		);
+		EventClass::AddEvent(event);
 
-			return true;
-		}
+		return true;
 	}
 
 	return false;
@@ -866,7 +915,8 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->RallySpeedType.Read(exINI, pSection, "RallySpeedType");
 	this->RallyMovementZone.Read(exINI,pSection,"RallyMovementZone");
 
-	this->AutoUpgrade.Read(exINI, pSection, "AutoUpgrade");
+	this->AutoBuilding.Read(exINI, pSection, "AutoBuilding");
+	this->AutoBuilding_Gap.Read(exINI, pSection, "AutoBuilding.Gap");
 	this->LimboBuild.Read(exINI, pSection, "LimboBuild");
 	this->LimboBuildID.Read(exINI, pSection, "LimboBuildID");
 	this->LaserFencePost_Fence.Read(exINI, pSection, "LaserFencePost.Fence");
@@ -1007,7 +1057,8 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AnimDontDelayBurst)
 		.Process(this->RallySpeedType)
 		.Process(this->RallyMovementZone)
-		.Process(this->AutoUpgrade)
+		.Process(this->AutoBuilding)
+		.Process(this->AutoBuilding_Gap)
 		.Process(this->LimboBuild)
 		.Process(this->LimboBuildID)
 		.Process(this->LaserFencePost_Fence)
