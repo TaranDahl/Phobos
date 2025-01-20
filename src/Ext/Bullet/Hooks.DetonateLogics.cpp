@@ -314,7 +314,6 @@ DEFINE_HOOK(0x469AA4, BulletClass_Logics_Extras, 0x5)
 		auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pThis->WeaponType);
 		int defaultDamage = pThis->WeaponType->Damage;
 
-		// Extra warheads
 		for (size_t i = 0; i < pWeaponExt->ExtraWarheads.size(); i++)
 		{
 			auto const pWH = pWeaponExt->ExtraWarheads[i];
