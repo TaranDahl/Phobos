@@ -256,9 +256,9 @@ public:
 		Valueable<ColorStruct> SelectedInfo_BelowColor;
 		Valueable<TechnoTypeClass*> FakeOf;
 		CustomPalette CameoPal;
-		Nullable<bool> NoRearm_Inactive;
+		Nullable<bool> NoRearm_UnderEMP;
 		Nullable<bool> NoRearm_Temporal;
-		Nullable<bool> NoReload_Inactive;
+		Nullable<bool> NoReload_UnderEMP;
 		Nullable<bool> NoReload_Temporal;
 		Valueable<int> RateDown_Ammo;
 		Valueable<int> RateDown_Delay;
@@ -583,9 +583,9 @@ public:
 			, SelectedInfo_BelowColor { { 0, 0, 0 } }
 			, FakeOf {}
 			, CameoPal {}
-			, NoRearm_Inactive {}
+			, NoRearm_UnderEMP {}
 			, NoRearm_Temporal {}
-			, NoReload_Inactive {}
+			, NoReload_UnderEMP {}
 			, NoReload_Temporal {}
 			, RateDown_Ammo { -2 }
 			, RateDown_Delay { 0 }
