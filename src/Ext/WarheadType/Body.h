@@ -141,8 +141,6 @@ public:
 
 		Valueable<bool> Nonprovocative;
 
-		Nullable<bool> MergeBuildingDamage;
-
 		Nullable<int> CombatLightDetailLevel;
 		Valueable<double> CombatLightChance;
 		Valueable<bool> CLIsBlack;
@@ -151,7 +149,7 @@ public:
 		Valueable<bool> BuildingSell;
 		Valueable<bool> BuildingUndeploy;
 		Valueable<bool> BuildingUndeploy_Leave;
-		Valueable<bool> MergeBuildingDamage;
+		Nullable<bool> MergeBuildingDamage;
 		Nullable<double> DamageOwnerMultiplier;
 		Nullable<double> DamageAlliesMultiplier;
 		Nullable<double> DamageEnemiesMultiplier;
@@ -304,8 +302,6 @@ public:
 
 			, Nonprovocative { false }
 
-			, MergeBuildingDamage {}
-
 			, CombatLightDetailLevel {}
 			, CombatLightChance { 1.0 }
 		    , CLIsBlack { false }
@@ -314,7 +310,7 @@ public:
 			, BuildingSell { false }
 			, BuildingUndeploy { false }
 			, BuildingUndeploy_Leave { false }
-			, MergeBuildingDamage { false }
+			, MergeBuildingDamage {}
 			, DamageOwnerMultiplier {}
 			, DamageAlliesMultiplier {}
 			, DamageEnemiesMultiplier {}

@@ -155,6 +155,7 @@ public:
 		Valueable<bool> AttackMove_Aggressive;
 		Valueable<bool> ExtendedScatterAction;
 		Valueable<bool> UnitWithoutTurretAlwaysTurnToTarget;
+		Valueable<bool> MergeBuildingDamage;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -210,8 +211,6 @@ public:
 		Valueable<Point2D> DrawInsignia_AdjustPos_Units;
 		Valueable<AnimTypeClass*> Promote_VeteranAnimation;
 		Valueable<AnimTypeClass*> Promote_EliteAnimation;
-
-		Valueable<bool> MergeBuildingDamage;
 
 		Valueable<double> AircraftLevelLightMultiplier;
 		Valueable<double> JumpjetLevelLightMultiplier;
@@ -350,6 +349,7 @@ public:
 			, AttackMove_Aggressive { false }
 			, ExtendedScatterAction { false }
 			, UnitWithoutTurretAlwaysTurnToTarget { false }
+			, MergeBuildingDamage { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
@@ -399,7 +399,6 @@ public:
 			, ShowDesignatorRange { true }
 			, DropPodTrailer { }
 			, PodImage { }
-			, MergeBuildingDamage { false }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
 			, VoxelLightSource { }
