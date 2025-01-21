@@ -479,6 +479,65 @@ int TechnoExt::ExtData::GetAttachedEffectCumulativeCount(AttachEffectTypeClass* 
 	return foundCount;
 }
 
+void TechnoExt::ExtData::InitAggressiveStance()
+{
+	this->AggressiveStance = this->TypeExtData->AggressiveStance.Get();
+}
+
+bool TechnoExt::ExtData::GetAggressiveStance() const
+{
+	// if this is a passenger then obey the configuration of the transport
+	if (auto pTransport = this->OwnerObject()->Transporter)
+		return TechnoExt::ExtMap.Find(pTransport)->GetAggressiveStance();
+
+	return this->AggressiveStance;
+}
+
+void TechnoExt::ExtData::ToggleAggressiveStance()
+{
+	this->AggressiveStance = !this->AggressiveStance;
+
+	if (!this->AggressiveStance)
+	{
+		const auto pThis = this->OwnerObject();
+		pThis->QueueMission(Mission::Guard, false);
+		pThis->SetTarget(nullptr);
+	}
+}
+
+bool TechnoExt::ExtData::CanToggleAggressiveStance()
+{
+	if (!RulesExt::Global()->EnableAggressiveStance)
+		return false;
+
+	const auto pTypeExt = this->TypeExtData;
+
+	if (!pTypeExt->AggressiveStance_Togglable.isset())
+	{
+		// Only techno that are armed and open-topped can be aggressive stance.
+		if (!this->OwnerObject()->IsArmed() && !pTypeExt->OwnerObject()->OpenTopped)
+		{
+			pTypeExt->AggressiveStance_Togglable = false;
+			return false;
+		}
+
+		// Engineers and Agents are default to not allow aggressive stance.
+		if (auto pInfantryTypeClass = abstract_cast<InfantryTypeClass*>(pTypeExt->OwnerObject()))
+		{
+			if (pInfantryTypeClass->Engineer || pInfantryTypeClass->Agent)
+			{
+				pTypeExt->AggressiveStance_Togglable = false;
+				return false;
+			}
+		}
+
+		pTypeExt->AggressiveStance_Togglable = true;
+		return true;
+	}
+
+	return pTypeExt->AggressiveStance_Togglable.Get(true);
+}
+
 // =============================
 // load / save
 
@@ -555,62 +614,6 @@ void TechnoExt::ExtData::SaveToStream(PhobosStreamWriter& Stm)
 {
 	Extension<TechnoClass>::SaveToStream(Stm);
 	this->Serialize(Stm);
-}
-
-void TechnoExt::ExtData::InitAggressiveStance()
-{
-	this->AggressiveStance = this->TypeExtData->AggressiveStance.Get();
-}
-
-bool TechnoExt::ExtData::GetAggressiveStance() const
-{
-	// if this is a passenger then obey the configuration of the transport
-	if (auto pTransport = this->OwnerObject()->Transporter)
-		return TechnoExt::ExtMap.Find(pTransport)->GetAggressiveStance();
-
-	return this->AggressiveStance;
-}
-
-void TechnoExt::ExtData::ToggleAggressiveStance()
-{
-	this->AggressiveStance = !this->AggressiveStance;
-
-	if (!this->AggressiveStance)
-	{
-		const auto pThis = this->OwnerObject();
-		pThis->QueueMission(Mission::Guard, false);
-		pThis->SetTarget(nullptr);
-	}
-}
-
-bool TechnoExt::ExtData::CanToggleAggressiveStance()
-{
-	const auto pTypeExt = this->TypeExtData;
-
-	if (!pTypeExt->AggressiveStance_Togglable.isset())
-	{
-		// Only techno that are armed and open-topped can be aggressive stance.
-		if (!(this->OwnerObject()->IsArmed() || pTypeExt->OwnerObject()->OpenTopped))
-		{
-			pTypeExt->AggressiveStance_Togglable = false;
-			return false;
-		}
-
-		// Engineers and Agents are default to not allow aggressive stance.
-		if (auto pInfantryTypeClass = abstract_cast<InfantryTypeClass*>(pTypeExt->OwnerObject()))
-		{
-			if (pInfantryTypeClass->Engineer || pInfantryTypeClass->Agent)
-			{
-				pTypeExt->AggressiveStance_Togglable = false;
-				return false;
-			}
-		}
-
-		pTypeExt->AggressiveStance_Togglable = true;
-		return true;
-	}
-
-	return pTypeExt->AggressiveStance_Togglable.Get(true);
 }
 
 bool TechnoExt::LoadGlobals(PhobosStreamReader& Stm)
