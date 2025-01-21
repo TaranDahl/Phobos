@@ -511,6 +511,7 @@ New:
 - Unit `Speed` setting now accepts floating point values (by Starkku)
 - Aggressive stance toggle command (auto target unarmed enemy buildings) (by Aephiex)
 - Exclusive SuperWeapon Sidebar (by NetsuNegi & CrimRecya)
+- Allow merging AOE damage to buildings into one (by CrimRecya)
 - Custom exit cell for infantry factory (by Starkku)
 
 Vanilla fixes:

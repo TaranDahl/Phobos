@@ -155,6 +155,7 @@ public:
 		Valueable<bool> AttackMove_Aggressive;
 		Valueable<bool> ExtendedScatterAction;
 		Valueable<bool> UnitWithoutTurretAlwaysTurnToTarget;
+		Valueable<bool> MergeBuildingDamage;
 
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
@@ -401,6 +402,7 @@ public:
 			, AttackMove_Aggressive { false }
 			, ExtendedScatterAction { false }
 			, UnitWithoutTurretAlwaysTurnToTarget { false }
+			, MergeBuildingDamage { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
