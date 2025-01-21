@@ -163,6 +163,7 @@ public:
 		Valueable<bool> BuildingSell;
 		Valueable<bool> BuildingUndeploy;
 		Valueable<bool> BuildingUndeploy_Leave;
+		Valueable<bool> MergeBuildingDamage;
 		Nullable<double> DamageOwnerMultiplier;
 		Nullable<double> DamageAlliesMultiplier;
 		Nullable<double> DamageEnemiesMultiplier;
@@ -338,6 +339,7 @@ public:
 			, BuildingSell { false }
 			, BuildingUndeploy { false }
 			, BuildingUndeploy_Leave { false }
+			, MergeBuildingDamage { false }
 			, DamageOwnerMultiplier {}
 			, DamageAlliesMultiplier {}
 			, DamageEnemiesMultiplier {}

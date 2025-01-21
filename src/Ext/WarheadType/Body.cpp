@@ -279,6 +279,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildingSell.Read(exINI, pSection, "BuildingSell");
 	this->BuildingUndeploy.Read(exINI, pSection, "BuildingUndeploy");
 	this->BuildingUndeploy_Leave.Read(exINI, pSection, "BuildingUndeploy.Leave");
+	this->MergeBuildingDamage.Read(exINI, pSection, "MergeBuildingDamage");
 	this->DamageOwnerMultiplier.Read(exINI, pSection, "DamageOwnerMultiplier");
 	this->DamageAlliesMultiplier.Read(exINI, pSection, "DamageAlliesMultiplier");
 	this->DamageEnemiesMultiplier.Read(exINI, pSection, "DamageEnemiesMultiplier");
@@ -526,6 +527,7 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->BuildingSell)
 		.Process(this->BuildingUndeploy)
 		.Process(this->BuildingUndeploy_Leave)
+		.Process(this->MergeBuildingDamage)
 		.Process(this->DamageOwnerMultiplier)
 		.Process(this->DamageAlliesMultiplier)
 		.Process(this->DamageEnemiesMultiplier)
