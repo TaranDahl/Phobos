@@ -406,6 +406,7 @@ This page lists all the individual contributions to the project by their author.
   - No turret unit turn to the target
   - Sell or undeploy building on impact
   - Extended gattling rate down logic
+  - Allow merging AOE damage to buildings into one
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
