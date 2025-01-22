@@ -1684,3 +1684,15 @@ DEFINE_HOOK(0x6A9C54, StripClass_DrawStrip_FindFactoryDehardCode, 0x6)
 
 	return 0;
 }
+
+// Enable Building Production Queue Hook #6 -> sub_6A9540 - Skip draw building factory busy
+DEFINE_HOOK(0x6A9789, StripClass_DrawStrip_NoGreyCameo, 0x6)
+{
+	enum { ContinueCheck = 0x6A9799, SkipGameCode = 0x6A97FB };
+
+	GET(TechnoTypeClass* const, pType, EBX);
+	GET_STACK(bool, clicked, STACK_OFFSET(0x48C, -0x475));
+
+	return (!RulesExt::Global()->ExpandBuildingQueue && pType->WhatAmI() == AbstractType::BuildingType && clicked) ? SkipGameCode : ContinueCheck;
+}
+
