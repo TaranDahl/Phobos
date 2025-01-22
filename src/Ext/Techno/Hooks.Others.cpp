@@ -1906,7 +1906,7 @@ DEFINE_HOOK(0x64C739, Game_ProcessDoList_AddMegaMissionEvent, 0xA)
 DEFINE_HOOK(0x6FFDA5, TechnoClass_ClickedMission_CacheClickedMission, 0x7)
 {
 	GET_STACK(AbstractClass* const, pCell, STACK_OFFSET(0x98, 0xC));
-	GET(TechnoClass* const, pThis, ECX);
+	GET(TechnoClass* const, pThis, ESI);
 	GET(AbstractClass* const, pTarget, EBP);
 	GET(Mission const, mission, EDI);
 
