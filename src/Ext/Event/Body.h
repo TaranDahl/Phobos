@@ -11,11 +11,11 @@ enum class EventTypeExt : uint8_t
 	// CnCNet reserved Events from 0x30 to 0x3F
 	// Ares used Events 0x60 and 0x61
 
-	ToggleAggressiveStance = 0x80,
-	ManualReload = 0x81,
+	ManualReload = 0x80,
+	ToggleAggressiveStance = 0x81,
 
-	FIRST = ToggleAggressiveStance,
-	LAST = ManualReload
+	FIRST = ManualReload,
+	LAST = ToggleAggressiveStance
 };
 
 #pragma pack(push, 1)
@@ -44,11 +44,11 @@ public:
 	bool AddEvent();
 	void RespondEvent();
 
-	static void RaiseToggleAggressiveStance(TechnoClass* pTechno);
-	void RespondToToggleAggressiveStance();
-
 	static void RaiseManualReloadEvent(TechnoClass* pTechno);
 	void RespondToManualReloadEvent();
+
+	static void RaiseToggleAggressiveStance(TechnoClass* pTechno);
+	void RespondToToggleAggressiveStance();
 
 	static size_t GetDataSize(EventTypeExt type);
 	static bool IsValidType(EventTypeExt type);

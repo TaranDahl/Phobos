@@ -5,6 +5,7 @@
 #include <HouseClass.h>
 
 #include "Ext/Techno/Body.h"
+#include <Ext/WarheadType/Body.h>
 
 bool EventExt::AddEvent()
 {
@@ -15,11 +16,48 @@ void EventExt::RespondEvent()
 {
 	switch (this->Type)
 	{
-	case EventTypeExt::ToggleAggressiveStance:
-		this->RespondToToggleAggressiveStance();
 	case EventTypeExt::ManualReload:
 		this->RespondToManualReloadEvent();
+	case EventTypeExt::ToggleAggressiveStance:
+		this->RespondToToggleAggressiveStance();
 		break;
+	}
+}
+
+void EventExt::RaiseManualReloadEvent(TechnoClass* pTechno)
+{
+	EventExt eventExt {};
+	eventExt.Type = EventTypeExt::ManualReload;
+	eventExt.HouseIndex = static_cast<char>(pTechno->Owner->ArrayIndex);
+	eventExt.Frame = Unsorted::CurrentFrame;
+	eventExt.ManualReloadEvent.Who = TargetClass(pTechno);
+	eventExt.AddEvent();
+	Debug::LogGame("Adding event MANUAL_RELOAD\n");
+}
+
+void EventExt::RespondToManualReloadEvent()
+{
+	if (const auto pTechno = this->ManualReloadEvent.Who.As_Techno())
+	{
+		if (pTechno->Ammo > 0 && pTechno->IsAlive && !pTechno->Berzerk)
+		{
+			const auto pType = pTechno->GetTechnoType();
+			const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+
+			if (pType && pTechno->Ammo != pType->Ammo && pTypeExt->CanManualReload)
+			{
+				if (pTypeExt->CanManualReload_DetonateWarhead && pTypeExt->CanManualReload_DetonateConsume <= pTechno->Ammo)
+					WarheadTypeExt::DetonateAt(pTypeExt->CanManualReload_DetonateWarhead.Get(), pTechno->GetCoords(), pTechno, 1, pTechno->Owner, pTechno->Target);
+
+				if (pTypeExt->CanManualReload_ResetROF)
+					pTechno->RearmTimer.Stop();
+
+				pTechno->Ammo = 0;
+
+				if (pTechno->WhatAmI() != AbstractType::Aircraft)
+					pTechno->StartReloading();
+			}
+		}
 	}
 }
 
@@ -48,44 +86,14 @@ void EventExt::RespondToToggleAggressiveStance()
 	}
 }
 
-void EventExt::RaiseManualReloadEvent(TechnoClass* pTechno)
-{
-	EventExt eventExt {};
-	eventExt.Type = EventTypeExt::ManualReload;
-	eventExt.HouseIndex = static_cast<char>(pTechno->Owner->ArrayIndex);
-	eventExt.Frame = Unsorted::CurrentFrame;
-	eventExt.ManualReloadEvent.Who = TargetClass(pTechno);
-	eventExt.AddEvent();
-	Debug::LogGame("Adding event MANUAL_RELOAD\n");
-}
-
-void EventExt::RespondToManualReloadEvent()
-{
-	if (const auto pTechno = this->ManualReloadEvent.Who.As_Techno())
-	{
-		if (pTechno->Ammo > 0 && pTechno->IsAlive && !pTechno->Berzerk)
-		{
-			const auto pType = pTechno->GetTechnoType();
-
-			if (pType && pTechno->Ammo != pType->Ammo && TechnoTypeExt::ExtMap.Find(pType)->CanManualReload)
-			{
-				pTechno->Ammo = 0;
-
-				if (pTechno->WhatAmI() != AbstractType::Aircraft)
-					pTechno->StartReloading();
-			}
-		}
-	}
-}
-
 size_t EventExt::GetDataSize(EventTypeExt type)
 {
 	switch (type)
 	{
-	case EventTypeExt::ToggleAggressiveStance:
-		return sizeof(EventExt::ToggleAggressiveStance);
 	case EventTypeExt::ManualReload:
 		return sizeof(EventExt::ManualReloadEvent);
+	case EventTypeExt::ToggleAggressiveStance:
+		return sizeof(EventExt::ToggleAggressiveStance);
 	}
 
 	return 0;

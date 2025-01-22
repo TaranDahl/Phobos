@@ -601,6 +601,9 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoQueueUpToEnter.Read(exINI, pSection, "NoQueueUpToEnter");
 	this->NoQueueUpToUnload.Read(exINI, pSection, "NoQueueUpToUnload");
 	this->CanManualReload.Read(exINI, pSection, "CanManualReload");
+	this->CanManualReload_ResetROF.Read(exINI, pSection, "CanManualReload.ResetROF");
+	this->CanManualReload_DetonateWarhead.Read(exINI, pSection, "CanManualReload.DetonateWarhead");
+	this->CanManualReload_DetonateConsume.Read(exINI, pSection, "CanManualReload.DetonateConsume");
 
 	this->CombatAlert.Read(exINI, pSection, "CombatAlert");
 	this->CombatAlert_NotBuilding.Read(exINI, pSection, "CombatAlert.NotBuilding");
@@ -1081,6 +1084,9 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->NoQueueUpToEnter)
 		.Process(this->NoQueueUpToUnload)
 		.Process(this->CanManualReload)
+		.Process(this->CanManualReload_ResetROF)
+		.Process(this->CanManualReload_DetonateWarhead)
+		.Process(this->CanManualReload_DetonateConsume)
 
 		.Process(this->CombatAlert)
 		.Process(this->CombatAlert_NotBuilding)
