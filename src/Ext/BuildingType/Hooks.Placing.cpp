@@ -1664,7 +1664,7 @@ DEFINE_HOOK(0x4FAAD8, HouseClass_AbandonProduction_RewriteForBuilding, 0x8)
 				return Return;
 		}
 
-		return dontCare ? CheckSame : SkipCheck;
+		return dontCare ? CheckSame : CheckSame;
 	}
 
 	if (!pFactory->Object)
