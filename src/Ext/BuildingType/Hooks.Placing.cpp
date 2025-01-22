@@ -1614,3 +1614,73 @@ DEFINE_HOOK(0x6D5815, TacticalClass_DrawLaserFenceGrid_SkipDrawLaserFence, 0x6)
 
 	return 0;
 }
+
+// Enable Building Production Queue Hook #1 -> sub_6AAD00 - Allow to press building cameo
+DEFINE_HOOK(0x6AB689, SelectClass_Action_SkipBuildingProductionCheck, 0x5)
+{
+	enum { SkipGameCode = 0x6AB6CE };
+	return RulesExt::Global()->ExpandBuildingQueue ? SkipGameCode : 0;
+}
+
+// Enable Building Production Queue Hook #2 -> sub_4FA350 - Lift the building ban
+DEFINE_HOOK(0x4FA520, HouseClass_BeginProduction_SkipBuilding, 0x5)
+{
+	enum { SkipGameCode = 0x4FA553 };
+	return RulesExt::Global()->ExpandBuildingQueue ? SkipGameCode : 0;
+}
+
+// Enable Building Production Queue Hook #3 -> sub_4C9C70 - No exception for building
+DEFINE_HOOK(0x4C9C7B, FactoryClass_QueueProduction_ForceCheckBuilding, 0x7)
+{
+	enum { SkipGameCode = 0x4C9C9E };
+	return RulesExt::Global()->ExpandBuildingQueue ? SkipGameCode : 0;
+}
+
+// Enable Building Production Queue Hook #4 -> sub_4FAA10 - Abandon building production
+DEFINE_HOOK(0x4FAAD8, HouseClass_AbandonProduction_RewriteForBuilding, 0x8)
+{
+	enum { CheckSame = 0x4FAB3D, SkipCheck = 0x4FAB64, Return = 0x4FAC9B };
+
+	GET_STACK(const bool, all, STACK_OFFSET(0x18, 0x10));
+	GET(const int, index, EBX);
+	GET(const BuildCat, buildCat, ECX);
+	GET(const AbstractType, absType, EBP);
+	GET(FactoryClass* const, pFactory, ESI);
+
+	const auto dontCare = buildCat == BuildCat::DontCare;
+
+	if (dontCare || all)
+	{
+		const auto pType = TechnoTypeClass::GetByTypeAndIndex(absType, index);
+		const auto firstRemoved = pFactory->RemoveOneFromQueue(pType);
+
+		if (firstRemoved)
+		{
+			SidebarClass::Instance->RepaintSidebar(SidebarClass::GetObjectTabIdx(absType, index, 0));
+
+			if (all)
+				while (pFactory->RemoveOneFromQueue(pType));
+			else
+				return Return;
+		}
+
+		return dontCare ? CheckSame : SkipCheck;
+	}
+
+	if (!pFactory->Object)
+		return SkipCheck;
+
+	return pFactory->RemoveOneFromQueue(TechnoTypeClass::GetByTypeAndIndex(absType, index)) ? Return : CheckSame;
+}
+
+// Enable Building Production Queue Hook #5 -> sub_6A9540 - Count defence
+DEFINE_HOOK(0x6A9C54, StripClass_DrawStrip_FindFactoryDehardCode, 0x6)
+{
+	GET(TechnoTypeClass* const, pType, ECX);
+	LEA_STACK(BuildCat*, pBuildCat, STACK_OFFSET(0x490, -0x490));
+
+	if (const auto pBuildingType = abstract_cast<BuildingTypeClass*>(pType))
+		*pBuildCat = pBuildingType->BuildCat;
+
+	return 0;
+}

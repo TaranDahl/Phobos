@@ -133,6 +133,7 @@ public:
 		Valueable<Vector3D<int>> Cameo_OverlayFrames;
 		CustomPalette Cameo_OverlayPalette;
 		Valueable<bool> ExpandBuildingPlace;
+		Valueable<bool> ExpandBuildingQueue;
 		Valueable<bool> PlacementGrid_Expand;
 		Valueable<Vector3D<int>> PlacementGrid_LandFrames;
 		Valueable<Vector3D<int>> PlacementGrid_WaterFrames;
@@ -327,6 +328,7 @@ public:
 			, Cameo_OverlayFrames { { -1, -1, -1 } }
 			, Cameo_OverlayPalette {}
 			, ExpandBuildingPlace { false }
+			, ExpandBuildingQueue { false }
 			, PlacementGrid_Expand { false }
 			, PlacementGrid_LandFrames { { 1, 0, 0 } }
 			, PlacementGrid_WaterFrames { { 1, 0, 0 } }
