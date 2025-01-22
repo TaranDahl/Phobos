@@ -688,8 +688,11 @@ bool BuildingTypeExt::AutoPlaceBuilding(BuildingClass* pBuilding)
 	}
 	else
 	{
+		// TODO Wall
 		const auto speedType = pType->Naval ? SpeedType::Float : SpeedType::Track;
+		// TODO MovementZone?
 		const auto buildGap = pTypeExt->AutoBuilding_Gap * 2;
+		// TODO ProtectWithWall
 		const auto width = pType->GetFoundationWidth() + buildGap;
 		const auto height = pType->GetFoundationHeight(false) + buildGap;
 		const auto offset = CellSpread::GetNeighbourOffset(Unsorted::CurrentFrame() & 7u);
