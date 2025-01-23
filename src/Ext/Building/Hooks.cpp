@@ -575,9 +575,7 @@ DEFINE_HOOK(0x4FAAD8, HouseClass_AbandonProduction_RewriteForBuilding, 0x8)
 	GET(const AbstractType, absType, EBP);
 	GET(FactoryClass* const, pFactory, ESI);
 
-	const auto dontCare = buildCat == BuildCat::DontCare;
-
-	if (dontCare || all)
+	if (buildCat == BuildCat::DontCare || all)
 	{
 		const auto pType = TechnoTypeClass::GetByTypeAndIndex(absType, index);
 		const auto firstRemoved = pFactory->RemoveOneFromQueue(pType);
@@ -592,7 +590,7 @@ DEFINE_HOOK(0x4FAAD8, HouseClass_AbandonProduction_RewriteForBuilding, 0x8)
 				return Return;
 		}
 
-		return dontCare ? CheckSame : CheckSame;
+		return CheckSame;
 	}
 
 	if (!pFactory->Object)
