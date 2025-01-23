@@ -177,7 +177,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->Cameo_OverlayFrames.Read(exINI, GameStrings::AudioVisual, "Cameo.OverlayFrames");
 	this->Cameo_OverlayPalette.LoadFromINI(pINI, GameStrings::AudioVisual, "Cameo.OverlayPalette");
 	this->ExpandBuildingPlace.Read(exINI, GameStrings::General, "ExpandBuildingPlace");
-	this->ExpandBuildingQueue.Read(exINI, GameStrings::General, "ExpandBuildingQueue");
+	this->BuildingProductionQueue.Read(exINI, GameStrings::General, "BuildingProductionQueue");
 	this->PlacementGrid_Expand.Read(exINI, GameStrings::AudioVisual, "PlacementGrid.Expand");
 	this->PlacementGrid_LandFrames.Read(exINI, GameStrings::AudioVisual, "PlacementGrid.LandFrames");
 	this->PlacementGrid_WaterFrames.Read(exINI, GameStrings::AudioVisual, "PlacementGrid.WaterFrames");
@@ -201,6 +201,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->ExtendedScatterAction.Read(exINI, GameStrings::General, "ExtendedScatterAction");
 	this->UnitWithoutTurretAlwaysTurnToTarget.Read(exINI, GameStrings::General, "UnitWithoutTurretAlwaysTurnToTarget");
 	this->MergeBuildingDamage.Read(exINI, GameStrings::CombatDamage, "MergeBuildingDamage");
+
 
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
 	this->ForbidParallelAIQueues_Aircraft.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Aircraft");
@@ -487,7 +488,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->Cameo_OverlayFrames)
 		.Process(this->Cameo_OverlayPalette)
 		.Process(this->ExpandBuildingPlace)
-		.Process(this->ExpandBuildingQueue)
+		.Process(this->BuildingProductionQueue)
 		.Process(this->PlacementGrid_Expand)
 		.Process(this->PlacementGrid_LandFrames)
 		.Process(this->PlacementGrid_WaterFrames)
