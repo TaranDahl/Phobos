@@ -158,6 +158,8 @@ public:
 		Valueable<bool> UnitWithoutTurretAlwaysTurnToTarget;
 		Valueable<bool> MergeBuildingDamage;
 
+		Valueable<bool> ExpandBuildingQueue;
+
 		Valueable<bool> AllowParallelAIQueues;
 		Valueable<bool> ForbidParallelAIQueues_Aircraft;
 		Valueable<bool> ForbidParallelAIQueues_Building;
@@ -352,6 +354,8 @@ public:
 			, ExtendedScatterAction { false }
 			, UnitWithoutTurretAlwaysTurnToTarget { false }
 			, MergeBuildingDamage { false }
+
+			, ExpandBuildingQueue { false }
 
 			, AllowParallelAIQueues { true }
 			, ForbidParallelAIQueues_Aircraft { false }
