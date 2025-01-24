@@ -54,6 +54,7 @@ bool Phobos::Config::SelectedDisplay_Enable = false;
 bool Phobos::Config::FPSCounter_Enable = false;
 bool Phobos::Config::MessageDisplayInCenter = false;
 bool Phobos::Config::ShowBuildingStatistics = false;
+bool Phobos::Config::AutoBuilding_Enable = true;
 bool Phobos::Config::DrawAdjacentBoundary = false;
 bool Phobos::Config::RealTimeTimers = false;
 bool Phobos::Config::RealTimeTimers_Adaptive = false;

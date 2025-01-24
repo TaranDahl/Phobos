@@ -36,6 +36,7 @@
     <ClCompile Include="src\Commands\SelectedInfo.cpp" />
     <ClCompile Include="src\Commands\HerosInfo.cpp" />
     <ClCompile Include="src\Commands\FPSNewCounter.cpp" />
+    <ClCompile Include="src\Commands\AutoBuilding.cpp" />
     <ClCompile Include="src\Commands\DistributionMode.cpp" />
     <ClCompile Include="src\Commands\ShowCurrentInfo.cpp" />
     <ClCompile Include="src\Commands\ManualReloadAmmo.cpp" />
@@ -224,6 +225,7 @@
     <ClInclude Include="src\Commands\SelectedInfo.h" />
     <ClInclude Include="src\Commands\HerosInfo.h" />
     <ClInclude Include="src\Commands\FPSNewCounter.h" />
+    <ClInclude Include="src\Commands\AutoBuilding.h" />
     <ClInclude Include="src\Commands\DistributionMode.h" />
     <ClInclude Include="src\Commands\ShowCurrentInfo.h" />
     <ClInclude Include="src\Commands\ManualReloadAmmo.h" />
