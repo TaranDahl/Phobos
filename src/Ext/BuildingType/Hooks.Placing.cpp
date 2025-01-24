@@ -247,7 +247,7 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 	if (!Game::IsActive)
 		return CanExistHere;
 
-	const auto expand = RulesExt::Global()->ExpandBuildingPlace.Get();
+	const auto expand = RulesExt::Global()->ExtendedBuildingPlacing.Get();
 	bool landFootOnly = false;
 
 	if (pBuildingType->LaserFence)
@@ -471,7 +471,7 @@ DEFINE_HOOK(0x47EEBC, CellClass_DrawPlaceGrid_RecordCell, 0x6)
 
 	if (!(pCell->AltFlags & AltCellFlags::ContainsBuilding))
 	{
-		if (!RulesExt::Global()->ExpandBuildingPlace)
+		if (!RulesExt::Global()->ExtendedBuildingPlacing)
 		{
 			R->EDX<BlitterFlags>(flags | (zero ? BlitterFlags::Zero : BlitterFlags::Nonzero));
 			return DrawVanillaAlt;
@@ -658,7 +658,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 			return BuildSucceeded;
 		}
 
-		if (RulesExt::Global()->ExpandBuildingPlace && !pBuildingType->PlaceAnywhere && !pBuildingType->PowersUpBuilding[0])
+		if (RulesExt::Global()->ExtendedBuildingPlacing && !pBuildingType->PlaceAnywhere && !pBuildingType->PowersUpBuilding[0])
 		{
 			const auto pHouseExt = HouseExt::ExtMap.Find(pHouse);
 			bool canBuild = true;
@@ -815,7 +815,7 @@ DEFINE_HOOK(0x4FB395, HouseClass_UnitFromFactory_SkipMouseReturn, 0x6)
 {
 	enum { SkipGameCode = 0x4FB489 };
 
-	if (!RulesExt::Global()->ExpandBuildingPlace)
+	if (!RulesExt::Global()->ExtendedBuildingPlacing)
 		return 0;
 
 	if (ProximityTemp::Mouse)
@@ -858,7 +858,7 @@ DEFINE_HOOK(0x4FB339, HouseClass_UnitFromFactory_SkipMouseClear, 0x6)
 
 	GET(TechnoClass* const, pTechno, ESI);
 
-	if (RulesExt::Global()->ExpandBuildingPlace)
+	if (RulesExt::Global()->ExtendedBuildingPlacing)
 	{
 		if (const auto pBuilding = abstract_cast<BuildingClass*>(pTechno))
 		{
@@ -880,7 +880,7 @@ DEFINE_HOOK(0x4FAB83, HouseClass_AbandonProductionOf_SkipMouseClear, 0x7)
 
 	GET(const int, index, EBX);
 
-	if (RulesExt::Global()->ExpandBuildingPlace && index >= 0)
+	if (RulesExt::Global()->ExtendedBuildingPlacing && index >= 0)
 	{
 		if (const auto pCurrentBuildingType = abstract_cast<BuildingTypeClass*>(DisplayClass::Instance->CurrentBuildingType))
 		{
@@ -897,7 +897,7 @@ DEFINE_HOOK(0x4CA05B, FactoryClass_AbandonProduction_AbandonCurrentBuilding, 0x5
 {
 	GET(FactoryClass*, pFactory, ESI);
 
-	if (RulesExt::Global()->ExpandBuildingPlace)
+	if (RulesExt::Global()->ExtendedBuildingPlacing)
 	{
 		const auto pHouseExt = HouseExt::ExtMap.Find(pFactory->Owner);
 
@@ -977,7 +977,7 @@ DEFINE_HOOK(0x4451F8, BuildingClass_KickOutUnit_CleanUpAIBuildingSpace, 0x6)
 		return BuildSucceeded;
 	}
 
-	if (!RulesExt::Global()->ExpandBuildingPlace)
+	if (!RulesExt::Global()->ExtendedBuildingPlacing)
 		return 0;
 
 	if (topLeftCell != CellStruct::Empty && !pBuildingType->PlaceAnywhere)
@@ -1152,7 +1152,7 @@ DEFINE_HOOK(0x73946C, UnitClass_TryToDeploy_CleanUpDeploySpace, 0x6)
 	GET(UnitClass* const, pUnit, EBP);
 	GET(CellStruct, topLeftCell, ESI);
 
-	if (!RulesExt::Global()->ExpandBuildingPlace)
+	if (!RulesExt::Global()->ExtendedBuildingPlacing)
 		return 0;
 
 	const auto pTechnoExt = TechnoExt::ExtMap.Find(pUnit);
@@ -1236,7 +1236,7 @@ DEFINE_HOOK(0x73946C, UnitClass_TryToDeploy_CleanUpDeploySpace, 0x6)
 // Buildable-upon TechnoTypes Hook #9-2 -> sub_73FD50 - Push the owner house into deploy check
 DEFINE_HOOK(0x73FF8F, UnitClass_MouseOverObject_ShowDeployCursor, 0x6)
 {
-	if (RulesExt::Global()->ExpandBuildingPlace) // This IF check is not so necessary
+	if (RulesExt::Global()->ExtendedBuildingPlacing) // This IF check is not so necessary
 	{
 		GET(const UnitClass* const, pUnit, ESI);
 		LEA_STACK(HouseClass**, pHousePtr, STACK_OFFSET(0x20, -0x20));
@@ -1249,7 +1249,7 @@ DEFINE_HOOK(0x73FF8F, UnitClass_MouseOverObject_ShowDeployCursor, 0x6)
 // Buildable-upon TechnoTypes Hook #10 -> sub_4C6CB0 - Stop deploy when get stop command
 DEFINE_HOOK(0x4C7665, EventClass_RespondToEvent_StopDeployInIdleEvent, 0x6)
 {
-	if (RulesExt::Global()->ExpandBuildingPlace) // This IF check is not so necessary
+	if (RulesExt::Global()->ExtendedBuildingPlacing) // This IF check is not so necessary
 	{
 		GET(const UnitClass* const, pUnit, ESI);
 
@@ -1302,7 +1302,7 @@ DEFINE_HOOK(0x4F8DB1, HouseClass_Update_CheckHangUpBuilding, 0x6)
 		}
 	}
 
-	if (!RulesExt::Global()->ExpandBuildingPlace)
+	if (!RulesExt::Global()->ExtendedBuildingPlacing)
 		return 0;
 
 	if (const auto pHouseExt = HouseExt::ExtMap.Find(pHouse))
@@ -1389,7 +1389,7 @@ DEFINE_HOOK(0x4A946E, DisplayClass_PreparePassesProximityCheck_ReplaceBuildingTy
 // Buildable-upon TechnoTypes Hook #12 -> sub_6D5030 - Draw the placing building preview
 DEFINE_HOOK(0x6D504C, TacticalClass_DrawPlacement_DrawPlacingPreview, 0x6)
 {
-	if (!RulesExt::Global()->ExpandBuildingPlace)
+	if (!RulesExt::Global()->ExtendedBuildingPlacing)
 		return 0;
 
 	const auto pPlayer = HouseClass::CurrentPlayer();
