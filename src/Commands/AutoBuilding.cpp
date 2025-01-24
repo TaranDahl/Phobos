@@ -30,7 +30,7 @@ void AutoBuildingCommandClass::Execute(WWKey eInput) const
 
 	MessageListClass::Instance->PrintMessage(
 		Phobos::Config::AutoBuilding_Enable ? L"Auto Building Switch On." : L"Auto Building Switch Off.",
-		RulesClass::Instance->MessageDelay,
+		150,
 		HouseClass::CurrentPlayer->ColorSchemeIndex,
 		true
 	);
