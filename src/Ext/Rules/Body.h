@@ -132,7 +132,8 @@ public:
 		Valueable<SHPStruct*> Cameo_OverlayShapes;
 		Valueable<Vector3D<int>> Cameo_OverlayFrames;
 		CustomPalette Cameo_OverlayPalette;
-		Valueable<bool> ExpandBuildingPlace;
+		Valueable<bool> ExtendedBuildingPlacing;
+		Valueable<bool> AutoBuilding;
 		Valueable<bool> BuildingProductionQueue;
 		Valueable<bool> PlacementGrid_Expand;
 		Valueable<Vector3D<int>> PlacementGrid_LandFrames;
@@ -327,7 +328,8 @@ public:
 			, Cameo_OverlayShapes { FileSystem::PIPS_SHP }
 			, Cameo_OverlayFrames { { -1, -1, -1 } }
 			, Cameo_OverlayPalette {}
-			, ExpandBuildingPlace { false }
+			, ExtendedBuildingPlacing { false }
+			, AutoBuilding { false }
 			, BuildingProductionQueue { false }
 			, PlacementGrid_Expand { false }
 			, PlacementGrid_LandFrames { { 1, 0, 0 } }
