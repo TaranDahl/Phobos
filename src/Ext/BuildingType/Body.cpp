@@ -1007,6 +1007,7 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SellBuildupLength.Read(exINI, pSection, "SellBuildupLength");
 	this->IsDestroyableObstacle.Read(exINI, pSection, "IsDestroyableObstacle");
 
+	this->Cameo_ShouldCount.Read(exINI, pSection, "Cameo.ShouldCount");
 	this->AutoBuilding.Read(exINI, pSection, "AutoBuilding");
 	this->AutoBuilding_Gap.Read(exINI, pSection, "AutoBuilding.Gap");
 	this->LimboBuild.Read(exINI, pSection, "LimboBuild");
@@ -1140,6 +1141,7 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ConsideredVehicle)
 		.Process(this->ZShapePointMove_OnBuildup)
 		.Process(this->SellBuildupLength)
+		.Process(this->Cameo_ShouldCount)
 		.Process(this->AutoBuilding)
 		.Process(this->AutoBuilding_Gap)
 		.Process(this->LimboBuild)
