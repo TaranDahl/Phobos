@@ -497,7 +497,8 @@ New:
 - Unit `Speed` setting now accepts floating point values (by Starkku)
 - Exclusive SuperWeapon Sidebar (by NetsuNegi & CrimRecya)
 - Allow merging AOE damage to buildings into one (by CrimRecya)
-- Enable Building Production Queue (by CrimRecya)
+- Enable building production queue (by CrimRecya)
+- Fixed sidebar not updating queued unit numbers when adding or removing units when the production is on hold (by CrimRecya)
 - Custom exit cell for infantry factory (by Starkku)
 
 Vanilla fixes:
