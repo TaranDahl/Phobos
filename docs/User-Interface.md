@@ -414,6 +414,11 @@ VoiceExitAggressiveStance=             ; sound entry
 - Manually empty and reload ammo if [CanManualReload=true](New-or-Enhanced-Logics.md#Manually-empty-and-reload-ammo).
 - For localization add `TXT_MANUAL_RELOAD` and `TXT_MANUAL_RELOAD_DESC` into your `.csf` file.
 
+### `[ ]` Auto Building
+
+- Switches on/off [auto building mode](New-or-Enhanced-Logics.md#Building-placing-and-deploying-logic-enhancement).
+- For localization add `TXT_AUTO_BUILD` and `TXT_AUTO_BUILD_DESC` into your `.csf` file.
+
 ## Loading screen
 
 - PCX files can now be used as loadscreen images.
