@@ -14,6 +14,7 @@
 #include "SelectedInfo.h"
 #include "HerosInfo.h"
 #include "FPSNewCounter.h"
+#include "AutoBuilding.h"
 #include "DistributionMode.h"
 #include "ShowCurrentInfo.h"
 #include "ManualReloadAmmo.h"
@@ -35,6 +36,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<SelectedInfoCommandClass>();
 	MakeCommand<HerosInfoCommandClass>();
 	MakeCommand<FPSNewCounterCommandClass>();
+	MakeCommand<AutoBuildingCommandClass>();
 	MakeCommand<DistributionMode1CommandClass>();
 	MakeCommand<DistributionMode2CommandClass>();
 	MakeCommand<AggressiveStanceClass>();
