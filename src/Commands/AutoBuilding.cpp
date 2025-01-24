@@ -1,5 +1,7 @@
 #include "AutoBuilding.h"
 
+#include <HouseClass.h>
+#include <MessageListClass.h>
 #include <Utilities/GeneralUtils.h>
 
 const char* AutoBuildingCommandClass::GetName() const
@@ -25,4 +27,11 @@ const wchar_t* AutoBuildingCommandClass::GetUIDescription() const
 void AutoBuildingCommandClass::Execute(WWKey eInput) const
 {
 	Phobos::Config::AutoBuilding_Enable = !Phobos::Config::AutoBuilding_Enable;
+
+	MessageListClass::Instance->PrintMessage(
+		Phobos::Config::AutoBuilding_Enable ? L"Auto Building Switch On." : L"Auto Building Switch Off.",
+		RulesClass::Instance->MessageDelay,
+		HouseClass::CurrentPlayer->ColorSchemeIndex,
+		true
+	);
 }
