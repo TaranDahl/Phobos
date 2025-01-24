@@ -366,6 +366,7 @@ This page lists all the individual contributions to the project by their author.
   - `TurretOffset` support for SHP vehicles
   - Customizable rocker amplitude
   - Customizable wake anim
+  - Initial effort on optimization for crates' random distribution
 - **Fryone**
   - Customizable ElectricBolt Arcs
   - Sound entry on unit's creation
@@ -386,6 +387,8 @@ This page lists all the individual contributions to the project by their author.
   - Fix aircraft `MovementZone` and `SpeedType` inconsistencies
   - Use 2D distance instead of 3D to check whether in air team members have arrived destination
   - Enhanced Straight trajectory
+  - Enable building production queue
+  - Fix for sidebar not updating queued unit numbers when on hold
   - Technos will maintain a suitable distance after firing
   - Several new Infotypes, no display in specific status and a new single frame display method
   - Projectile subject to ground check before firing
@@ -414,7 +417,6 @@ This page lists all the individual contributions to the project by their author.
   - Sell or undeploy building on impact
   - Extended gattling rate down logic
   - Allow merging AOE damage to buildings into one
-  - Enable Building Production Queue
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
