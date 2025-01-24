@@ -1012,6 +1012,7 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->RallySpeedType.Read(exINI, pSection, "RallySpeedType");
 	this->RallyMovementZone.Read(exINI,pSection,"RallyMovementZone");
 
+	this->Cameo_ShouldCount.Read(exINI, pSection, "Cameo.ShouldCount");
 	this->AutoBuilding.Read(exINI, pSection, "AutoBuilding");
 	this->AutoBuilding_Gap.Read(exINI, pSection, "AutoBuilding.Gap");
 	this->LimboBuild.Read(exINI, pSection, "LimboBuild");
@@ -1154,6 +1155,7 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AnimDontDelayBurst)
 		.Process(this->RallySpeedType)
 		.Process(this->RallyMovementZone)
+		.Process(this->Cameo_ShouldCount)
 		.Process(this->AutoBuilding)
 		.Process(this->AutoBuilding_Gap)
 		.Process(this->LimboBuild)

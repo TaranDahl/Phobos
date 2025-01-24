@@ -72,6 +72,7 @@ public:
 		Nullable<int> RallySpeedType;
 		Nullable<int> RallyMovementZone;
 
+		Nullable<bool> Cameo_ShouldCount;
 		Nullable<bool> AutoBuilding;
 		Valueable<int> AutoBuilding_Gap;
 		Valueable<bool> LimboBuild;
@@ -139,6 +140,7 @@ public:
 			, AnimDontDelayBurst { false }
 			, RallySpeedType { }
 			, RallyMovementZone { }
+			, Cameo_ShouldCount {}
 			, AutoBuilding {}
 			, AutoBuilding_Gap { 1 }
 			, LimboBuild { false }
