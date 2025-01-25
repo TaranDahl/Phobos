@@ -4,7 +4,6 @@
 #include <Utilities/Macro.h>
 #include <Utilities/AresHelper.h>
 #include <Utilities/Helpers.Alex.h>
-#include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
 
 #include <Ext/Sidebar/Body.h>
 
