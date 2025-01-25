@@ -407,6 +407,13 @@ void TacticalButtonsClass::CurrentSelectPathDraw()
 						}
 					}
 				}
+				else if (const auto pBuilding = abstract_cast<BuildingClass*>(pTechno))
+				{
+					const auto baseCell = pBuilding->GetMapCoords();
+
+					for (auto pFoundation = pBuilding->Type->FoundationOutside; *pFoundation != CellStruct { 0x7FFF, 0x7FFF }; ++pFoundation)
+						pathCells.push_back(MapClass::Instance->GetCellAt(baseCell + *pFoundation));
+				}
 
 				if (const auto cellsSize = pathCells.size())
 				{
