@@ -20,8 +20,6 @@ public:
 
 	static bool IsEnabled();
 
-	static bool __stdcall AresTabCameo_RemoveCameo(BuildType* pItem);
-
 	static SWSidebarClass Instance;
 
 public:
