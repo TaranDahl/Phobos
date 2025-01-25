@@ -6,6 +6,8 @@
 #include <Utilities/Helpers.Alex.h>
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
 
+#include <Ext/Sidebar/Body.h>
+
 // In vanilla YR, game destroys building animations directly by calling constructor.
 // Ares changed this to call UnInit() which has a consequence of doing pointer invalidation on the AnimClass pointer.
 // This notably causes an issue with Grinder that restores ActiveAnim if the building is sold/destroyed while SpecialAnim is playing even if the building is gone or in limbo.
@@ -47,7 +49,7 @@ void Apply_Ares3_0_Patches()
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x528C8, &Helpers::Alex::getCellSpreadItems);
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x5273A, &Helpers::Alex::getCellSpreadItems);
 
-	// Redirect Ares's RemoveCameo to out implementation:
+	// Redirect Ares's RemoveCameo to our implementation:
 	Patch::Apply_LJMP(AresHelper::AresBaseAddress + 0x02BDD0, GET_OFFSET(SidebarExt::AresTabCameo_RemoveCameo));
 
 	// InitialPayload creation:
@@ -66,7 +68,7 @@ void Apply_Ares3_0p1_Patches()
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x53578, &Helpers::Alex::getCellSpreadItems);
 	Patch::Apply_CALL(AresHelper::AresBaseAddress + 0x533EA, &Helpers::Alex::getCellSpreadItems);
 
-	// Redirect Ares's RemoveCameo to out implementation:
+	// Redirect Ares's RemoveCameo to our implementation:
 	Patch::Apply_LJMP(AresHelper::AresBaseAddress + 0x02C910, GET_OFFSET(SidebarExt::AresTabCameo_RemoveCameo));
 
 	// InitialPayload creation:
