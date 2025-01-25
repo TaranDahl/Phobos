@@ -615,7 +615,7 @@ DEFINE_HOOK(0x4FB1EA, HouseClass_UnitFromFactory_HangUpPlaceEvent, 0x5)
 			}
 
 			// If the land occupation of the two buildings is different, the larger one will prevail, And the smaller one may not be placed on the shore.
-			if ((MapClass::Instance->GetCellAt(checkCell)->LandType == LandType::Water) ^ pBuildingType->Naval)
+			if ((MapClass::Instance->GetCellAt(checkCell)->LandType == LandType::Water) ^ (pBuildingType->SpeedType == SpeedType::Float))
 				pBuildingType = pAnotherType;
 		}
 
