@@ -199,54 +199,47 @@ DEFINE_HOOK(0x692419, DisplayClass_ProcessClickCoords_SWSidebar, 0x7)
 	return toggleButton && toggleButton->IsHovering ? DoNothing : 0;
 }
 
-DEFINE_HOOK(0x4F92FB, HouseClass_UpdateTechTree_SWSidebar, 0x7)
+DEFINE_HOOK(0x4F92DD, HouseClass_UpdateTechTree_SWSidebar, 0x5)
 {
-	enum { SkipGameCode = 0x4F9302 };
-
 	GET(HouseClass*, pHouse, ESI);
 
-	pHouse->AISupers();
+	auto& sidebar = SWSidebarClass::Instance;
 
-	if (pHouse->IsCurrentPlayer())
+	for (const auto& column : sidebar.Columns)
 	{
-		auto& sidebar = SWSidebarClass::Instance;
+		std::vector<int> removeButtons;
 
-		for (const auto& column : sidebar.Columns)
+		for (const auto& button : column->Buttons)
 		{
-			std::vector<int> removeButtons;
+			if (HouseClass::CurrentPlayer->Supers[button->SuperIndex]->IsPresent)
+				continue;
 
-			for (const auto& button : column->Buttons)
-			{
-				if (HouseClass::CurrentPlayer->Supers[button->SuperIndex]->IsPresent)
-					continue;
-
-				removeButtons.push_back(button->SuperIndex);
-			}
-
-			for (const auto& index : removeButtons)
-			{
-				if (column->RemoveButton(index))
-					SidebarExt::Global()->SWSidebar_Indices.Remove(index);
-			}
+			removeButtons.push_back(button->SuperIndex);
 		}
 
-		SWSidebarClass::Instance.SortButtons();
-		int removes = 0;
-
-		for (const auto& column : sidebar.Columns)
+		for (const auto& index : removeButtons)
 		{
-			if (column->Buttons.empty())
-				++removes;
+			if (column->RemoveButton(index))
+				SidebarExt::Global()->SWSidebar_Indices.Remove(index);
 		}
-
-		for (; removes > 0; --removes)
-			sidebar.RemoveColumn();
-
-		if (const auto toggleButton = sidebar.ToggleButton)
-			toggleButton->UpdatePosition();
 	}
 
-	return SkipGameCode;
+	SWSidebarClass::Instance.SortButtons();
+	int removes = 0;
+
+	for (const auto& column : sidebar.Columns)
+	{
+		if (column->Buttons.empty())
+			++removes;
+	}
+
+	for (; removes > 0; --removes)
+		sidebar.RemoveColumn();
+
+	if (const auto toggleButton = sidebar.ToggleButton)
+		toggleButton->UpdatePosition();
+
+	return 0;
 }
 
 DEFINE_HOOK(0x6A6316, SidebarClass_AddCameo_SuperWeapon_SWSidebar, 0x6)
