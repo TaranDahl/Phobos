@@ -832,7 +832,8 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 	}
 	else
 	{
-		auto point = WWMouseClass::Instance->XY1 - Point2D { DSurface::ViewBounds->X, DSurface::ViewBounds->Y };
+		const auto mouseXY1 = WWMouseClass::Instance->XY1;
+		auto point = mouseXY1 - Point2D { DSurface::ViewBounds->X, DSurface::ViewBounds->Y };
 		auto cell = CellStruct::Empty;
 		auto coords = CoordStruct::Empty;
 		ObjectClass* pObj = nullptr;
@@ -842,6 +843,13 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		DisplayClass::Instance->ProcessClickCoords(&point, &cell, &coords, &pObj, &fogged, &shrouded);
 
 		const auto pCell = MapClass::Instance->GetCellAt(cell);
+
+		drawText("Cell: slope %d , UniqueID: %d", pCell->SlopeIndex, pCell->UniqueID);
+
+		constexpr const char* landTypes[12] = { "Clear", "Road", "Water", "Rock", "Wall", "Tiberium", "Beach", "Rough", "Ice", "Railroad", "Tunnel", "Weeds" };
+		const auto landType = static_cast<int>(pCell->LandType);
+
+		drawText("LandType = ( %s )", (landType >= 0 && landType < 12) ? landTypes[landType] : "Unknown");
 
 		drawText("Location = [ %d , %d , %d ]( %d , %d , %d )", coords.X, coords.Y, coords.Z, cell.X, cell.Y, pCell->GetLevel());
 
@@ -890,6 +898,10 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 
 		drawText("TubeIndex = %d", pCell->TubeIndex);
 		drawText("Rad Level = %.2f", pCell->RadLevel);
+
+		drawText(" ");
+
+		drawText("Mouse: ( %d , %d )", mouseXY1.X, mouseXY1.Y);
 
 		drawText(" ");
 
