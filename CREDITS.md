@@ -417,6 +417,7 @@ This page lists all the individual contributions to the project by their author.
   - Sell or undeploy building on impact
   - Extended gattling rate down logic
   - Allow merging AOE damage to buildings into one
+  - Distribution click action mode
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
