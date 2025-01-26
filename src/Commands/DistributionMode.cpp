@@ -212,3 +212,18 @@ DEFINE_HOOK(0x4F4596, GScreenClass_DrawOnTop_DrawDistributionModeShape, 0x7)
 
 	return 0;
 }
+
+DEFINE_HOOK(0x6DBE74, TacticalClass_DrawAllRadialIndicators_DrawDistributionRange, 0x7)
+{
+	if (const auto mode1 = DistributionMode1CommandClass::Mode)
+	{
+		const auto mode2 = DistributionMode2CommandClass::Mode;
+		const auto pCell = MapClass::Instance->GetCellAt(DisplayClass::Instance->CurrentFoundation_CenterCell);
+		const auto color = ((mode2 > 1)
+			? ((mode2 == 3) ? ColorStruct { 255, 0, 0 } : ColorStruct { 200, 200, 0 })
+			: (mode2 == 1) ? ColorStruct { 0, 100, 255 } : ColorStruct { 0, 255, 50 });
+		Game::DrawRadialIndicator(false, true, pCell->GetCoords(), color, static_cast<float>(2 << mode1), false, true);
+	}
+
+	return 0;
+}
