@@ -329,7 +329,10 @@ void TacticalButtonsClass::FPSCounterDraw()
 
 void TacticalButtonsClass::CurrentSelectPathDraw()
 {
-	if (Phobos::ShowCurrentInfo && ObjectClass::CurrentObjects->Count > 0)
+	if (!Phobos::ShowCurrentInfo)
+		return;
+
+	if (ObjectClass::CurrentObjects->Count > 0)
 	{
 		for (const auto& pCurrent : ObjectClass::CurrentObjects())
 		{
@@ -440,10 +443,22 @@ void TacticalButtonsClass::CurrentSelectPathDraw()
 					}
 				}
 
-				break;
+				return;
 			}
 		}
 	}
+
+	const auto pCell = MapClass::Instance->GetCellAt(DisplayClass::Instance->CurrentFoundation_CenterCell);
+	const auto location = CoordStruct { (pCell->MapCoords.X << 8), (pCell->MapCoords.Y << 8), 0 };
+	const auto height = pCell->GetLevel() * 15;
+	const auto position = TacticalClass::Instance->CoordsToScreen(location) - TacticalClass::Instance->TacticalPos - Point2D { 0, (1 + height) };
+
+	DSurface::Temp->DrawSHP(
+		FileSystem::PALETTE_PAL, Make_Global<SHPStruct*>(0x8A03FC),
+		(pCell->SlopeIndex + 2), &position, &DSurface::ViewBounds,
+		(BlitterFlags::Centered | BlitterFlags::TransLucent50 | BlitterFlags::bf_400 | BlitterFlags::Zero),
+		0, (-height - (pCell->SlopeIndex ? 12 : 2)), ZGradient::Ground, 1000, 0, 0, 0, 0, 0
+	);
 }
 
 void TacticalButtonsClass::CurrentSelectInfoDraw()
@@ -841,7 +856,6 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		BYTE shrouded = 0;
 
 		DisplayClass::Instance->ProcessClickCoords(&point, &cell, &coords, &pObj, &fogged, &shrouded);
-
 		const auto pCell = MapClass::Instance->GetCellAt(cell);
 
 		drawText("Cell: slope %d , UniqueID: %d", pCell->SlopeIndex, pCell->UniqueID);
@@ -902,29 +916,6 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		drawText(" ");
 
 		drawText("Mouse: ( %d , %d )", mouseXY1.X, mouseXY1.Y);
-
-		drawText(" ");
-
-		if (pObj)
-		{
-			const auto pType = pObj->GetType();
-			drawText("%s: %s , UniqueID: %d", "Object", pType->get_ID(), pObj->UniqueID);
-			drawText("Health = ( %d / %d )", pObj->Health, pType->Strength);
-			return;
-		}
-
-		drawText("N/A");
-
-		const auto location = CoordStruct { (cell.X << 8), (cell.Y << 8), 0 };
-		const auto height = pCell->GetLevel() * 15;
-		const auto position = TacticalClass::Instance->CoordsToScreen(location) - TacticalClass::Instance->TacticalPos - Point2D { 0, (1 + height) };
-
-		DSurface::Temp->DrawSHP(
-			FileSystem::PALETTE_PAL, Make_Global<SHPStruct*>(0x8A03FC),
-			(pCell->SlopeIndex + 2), &position, &DSurface::ViewBounds,
-			(BlitterFlags::Centered | BlitterFlags::TransLucent50 | BlitterFlags::bf_400 | BlitterFlags::Zero),
-			0, (-height - (pCell->SlopeIndex ? 12 : 2)), ZGradient::Ground, 1000, 0, 0, 0, 0, 0
-		);
 	}
 }
 
