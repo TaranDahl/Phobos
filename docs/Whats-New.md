@@ -350,6 +350,7 @@ New:
 - Buildings with foundation bigger than 1x1 can now recycle spawned correctly (by TaranDahl)
 - Infantry firing while moving (by TaranDahl)
 - Fix the bug that parasite will vanish if it missed its target when its previous cell is occupied (by TaranDahl)
+- Grant new superweapons in superweapons (by FS-21).
 - Enhance bombard trajectory with vertical and meteor trajectory (by NaotoYuuki & Ollerus)
 - Option for vehicles to keep target when issued move command (by Starkku)
 - Aggressive stance toggle command (auto target unarmed enemy buildings) (by Aephiex)
@@ -448,7 +449,6 @@ New:
 - Allow setting default singleplayer map loading screen and briefing offsets (by Starkku)
 - Allow toggling whether or not fire particle systems adjust target coordinates when firer rotates (by Starkku)
 - `AmbientDamage` warhead & main target ignore customization (by Starkku)
-- Grant new superweapons in superweapons (by FS-21).
 - Flashing Technos on selecting (by Fryone)
 - Customizable DropPod properties on a per-InfantryType basis (by Trsdy)
 - Projectile return weapon (by Starkku)
