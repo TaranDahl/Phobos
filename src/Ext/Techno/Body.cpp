@@ -588,13 +588,13 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->CachedCell)
 		.Process(this->CachedTarget)
 		.Process(this->FiringObstacleCell)
-		.Process(this->KeepTargetOnMove)
 		.Process(this->IsDetachingForCloak)
 		.Process(this->OriginalPassengerOwner)
 		.Process(this->HasRemainingWarpInDelay)
 		.Process(this->LastWarpInDelay)
 		.Process(this->IsBeingChronoSphered)
 		.Process(this->AggressiveStance)
+		.Process(this->KeepTargetOnMove)
 		;
 }
 

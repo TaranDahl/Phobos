@@ -69,7 +69,6 @@ public:
 		AbstractClass* CachedCell;
 		AbstractClass* CachedTarget;
 		CellClass* FiringObstacleCell; // Set on firing if there is an obstacle cell between target and techno, used for updating WaveClass target etc.
-		bool KeepTargetOnMove;
 		bool IsDetachingForCloak; // Used for checking animation detaching, set to true before calling Detach_All() on techno when this anim is attached to and to false after when cloaking only.
 
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
@@ -78,6 +77,7 @@ public:
 		bool HasRemainingWarpInDelay;          // Converted from object with Teleport Locomotor to one with a different Locomotor while still phasing in OR set if ChronoSphereDelay > 0.
 		int LastWarpInDelay;                   // Last-warp in delay for this unit, used by HasCarryoverWarpInDelay.
 		bool IsBeingChronoSphered;             // Set to true on units currently being ChronoSphered, does not apply to Ares-ChronoSphere'd buildings or Chrono reinforcements.
+		bool KeepTargetOnMove;
 
 		bool AggressiveStance;                  // Aggressive stance that will auto target buildings
 
@@ -128,13 +128,13 @@ public:
 			, CachedCell { nullptr }
 			, CachedTarget { nullptr }
 			, FiringObstacleCell {}
-			, KeepTargetOnMove { false }
 			, IsDetachingForCloak { false }
 			, OriginalPassengerOwner {}
 			, HasRemainingWarpInDelay { false }
 			, LastWarpInDelay { 0 }
 			, IsBeingChronoSphered { false }
 			, AggressiveStance { false }
+			, KeepTargetOnMove { false }
 		{ }
 
 		void OnEarlyUpdate();
