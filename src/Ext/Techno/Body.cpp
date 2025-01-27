@@ -527,6 +527,7 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->HasRemainingWarpInDelay)
 		.Process(this->LastWarpInDelay)
 		.Process(this->IsBeingChronoSphered)
+		.Process(this->KeepTargetOnMove)
 		;
 }
 
