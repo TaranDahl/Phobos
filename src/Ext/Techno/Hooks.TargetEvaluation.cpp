@@ -179,7 +179,9 @@ DEFINE_HOOK(0x4DF3A0, FootClass_UpdateAttackMove_SelectNewTarget, 0x6)
 {
 	GET(FootClass* const, pThis, ECX);
 
-	if (RulesExt::Global()->AttackMove_Aggressive && CheckAttackMoveCanResetTarget(pThis))
+	const auto pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (pExt->TypeExtData->AttackMove_UpdateTarget.Get(RulesExt::Global()->AttackMove_Aggressive) && CheckAttackMoveCanResetTarget(pThis))
 	{
 		pThis->Target = nullptr;
 		pThis->HaveAttackMoveTarget = false;
@@ -197,8 +199,13 @@ DEFINE_HOOK(0x6F85AB, TechnoClass_CanAutoTargetObject_AggressiveAttackMove, 0x6)
 	if (!pThis->Owner->IsControlledByHuman())
 		return CanTarget;
 
-	if (RulesExt::Global()->AttackMove_Aggressive && pThis->MegaMissionIsAttackMove())
-		return CanTarget;
+	if (pThis->MegaMissionIsAttackMove())
+	{
+		const auto pExt = TechnoExt::ExtMap.Find(pThis);
+
+		if (pExt->TypeExtData->AttackMove_Aggressive.Get(RulesExt::Global()->AttackMove_Aggressive))
+			return CanTarget;
+	}
 
 	GET(TechnoClass*, pTarget, ESI);
 
