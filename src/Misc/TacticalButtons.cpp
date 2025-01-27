@@ -820,6 +820,8 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 			drawTime("CashProduction", pBuilding->CashProductionTimer);
 			drawTime("BuildingGate", pBuilding->GateTimer);
 
+			drawText("BaseNodes: %d , Center = ( %d , %d )", pOwner->Base.BaseNodes.Count, pOwner->Base.Center.X, pOwner->Base.Center.Y);
+
 			SuperClass* pSuper = nullptr;
 
 			if (pBuildingType->SuperWeapon != -1)
