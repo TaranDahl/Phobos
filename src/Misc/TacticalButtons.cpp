@@ -416,77 +416,16 @@ void TacticalButtonsClass::CurrentSelectPathDraw()
 					{
 						const auto pBase = &pBuilding->Owner->Base;
 
-						if (pBase->Cells_24.Count)
-						{
-							std::vector<CellClass*> cells24;
-
-							for (const auto& baseCell : pBase->Cells_24)
-								cells24.push_back(MapClass::Instance->GetCellAt(baseCell));
-
-							if (const auto cellsSize = cells24.size())
-							{
-								std::sort(&cells24[0], &cells24[cellsSize],[](CellClass* pCellA, CellClass* pCellB)
-								{
-									if (pCellA->MapCoords.X != pCellB->MapCoords.X)
-										return pCellA->MapCoords.X < pCellB->MapCoords.X;
-
-									return pCellA->MapCoords.Y < pCellB->MapCoords.Y;
-								});
-
-								for (const auto& pPathCell : cells24)
-								{
-									const auto location = CoordStruct { (pPathCell->MapCoords.X << 8), (pPathCell->MapCoords.Y << 8), 0 };
-									const auto height = pPathCell->GetLevel() * 15;
-									const auto position = TacticalClass::Instance->CoordsToScreen(location) - TacticalClass::Instance->TacticalPos - Point2D { 0, (1 + height) };
-
-									DSurface::Temp->DrawSHP(
-										FileSystem::PALETTE_PAL, Make_Global<SHPStruct*>(0x8A03FC),
-										0, &position, &DSurface::ViewBounds,
-										(BlitterFlags::Centered | BlitterFlags::TransLucent50 | BlitterFlags::bf_400 | BlitterFlags::Zero),
-										0, (-height - 2), ZGradient::Ground, 1000, 0, 0, 0, 0, 0
-									);
-								}
-							}
-						}
-
-						if (pBase->Cells_38.Count)
-						{
-							std::vector<CellClass*> cells38;
-
-							for (const auto& baseCell : pBase->Cells_38)
-								cells38.push_back(MapClass::Instance->GetCellAt(baseCell));
-
-							if (const auto cellsSize = cells38.size())
-							{
-								std::sort(&cells38[0], &cells38[cellsSize],[](CellClass* pCellA, CellClass* pCellB)
-								{
-									if (pCellA->MapCoords.X != pCellB->MapCoords.X)
-										return pCellA->MapCoords.X < pCellB->MapCoords.X;
-
-									return pCellA->MapCoords.Y < pCellB->MapCoords.Y;
-								});
-
-								for (const auto& pPathCell : cells38)
-								{
-									const auto location = CoordStruct { (pPathCell->MapCoords.X << 8), (pPathCell->MapCoords.Y << 8), 0 };
-									const auto height = pPathCell->GetLevel() * 15;
-									const auto position = TacticalClass::Instance->CoordsToScreen(location) - TacticalClass::Instance->TacticalPos - Point2D { 0, (1 + height) };
-
-									DSurface::Temp->DrawSHP(
-										FileSystem::PALETTE_PAL, Make_Global<SHPStruct*>(0x8A03FC),
-										1, &position, &DSurface::ViewBounds,
-										(BlitterFlags::Centered | BlitterFlags::TransLucent50 | BlitterFlags::bf_400 | BlitterFlags::Zero),
-										0, (-height - 2), ZGradient::Ground, 1000, 0, 0, 0, 0, 0
-									);
-								}
-							}
-						}
+						for (const auto& baseCell : pBase->Cells_24)
+							pathCells.push_back(MapClass::Instance->GetCellAt(baseCell));
 					}
+					else
+					{
+						const auto baseCell = pBuilding->GetMapCoords();
 
-					const auto baseCell = pBuilding->GetMapCoords();
-
-					for (auto pFoundation = pBuilding->Type->FoundationOutside; *pFoundation != CellStruct { 0x7FFF, 0x7FFF }; ++pFoundation)
-						pathCells.push_back(MapClass::Instance->GetCellAt(baseCell + *pFoundation));
+						for (auto pFoundation = pBuilding->Type->FoundationOutside; *pFoundation != CellStruct { 0x7FFF, 0x7FFF }; ++pFoundation)
+							pathCells.push_back(MapClass::Instance->GetCellAt(baseCell + *pFoundation));
+					}
 				}
 
 				if (const auto cellsSize = pathCells.size())
