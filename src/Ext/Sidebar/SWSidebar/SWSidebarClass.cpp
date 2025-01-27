@@ -201,8 +201,6 @@ DEFINE_HOOK(0x692419, DisplayClass_ProcessClickCoords_SWSidebar, 0x7)
 
 DEFINE_HOOK(0x4F92DD, HouseClass_UpdateTechTree_SWSidebar, 0x5)
 {
-	GET(HouseClass*, pHouse, ESI);
-
 	auto& sidebar = SWSidebarClass::Instance;
 
 	for (const auto& column : sidebar.Columns)
