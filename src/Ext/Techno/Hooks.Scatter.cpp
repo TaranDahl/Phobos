@@ -498,17 +498,18 @@ DEFINE_HOOK(0x75B8AC, WalkLocomotionClass_MovingProcess_CheckOverrideMission, 0x
 // Execute Scatter
 DEFINE_HOOK(0x51D43F, InfantryClass_Scatter_ScatterRecord, 0x6)
 {
-	enum { SkipGameCode = 0x51D45B };
+	enum { ProcessNow = 0x51D45B, SkipGameCode = 0x51D487 };
+
+	if (RulesExt::Global()->ExtendedScatterAction)
+		return SkipGameCode;
 
 	GET(InfantryClass* const, pThis, ESI);
 	GET_STACK(const CellStruct, cell, STACK_OFFSET(0x50, -0x38));
 
 	pThis->SetDestination(MapClass::Instance->GetCellAt(cell), true);
+	TechnoExt::ExtMap.Find(pThis)->ScatteringStopFrame = Unsorted::CurrentFrame() + 60;
 
-	if (RulesExt::Global()->ExtendedScatterAction)
-		TechnoExt::ExtMap.Find(pThis)->ScatteringStopFrame = Unsorted::CurrentFrame() + 60;
-
-	return SkipGameCode;
+	return ProcessNow;
 }
 
 DEFINE_HOOK(0x51D487, InfantryClass_Scatter_EnhancedScatter, 0x6)
@@ -562,7 +563,6 @@ DEFINE_HOOK(0x743E08, UnitClass_Scatter_EnhancedScatter, 0x7)
 
 	if (cell != CellStruct::Empty)
 	{
-		// pThis->QueueMission(Mission::Move, false);
 		pThis->SetDestination(MapClass::Instance->GetCellAt(cell), true);
 		TechnoExt::ExtMap.Find(pThis)->ScatteringStopFrame = Unsorted::CurrentFrame() + 60;
 	}
