@@ -330,9 +330,6 @@ public:
 		Valueable<double> FallingDownDamage;
 		Nullable<double> FallingDownDamage_Water;
 
-		Valueable<bool> KeepTargetOnMove;
-		Valueable<Leptons> KeepTargetOnMove_ExtraDistance;
-
 		Nullable<AnimTypeClass*> Wake;
 		Nullable<AnimTypeClass*> Wake_Grapple;
 		Nullable<AnimTypeClass*> Wake_Sinking;
@@ -663,9 +660,6 @@ public:
 
 			, FallingDownDamage { 1.0 }
 			, FallingDownDamage_Water {}
-
-			, KeepTargetOnMove { false }
-			, KeepTargetOnMove_ExtraDistance { Leptons(0) }
 
 			, Wake { }
 			, Wake_Grapple { }
