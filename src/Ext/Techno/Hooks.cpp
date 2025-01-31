@@ -4,6 +4,7 @@
 #include <EventClass.h>
 #include <ScenarioClass.h>
 #include <TunnelLocomotionClass.h>
+#include <YRMath.h>
 
 #include <Ext/BuildingType/Body.h>
 #include <Ext/House/Body.h>
@@ -608,6 +609,16 @@ DEFINE_HOOK(0x736480, UnitClass_AI_KeepTargetOnMove, 0x6)
 		}
 	}
 
+	return 0;
+}
+
+#pragma endregion
+
+#pragma region VisualWobbles
+
+DEFINE_HOOK(0x55ABD8, LocomotionClass_DrawPoint_VisualWobbles, 0x5)
+{
+	R->EDX(Math::sin((Unsorted::CurrentFrame % 20) * 0.3141592653589793) * 3.5 + 20.5);
 	return 0;
 }
 

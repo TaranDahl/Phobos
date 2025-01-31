@@ -235,6 +235,15 @@ public:
 
 		Valueable<int> Power;
 
+		Valueable<bool> VisualWobbles;
+		Valueable<double> VisualHeight;
+		Valueable<double> VisualWobbles_Amplitude;
+		Valueable<double> VisualWobbles_AngularVelocity;
+		Valueable<bool> VisualWobbles_WhenDisabled;
+		Valueable<bool> VisualWobbles_OnFloor;
+		Valueable<bool> VisualWobbles_InAir;
+		Valueable<bool> VisualWobbles_Underground;
+
 		struct LaserTrailDataEntry
 		{
 			ValueableIdx<LaserTrailTypeClass> idxType;
