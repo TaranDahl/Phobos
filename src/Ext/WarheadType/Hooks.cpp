@@ -366,12 +366,12 @@ DEFINE_HOOK(0x489B49, MapClass_DamageArea_Rocker, 0xA)
 
 namespace DamageBuildingHelper
 {
-	std::map<BuildingClass*, double> Buildings;
+	PhobosMap<BuildingClass*, double> Buildings; // Unsafe, need to rewrite whole func
 }
 
 DEFINE_HOOK(0x4899DA, DamageArea_DamageBuilding_SetContext, 0x7)
 {
-	GET_BASE(WarheadTypeClass* const, pWH, 0xC);
+	GET_BASE(WarheadTypeClass* const, pWH, 0x0C);
 
 	if (!WarheadTypeExt::ExtMap.Find(pWH)->MergeBuildingDamage.Get(RulesExt::Global()->MergeBuildingDamage))
 		return 0;
@@ -389,13 +389,12 @@ DEFINE_HOOK(0x4899DA, DamageArea_DamageBuilding_SetContext, 0x7)
 	const auto cellSpread = Game::F2I(pWH->CellSpread * Unsorted::LeptonsPerCell);
 	const auto percentDifference = 1.0 - pWH->PercentAtMax; // Vanilla will first multiply the damage and round it up, but we don't need to.
 
-	for (auto& group : groups)
+	for (const auto& group : groups)
 	{
 		if (const auto pBuilding = abstract_cast<BuildingClass*>(group->Target))
 		{
 			const auto multiplier = (cellSpread && percentDifference) ? 1.0 - (percentDifference * group->Distance / cellSpread) : 1.0;
 			DamageBuildingHelper::Buildings[pBuilding] += multiplier > 0 ? multiplier : 0;
-			group->Distance = 0;
 		}
 	}
 
@@ -411,15 +410,16 @@ DEFINE_HOOK(0x489AA0, DamageArea_DamageBuilding_ReceiveDamage, 0x7)
 	if (!WarheadTypeExt::ExtMap.Find(pWH)->MergeBuildingDamage.Get(RulesExt::Global()->MergeBuildingDamage))
 		return 0;
 
-	GET(ObjectClass* const, pTechno, ESI);
+	GET(ObjectClass* const, pTarget, ESI);
 
-	if (const auto pBuilding = abstract_cast<BuildingClass*>(pTechno))
+	if (const auto pBuilding = abstract_cast<BuildingClass*>(pTarget))
 	{
 		if (DamageBuildingHelper::Buildings.contains(pBuilding))
 		{
 			GET(const int, damage, EAX);
 			const auto multiplier = DamageBuildingHelper::Buildings[pBuilding];
 			R->EAX(Game::F2I(damage * multiplier));
+			R->EDI(0); // Distance
 			DamageBuildingHelper::Buildings.erase(pBuilding);
 		}
 		else
