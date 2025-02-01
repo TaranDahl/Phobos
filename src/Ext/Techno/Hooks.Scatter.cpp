@@ -19,7 +19,7 @@ static inline void EnhancedScatterContent(CellClass* pCell, TechnoClass* pCaller
 		if (pFootExt->ScatteringStopFrame >= Unsorted::CurrentFrame())
 			continue;
 
-		if (pFoot->NavQueue.Count <= 0)
+		if (pFoot->NavQueue.Count <= 0 && pFoot->CurrentMission == Mission::Move)
 		{
 			if (const auto pFootDestination = pFoot->Destination)
 			{
@@ -313,7 +313,7 @@ static inline void ScatterPathCellContent(FootClass* pThis, CellClass* pCell)
 		if (pFoot->WhatAmI() == AbstractType::Unit && ((pFoot->Location.X & 0xFF) != 128 || (pFoot->Location.Y & 0xFF) != 128))
 			continue;
 
-		if (pFoot->NavQueue.Count <= 0)
+		if (pFoot->NavQueue.Count <= 0 && pFoot->CurrentMission == Mission::Move)
 		{
 			if (const auto pFootDestination = pFoot->Destination)
 			{
