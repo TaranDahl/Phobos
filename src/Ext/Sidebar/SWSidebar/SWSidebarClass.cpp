@@ -199,45 +199,57 @@ DEFINE_HOOK(0x692419, DisplayClass_ProcessClickCoords_SWSidebar, 0x7)
 	return toggleButton && toggleButton->IsHovering ? DoNothing : 0;
 }
 
-DEFINE_HOOK(0x4F92DD, HouseClass_UpdateTechTree_SWSidebar, 0x5)
+DEFINE_HOOK(0x4F92FB, HouseClass_UpdateTechTree_SWSidebar, 0x7)
 {
-	auto& sidebar = SWSidebarClass::Instance;
+	enum { SkipGameCode = 0x4F9302 };
 
-	for (const auto& column : sidebar.Columns)
+	GET(HouseClass*, pHouse, ESI);
+
+	pHouse->AISupers();
+
+	if (pHouse->IsCurrentPlayer())
 	{
-		std::vector<int> removeButtons;
+		auto& sidebar = SWSidebarClass::Instance;
 
-		for (const auto& button : column->Buttons)
+		for (const auto& column : sidebar.Columns)
 		{
-			if (HouseClass::CurrentPlayer->Supers[button->SuperIndex]->IsPresent)
-				continue;
+			std::vector<int> removeButtons;
 
-			removeButtons.push_back(button->SuperIndex);
+			for (const auto& button : column->Buttons)
+			{
+				if (HouseClass::CurrentPlayer->Supers[button->SuperIndex]->IsPresent)
+					continue;
+
+				removeButtons.push_back(button->SuperIndex);
+			}
+
+			if (removeButtons.size())
+				pHouse->RecheckTechTree = true;
+
+			for (const auto& index : removeButtons)
+			{
+				if (column->RemoveButton(index))
+					SidebarExt::Global()->SWSidebar_Indices.Remove(index);
+			}
 		}
 
-		for (const auto& index : removeButtons)
+		SWSidebarClass::Instance.SortButtons();
+		int removes = 0;
+
+		for (const auto& column : sidebar.Columns)
 		{
-			if (column->RemoveButton(index))
-				SidebarExt::Global()->SWSidebar_Indices.Remove(index);
+			if (column->Buttons.empty())
+				++removes;
 		}
+
+		for (; removes > 0; --removes)
+			sidebar.RemoveColumn();
+
+		if (const auto toggleButton = sidebar.ToggleButton)
+			toggleButton->UpdatePosition();
 	}
 
-	SWSidebarClass::Instance.SortButtons();
-	int removes = 0;
-
-	for (const auto& column : sidebar.Columns)
-	{
-		if (column->Buttons.empty())
-			++removes;
-	}
-
-	for (; removes > 0; --removes)
-		sidebar.RemoveColumn();
-
-	if (const auto toggleButton = sidebar.ToggleButton)
-		toggleButton->UpdatePosition();
-
-	return 0;
+	return SkipGameCode;
 }
 
 DEFINE_HOOK(0x6A6316, SidebarClass_AddCameo_SuperWeapon_SWSidebar, 0x6)
