@@ -429,6 +429,7 @@ This page lists all the individual contributions to the project by their author.
   - Skirmish AI "sell all buildings and set all technos to hunt" behavior dehardcode
   - Skirmish AI "gather when MCV deploy" behavior dehardcode
   - Global value of `RepairBaseNodes`
+  - Skip anim delay for burst fire
   - Raise alert when technos are taking damage
   - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller
   - `Spawner.RecycleRange`
