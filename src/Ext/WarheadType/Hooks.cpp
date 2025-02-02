@@ -394,6 +394,9 @@ DEFINE_HOOK(0x4899DA, DamageArea_DamageBuilding_CauseMergeBuildingDamage, 0x7)
 		{
 			if (const auto pBuilding = abstract_cast<BuildingClass*>(group->Target))
 			{
+				if (group->Distance > cellSpread)
+					continue;
+
 				const auto multiplier = (cellSpread && percentDifference) ? 1.0 - (percentDifference * group->Distance / cellSpread) : 1.0;
 				MapBuildings[pBuilding] += multiplier > 0 ? multiplier : 0;
 			}
@@ -408,6 +411,10 @@ DEFINE_HOOK(0x4899DA, DamageArea_DamageBuilding_CauseMergeBuildingDamage, 0x7)
 				&& pBuilding->Health > 0 && pBuilding->IsOnMap && !pBuilding->InLimbo && MapBuildings.contains(pBuilding))
 			{
 				auto receiveDamage = Game::F2I(baseDamage * MapBuildings[pBuilding]);
+
+				if (!receiveDamage && baseDamage)
+					receiveDamage = Math::sgn(baseDamage);
+
 				pBuilding->ReceiveDamage(&receiveDamage, 0, pWH, pAttacker, false, false, pAttackHouse);
 				MapBuildings.erase(pBuilding);
 			}
