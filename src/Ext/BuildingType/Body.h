@@ -68,7 +68,6 @@ public:
 
 		Valueable<bool> JustHasRallyPoint;
 		Nullable<CoordStruct> JumpjetExitCoord;
-		Valueable<bool> AnimDontDelayBurst;
 		Nullable<int> RallySpeedType;
 		Nullable<int> RallyMovementZone;
 
@@ -139,7 +138,6 @@ public:
 			, SellBuildupLength { 23 }
 			, JustHasRallyPoint { false }
 			, JumpjetExitCoord { }
-			, AnimDontDelayBurst { false }
 			, RallySpeedType { }
 			, RallyMovementZone { }
 			, Cameo_ShouldCount {}

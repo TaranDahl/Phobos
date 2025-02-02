@@ -91,17 +91,6 @@ DEFINE_HOOK(0x736F67, UnitClass_UpdateFiring_BurstNoDelay, 0x6)
 	return 0;
 }
 
-DEFINE_HOOK(0x44B630, BuildingClass_MissionAttack_AnimDelayedFire, 0x6)
-{
-	enum { JustFire = 0x44B6C4 };
-
-	GET(BuildingClass* const, pThis, ESI);
-
-	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
-
-	return (pTypeExt && pTypeExt->AnimDontDelayBurst && pThis->CurrentBurstIndex != 0) ? JustFire : 0;
-}
-
 #pragma endregion
 
 #pragma region AIConstructionYard
