@@ -317,6 +317,7 @@ New:
 - Fixed sidebar not updating queued unit numbers when adding or removing units when the production is on hold (by CrimRecya)
 - Custom exit cell for infantry factory (by Starkku)
 - Option for vehicles to keep target when issued move command (by Starkku)
+- Skip anim delay for burst fire (by TaranDahl)
 - Projectile subject to ground check before firing (by CrimRecya)
 - New Disperse trajectory (by CrimRecya)
 - New Engrave trajectory (by CrimRecya)

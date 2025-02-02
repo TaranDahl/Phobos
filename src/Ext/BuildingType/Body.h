@@ -74,6 +74,8 @@ public:
 		Valueable<BuildingTypeClass*> PlaceBuilding_OnLand;
 		Valueable<BuildingTypeClass*> PlaceBuilding_OnWater;
 
+		Valueable<bool> IsAnimDelayedBurst;
+
 		std::vector<std::optional<DirType>> AircraftDockingDirs;
 
 		ValueableVector<TechnoTypeClass*> FactoryPlant_AllowTypes;
@@ -138,6 +140,7 @@ public:
 			, AircraftDockingDirs {}
 			, FactoryPlant_AllowTypes {}
 			, FactoryPlant_DisallowTypes {}
+			, IsAnimDelayedBurst { true }
 			, IsDestroyableObstacle { false }
 			, Units_RepairRate {}
 			, Units_RepairStep {}

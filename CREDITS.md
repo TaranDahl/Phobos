@@ -421,6 +421,7 @@ This page lists all the individual contributions to the project by their author.
   - Skirmish AI "sell all buildings and set all technos to hunt" behavior dehardcode
   - Skirmish AI "gather when MCV deploy" behavior dehardcode
   - Global value of `RepairBaseNodes`
+  - Skip anim delay for burst fire
   - Units are now unable to kick out from a factory that is in construction process
   - No turret unit turn to the target
 - **tyuah8** - Drive/Jumpjet/Ship/Teleport locomotor did not power on when it is un-piggybacked bugfix
