@@ -124,13 +124,19 @@ DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
 			const auto range = (2 << mode1);
 			const auto pItems = Helpers::Alex::getCellSpreadItems(pTarget->Location, range);
 			std::map<TechnoClass*, int> record;
+			record[static_cast<TechnoClass*>(pTarget)] = 0;
 			int current = 1;
 
 			for (const auto& pItem : pItems)
 			{
-				if (pItem->CloakState != CloakState::Cloaked || pItem->GetCell()->Sensors_InclHouse(HouseClass::CurrentPlayer->ArrayIndex))
+				if ((pItem->CloakState != CloakState::Cloaked || pItem->GetCell()->Sensors_InclHouse(HouseClass::CurrentPlayer->ArrayIndex))
+					&& !pItem->IsDisguisedAs(HouseClass::CurrentPlayer))
 				{
 					auto coords = pItem->GetCoords();
+
+					if (!MapClass::Instance->IsWithinUsableArea(coords))
+						continue;
+
 					coords.Z = MapClass::Instance->GetCellFloorHeight(coords);
 
 					if (MapClass::Instance->GetCellAt(coords)->ContainsBridge())
