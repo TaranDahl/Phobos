@@ -35,6 +35,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<AutoBuildingCommandClass>();
 	MakeCommand<DistributionMode1CommandClass>();
 	MakeCommand<DistributionMode2CommandClass>();
+	MakeCommand<DistributionMode3CommandClass>();
 	MakeCommand<ManualReloadAmmoCommandClass>();
 	MakeCommand<ToggleSWSidebar>();
 
