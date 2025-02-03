@@ -1,6 +1,6 @@
 #include "TracingTrajectory.h"
-#include "DisperseTrajectory.h"
 #include "StraightTrajectory.h"
+#include "DisperseTrajectory.h"
 #include "EngraveTrajectory.h"
 
 #include <AnimClass.h>
@@ -741,14 +741,14 @@ void TracingTrajectory::CreateTracingBullets(BulletClass* pBullet, WeaponTypeCla
 				pTrajectory->FirepowerMult = this->FirepowerMult;
 				pTrajectory->NotMainWeapon = true;
 			}
-			else if (flag == TrajectoryFlag::Disperse)
-			{
-				const auto pTrajectory = static_cast<DisperseTrajectory*>(pTraj);
-				pTrajectory->FirepowerMult = this->FirepowerMult;
-			}
 			else if (flag == TrajectoryFlag::Straight)
 			{
 				const auto pTrajectory = static_cast<StraightTrajectory*>(pTraj);
+				pTrajectory->FirepowerMult = this->FirepowerMult;
+			}
+			else if (flag == TrajectoryFlag::Disperse)
+			{
+				const auto pTrajectory = static_cast<DisperseTrajectory*>(pTraj);
 				pTrajectory->FirepowerMult = this->FirepowerMult;
 			}
 			else if (flag == TrajectoryFlag::Engrave)
