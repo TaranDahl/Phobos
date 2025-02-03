@@ -599,6 +599,8 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		drawTime("ReloadTimer", pTechno->ReloadTimer);
 		drawTime("RearmTimer", pTechno->RearmTimer);
 
+		drawText("TurretRecoil = %.3f , BarrelRecoil = %.3f", pTechno->TurretRecoil.TravelSoFar, pTechno->BarrelRecoil.TravelSoFar);
+
 		if (pTechno->Passengers.NumPassengers > 0)
 		{
 			drawText("%d Passengers", pTechno->Passengers.NumPassengers);
