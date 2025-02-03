@@ -1771,7 +1771,7 @@ void TacticalButtonsClass::SelectedDraw()
 
 						if ((!pOwner || !pOwner->IsAlliedWith(pHouse)) && !pHouse->IsObserver())
 						{
-							if (pThis->IsDisguised() && !pThis->GetCell()->DisguiseSensors_InclHouse(pHouse->ArrayIndex))
+							if (pThis->IsDisguisedAs(pHouse))
 							{
 								const auto pDisguiseType = TechnoTypeExt::GetTechnoType(pThis->Disguise);
 
