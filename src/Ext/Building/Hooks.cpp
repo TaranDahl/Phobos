@@ -342,6 +342,35 @@ DEFINE_HOOK(0x449149, BuildingClass_Captured_FactoryPlant2, 0x6)
 
 #pragma endregion
 
+DEFINE_HOOK(0x450630, BuildingClass_UpdateRepair_PlayerAutoRepair, 0x9)
+{
+	GET(BuildingClass*, pThis, ECX);
+
+	auto const pOwner = pThis->Owner;
+	auto const mission = pThis->CurrentMission;
+
+	if (pThis->Health < pThis->GetTechnoType()->Strength
+		&& pThis->Type->ClickRepairable
+		&& mission != Mission::Construction && mission != Mission::Selling
+		&& (pOwner->IsHumanPlayer || pOwner->IsControlledByHuman()) && RulesExt::Global()->PlayerAutoRepair)
+	{
+		pThis->IsBeingRepaired = true;	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x448480, BuildingClass_SetOwningHouse_CapturedEVA, 0x5)
+{
+	GET(HouseClass*, pToHouse, EBX);
+
+	if (pToHouse->IsControlledByCurrentPlayer()) // Not necessary to per techno customize this, I guess?
+		VoxClass::PlayIndex(RulesExt::Global()->EVA_WeCaptureABuilding.Get(VoxClass::FindIndex((const char*)"EVA_BuildingCaptured")));
+	else
+		VoxClass::PlayIndex(RulesExt::Global()->EVA_OurBuildingIsCaptured.Get(VoxClass::FindIndex((const char*)"EVA_BuildingCaptured")));
+
+	return 0x44848F;
+}
+
 #pragma region DestroyableObstacle
 
 template <bool remove = false>
@@ -601,7 +630,24 @@ DEFINE_HOOK(0x6A9789, StripClass_DrawStrip_NoGreyCameo, 0x6)
 	GET(TechnoTypeClass* const, pType, EBX);
 	GET_STACK(bool, clicked, STACK_OFFSET(0x48C, -0x475));
 
-	return (!RulesExt::Global()->BuildingProductionQueue && pType->WhatAmI() == AbstractType::BuildingType && clicked) ? SkipGameCode : ContinueCheck;
+	if (!RulesExt::Global()->BuildingProductionQueue)
+	{
+		if (pType->WhatAmI() == AbstractType::BuildingType && clicked)
+			return SkipGameCode;
+	}
+	else if (const auto pBuildingType = abstract_cast<BuildingTypeClass*>(pType))
+	{
+		if (const auto pFactory = HouseClass::CurrentPlayer->GetPrimaryFactory(AbstractType::BuildingType, pType->Naval, pBuildingType->BuildCat))
+		{
+			if (const auto pProduct = abstract_cast<BuildingClass*>(pFactory->Object))
+			{
+				if (pFactory->IsDone() && pProduct->Type != pType && ((pProduct->Type->BuildCat != BuildCat::Combat) ^ (pBuildingType->BuildCat == BuildCat::Combat)))
+					return SkipGameCode;
+			}
+		}
+	}
+
+	return ContinueCheck;
 }
 
 DEFINE_HOOK(0x6AA88D, StripClass_RecheckCameo_FindFactoryDehardCode, 0x6)
@@ -676,3 +722,14 @@ DEFINE_HOOK(0x444B83, BuildingClass_ExitObject_BarracksExitCell, 0x7)
 
 #pragma endregion
 
+#pragma region BuildingFiring
+
+DEFINE_HOOK(0x44B630, BuildingClass_MissionAttack_AnimDelayedFire, 0x6)
+{
+	enum { JustFire = 0x44B6C4, VanillaCheck = 0 };
+	GET(BuildingClass* const, pThis, ESI);
+	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
+	return (pTypeExt && !pTypeExt->IsAnimDelayedBurst && pThis->CurrentBurstIndex != 0) ? JustFire : VanillaCheck;
+}
+
+#pragma endregion

@@ -258,6 +258,114 @@ TechnoClass* TechnoTypeExt::CreateUnit(TechnoTypeClass* pType, CoordStruct locat
 	return nullptr;
 }
 
+DirStruct TechnoTypeExt::ExtData::GetTurretDesiredDir(DirStruct defaultDir)
+{
+	const auto turretExtraAngle = this->Turret_ExtraAngle.Get();
+
+	if (!turretExtraAngle)
+		return defaultDir;
+
+	const auto rotate = DirStruct { static_cast<int>(turretExtraAngle * TechnoTypeExt::AngleToRaw + 0.5) };
+
+	return DirStruct { static_cast<short>(defaultDir.Raw) + static_cast<short>(rotate.Raw) };
+}
+
+void TechnoTypeExt::ExtData::SetTurretLimitedDir(FootClass* pThis, DirStruct desiredDir)
+{
+	const auto turretRestrictAngle = this->Turret_Restriction.Get();
+	const auto pBody = &pThis->PrimaryFacing;
+	const auto pTurret = &pThis->SecondaryFacing;
+	const auto destinationDir = this->GetTurretDesiredDir(desiredDir);
+
+	if (turretRestrictAngle < 10.0)
+	{
+		const auto facing = pBody->Current();
+		pTurret->SetCurrent(facing);
+		pTurret->SetDesired(facing);
+
+		if (!pThis->Locomotor->Is_Moving_Now())
+			pBody->SetDesired(destinationDir);
+
+		return;
+	}
+
+	if (turretRestrictAngle >= 180.0)
+	{
+		pTurret->SetDesired(destinationDir);
+		return;
+	}
+
+	const auto desiredRaw = static_cast<short>(destinationDir.Raw);
+	const auto turretRaw = static_cast<short>(pTurret->Current().Raw);
+	const auto currentDir = pBody->Current();
+	const auto bodyDir = this->GetTurretDesiredDir(currentDir);
+	const auto bodyRaw = static_cast<short>(bodyDir.Raw);
+
+	const auto currentDifference = static_cast<short>(turretRaw - bodyRaw);
+	const auto desiredDifference = static_cast<short>(desiredRaw - bodyRaw);
+	const auto restrictRaw = static_cast<short>(this->Turret_Restriction * TechnoTypeExt::AngleToRaw + 0.5);
+
+	if (currentDifference < -restrictRaw)
+	{
+		const auto restrictDir = DirStruct {(bodyRaw - restrictRaw)};
+		pTurret->SetCurrent(restrictDir);
+		pTurret->SetDesired(restrictDir);
+	}
+	else if (currentDifference > restrictRaw)
+	{
+		const auto restrictDir = DirStruct {(bodyRaw + restrictRaw)};
+		pTurret->SetCurrent(restrictDir);
+		pTurret->SetDesired(restrictDir);
+	}
+
+	if ((desiredDifference < -restrictRaw || desiredDifference > restrictRaw) && !pThis->Locomotor->Is_Moving_Now())
+		pBody->SetDesired(this->Turret_BodyOrientation ? this->GetBodyDesiredDir(currentDir, desiredDir) : desiredDir);
+
+	pTurret->SetDesired(((currentDifference > 0 && desiredDifference < 0) || (currentDifference < 0 && desiredDifference > 0)) ? bodyDir : destinationDir);
+}
+
+short TechnoTypeExt::ExtData::GetTurretLimitedRaw(short currentDirectionRaw)
+{
+	const auto turretRestrictAngle = this->Turret_Restriction.Get();
+
+	if (turretRestrictAngle < 0)
+		return 0;
+
+	if (turretRestrictAngle >= 180)
+		return currentDirectionRaw;
+
+	const auto restrictRaw = static_cast<short>(this->Turret_Restriction * TechnoTypeExt::AngleToRaw + 0.5);
+
+	if (currentDirectionRaw < -restrictRaw)
+		return -restrictRaw;
+
+	if (currentDirectionRaw > restrictRaw)
+		return restrictRaw;
+
+	return currentDirectionRaw;
+}
+
+DirStruct TechnoTypeExt::ExtData::GetBodyDesiredDir(DirStruct currentDir, DirStruct defaultDir)
+{
+	const auto bodyAngle = this->Turret_BodyOrientationAngle.Get();
+
+	if (!bodyAngle)
+		return defaultDir;
+
+	const auto rotateRaw = static_cast<short>(bodyAngle * TechnoTypeExt::AngleToRaw + 0.5);
+	const auto rotate = DirStruct { this->GetTurretLimitedRaw(rotateRaw) };
+	const auto rightDir = DirStruct { static_cast<short>(defaultDir.Raw) + static_cast<short>(rotate.Raw) };
+
+	if (!this->Turret_BodyOrientationSymmetric)
+		return rightDir;
+
+	const auto leftDir = DirStruct { static_cast<short>(defaultDir.Raw) - static_cast<short>(rotate.Raw) };
+	const auto rightDifference = static_cast<short>(static_cast<short>(rightDir.Raw) - static_cast<short>(currentDir.Raw));
+	const auto leftDifference = static_cast<short>(static_cast<short>(leftDir.Raw) - static_cast<short>(currentDir.Raw));
+
+	return (std::abs(rightDifference) < std::abs(leftDifference)) ? rightDir : leftDir;
+}
+
 // =============================
 // load / save
 
@@ -370,6 +478,12 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->AutoFire.Read(exINI, pSection, "AutoFire");
 	this->AutoFire_TargetSelf.Read(exINI, pSection, "AutoFire.TargetSelf");
 
+	this->AggressiveStance.Read(exINI, pSection, "AggressiveStance");
+	this->AggressiveStance_Togglable.Read(exINI, pSection, "AggressiveStance.Togglable");
+	this->AggressiveStance_Exempt.Read(exINI, pSection, "AggressiveStance.Exempt");
+	this->VoiceEnterAggressiveStance.Read(exINI, pSection, "VoiceEnterAggressiveStance");
+	this->VoiceExitAggressiveStance.Read(exINI, pSection, "VoiceExitAggressiveStance");
+
 	this->NoSecondaryWeaponFallback.Read(exINI, pSection, "NoSecondaryWeaponFallback");
 	this->NoSecondaryWeaponFallback_AllowAA.Read(exINI, pSection, "NoSecondaryWeaponFallback.AllowAA");
 
@@ -454,9 +568,105 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildLimitGroup_ExtraLimit_Nums.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.Nums");
 	this->BuildLimitGroup_ExtraLimit_MaxCount.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxCount");
 	this->BuildLimitGroup_ExtraLimit_MaxNum.Read(exINI, pSection, "BuildLimitGroup.ExtraLimit.MaxNum");
+
+	this->RecountBurst.Read(exINI, pSection, "RecountBurst");
+	this->Turret_IdleRotate.Read(exINI, pSection, "Turret.IdleRotate");
+	this->Turret_PointToMouse.Read(exINI, pSection, "Turret.PointToMouse");
+	this->TurretROT.Read(exINI, pSection, "TurretROT");
+	this->Turret_Restriction.Read(exINI, pSection, "Turret.Restriction");
+	this->Turret_ExtraAngle.Read(exINI, pSection, "Turret.ExtraAngle");
+	this->Turret_BodyOrientation.Read(exINI, pSection, "Turret.BodyOrientation");
+	this->Turret_BodyOrientationAngle.Read(exINI, pSection, "Turret.BodyOrientationAngle");
+	this->Turret_BodyOrientationSymmetric.Read(exINI, pSection, "Turret.BodyOrientationSymmetric");
+	this->CanBeBuiltOn.Read(exINI, pSection, "CanBeBuiltOn");
+	this->UnitBaseNormal.Read(exINI, pSection, "UnitBaseNormal");
+	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
+	this->Cameo_AlwaysExist.Read(exINI, pSection, "Cameo.AlwaysExist");
+	this->Cameo_AuxTechnos.Read(exINI, pSection, "Cameo.AuxTechnos");
+	this->Cameo_NegTechnos.Read(exINI, pSection, "Cameo.NegTechnos");
+	this->UIDescription_Unbuildable.Read(exINI, pSection, "UIDescription.Unbuildable");
+	this->SelectedInfo_UpperType.Read(exINI, pSection, "SelectedInfo.UpperType");
+	this->SelectedInfo_UpperColor.Read(exINI, pSection, "SelectedInfo.UpperColor");
+	this->SelectedInfo_BelowType.Read(exINI, pSection, "SelectedInfo.BelowType");
+	this->SelectedInfo_BelowColor.Read(exINI, pSection, "SelectedInfo.BelowColor");
+	this->FakeOf.Read(exINI, pSection, "FakeOf");
+	this->NoRearm_UnderEMP.Read(exINI, pSection, "NoRearm.UnderEMP");
+	this->NoRearm_Temporal.Read(exINI, pSection, "NoRearm.Temporal");
+	this->NoReload_UnderEMP.Read(exINI, pSection, "NoReload.UnderEMP");
+	this->NoReload_Temporal.Read(exINI, pSection, "NoReload.Temporal");
+	this->RateDown_Ammo.Read(exINI, pSection, "RateDown.Ammo");
+	this->RateDown_Delay.Read(exINI, pSection, "RateDown.Delay");
+	this->RateDown_Cover.Read(exINI, pSection, "RateDown.Cover");
+	this->RateDown_Reset.Read(exINI, pSection, "RateDown.Reset");
+	this->UniqueTechno.Read(exINI, pSection, "UniqueTechno");
+	this->NoQueueUpToEnter.Read(exINI, pSection, "NoQueueUpToEnter");
+	this->NoQueueUpToUnload.Read(exINI, pSection, "NoQueueUpToUnload");
+	this->CanManualReload.Read(exINI, pSection, "CanManualReload");
+	this->CanManualReload_ResetROF.Read(exINI, pSection, "CanManualReload.ResetROF");
+	this->CanManualReload_DetonateWarhead.Read(exINI, pSection, "CanManualReload.DetonateWarhead");
+	this->CanManualReload_DetonateConsume.Read(exINI, pSection, "CanManualReload.DetonateConsume");
+
+	this->CombatAlert.Read(exINI, pSection, "CombatAlert");
+	this->CombatAlert_NotBuilding.Read(exINI, pSection, "CombatAlert.NotBuilding");
+	this->CombatAlert_UseFeedbackVoice.Read(exINI, pSection, "CombatAlert.UseFeedbackVoice");
+	this->CombatAlert_UseAttackVoice.Read(exINI, pSection, "CombatAlert.UseAttackVoice");
+	this->CombatAlert_UseEVA.Read(exINI, pSection, "CombatAlert.UseEVA");
+	this->CombatAlert_EVA.Read(exINI, pSection, "CombatAlert.EVA");
+	this->Spawner_RecycleRange.Read(exINI, pSection, "Spawner.RecycleRange");
+	this->Spawner_RecycleAnim.Read(exINI, pSection, "Spawner.RecycleAnim");
+	this->AINormalTargetingDelay.Read(exINI, pSection, "AINormalTargetingDelay");
+	this->PlayerNormalTargetingDelay.Read(exINI, pSection, "PlayerNormalTargetingDelay");
+	this->AIGuardAreaTargetingDelay.Read(exINI, pSection, "AIGuardAreaTargetingDelay");
+	this->PlayerGuardAreaTargetingDelay.Read(exINI, pSection, "PlayerGuardAreaTargetingDelay");
+	this->KeepWarping.Read(exINI, pSection, "KeepWarping");
+	this->KeepWarping_Distance.Read(exINI, pSection, "KeepWarping.Distance");
+	this->FiringByPassMovingCheck.Read(exINI, pSection, "FiringByPassMovingCheck");
+	this->SkipCrushSlowdown.Read(exINI, pSection, "SkipCrushSlowdown");
+	this->PlayerGuardModePursuit.Read(exINI, pSection, "PlayerGuardModePursuit");
+	this->PlayerGuardModeStray.Read(exINI, pSection, "PlayerGuardModeStray");
+	this->PlayerGuardModeGuardRangeMultiplier.Read(exINI, pSection, "PlayerGuardModeGuardRangeMultiplier");
+	this->PlayerGuardModeGuardRangeAddend.Read(exINI, pSection, "PlayerGuardModeGuardRangeAddend");
+	this->PlayerGuardStationaryStray.Read(exINI, pSection, "PlayerGuardStationaryStray");
+	this->AIGuardModePursuit.Read(exINI, pSection, "AIGuardModePursuit");
+	this->AIGuardModeStray.Read(exINI, pSection, "AIGuardModeStray");
+	this->AIGuardModeGuardRangeMultiplier.Read(exINI, pSection, "AIGuardModeGuardRangeMultiplier");
+	this->AIGuardModeGuardRangeAddend.Read(exINI, pSection, "AIGuardModeGuardRangeAddend");
+	this->AIGuardStationaryStray.Read(exINI, pSection, "AIGuardStationaryStray");
+	this->Engineer_CanAutoFire.Read(exINI, pSection, "Engineer.CanAutoFire");
+	this->BunkerableAnyWay.Read(exINI, pSection, "BunkerableAnyWay");
+	this->Harvester_CanGuardArea.Read(exINI, pSection, "Harvester.CanGuardArea");
+	this->DigStartROT.Read(exINI, pSection, "DigStartROT");
+	this->DigInSpeed.Read(exINI, pSection, "DigInSpeed");
+	this->DigOutSpeed.Read(exINI, pSection, "DigOutSpeed");
+	this->DigEndROT.Read(exINI, pSection, "DigEndROT");
+	this->FlightClimb.Read(exINI, pSection, "FlightClimb");
+	this->FlightCrash.Read(exINI, pSection, "FlightCrash");
+	this->ExplodeOnDestroy.Read(exINI, pSection, "ExplodeOnDestroy");
+	this->FireDeathWeaponOnCrushed.Read(exINI, pSection, "FireDeathWeaponOnCrushed");
+	this->ExitCoord.Read(exINI, pSection, "ExitCoord");
+	this->MissileSpawnUseOtherFLHs.Read(exINI, pSection, "MissileSpawnUseOtherFLHs");
+	this->HarvesterQuickUnloader.Read(exINI, pSection, "HarvesterQuickUnloader");
+	this->DistributeTargetingFrame.Read(exINI, pSection, "DistributeTargetingFrame");
+	this->AttackMove_Follow.Read(exINI, pSection, "AttackMove.Follow");
+	this->AttackMove_Follow_IncludeAir.Read(exINI, pSection, "AttackMove.Follow.IncludeAir");
+	this->AttackMove_StopWhenTargetAcquired.Read(exINI, pSection, "AttackMove.StopWhenTargetAcquired");
+	this->AttackMove_PursuitTarget.Read(exINI, pSection, "AttackMove.PursuitTarget");
+	this->ThisIsAJumpjet.Read(exINI, pSection, "ThisIsAJumpjet");
+	this->ImAJumpjetFromAirport.Read(exINI, pSection, "ImAJumpjetFromAirport");
+	this->IgnoreRallyPoint.Read(exINI, pSection, "IgnoreRallyPoint");
+	this->Sinkable.Read(exINI, pSection, "Sinkable");
+	this->SinkSpeed.Read(exINI, pSection, "SinkSpeed");
+	this->JumpjetSpeedType.Read(exINI, pSection, "JumpjetSpeedType");
+
+	this->FallingDownDamage.Read(exINI, pSection, "FallingDownDamage");
+	this->FallingDownDamage_Water.Read(exINI, pSection, "FallingDownDamage.Water");
+
 	this->Wake.Read(exINI, pSection, "Wake");
 	this->Wake_Grapple.Read(exINI, pSection, "Wake.Grapple");
 	this->Wake_Sinking.Read(exINI, pSection, "Wake.Sinking");
+
+	this->AttackMove_Aggressive.Read(exINI, pSection, "AttackMove.Aggressive");
+	this->AttackMove_UpdateTarget.Read(exINI, pSection, "AttackMove.UpdateTarget");
 
 	this->KeepTargetOnMove.Read(exINI, pSection, "KeepTargetOnMove");
 	this->KeepTargetOnMove_ExtraDistance.Read(exINI, pSection, "KeepTargetOnMove.ExtraDistance");
@@ -476,6 +686,9 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	// Ares 0.C
 	this->NoAmmoWeapon.Read(exINI, pSection, "NoAmmoWeapon");
 	this->NoAmmoAmount.Read(exINI, pSection, "NoAmmoAmount");
+
+	// Ares 3.0
+	this->KeepAlive.Read(exINI, pSection, "KeepAlive");
 
 	char tempBuffer[32];
 
@@ -509,6 +722,10 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	// Art tags
 	INI_EX exArtINI(CCINIClass::INI_Art);
 	auto pArtSection = pThis->ImageFile;
+
+	this->CameoPCX.Read(&CCINIClass::INI_Art, pArtSection, "CameoPCX");
+	this->GreyCameoPCX.Read(&CCINIClass::INI_Art, pArtSection, "GreyCameoPCX");
+	this->CameoPal.LoadFromINI(&CCINIClass::INI_Art, pArtSection, "CameoPalette");
 
 	this->TurretOffset.Read(exArtINI, pArtSection, "TurretOffset");
 	this->TurretShadow.Read(exArtINI, pArtSection, "TurretShadow");
@@ -728,6 +945,13 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 
 		.Process(this->AutoFire)
 		.Process(this->AutoFire_TargetSelf)
+
+		.Process(this->AggressiveStance)
+		.Process(this->AggressiveStance_Togglable)
+		.Process(this->AggressiveStance_Exempt)
+		.Process(this->VoiceEnterAggressiveStance)
+		.Process(this->VoiceExitAggressiveStance)
+
 		.Process(this->NoSecondaryWeaponFallback)
 		.Process(this->NoSecondaryWeaponFallback_AllowAA)
 		.Process(this->NoAmmoWeapon)
@@ -830,9 +1054,110 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxCount)
 		.Process(this->BuildLimitGroup_ExtraLimit_MaxNum)
 
+		.Process(this->RecountBurst)
+		.Process(this->Turret_IdleRotate)
+		.Process(this->Turret_PointToMouse)
+		.Process(this->TurretROT)
+		.Process(this->Turret_Restriction)
+		.Process(this->Turret_ExtraAngle)
+		.Process(this->Turret_BodyOrientation)
+		.Process(this->Turret_BodyOrientationAngle)
+		.Process(this->Turret_BodyOrientationSymmetric)
+		.Process(this->CanBeBuiltOn)
+		.Process(this->UnitBaseNormal)
+		.Process(this->UnitBaseForAllyBuilding)
+		.Process(this->Cameo_AlwaysExist)
+		.Process(this->Cameo_AuxTechnos)
+		.Process(this->Cameo_NegTechnos)
+		.Process(this->CameoCheckMutex)
+		.Process(this->UIDescription_Unbuildable)
+		.Process(this->CameoPCX)
+		.Process(this->GreyCameoPCX)
+		.Process(this->SelectedInfo_UpperType)
+		.Process(this->SelectedInfo_UpperColor)
+		.Process(this->SelectedInfo_BelowType)
+		.Process(this->SelectedInfo_BelowColor)
+		.Process(this->FakeOf)
+		.Process(this->CameoPal)
+		.Process(this->NoRearm_UnderEMP)
+		.Process(this->NoRearm_Temporal)
+		.Process(this->NoReload_UnderEMP)
+		.Process(this->NoReload_Temporal)
+		.Process(this->RateDown_Ammo)
+		.Process(this->RateDown_Delay)
+		.Process(this->RateDown_Cover)
+		.Process(this->RateDown_Reset)
+		.Process(this->UniqueTechno)
+		.Process(this->NoQueueUpToEnter)
+		.Process(this->NoQueueUpToUnload)
+		.Process(this->CanManualReload)
+		.Process(this->CanManualReload_ResetROF)
+		.Process(this->CanManualReload_DetonateWarhead)
+		.Process(this->CanManualReload_DetonateConsume)
+
+		.Process(this->CombatAlert)
+		.Process(this->CombatAlert_NotBuilding)
+		.Process(this->CombatAlert_UseFeedbackVoice)
+		.Process(this->CombatAlert_UseAttackVoice)
+		.Process(this->CombatAlert_UseEVA)
+		.Process(this->CombatAlert_EVA)
+		.Process(this->Spawner_RecycleRange)
+		.Process(this->Spawner_RecycleAnim)
+		.Process(this->AINormalTargetingDelay)
+		.Process(this->PlayerNormalTargetingDelay)
+		.Process(this->AIGuardAreaTargetingDelay)
+		.Process(this->PlayerGuardAreaTargetingDelay)
+		.Process(this->KeepWarping)
+		.Process(this->KeepWarping_Distance)
+		.Process(this->FiringByPassMovingCheck)
+		.Process(this->SkipCrushSlowdown)
+		.Process(this->PlayerGuardModePursuit)
+		.Process(this->PlayerGuardModeStray)
+		.Process(this->PlayerGuardModeGuardRangeMultiplier)
+		.Process(this->PlayerGuardModeGuardRangeAddend)
+		.Process(this->PlayerGuardStationaryStray)
+		.Process(this->AIGuardModePursuit)
+		.Process(this->AIGuardModeStray)
+		.Process(this->AIGuardModeGuardRangeMultiplier)
+		.Process(this->AIGuardModeGuardRangeAddend)
+		.Process(this->AIGuardStationaryStray)
+		.Process(this->Engineer_CanAutoFire)
+		.Process(this->BunkerableAnyWay)
+		.Process(this->Harvester_CanGuardArea)
+		.Process(this->DigStartROT)
+		.Process(this->DigInSpeed)
+		.Process(this->DigOutSpeed)
+		.Process(this->DigEndROT)
+		.Process(this->FlightClimb)
+		.Process(this->FlightCrash)
+		.Process(this->ExplodeOnDestroy)
+		.Process(this->FireDeathWeaponOnCrushed)
+		.Process(this->ExitCoord)
+		.Process(this->MissileSpawnUseOtherFLHs)
+		.Process(this->HarvesterQuickUnloader)
+		.Process(this->DistributeTargetingFrame)
+		.Process(this->AttackMove_Follow)
+		.Process(this->AttackMove_Follow_IncludeAir)
+		.Process(this->AttackMove_StopWhenTargetAcquired)
+		.Process(this->AttackMove_PursuitTarget)
+		.Process(this->ThisIsAJumpjet)
+		.Process(this->ImAJumpjetFromAirport)
+		.Process(this->IgnoreRallyPoint)
+		.Process(this->Sinkable)
+		.Process(this->SinkSpeed)
+		.Process(this->JumpjetSpeedType)
+
+		.Process(this->KeepAlive)
+
+		.Process(this->FallingDownDamage)
+		.Process(this->FallingDownDamage_Water)
+
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)
 		.Process(this->Wake_Sinking)
+
+		.Process(this->AttackMove_Aggressive)
+		.Process(this->AttackMove_UpdateTarget)
 
 		.Process(this->KeepTargetOnMove)
 		.Process(this->KeepTargetOnMove_ExtraDistance)

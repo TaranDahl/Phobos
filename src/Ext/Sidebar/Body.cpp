@@ -4,6 +4,8 @@
 #include <HouseClass.h>
 #include <SuperClass.h>
 
+#include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
+
 std::unique_ptr<SidebarExt::ExtData> SidebarExt::Data = nullptr;
 
 SHPStruct* SidebarExt::TabProducingProgress[4];
@@ -36,7 +38,7 @@ bool __stdcall SidebarExt::AresTabCameo_RemoveCameo(BuildType* pItem)
 	{
 		const auto& supers = pCurrent->Supers;
 
-		if (supers.ValidIndex(pItem->ItemIndex) && supers[pItem->ItemIndex]->IsPresent)
+		if (supers.ValidIndex(pItem->ItemIndex) && supers[pItem->ItemIndex]->IsPresent && !SWSidebarClass::Instance.AddButton(pItem->ItemIndex))
 			return false;
 	}
 
@@ -78,6 +80,8 @@ template <typename T>
 void SidebarExt::ExtData::Serialize(T& Stm)
 {
 	Stm
+		.Process(this->SWSidebar_Enable)
+		.Process(this->SWSidebar_Indices)
 		;
 }
 

@@ -7,6 +7,7 @@
 #include <Ext/Anim/Body.h>
 #include <Ext/Scenario/Body.h>
 #include <Ext/WeaponType/Body.h>
+#include <Ext/House/Body.h>
 
 #include <Utilities/AresFunctions.h>
 
@@ -21,6 +22,18 @@ TechnoExt::ExtData::~ExtData()
 	if (pTypeExt->AutoDeath_Behavior.isset())
 	{
 		auto& vec = ScenarioExt::Global()->AutoDeathObjects;
+		vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
+	}
+
+	if (RulesExt::Global()->ExtendedBuildingPlacing && pThis->WhatAmI() == AbstractType::Unit && pType->DeploysInto)
+	{
+		auto& vec = HouseExt::ExtMap.Find(pThis->Owner)->OwnedDeployingUnits;
+		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
+	}
+
+	if (pTypeExt->UniqueTechno)
+	{
+		auto& vec = ScenarioExt::Global()->OwnedHeros;
 		vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
 	}
 
@@ -466,6 +479,65 @@ int TechnoExt::ExtData::GetAttachedEffectCumulativeCount(AttachEffectTypeClass* 
 	return foundCount;
 }
 
+void TechnoExt::ExtData::InitAggressiveStance()
+{
+	this->AggressiveStance = this->TypeExtData->AggressiveStance.Get();
+}
+
+bool TechnoExt::ExtData::GetAggressiveStance() const
+{
+	// if this is a passenger then obey the configuration of the transport
+	if (auto pTransport = this->OwnerObject()->Transporter)
+		return TechnoExt::ExtMap.Find(pTransport)->GetAggressiveStance();
+
+	return this->AggressiveStance;
+}
+
+void TechnoExt::ExtData::ToggleAggressiveStance()
+{
+	this->AggressiveStance = !this->AggressiveStance;
+
+	if (!this->AggressiveStance)
+	{
+		const auto pThis = this->OwnerObject();
+		pThis->QueueMission(Mission::Guard, false);
+		pThis->SetTarget(nullptr);
+	}
+}
+
+bool TechnoExt::ExtData::CanToggleAggressiveStance()
+{
+	if (!RulesExt::Global()->EnableAggressiveStance)
+		return false;
+
+	const auto pTypeExt = this->TypeExtData;
+
+	if (!pTypeExt->AggressiveStance_Togglable.isset())
+	{
+		// Only techno that are armed and open-topped can be aggressive stance.
+		if (!this->OwnerObject()->IsArmed() && !pTypeExt->OwnerObject()->OpenTopped)
+		{
+			pTypeExt->AggressiveStance_Togglable = false;
+			return false;
+		}
+
+		// Engineers and Agents are default to not allow aggressive stance.
+		if (auto pInfantryTypeClass = abstract_cast<InfantryTypeClass*>(pTypeExt->OwnerObject()))
+		{
+			if (pInfantryTypeClass->Engineer || pInfantryTypeClass->Agent)
+			{
+				pTypeExt->AggressiveStance_Togglable = false;
+				return false;
+			}
+		}
+
+		pTypeExt->AggressiveStance_Togglable = true;
+		return true;
+	}
+
+	return pTypeExt->AggressiveStance_Togglable.Get(true);
+}
+
 // =============================
 // load / save
 
@@ -496,14 +568,40 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->LastRearmWasFullDelay)
 		.Process(this->CanCloakDuringRearm)
 		.Process(this->WHAnimRemainingCreationInterval)
+		.Process(this->UnitIdleIsSelected)
+		.Process(this->UnitIdleActionTimer)
+		.Process(this->UnitIdleActionGapTimer)
+		.Process(this->UnitAutoDeployTimer)
+		.Process(this->LastWeaponType)
+		.Process(this->LastWeaponFLH)
+		.Process(this->LastHurtFrame)
+		.Process(this->BeControlledThreatFrame)
+		.Process(this->LastTargetID)
+		.Process(this->AccumulatedGattlingValue)
+		.Process(this->ShouldUpdateGattlingValue)
+		.Process(this->ScatteringStopFrame)
+		.Process(this->MyTargetingFrame)
+		.Process(this->AttackMoveFollowerTempCount)
+		.Process(this->AutoTargetedWallCell)
+		.Process(this->HasCachedClick)
+		.Process(this->CachedMission)
+		.Process(this->CachedCell)
+		.Process(this->CachedTarget)
 		.Process(this->FiringObstacleCell)
 		.Process(this->IsDetachingForCloak)
 		.Process(this->OriginalPassengerOwner)
 		.Process(this->HasRemainingWarpInDelay)
 		.Process(this->LastWarpInDelay)
 		.Process(this->IsBeingChronoSphered)
+		.Process(this->AggressiveStance)
 		.Process(this->KeepTargetOnMove)
 		;
+}
+
+void TechnoExt::ExtData::InvalidatePointer(void* ptr, bool bRemoved)
+{
+	if (this->HasCachedClick && this->CachedTarget == ptr)
+		this->ClearCachedClick();
 }
 
 void TechnoExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

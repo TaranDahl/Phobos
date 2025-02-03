@@ -3,6 +3,7 @@
 #include <SuperClass.h>
 #include <SuperWeaponTypeClass.h>
 
+#include <Ext/TechnoType/Body.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
@@ -58,11 +59,28 @@ public:
 		Valueable<bool> SpyEffect_Custom;
 		ValueableIdx<SuperWeaponTypeClass> SpyEffect_VictimSuperWeapon;
 		ValueableIdx<SuperWeaponTypeClass> SpyEffect_InfiltratorSuperWeapon;
+		Valueable<int> SpyEffect_RadarJamDuration;
 
 		Nullable<bool> ConsideredVehicle;
 		Valueable<bool> ZShapePointMove_OnBuildup;
 		Valueable<int> SellBuildupLength;
 		Valueable<bool> IsDestroyableObstacle;
+
+		Valueable<bool> JustHasRallyPoint;
+		Nullable<CoordStruct> JumpjetExitCoord;
+		Nullable<int> RallySpeedType;
+		Nullable<int> RallyMovementZone;
+
+		Nullable<bool> Cameo_ShouldCount;
+		Nullable<bool> AutoBuilding;
+		Valueable<int> AutoBuilding_Gap;
+		Valueable<bool> LimboBuild;
+		Valueable<int> LimboBuildID;
+		Valueable<BuildingTypeClass*> LaserFencePost_Fence;
+		Valueable<BuildingTypeClass*> PlaceBuilding_OnLand;
+		Valueable<BuildingTypeClass*> PlaceBuilding_OnWater;
+
+		Valueable<bool> IsAnimDelayedBurst;
 
 		std::vector<std::optional<DirType>> AircraftDockingDirs;
 
@@ -114,12 +132,26 @@ public:
 			, SpyEffect_Custom { false }
 			, SpyEffect_VictimSuperWeapon {}
 			, SpyEffect_InfiltratorSuperWeapon {}
+			, SpyEffect_RadarJamDuration { 0 }
 			, ConsideredVehicle {}
 			, ZShapePointMove_OnBuildup { false }
 			, SellBuildupLength { 23 }
+			, JustHasRallyPoint { false }
+			, JumpjetExitCoord { }
+			, RallySpeedType { }
+			, RallyMovementZone { }
+			, Cameo_ShouldCount {}
+			, AutoBuilding {}
+			, AutoBuilding_Gap { 1 }
+			, LimboBuild { false }
+			, LimboBuildID { -1 }
+			, LaserFencePost_Fence {}
+			, PlaceBuilding_OnLand {}
+			, PlaceBuilding_OnWater {}
 			, AircraftDockingDirs {}
 			, FactoryPlant_AllowTypes {}
 			, FactoryPlant_DisallowTypes {}
+			, IsAnimDelayedBurst { true }
 			, IsDestroyableObstacle { false }
 			, Units_RepairRate {}
 			, Units_RepairStep {}
@@ -169,4 +201,13 @@ public:
 	static bool CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner);
 	static int CountOwnedNowWithDeployOrUpgrade(BuildingTypeClass* pBuilding, HouseClass* pHouse);
 	static int GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass* pHouse);
+	static bool ShouldExistGreyCameo(const TechnoTypeExt::ExtData* const pTypeExt);
+	static CanBuildResult CheckAlwaysExistCameo(const TechnoTypeClass* const pType, CanBuildResult canBuild);
+	static bool CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseClass* pOccupierHouse);
+	static bool CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, CellStruct topLeftCell, HouseClass* pHouse, TechnoClass* pExceptTechno = nullptr);
+	static void DrawAdjacentLines();
+	static bool AutoPlaceBuilding(BuildingClass* pBuilding);
+	static bool BuildLimboBuilding(BuildingClass* pBuilding);
+	static void CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID);
+	static bool DeleteLimboBuilding(BuildingClass* pBuilding, int ID);
 };

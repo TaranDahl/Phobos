@@ -6,7 +6,7 @@
 #include <TunnelLocomotionClass.h>
 
 #include <Ext/BuildingType/Body.h>
-#include <Ext/House/Body.h>
+#include <Ext/Scenario/Body.h>
 #include <Ext/WarheadType/Body.h>
 #include <Ext/WeaponType/Body.h>
 #include <Utilities/EnumFunctions.h>
@@ -139,6 +139,12 @@ DEFINE_HOOK(0x6F42F7, TechnoClass_Init, 0x2)
 	pExt->CurrentShieldType = pExt->TypeExtData->ShieldType;
 	pExt->InitializeLaserTrails();
 	pExt->InitializeAttachEffects();
+	pExt->InitializeDisplayInfo();
+
+	if (pExt->TypeExtData->UniqueTechno && pThis->Owner->IsControlledByCurrentPlayer())
+		ScenarioExt::Global()->OwnedHeros.push_back(pExt);
+
+	pExt->InitAggressiveStance();
 
 	return 0;
 }
@@ -546,7 +552,78 @@ DEFINE_HOOK(0x70EFE0, TechnoClass_GetMaxSpeed, 0x6)
 	return SkipGameCode;
 }
 
+#pragma region DestroyAnimGeneralize
 
+namespace PlayDestroyAnimGeneralize
+{
+	TechnoTypeClass* pType;
+}
+
+DEFINE_HOOK(0x738687, UnitClass_PlayDestroyAnim_SetContext, 0x6)
+{
+	enum { SkipGameCode = 0x73868D };
+
+	GET(TechnoClass*, pThis, ESI);
+
+	PlayDestroyAnimGeneralize::pType = pThis->GetTechnoType();
+	R->EAX(PlayDestroyAnimGeneralize::pType);
+
+	return SkipGameCode;
+}
+
+DEFINE_HOOK_AGAIN(0x738822, UnitClass_PlayDestroyAnim_Generalize1, 0x6);
+DEFINE_HOOK_AGAIN(0x7387C4, UnitClass_PlayDestroyAnim_Generalize1, 0x6);
+DEFINE_HOOK(0x7386AC, UnitClass_PlayDestroyAnim_Generalize1, 0x6)
+{
+	R->ECX(PlayDestroyAnimGeneralize::pType);
+	return R->Origin() + 6;
+}
+
+DEFINE_HOOK_AGAIN(0x738801, UnitClass_PlayDestroyAnim_Generalize2, 0x6);
+DEFINE_HOOK(0x7386DA, UnitClass_PlayDestroyAnim_Generalize2, 0x6)
+{
+	R->EAX(PlayDestroyAnimGeneralize::pType);
+	return R->Origin() + 6;
+}
+
+DEFINE_HOOK(0x746D61, UnitClass_Destroy_ToggleAnim, 0x7)
+{
+	enum { SkipGameCode = 0x746D68 };
+
+	GET(TechnoClass*, pThis, ECX);
+
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	if (pTypeExt->ExplodeOnDestroy.Get(pThis->WhatAmI() == AbstractType::Unit || RulesExt::Global()->NonVehExplodeOnDestroy))
+		static_cast<UnitClass*>(pThis)->Explode();
+
+	R->ESI(pThis);
+	return SkipGameCode;
+}
+
+DEFINE_JUMP(VTABLE, 0x7EB1C8, 0x746D60); // Redirect InfantryClass::Explode(TechnoClass::Explode) to UnitClass::Explode
+DEFINE_JUMP(VTABLE, 0x7E402C, 0x746D60); // Redirect BuildingClass::Explode(TechnoClass::Explode) to UnitClass::Explode
+DEFINE_JUMP(VTABLE, 0x7E2414, 0x746D60); // Redirect AircraftClass::Explode(TechnoClass::Explode) to UnitClass::Explode
+
+DEFINE_HOOK(0x7418D4, UnitClass_CrushCell_FireDeathWeapon, 0x6)
+{
+	GET(ObjectClass*, pThis, ESI);
+
+	if ((pThis->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None)
+	{
+		auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+		if (pTypeExt && pTypeExt->FireDeathWeaponOnCrushed.Get(RulesExt::Global()->FireDeathWeaponOnCrushed))
+		{
+			auto const pTechno = static_cast<TechnoClass*>(pThis);
+			pTechno->FireDeathWeapon(0);
+		}
+	}
+
+	return 0;
+}
+
+#pragma endregion
 
 #pragma region KeepTargetOnMove
 
@@ -564,7 +641,7 @@ DEFINE_HOOK(0x4C7462, EventClass_Execute_KeepTargetOnMove, 0x5)
 
 	auto const mission = static_cast<Mission>(pThis->MegaMission.Mission);
 	auto const pExt = TechnoExt::ExtMap.Find(pTechno);
-	
+
 	if ((mission == Mission::Move) && pExt->TypeExtData->KeepTargetOnMove && pTechno->Target && !pTarget)
 	{
 		if (pTechno->IsCloseEnoughToAttack(pTechno->Target))
@@ -612,3 +689,18 @@ DEFINE_HOOK(0x736480, UnitClass_AI_KeepTargetOnMove, 0x6)
 }
 
 #pragma endregion
+
+DEFINE_HOOK(0x70D703, TechnoClass_FireDeathWeapon_UseGlobalDeathWeaponDamage, 0xA)
+{
+	enum { ReplaceDamage = 0x70D724 };
+
+	if (RulesExt::Global()->UseGlobalDeathWeaponDamage)
+	{
+		auto const pDeathWeapon = RulesClass::Instance()->DeathWeapon;
+		R->EDI(pDeathWeapon);
+		R->EAX(pDeathWeapon ? pDeathWeapon->Damage : 0);
+		return ReplaceDamage;
+	}
+
+	return 0;
+}

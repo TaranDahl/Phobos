@@ -24,6 +24,14 @@ public:
 		std::map<int, int> PowerPlantEnhancers;
 		std::vector<BuildingClass*> OwnedLimboDeliveredBuildings;
 
+		std::vector<UnitClass*> OwnedDeployingUnits;
+		BuildingTypeClass* CurrentBuildingType;
+		BuildingTypeClass* CurrentBuildingDrawType;
+		CellStruct CurrentBuildingTopLeft;
+		CDTimerClass CurrentBuildingTimer;
+		int CurrentBuildingTimes;
+		int LastRefineryBuildFrame;
+
 		CounterClass LimboAircraft;  // Currently owned aircraft in limbo
 		CounterClass LimboBuildings; // Currently owned buildings in limbo
 		CounterClass LimboInfantry;  // Currently owned infantry in limbo
@@ -35,6 +43,7 @@ public:
 		BuildingClass* Factory_NavyType;
 		BuildingClass* Factory_AircraftType;
 
+		CDTimerClass CombatAlertTimer;
 		CDTimerClass AISuperWeaponDelayTimer;
 		CDTimerClass AIFireSaleDelayTimer;
 
@@ -62,9 +71,18 @@ public:
 		};
 		std::vector<SWExt> SuperExts;
 
+		CDTimerClass SpyEffect_RadarJamTimer;
+
 		ExtData(HouseClass* OwnerObject) : Extension<HouseClass>(OwnerObject)
 			, PowerPlantEnhancers {}
 			, OwnedLimboDeliveredBuildings {}
+			, OwnedDeployingUnits {}
+			, CurrentBuildingType { nullptr }
+			, CurrentBuildingDrawType { nullptr }
+			, CurrentBuildingTopLeft {}
+			, CurrentBuildingTimer {}
+			, CurrentBuildingTimes { 0 }
+			, LastRefineryBuildFrame { 0 }
 			, LimboAircraft {}
 			, LimboBuildings {}
 			, LimboInfantry {}
@@ -74,6 +92,7 @@ public:
 			, Factory_VehicleType { nullptr }
 			, Factory_NavyType { nullptr }
 			, Factory_AircraftType { nullptr }
+			, CombatAlertTimer {}
 			, AISuperWeaponDelayTimer {}
 			, RepairBaseNodes { }
 			, RestrictedFactoryPlants {}
@@ -87,6 +106,7 @@ public:
 			, AIFireSaleDelayTimer {}
 			, SuspendedEMPulseSWs {}
 			, SuperExts(SuperWeaponTypeClass::Array->Count)
+			, SpyEffect_RadarJamTimer {}
 		{ }
 
 		bool OwnsLimboDeliveredBuilding(BuildingClass* pBuilding);
