@@ -130,7 +130,7 @@ public:
 		Valueable<bool> CheckUnitBaseNormal;
 		Valueable<bool> Cameo_AlwaysExist;
 		Valueable<SHPStruct*> Cameo_OverlayShapes;
-		Valueable<Vector3D<int>> Cameo_OverlayFrames;
+		ValueableVector<int> Cameo_OverlayFrames;
 		CustomPalette Cameo_OverlayPalette;
 		Valueable<bool> ExtendedBuildingPlacing;
 		Valueable<bool> AutoBuilding;
@@ -326,7 +326,7 @@ public:
 			, CheckUnitBaseNormal { false }
 			, Cameo_AlwaysExist { false }
 			, Cameo_OverlayShapes { FileSystem::PIPS_SHP }
-			, Cameo_OverlayFrames { { -1, -1, -1 } }
+			, Cameo_OverlayFrames {}
 			, Cameo_OverlayPalette {}
 			, ExtendedBuildingPlacing { false }
 			, AutoBuilding { false }
