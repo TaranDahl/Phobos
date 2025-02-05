@@ -66,35 +66,23 @@ int BuildingTypeExt::GetEnhancedPower(BuildingClass* pBuilding, HouseClass* pHou
 	return static_cast<int>(std::round(pBuilding->GetPowerOutput() * fFactor)) + nAmount;
 }
 
-int BuildingTypeExt::CountOwnedNowWithDeployOrUpgrade(BuildingTypeClass* pType, HouseClass* pHouse)
-{
-	const auto upgrades = BuildingTypeExt::GetUpgradesAmount(pType, pHouse);
-
-	if (upgrades != -1)
-		return upgrades;
-
-	if (const auto pUndeploy = pType->UndeploysInto)
-		return pHouse->CountOwnedNow(pType) + pHouse->CountOwnedNow(pUndeploy);
-
-	return pHouse->CountOwnedNow(pType);
-}
-
-int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass* pHouse) // not including producing upgrades
+int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass* pBuildingType, HouseClass* pHouse, bool includeProduct)
 {
 	int result = 0;
 	bool isUpgrade = false;
-	auto pPowersUp = pBuilding->PowersUpBuilding;
+	auto pPowersUp = pBuildingType->PowersUpBuilding;
 
-	auto checkUpgrade = [pHouse, pBuilding, &result, &isUpgrade](BuildingTypeClass* pTPowersUp)
+	auto checkUpgrade = [pHouse, pBuildingType, &result, &isUpgrade](BuildingTypeClass* pTPowersUp)
 	{
 		isUpgrade = true;
+
 		for (auto const& pBld : pHouse->Buildings)
 		{
 			if (pBld->Type == pTPowersUp)
 			{
 				for (auto const& pUpgrade : pBld->Upgrades)
 				{
-					if (pUpgrade == pBuilding)
+					if (pUpgrade == pBuildingType)
 						++result;
 				}
 			}
@@ -107,13 +95,36 @@ int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass*
 			checkUpgrade(pTPowersUp);
 	}
 
-	if (auto pBuildingExt = BuildingTypeExt::ExtMap.Find(pBuilding))
+	if (auto pTypeExt = BuildingTypeExt::ExtMap.Find(pBuildingType))
 	{
-		for (auto pTPowersUp : pBuildingExt->PowersUp_Buildings)
+		for (auto pTPowersUp : pTypeExt->PowersUp_Buildings)
 			checkUpgrade(pTPowersUp);
 	}
 
-	return isUpgrade ? result : -1;
+	if (!isUpgrade)
+		return -1;
+
+	if (!includeProduct)
+		return result;
+
+	if (pHouse->IsControlledByHuman())
+	{
+		if (const auto pFactory = pHouse->GetPrimaryFactory(AbstractType::Building, pBuildingType->Naval, pBuildingType->BuildCat))
+		{
+			if (pFactory->Object && pFactory->Object->GetTechnoType() == pBuildingType)
+				result += 1;
+		}
+	}
+	else
+	{
+		for (const auto& pHBuilding : pHouse->Buildings)
+		{
+			if (pHBuilding->Factory && pHBuilding->Factory->Object && pHBuilding->Factory->Object->GetTechnoType() == pBuildingType)
+				result += 1;
+		}
+	}
+
+	return result;
 }
 
 // Check whether can call the occupiers leave
