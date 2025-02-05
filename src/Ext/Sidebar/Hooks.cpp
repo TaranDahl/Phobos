@@ -177,13 +177,7 @@ DEFINE_HOOK(0x6A9BC5, StripClass_Draw_DrawGreyCameoExtraCover, 0x6)
 
 		if ((frameSize && frames[0] >= 0) || statistics)
 		{
-			const auto pHouse = HouseClass::CurrentPlayer();
-			auto count = BuildingTypeExt::GetUpgradesAmount(pBuildingType, pHouse);
-
-			if (count == -1)
-				count = pHouse->CountOwnedAndPresent(pBuildingType);
-
-			if (count > 0)
+			if (const auto count = HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass::CurrentPlayer(), pBuildingType))
 			{
 				if (frames[0] >= 0)
 				{

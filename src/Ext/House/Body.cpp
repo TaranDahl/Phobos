@@ -361,6 +361,36 @@ void HouseExt::GetAIChronoshiftSupers(HouseClass* pThis, SuperClass*& pSuperCSph
 	}
 }
 
+int HouseExt::CountOwnedNowWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType)
+{
+	const auto upgrades = BuildingTypeExt::GetUpgradesAmount(pBuildingType, pHouse, true);
+
+	if (upgrades != -1)
+		return upgrades;
+
+	auto count = pHouse->CountOwnedNow(pBuildingType);
+
+	if (const auto pUndeployType = pBuildingType->UndeploysInto)
+		count += pHouse->CountOwnedNow(pUndeployType);
+
+	return count;
+}
+
+int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType)
+{
+	const auto upgrades = BuildingTypeExt::GetUpgradesAmount(pBuildingType, pHouse);
+
+	if (upgrades != -1)
+		return upgrades;
+
+	auto count = pHouse->CountOwnedAndPresent(pBuildingType);
+
+	if (const auto pUndeployType = pBuildingType->UndeploysInto)
+		count += pHouse->CountOwnedAndPresent(pUndeployType);
+
+	return count;
+}
+
 // Ares
 HouseClass* HouseExt::GetHouseKind(OwnerHouseKind const kind, bool const allowRandom, HouseClass* const pDefault, HouseClass* const pInvoker, HouseClass* const pVictim)
 {
