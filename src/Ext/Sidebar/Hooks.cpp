@@ -128,20 +128,15 @@ DEFINE_HOOK(0x6A9BC5, StripClass_Draw_DrawGreyCameoExtraCover, 0x6)
 		auto frame = frames[2];
 		const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
 
-		if (frameSize > 3 && pTypeExt && pTypeExt->Cameo_AlwaysExist.Get(RulesExt::Global()->Cameo_AlwaysExist))
+		if (frameSize > 3 && pTypeExt && pTypeExt->IsGreyCameoForCurrentPlayer)
 		{
-			auto& vec = ScenarioExt::Global()->OwnedExistCameoTechnoTypes;
-
-			if (std::find(vec.begin(), vec.end(), pTypeExt) != vec.end())
+			if (const auto CameoPCX = pTypeExt->GreyCameoPCX.GetSurface())
 			{
-				if (const auto CameoPCX = pTypeExt->GreyCameoPCX.GetSurface())
-				{
-					auto drawRect = RectangleStruct { destX, destY, 60, 48 };
-					PCX::Instance->BlitToSurface(&drawRect, DSurface::Sidebar, CameoPCX);
-				}
-
-				frame = frames[3];
+				auto drawRect = RectangleStruct { destX, destY, 60, 48 };
+				PCX::Instance->BlitToSurface(&drawRect, DSurface::Sidebar, CameoPCX);
 			}
+
+			frame = frames[3];
 		}
 
 		if (frame >= 0)

@@ -5,6 +5,7 @@
 
 decltype(AresFunctions::ConvertTypeTo) AresFunctions::ConvertTypeTo = nullptr;
 decltype(AresFunctions::SpawnSurvivors) AresFunctions::SpawnSurvivors = nullptr;
+decltype(AresFunctions::RequirementsMet) AresFunctions::RequirementsMet = nullptr;
 decltype(AresFunctions::IsTargetConstraintsEligible) AresFunctions::IsTargetConstraintsEligible = nullptr;
 std::function<AresSWTypeExtData* (SuperWeaponTypeClass*)> AresFunctions::SWTypeExtMap_Find;
 
@@ -26,6 +27,8 @@ void AresFunctions::InitAres3_0()
 	{
 		NOTE_ARES_FUN(SpawnSurvivors, 0x464C0);
 	}
+
+	NOTE_ARES_FUN(RequirementsMet, 0x021FF0);
 
 	NOTE_ARES_FUN(IsTargetConstraintsEligible, 0x032110);
 
@@ -50,6 +53,8 @@ void AresFunctions::InitAres3_0p1()
 	{
 		NOTE_ARES_FUN(SpawnSurvivors, 0x47030);
 	}
+
+	NOTE_ARES_FUN(RequirementsMet, 0x022A70);
 
 	NOTE_ARES_FUN(IsTargetConstraintsEligible, 0x032AF0);
 

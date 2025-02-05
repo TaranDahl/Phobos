@@ -201,11 +201,10 @@ public:
 	static bool CanUpgrade(BuildingClass* pBuilding, BuildingTypeClass* pUpgradeType, HouseClass* pUpgradeOwner);
 	static int CountOwnedNowWithDeployOrUpgrade(BuildingTypeClass* pBuilding, HouseClass* pHouse);
 	static int GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass* pHouse);
-	static bool ShouldExistGreyCameo(const TechnoTypeExt::ExtData* const pTypeExt);
-	static CanBuildResult CheckAlwaysExistCameo(const TechnoTypeClass* const pType, CanBuildResult canBuild);
 	static bool CheckOccupierCanLeave(HouseClass* pBuildingHouse, HouseClass* pOccupierHouse);
 	static bool CleanUpBuildingSpace(BuildingTypeClass* pBuildingType, CellStruct topLeftCell, HouseClass* pHouse, TechnoClass* pExceptTechno = nullptr);
 	static void DrawAdjacentLines();
+	static bool IsSameBuildingType(BuildingTypeClass* pType1, BuildingTypeClass* pType2);
 	static bool AutoPlaceBuilding(BuildingClass* pBuilding);
 	static bool BuildLimboBuilding(BuildingClass* pBuilding);
 	static void CreateLimboBuilding(BuildingClass* pBuilding, BuildingTypeClass* pType, HouseClass* pOwner, int ID);
