@@ -36,7 +36,6 @@ public:
 		std::vector<TechnoExt::ExtData*> AutoDeathObjects;
 		std::vector<TechnoExt::ExtData*> TransportReloaders; // Objects that can reload ammo in limbo
 
-		std::vector<TechnoTypeExt::ExtData*> OwnedExistCameoTechnoTypes;
 		std::vector<CellStruct> BaseNormalCells;
 		std::vector<TechnoExt::ExtData*> OwnedHeros;
 
@@ -47,7 +46,6 @@ public:
 			, Variables { }
 			, AutoDeathObjects {}
 			, TransportReloaders {}
-			, OwnedExistCameoTechnoTypes {}
 			, BaseNormalCells {}
 			, OwnedHeros {}
 		{ }

@@ -6,6 +6,7 @@
 #include <JumpjetLocomotionClass.h>
 #include <TechnoTypeClass.h>
 #include <StringTable.h>
+#include <EventClass.h>
 
 #include <Ext/Anim/Body.h>
 #include <Ext/BuildingType/Body.h>
@@ -13,6 +14,7 @@
 #include <Ext/Techno/Body.h>
 
 #include <Utilities/GeneralUtils.h>
+#include <Utilities/AresFunctions.h>
 
 TechnoTypeExt::ExtContainer TechnoTypeExt::ExtMap;
 
@@ -366,6 +368,88 @@ DirStruct TechnoTypeExt::ExtData::GetBodyDesiredDir(DirStruct currentDir, DirStr
 	return (std::abs(rightDifference) < std::abs(leftDifference)) ? rightDir : leftDir;
 }
 
+int __fastcall TechnoTypeExt::RequirementsMetExtraCheck(void* pAresHouseExt, void* _, TechnoTypeClass* pType)
+{
+	// Only with Ares will call this function, so skip sanity check.
+	const auto result = AresFunctions::RequirementsMet(pAresHouseExt, pType);
+
+	if (*reinterpret_cast<HouseClass**>(pAresHouseExt) == HouseClass::CurrentPlayer())
+	{
+		const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+
+		if (pTypeExt->Cameo_AlwaysExist.Get(RulesExt::Global()->Cameo_AlwaysExist))
+			pTypeExt->IsMetTheEssentialConditions = (result > 2);
+	}
+
+	return result;
+}
+
+CanBuildResult TechnoTypeExt::CheckAlwaysExistCameo(TechnoTypeClass* pType, CanBuildResult canBuild)
+{
+	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+	auto ForceRedrawSidebar = [&pType]()
+	{
+		const auto tabIndex = SidebarClass::GetObjectTabIdx(pType->WhatAmI(), pType->GetArrayIndex(), 0);
+		const auto pSidebar = SidebarClass::Instance();
+
+		if (tabIndex != pSidebar->ActiveTabIndex)
+			return;
+
+		pSidebar->SidebarNeedsRedraw = true;
+		pSidebar->SidebarBackgroundNeedsRedraw = true; // Necessary
+		pSidebar->Tabs[tabIndex].NeedsRedraw = true;
+		pSidebar->RedrawSidebar(0);
+	};
+
+	if (canBuild == CanBuildResult::Unbuildable)
+	{
+		if (pTypeExt->IsMetTheEssentialConditions)
+		{
+			if (!pTypeExt->IsGreyCameoForCurrentPlayer)
+			{
+				pTypeExt->IsGreyCameoForCurrentPlayer = true;
+				ForceRedrawSidebar();
+
+				if (const auto pBldType = abstract_cast<BuildingTypeClass*>(pType))
+				{
+					const auto pDisplay = DisplayClass::Instance();
+					const auto pCurType = abstract_cast<BuildingTypeClass*>(pDisplay->CurrentBuildingType);
+
+					if (!RulesExt::Global()->ExtendedBuildingPlacing || !pCurType
+						|| BuildingTypeExt::IsSameBuildingType(pBldType, pCurType))
+					{
+						pDisplay->SetActiveFoundation(nullptr);
+						pDisplay->CurrentBuilding = nullptr;
+						pDisplay->CurrentBuildingType = nullptr;
+						pDisplay->CurrentBuildingOwnerArrayIndex = -1;
+					}
+				}
+
+				const EventClass event
+				(
+					HouseClass::CurrentPlayer->ArrayIndex,
+					EventType::AbandonAll,
+					static_cast<int>(pType->WhatAmI()),
+					pType->GetArrayIndex(),
+					pType->Naval
+				);
+				EventClass::AddEvent(event);
+			}
+
+			canBuild = CanBuildResult::TemporarilyUnbuildable;
+		}
+	}
+	else if (pTypeExt->IsGreyCameoForCurrentPlayer)
+	{
+		pTypeExt->IsGreyCameoForCurrentPlayer = false;
+		pTypeExt->IsGreyCameoAbandonedProduct = false;
+		VoxClass::Play(&Make_Global<const char>(0x83FA64)); // 0x83FA64 -> EVA_NewConstructionOptions
+		ForceRedrawSidebar();
+	}
+
+	return canBuild;
+}
+
 // =============================
 // load / save
 
@@ -576,8 +660,6 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->UnitBaseNormal.Read(exINI, pSection, "UnitBaseNormal");
 	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
 	this->Cameo_AlwaysExist.Read(exINI, pSection, "Cameo.AlwaysExist");
-	this->Cameo_AuxTechnos.Read(exINI, pSection, "Cameo.AuxTechnos");
-	this->Cameo_NegTechnos.Read(exINI, pSection, "Cameo.NegTechnos");
 	this->UIDescription_Unbuildable.Read(exINI, pSection, "UIDescription.Unbuildable");
 	this->SelectedInfo_UpperType.Read(exINI, pSection, "SelectedInfo.UpperType");
 	this->SelectedInfo_UpperColor.Read(exINI, pSection, "SelectedInfo.UpperColor");
@@ -997,9 +1079,9 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->UnitBaseNormal)
 		.Process(this->UnitBaseForAllyBuilding)
 		.Process(this->Cameo_AlwaysExist)
-		.Process(this->Cameo_AuxTechnos)
-		.Process(this->Cameo_NegTechnos)
-		.Process(this->CameoCheckMutex)
+		.Process(this->IsMetTheEssentialConditions)
+		.Process(this->IsGreyCameoForCurrentPlayer)
+		.Process(this->IsGreyCameoAbandonedProduct)
 		.Process(this->UIDescription_Unbuildable)
 		.Process(this->CameoPCX)
 		.Process(this->GreyCameoPCX)

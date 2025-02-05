@@ -4,6 +4,7 @@
 #include <HouseClass.h>
 #include <SuperClass.h>
 
+#include <Ext/BuildingType/Body.h>
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
 
 std::unique_ptr<SidebarExt::ExtData> SidebarExt::Data = nullptr;
@@ -31,7 +32,7 @@ bool __stdcall SidebarExt::AresTabCameo_RemoveCameo(BuildType* pItem)
 	{
 		const auto pFactory = pTechnoType->FindFactory(true, false, false, pCurrent);
 
-		if (pFactory && pFactory->Owner->CanBuild(pTechnoType, false, true) != CanBuildResult::Unbuildable)
+		if (pFactory && pCurrent->CanBuild(pTechnoType, false, true) != CanBuildResult::Unbuildable)
 			return false;
 	}
 	else
@@ -42,31 +43,34 @@ bool __stdcall SidebarExt::AresTabCameo_RemoveCameo(BuildType* pItem)
 			return false;
 	}
 
-	if (pItem->CurrentFactory)
+	// Here we just raise AbandonAll without find factory, rather than check factory and Abandon then find factory and AbandonAll
+	if (pTechnoType)
 	{
-		EventClass event = EventClass(pCurrent->ArrayIndex, EventType::Abandon, static_cast<int>(pItem->ItemType), pItem->ItemIndex, pTechnoType && pTechnoType->Naval);
+		const EventClass event
+		(
+			pCurrent->ArrayIndex,
+			EventType::AbandonAll,
+			static_cast<int>(pItem->ItemType),
+			pItem->ItemIndex,
+			pTechnoType->Naval
+		);
 		EventClass::AddEvent(event);
 	}
 
 	if (pItem->ItemType == AbstractType::BuildingType || pItem->ItemType == AbstractType::Building)
 	{
-		DisplayClass::Instance->CurrentBuilding = nullptr;
-		DisplayClass::Instance->CurrentBuildingType = nullptr;
-		DisplayClass::Instance->CurrentBuildingOwnerArrayIndex = -1;
-		DisplayClass::Instance->SetActiveFoundation(nullptr);
-	}
+		// It is not necessary to remove buildings on the mouse in all cases here
+		const auto pBldType = static_cast<BuildingTypeClass*>(pTechnoType);
+		const auto pDisplay = DisplayClass::Instance();
+		const auto pCurType = abstract_cast<BuildingTypeClass*>(pDisplay->CurrentBuildingType);
 
-	if (pTechnoType)
-	{
-		const auto absType = pTechnoType->WhatAmI();
-
-		// Here we make correction to the hardcoded BuildCat::DontCare
-		const auto buildCat = absType == AbstractType::BuildingType ? static_cast<BuildingTypeClass*>(pTechnoType)->BuildCat : BuildCat::DontCare;
-
-		if (pCurrent->GetPrimaryFactory(absType, pTechnoType->Naval, buildCat))
+		if (!RulesExt::Global()->ExtendedBuildingPlacing || !pCurType
+			|| BuildingTypeExt::IsSameBuildingType(pBldType, pCurType))
 		{
-			EventClass event = EventClass(pCurrent->ArrayIndex, EventType::AbandonAll, static_cast<int>(pItem->ItemType), pItem->ItemIndex, pTechnoType->Naval);
-			EventClass::AddEvent(event);
+			pDisplay->SetActiveFoundation(nullptr);
+			pDisplay->CurrentBuilding = nullptr;
+			pDisplay->CurrentBuildingType = nullptr;
+			pDisplay->CurrentBuildingOwnerArrayIndex = -1;
 		}
 	}
 

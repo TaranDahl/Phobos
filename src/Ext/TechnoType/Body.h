@@ -239,9 +239,9 @@ public:
 		Valueable<bool> UnitBaseNormal;
 		Valueable<bool> UnitBaseForAllyBuilding;
 		Nullable<bool> Cameo_AlwaysExist;
-		ValueableVector<TechnoTypeClass*> Cameo_AuxTechnos;
-		ValueableVector<TechnoTypeClass*> Cameo_NegTechnos;
-		bool CameoCheckMutex; // Not read from ini
+		bool IsMetTheEssentialConditions; // Not read from ini
+		bool IsGreyCameoForCurrentPlayer; // Not read from ini
+		bool IsGreyCameoAbandonedProduct; // Not read from ini
 		Valueable<CSFText> UIDescription_Unbuildable;
 		PhobosPCXFile CameoPCX;
 		PhobosPCXFile GreyCameoPCX;
@@ -511,9 +511,9 @@ public:
 			, UnitBaseNormal { false }
 			, UnitBaseForAllyBuilding { false }
 			, Cameo_AlwaysExist {}
-			, Cameo_AuxTechnos {}
-			, Cameo_NegTechnos {}
-			, CameoCheckMutex { false }
+			, IsMetTheEssentialConditions { false }
+			, IsGreyCameoForCurrentPlayer { false }
+			, IsGreyCameoAbandonedProduct { true }
 			, UIDescription_Unbuildable {}
 			, CameoPCX {}
 			, GreyCameoPCX {}
@@ -596,6 +596,9 @@ public:
 	static TechnoClass* CreateUnit(TechnoTypeClass* pType, CoordStruct location, DirType facing, DirType* secondaryFacing, HouseClass* pOwner,
 		TechnoClass* pInvoker = nullptr, HouseClass* pInvokerHouse = nullptr, AnimTypeClass* pSpawnAnimType = nullptr, int spawnHeight = -1,
 		bool alwaysOnGround = false, bool checkPathfinding = false, bool parachuteIfInAir = false, Mission mission = Mission::Guard, Mission* missionAI = nullptr);
+
+	static int __fastcall RequirementsMetExtraCheck(void* pAresHouseExt, void* _, TechnoTypeClass* pType);
+	static CanBuildResult CheckAlwaysExistCameo(TechnoTypeClass* pType, CanBuildResult canBuild);
 
 	// Ares 0.A
 	static const char* GetSelectionGroupID(ObjectTypeClass* pType);
