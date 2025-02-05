@@ -403,7 +403,8 @@ CanBuildResult TechnoTypeExt::CheckAlwaysExistCameo(TechnoTypeClass* pType, CanB
 
 	if (canBuild == CanBuildResult::Unbuildable)
 	{
-		if (pTypeExt->IsMetTheEssentialConditions)
+		if (pTypeExt->IsMetTheEssentialConditions
+			&& (pType->AIBasePlanningSide == -1 || pType->AIBasePlanningSide == HouseClass::CurrentPlayer->Type->SideIndex))
 		{
 			if (!pTypeExt->IsGreyCameoForCurrentPlayer)
 			{
