@@ -75,7 +75,6 @@ int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass*
 	auto checkUpgrade = [pHouse, pBuilding, &result, &isUpgrade](BuildingTypeClass* pTPowersUp)
 	{
 		isUpgrade = true;
-
 		for (auto const& pBld : pHouse->Buildings)
 		{
 			if (pBld->Type == pTPowersUp)
