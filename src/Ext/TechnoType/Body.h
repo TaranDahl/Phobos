@@ -239,8 +239,8 @@ public:
 		Valueable<bool> UnitBaseNormal;
 		Valueable<bool> UnitBaseForAllyBuilding;
 		Nullable<bool> Cameo_AlwaysExist;
-		ValueableVector<TechnoTypeClass*> Cameo_AuxTechnos;
-		DWORD Cameo_AuxHouses;
+		ValueableVector<TechnoTypeClass*> Cameo_OverrideTechnos;
+		DWORD Cameo_RequiredHouses;
 		bool IsMetTheEssentialConditions; // Not read from ini
 		bool IsGreyCameoForCurrentPlayer; // Not read from ini
 		bool IsGreyCameoAbandonedProduct; // Not read from ini
@@ -513,8 +513,8 @@ public:
 			, UnitBaseNormal { false }
 			, UnitBaseForAllyBuilding { false }
 			, Cameo_AlwaysExist {}
-			, Cameo_AuxTechnos {}
-			, Cameo_AuxHouses { 0xFFFFFFFF }
+			, Cameo_OverrideTechnos {}
+			, Cameo_RequiredHouses { 0xFFFFFFFF }
 			, IsMetTheEssentialConditions { false }
 			, IsGreyCameoForCurrentPlayer { false }
 			, IsGreyCameoAbandonedProduct { true }

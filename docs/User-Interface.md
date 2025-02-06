@@ -471,9 +471,9 @@ MissingCameo=XXICON.SHP  ; filename - including the .shp/.pcx extension
 ### Show cameo when unbuildable
 
 - A setting that allows you to preview information. This feature can be used as before, playing "new construction options" and clearing the specific production queue when prerequisites loss.
-  - `Cameo.AlwaysExist` controls whether you can see the cameo when the prerequisite have not satisfied (`TechnoLevel`, `Owner` & `Cameo.AuxHouses`, `RequiredHouses`, `ForbiddenHouses`, `FactoryOwners`, `StolenTech`, `SecretLab` and `RequiredTheaters`, etc should be satisfied, if the `Cameo.AuxTechnos` is met, it will override the `Owner` & `Cameo.AuxHouses` conditions). Defaults to `[AudioVisual]` -> `Cameo.AlwaysExist`.
-    - `Cameo.AuxHouses` determines whether to add a condition together with `Owner` for `Cameo.AlwaysExist` check when the value is not empty. Suitable for situations where cameo is no need to be modified in games.
-    - `Cameo.AuxTechnos` determines whether the cameo can also be displayed when you own one of these technos when the value is not empty. Suitable for situations where cameo need to be dynamically modified in games.
+  - `Cameo.AlwaysExist` controls whether you can see the cameo when the prerequisite have not satisfied (`TechnoLevel`, `Owner` & `Cameo.RequiredHouses`, `RequiredHouses`, `ForbiddenHouses`, `FactoryOwners`, `StolenTech`, `SecretLab` and `RequiredTheaters`, etc should be satisfied, if the `Cameo.OverrideTechnos` is met, it will override the `Owner` & `Cameo.RequiredHouses` conditions). Defaults to `[AudioVisual]` -> `Cameo.AlwaysExist`.
+    - `Cameo.RequiredHouses` determines whether to add a condition together with `Owner` for `Cameo.AlwaysExist` check when the value is not empty. Suitable for situations where cameo is no need to be modified in games.
+    - `Cameo.OverrideTechnos` determines whether the cameo can also be displayed when you own one of these technos when the value is not empty. Suitable for situations where cameo need to be dynamically modified in games.
   - `ShowBuildingStatistics` controls whether the number of buildings of this type that you currently own needs to be displayed in the upper left corner of the building cameo (requires the cameo exist).
     - `Cameo.ShouldCount` controls whether this type of building need to count if `ShowBuildingStatistics=true`. Default to check if building's own `BuildCat` is not `Combat` or `BuildLimit` is set.
   - `Cameo.OverlayShapes` controls the drawn image file.
@@ -497,8 +497,8 @@ Cameo.OverlayPalette=palette.pal ; filename - including the .pal extension
 
 [SOMETECHNO]                     ; TechnoType
 Cameo.AlwaysExist=               ; boolean
-Cameo.AuxHouses=                 ; list of house types
-Cameo.AuxTechnos=                ; List of TechnoTypes
+Cameo.RequiredHouses=            ; list of house types
+Cameo.OverrideTechnos=           ; List of TechnoTypes
 UIDescription.Unbuildable=       ; CSF entry key
 
 [SOMEBUILDING]                   ; BuildingType
