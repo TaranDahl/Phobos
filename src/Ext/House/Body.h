@@ -198,4 +198,6 @@ public:
 	static bool ReachedBuildLimit(const HouseClass* pHouse, const TechnoTypeClass* pType, bool ignoreQueued);
 	static int CountOwnedNowWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType);
 	static int CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType);
+	static bool CheckOwnerBitfieldForCurrentPlayer(TechnoTypeClass* pType);
+	static void RecheckOwnerBitfieldForCurrentPlayer();
 };

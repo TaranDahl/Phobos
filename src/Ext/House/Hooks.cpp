@@ -370,6 +370,21 @@ DEFINE_HOOK(0x50B669, HouseClass_ShouldDisableCameo_GreyCameo, 0x5)
 	return 0;
 }
 
+DEFINE_HOOK(0x4F9286, HouseClass_Update_RecheckOwnerBitfield, 0x6)
+{
+	enum { SkipLoop = 0x4F92DD, StartLoop = 0x4F928C };
+
+	GET(const int, buildingCount, EBP);
+
+	R->EBX(0);
+
+	if (!buildingCount)
+		return SkipLoop;
+
+	HouseExt::RecheckOwnerBitfieldForCurrentPlayer();
+	return StartLoop;
+}
+
 // All technos have Cameo_AlwaysExist=true need to change the EVA_NewConstructionOptions playing time
 DEFINE_HOOK(0x6A640B, SideBarClass_AddCameo_DoNotPlayEVA, 0x5)
 {
