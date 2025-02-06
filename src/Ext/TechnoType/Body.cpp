@@ -12,6 +12,7 @@
 #include <Ext/BuildingType/Body.h>
 #include <Ext/BulletType/Body.h>
 #include <Ext/Techno/Body.h>
+#include <Ext/House/Body.h>
 
 #include <Utilities/GeneralUtils.h>
 #include <Utilities/AresFunctions.h>
@@ -387,7 +388,7 @@ int __fastcall TechnoTypeExt::RequirementsMetExtraCheck(void* pAresHouseExt, voi
 CanBuildResult TechnoTypeExt::CheckAlwaysExistCameo(TechnoTypeClass* pType, CanBuildResult canBuild)
 {
 	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
-	auto ForceRedrawSidebar = [&pType]()
+	auto ForceRedrawSidebar = [pType]()
 	{
 		const auto tabIndex = SidebarClass::GetObjectTabIdx(pType->WhatAmI(), pType->GetArrayIndex(), 0);
 		const auto pSidebar = SidebarClass::Instance();
@@ -403,7 +404,13 @@ CanBuildResult TechnoTypeExt::CheckAlwaysExistCameo(TechnoTypeClass* pType, CanB
 
 	if (canBuild == CanBuildResult::Unbuildable)
 	{
-		if (pTypeExt->IsMetTheEssentialConditions)
+		auto CheckSideIndex = [pType]()
+		{
+			const auto sideIndex = pType->AIBasePlanningSide;
+			return (sideIndex == -1 || sideIndex == HouseClass::CurrentPlayer->Type->SideIndex);
+		};
+
+		if (pTypeExt->IsMetTheEssentialConditions && CheckSideIndex() && HouseExt::CheckOwnerBitfieldForCurrentPlayer(pType))
 		{
 			if (!pTypeExt->IsGreyCameoForCurrentPlayer)
 			{
