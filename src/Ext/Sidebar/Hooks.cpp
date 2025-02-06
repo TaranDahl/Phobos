@@ -3,8 +3,8 @@
 #include <HouseClass.h>
 #include <FactoryClass.h>
 #include <FileSystem.h>
-#include <Ext/Side/Body.h>
 
+#include <Ext/Side/Body.h>
 #include <Ext/House/Body.h>
 #include <Ext/TechnoType/Body.h>
 #include <Ext/Scenario/Body.h>
