@@ -429,6 +429,11 @@ bool HouseExt::CheckOwnerBitfieldForCurrentPlayer(TechnoTypeClass* pType)
 {
 	const auto pScenarioExt = ScenarioExt::Global();
 	DWORD baseBits = TechnoTypeExt::ExtMap.Find(pType)->Cameo_RequiredHouses & pType->GetOwners();
+	baseBits &= (1u << HouseClass::CurrentPlayer->Type->FindParentCountryIndex());
+
+	if (!baseBits)
+		return false;
+
 	bool result = false;
 
 	switch (pType->WhatAmI())
