@@ -360,32 +360,71 @@ void HouseExt::GetAIChronoshiftSupers(HouseClass* pThis, SuperClass*& pSuperCSph
 	}
 }
 
-int HouseExt::CountOwnedNowWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType)
+// Only those currently effective
+int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, TechnoTypeClass* pTechnoType, bool upgrade, bool deploy)
 {
-	const auto upgrades = BuildingTypeExt::GetUpgradesAmount(pBuildingType, pHouse, true);
+	switch (pTechnoType->WhatAmI())
+	{
+	case AbstractType::BuildingType:
+		return HouseExt::CountOwnedPresentWithDeployOrUpgrade(pHouse, static_cast<BuildingTypeClass*>(pTechnoType), upgrade, deploy);
+	case AbstractType::InfantryType:
+		return pHouse->CountOwnedAndPresent(static_cast<InfantryTypeClass*>(pTechnoType));
+	case AbstractType::UnitType:
+		return HouseExt::CountOwnedPresentWithDeployOrUpgrade(pHouse, static_cast<UnitTypeClass*>(pTechnoType), deploy);
+	case AbstractType::AircraftType:
+		return pHouse->CountOwnedAndPresent(static_cast<AircraftTypeClass*>(pTechnoType));
+	default:
+		break;
+	}
 
-	if (upgrades != -1)
-		return upgrades;
+	return 0;
+}
 
-	auto count = pHouse->CountOwnedNow(pBuildingType);
+// Only those currently effective
+int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, UnitTypeClass* pUnitType, bool deploy)
+{
+	auto count = pHouse->CountOwnedAndPresent(pUnitType);
 
-	if (const auto pUndeployType = pBuildingType->UndeploysInto)
-		count += pHouse->CountOwnedNow(pUndeployType);
+	if (deploy && pUnitType->DeploysInto)
+		count += pHouse->CountOwnedAndPresent(pUnitType->DeploysInto);
 
 	return count;
 }
 
-int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType)
+// Only those currently effective
+int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType, bool upgrade, bool deploy)
 {
+	auto count = pHouse->CountOwnedAndPresent(pBuildingType);
+
+	if (deploy && pBuildingType->UndeploysInto)
+		count += pHouse->CountOwnedAndPresent(pBuildingType->UndeploysInto);
+
+	if (!upgrade)
+		return count;
+
 	const auto upgrades = BuildingTypeExt::GetUpgradesAmount(pBuildingType, pHouse);
 
 	if (upgrades != -1)
-		return upgrades;
+		count += upgrades;
 
-	auto count = pHouse->CountOwnedAndPresent(pBuildingType);
+	return count;
+}
 
-	if (const auto pUndeployType = pBuildingType->UndeploysInto)
-		count += pHouse->CountOwnedAndPresent(pUndeployType);
+// Including the current product
+int HouseExt::CountOwnedNowWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType, bool upgrade, bool deploy)
+{
+	auto count = pHouse->CountOwnedNow(pBuildingType);
+
+	if (deploy && pBuildingType->UndeploysInto)
+		count += pHouse->CountOwnedNow(pBuildingType->UndeploysInto);
+
+	if (!upgrade)
+		return count;
+
+	const auto upgrades = BuildingTypeExt::GetUpgradesAmount(pBuildingType, pHouse);
+
+	if (upgrades != -1)
+		count += upgrades;
 
 	return count;
 }
@@ -393,6 +432,7 @@ int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, BuildingT
 bool HouseExt::CheckOwnerBitfieldForCurrentPlayer(TechnoTypeClass* pType)
 {
 	const auto pScenarioExt = ScenarioExt::Global();
+	DWORD baseBits = TechnoTypeExt::ExtMap.Find(pType)->Cameo_AuxHouses & pType->GetOwners();
 	bool result = false;
 
 	switch (pType->WhatAmI())
@@ -400,29 +440,29 @@ bool HouseExt::CheckOwnerBitfieldForCurrentPlayer(TechnoTypeClass* pType)
 	case AbstractType::Building:
 	case AbstractType::BuildingType:
 	{
-		result = pScenarioExt->OwnerBitfield_BuildingType & pType->GetOwners();
+		result = pScenarioExt->OwnerBitfield_BuildingType & baseBits;
 		break;
 	}
 	case AbstractType::Infantry:
 	case AbstractType::InfantryType:
 	{
-		result = pScenarioExt->OwnerBitfield_InfantryType & pType->GetOwners();
+		result = pScenarioExt->OwnerBitfield_InfantryType & baseBits;
 		break;
 	}
 	case AbstractType::Unit:
 	case AbstractType::UnitType:
 	{
 		if (!pType->Naval)
-			result = pScenarioExt->OwnerBitfield_VehicleType & pType->GetOwners();
+			result = pScenarioExt->OwnerBitfield_VehicleType & baseBits;
 		else
-			result = pScenarioExt->OwnerBitfield_NavyType & pType->GetOwners();
+			result = pScenarioExt->OwnerBitfield_NavyType & baseBits;
 
 		break;
 	}
 	case AbstractType::Aircraft:
 	case AbstractType::AircraftType:
 	{
-		result = pScenarioExt->OwnerBitfield_AircraftType & pType->GetOwners();
+		result = pScenarioExt->OwnerBitfield_AircraftType & baseBits;
 		break;
 	}
 	default:
@@ -452,29 +492,38 @@ void HouseExt::RecheckOwnerBitfieldForCurrentPlayer()
 		case AbstractType::Building:
 		case AbstractType::BuildingType:
 		{
-			pScenarioExt->OwnerBitfield_BuildingType |= pBuildingType->GetOwners();
+			const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pBuildingType);
+			DWORD baseBits = pTypeExt->Cameo_AuxHouses & pBuildingType->GetOwners();
+			pScenarioExt->OwnerBitfield_BuildingType |= baseBits;
 			break;
 		}
 		case AbstractType::Infantry:
 		case AbstractType::InfantryType:
 		{
-			pScenarioExt->OwnerBitfield_InfantryType |= pBuildingType->GetOwners();
+			const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pBuildingType);
+			DWORD baseBits = pTypeExt->Cameo_AuxHouses & pBuildingType->GetOwners();
+			pScenarioExt->OwnerBitfield_InfantryType |= baseBits;
 			break;
 		}
 		case AbstractType::Unit:
 		case AbstractType::UnitType:
 		{
+			const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pBuildingType);
+			DWORD baseBits = pTypeExt->Cameo_AuxHouses & pBuildingType->GetOwners();
+
 			if (!pBuildingType->Naval)
-				pScenarioExt->OwnerBitfield_VehicleType |= pBuildingType->GetOwners();
+				pScenarioExt->OwnerBitfield_VehicleType |= baseBits;
 			else
-				pScenarioExt->OwnerBitfield_NavyType |= pBuildingType->GetOwners();
+				pScenarioExt->OwnerBitfield_NavyType |= baseBits;
 
 			break;
 		}
 		case AbstractType::Aircraft:
 		case AbstractType::AircraftType:
 		{
-			pScenarioExt->OwnerBitfield_AircraftType |= pBuildingType->GetOwners();
+			const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pBuildingType);
+			DWORD baseBits = pTypeExt->Cameo_AuxHouses & pBuildingType->GetOwners();
+			pScenarioExt->OwnerBitfield_AircraftType |= baseBits;
 			break;
 		}
 		default:
