@@ -428,7 +428,7 @@ int HouseExt::CountOwnedNowWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeC
 bool HouseExt::CheckOwnerBitfieldForCurrentPlayer(TechnoTypeClass* pType)
 {
 	const auto pScenarioExt = ScenarioExt::Global();
-	DWORD baseBits = TechnoTypeExt::ExtMap.Find(pType)->Cameo_AuxHouses & pType->GetOwners();
+	DWORD baseBits = TechnoTypeExt::ExtMap.Find(pType)->Cameo_RequiredHouses & pType->GetOwners();
 	bool result = false;
 
 	switch (pType->WhatAmI())
@@ -489,7 +489,7 @@ void HouseExt::RecheckOwnerBitfieldForCurrentPlayer()
 		case AbstractType::BuildingType:
 		{
 			const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pBuildingType);
-			DWORD baseBits = pTypeExt->Cameo_AuxHouses & pBuildingType->GetOwners();
+			DWORD baseBits = pTypeExt->Cameo_RequiredHouses & pBuildingType->GetOwners();
 			pScenarioExt->OwnerBitfield_BuildingType |= baseBits;
 			break;
 		}
@@ -497,7 +497,7 @@ void HouseExt::RecheckOwnerBitfieldForCurrentPlayer()
 		case AbstractType::InfantryType:
 		{
 			const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pBuildingType);
-			DWORD baseBits = pTypeExt->Cameo_AuxHouses & pBuildingType->GetOwners();
+			DWORD baseBits = pTypeExt->Cameo_RequiredHouses & pBuildingType->GetOwners();
 			pScenarioExt->OwnerBitfield_InfantryType |= baseBits;
 			break;
 		}
@@ -505,7 +505,7 @@ void HouseExt::RecheckOwnerBitfieldForCurrentPlayer()
 		case AbstractType::UnitType:
 		{
 			const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pBuildingType);
-			DWORD baseBits = pTypeExt->Cameo_AuxHouses & pBuildingType->GetOwners();
+			DWORD baseBits = pTypeExt->Cameo_RequiredHouses & pBuildingType->GetOwners();
 
 			if (!pBuildingType->Naval)
 				pScenarioExt->OwnerBitfield_VehicleType |= baseBits;
@@ -518,7 +518,7 @@ void HouseExt::RecheckOwnerBitfieldForCurrentPlayer()
 		case AbstractType::AircraftType:
 		{
 			const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pBuildingType);
-			DWORD baseBits = pTypeExt->Cameo_AuxHouses & pBuildingType->GetOwners();
+			DWORD baseBits = pTypeExt->Cameo_RequiredHouses & pBuildingType->GetOwners();
 			pScenarioExt->OwnerBitfield_AircraftType |= baseBits;
 			break;
 		}

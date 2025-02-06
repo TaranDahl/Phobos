@@ -404,9 +404,9 @@ CanBuildResult TechnoTypeExt::CheckAlwaysExistCameo(TechnoTypeClass* pType, CanB
 
 	if (canBuild == CanBuildResult::Unbuildable)
 	{
-		auto CheckAuxTechnos = [pTypeExt]()
+		auto CheckOverrideTechnos = [pTypeExt]()
 		{
-			const auto& pAuxTypes = pTypeExt->Cameo_AuxTechnos;
+			const auto& pAuxTypes = pTypeExt->Cameo_OverrideTechnos;
 
 			if (pAuxTypes.size())
 			{
@@ -420,7 +420,7 @@ CanBuildResult TechnoTypeExt::CheckAlwaysExistCameo(TechnoTypeClass* pType, CanB
 			return false;
 		};
 
-		if (pTypeExt->IsMetTheEssentialConditions && (CheckAuxTechnos() || HouseExt::CheckOwnerBitfieldForCurrentPlayer(pType)))
+		if (pTypeExt->IsMetTheEssentialConditions && (CheckOverrideTechnos() || HouseExt::CheckOwnerBitfieldForCurrentPlayer(pType)))
 		{
 			if (!pTypeExt->IsGreyCameoForCurrentPlayer)
 			{
@@ -432,8 +432,7 @@ CanBuildResult TechnoTypeExt::CheckAlwaysExistCameo(TechnoTypeClass* pType, CanB
 					const auto pDisplay = DisplayClass::Instance();
 					const auto pCurType = abstract_cast<BuildingTypeClass*>(pDisplay->CurrentBuildingType);
 
-					if (!RulesExt::Global()->ExtendedBuildingPlacing || !pCurType
-						|| BuildingTypeExt::IsSameBuildingType(pBldType, pCurType))
+					if (!RulesExt::Global()->ExtendedBuildingPlacing || !pCurType || BuildingTypeExt::IsSameBuildingType(pBldType, pCurType))
 					{
 						pDisplay->SetActiveFoundation(nullptr);
 						pDisplay->CurrentBuilding = nullptr;
@@ -683,8 +682,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->UnitBaseNormal.Read(exINI, pSection, "UnitBaseNormal");
 	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
 	this->Cameo_AlwaysExist.Read(exINI, pSection, "Cameo.AlwaysExist");
-	this->Cameo_AuxTechnos.Read(exINI, pSection, "Cameo.AuxTechnos");
-	this->Cameo_AuxHouses = pINI->ReadHouseTypesList(pSection, "Cameo.AuxHouses", this->Cameo_AuxHouses);
+	this->Cameo_OverrideTechnos.Read(exINI, pSection, "Cameo.OverrideTechnos");
+	this->Cameo_RequiredHouses = pINI->ReadHouseTypesList(pSection, "Cameo.RequiredHouses", this->Cameo_RequiredHouses);
 	this->UIDescription_Unbuildable.Read(exINI, pSection, "UIDescription.Unbuildable");
 	this->SelectedInfo_UpperType.Read(exINI, pSection, "SelectedInfo.UpperType");
 	this->SelectedInfo_UpperColor.Read(exINI, pSection, "SelectedInfo.UpperColor");
@@ -1168,8 +1167,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->UnitBaseNormal)
 		.Process(this->UnitBaseForAllyBuilding)
 		.Process(this->Cameo_AlwaysExist)
-		.Process(this->Cameo_AuxTechnos)
-		.Process(this->Cameo_AuxHouses)
+		.Process(this->Cameo_OverrideTechnos)
+		.Process(this->Cameo_RequiredHouses)
 		.Process(this->IsMetTheEssentialConditions)
 		.Process(this->IsGreyCameoForCurrentPlayer)
 		.Process(this->IsGreyCameoAbandonedProduct)
