@@ -643,6 +643,12 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 			drawText("FootCell = ( %d , %d )", pFoot->CurrentMapCoords.X, pFoot->CurrentMapCoords.Y);
 			drawText("LastCell = ( %d , %d )", pFoot->LastMapCoords.X, pFoot->LastMapCoords.Y);
 
+			const auto destination = pFoot->Locomotor->Destination();
+			const auto headToCoord = pFoot->Locomotor->Head_To_Coord();
+
+			drawText("LocoDestination = ( %d , %d , %d )", destination.X, destination.Y, destination.Z);
+			drawText("LocoHeadToCoord = ( %d , %d , %d )", headToCoord.X, headToCoord.Y, headToCoord.Z);
+
 			drawText("PathWaitTime = %d , WaitingBlockage = %s", pFoot->unknown_int_64C, (pFoot->unknown_bool_6B7 ? "Yes" : "No"));
 			drawTime("PathFindTimer", pFoot->PathDelayTimer);
 			drawTime("BlockageTimer", pFoot->BlockagePathTimer);
