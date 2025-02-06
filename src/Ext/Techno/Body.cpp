@@ -583,10 +583,12 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->MyTargetingFrame)
 		.Process(this->AttackMoveFollowerTempCount)
 		.Process(this->AutoTargetedWallCell)
-		.Process(this->HasCachedClick)
+		.Process(this->HasCachedClickMission)
 		.Process(this->CachedMission)
 		.Process(this->CachedCell)
 		.Process(this->CachedTarget)
+		.Process(this->HasCachedClickEvent)
+		.Process(this->CachedEventType)
 		.Process(this->FiringObstacleCell)
 		.Process(this->IsDetachingForCloak)
 		.Process(this->OriginalPassengerOwner)
@@ -600,8 +602,13 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 
 void TechnoExt::ExtData::InvalidatePointer(void* ptr, bool bRemoved)
 {
-	if (this->HasCachedClick && this->CachedTarget == ptr)
-		this->ClearCachedClick();
+	if (this->HasCachedClickMission && this->CachedTarget == ptr)
+	{
+		this->HasCachedClickMission = false;
+		this->CachedMission = Mission::None;
+		this->CachedCell = nullptr;
+		this->CachedTarget = nullptr;
+	}
 }
 
 void TechnoExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
