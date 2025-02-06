@@ -404,13 +404,23 @@ CanBuildResult TechnoTypeExt::CheckAlwaysExistCameo(TechnoTypeClass* pType, CanB
 
 	if (canBuild == CanBuildResult::Unbuildable)
 	{
-		auto CheckSideIndex = [pType]()
+		auto CheckAuxTechnos = [pTypeExt]()
 		{
-			const auto sideIndex = pType->AIBasePlanningSide;
-			return (sideIndex == -1 || sideIndex == HouseClass::CurrentPlayer->Type->SideIndex);
+			const auto& pAuxTypes = pTypeExt->Cameo_AuxTechnos;
+
+			if (pAuxTypes.size())
+			{
+				for (const auto& pAuxType : pAuxTypes)
+				{
+					if (HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass::CurrentPlayer, pAuxType, true, true))
+						return true;
+				}
+			}
+
+			return false;
 		};
 
-		if (pTypeExt->IsMetTheEssentialConditions && CheckSideIndex() && HouseExt::CheckOwnerBitfieldForCurrentPlayer(pType))
+		if (pTypeExt->IsMetTheEssentialConditions && (CheckAuxTechnos() || HouseExt::CheckOwnerBitfieldForCurrentPlayer(pType)))
 		{
 			if (!pTypeExt->IsGreyCameoForCurrentPlayer)
 			{
@@ -673,6 +683,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->UnitBaseNormal.Read(exINI, pSection, "UnitBaseNormal");
 	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
 	this->Cameo_AlwaysExist.Read(exINI, pSection, "Cameo.AlwaysExist");
+	this->Cameo_AuxTechnos.Read(exINI, pSection, "Cameo.AuxTechnos");
+	this->Cameo_AuxHouses = pINI->ReadHouseTypesList(pSection, "Cameo.AuxHouses", this->Cameo_AuxHouses);
 	this->UIDescription_Unbuildable.Read(exINI, pSection, "UIDescription.Unbuildable");
 	this->SelectedInfo_UpperType.Read(exINI, pSection, "SelectedInfo.UpperType");
 	this->SelectedInfo_UpperColor.Read(exINI, pSection, "SelectedInfo.UpperColor");
@@ -1156,6 +1168,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->UnitBaseNormal)
 		.Process(this->UnitBaseForAllyBuilding)
 		.Process(this->Cameo_AlwaysExist)
+		.Process(this->Cameo_AuxTechnos)
+		.Process(this->Cameo_AuxHouses)
 		.Process(this->IsMetTheEssentialConditions)
 		.Process(this->IsGreyCameoForCurrentPlayer)
 		.Process(this->IsGreyCameoAbandonedProduct)

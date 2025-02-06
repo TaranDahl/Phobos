@@ -177,7 +177,7 @@ DEFINE_HOOK(0x6A9BC5, StripClass_Draw_DrawGreyCameoExtraCover, 0x6)
 
 		if ((frameSize && frames[0] >= 0) || statistics)
 		{
-			if (const auto count = HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass::CurrentPlayer(), pBuildingType))
+			if (const auto count = HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass::CurrentPlayer(), pBuildingType, true))
 			{
 				if (frames[0] >= 0)
 				{

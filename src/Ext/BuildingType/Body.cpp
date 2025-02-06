@@ -66,13 +66,13 @@ int BuildingTypeExt::GetEnhancedPower(BuildingClass* pBuilding, HouseClass* pHou
 	return static_cast<int>(std::round(pBuilding->GetPowerOutput() * fFactor)) + nAmount;
 }
 
-int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass* pBuildingType, HouseClass* pHouse, bool includeProduct)
+int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass* pBuilding, HouseClass* pHouse) // not including producing upgrades
 {
 	int result = 0;
 	bool isUpgrade = false;
-	auto pPowersUp = pBuildingType->PowersUpBuilding;
+	auto pPowersUp = pBuilding->PowersUpBuilding;
 
-	auto checkUpgrade = [pHouse, pBuildingType, &result, &isUpgrade](BuildingTypeClass* pTPowersUp)
+	auto checkUpgrade = [pHouse, pBuilding, &result, &isUpgrade](BuildingTypeClass* pTPowersUp)
 	{
 		isUpgrade = true;
 
@@ -82,7 +82,7 @@ int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass* pBuildingType, HouseCl
 			{
 				for (auto const& pUpgrade : pBld->Upgrades)
 				{
-					if (pUpgrade == pBuildingType)
+					if (pUpgrade == pBuilding)
 						++result;
 				}
 			}
@@ -95,36 +95,13 @@ int BuildingTypeExt::GetUpgradesAmount(BuildingTypeClass* pBuildingType, HouseCl
 			checkUpgrade(pTPowersUp);
 	}
 
-	if (auto pTypeExt = BuildingTypeExt::ExtMap.Find(pBuildingType))
+	if (auto pBuildingExt = BuildingTypeExt::ExtMap.Find(pBuilding))
 	{
-		for (auto pTPowersUp : pTypeExt->PowersUp_Buildings)
+		for (auto pTPowersUp : pBuildingExt->PowersUp_Buildings)
 			checkUpgrade(pTPowersUp);
 	}
 
-	if (!isUpgrade)
-		return -1;
-
-	if (!includeProduct)
-		return result;
-
-	if (pHouse->IsControlledByHuman())
-	{
-		if (const auto pFactory = pHouse->GetPrimaryFactory(AbstractType::Building, pBuildingType->Naval, pBuildingType->BuildCat))
-		{
-			if (pFactory->Object && pFactory->Object->GetTechnoType() == pBuildingType)
-				result += 1;
-		}
-	}
-	else
-	{
-		for (const auto& pHBuilding : pHouse->Buildings)
-		{
-			if (pHBuilding->Factory && pHBuilding->Factory->Object && pHBuilding->Factory->Object->GetTechnoType() == pBuildingType)
-				result += 1;
-		}
-	}
-
-	return result;
+	return isUpgrade ? result : -1;
 }
 
 // Check whether can call the occupiers leave
