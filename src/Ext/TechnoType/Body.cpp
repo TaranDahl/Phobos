@@ -412,7 +412,7 @@ CanBuildResult TechnoTypeExt::CheckAlwaysExistCameo(TechnoTypeClass* pType, CanB
 			{
 				for (const auto& pAuxType : pAuxTypes)
 				{
-					if (HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass::CurrentPlayer, pAuxType, true, true))
+					if (HouseExt::CountOwnedPresentExt(HouseClass::CurrentPlayer, pAuxType, true, true))
 						return true;
 				}
 			}

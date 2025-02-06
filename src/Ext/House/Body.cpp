@@ -360,8 +360,7 @@ void HouseExt::GetAIChronoshiftSupers(HouseClass* pThis, SuperClass*& pSuperCSph
 	}
 }
 
-// Only those currently effective
-int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, TechnoTypeClass* pTechnoType, bool upgrade, bool deploy)
+int HouseExt::CountOwnedPresentExt(HouseClass* pHouse, TechnoTypeClass* pTechnoType, bool upgrade, bool deploy)
 {
 	switch (pTechnoType->WhatAmI())
 	{
@@ -370,7 +369,7 @@ int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, TechnoTyp
 	case AbstractType::InfantryType:
 		return pHouse->CountOwnedAndPresent(static_cast<InfantryTypeClass*>(pTechnoType));
 	case AbstractType::UnitType:
-		return HouseExt::CountOwnedPresentWithDeployOrUpgrade(pHouse, static_cast<UnitTypeClass*>(pTechnoType), deploy);
+		return HouseExt::CountOwnedPresentWithDeploy(pHouse, static_cast<UnitTypeClass*>(pTechnoType), deploy);
 	case AbstractType::AircraftType:
 		return pHouse->CountOwnedAndPresent(static_cast<AircraftTypeClass*>(pTechnoType));
 	default:
@@ -380,8 +379,7 @@ int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, TechnoTyp
 	return 0;
 }
 
-// Only those currently effective
-int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, UnitTypeClass* pUnitType, bool deploy)
+int HouseExt::CountOwnedPresentWithDeploy(HouseClass* pHouse, UnitTypeClass* pUnitType, bool deploy)
 {
 	auto count = pHouse->CountOwnedAndPresent(pUnitType);
 
@@ -391,7 +389,6 @@ int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, UnitTypeC
 	return count;
 }
 
-// Only those currently effective
 int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType, bool upgrade, bool deploy)
 {
 	auto count = pHouse->CountOwnedAndPresent(pBuildingType);
@@ -410,7 +407,6 @@ int HouseExt::CountOwnedPresentWithDeployOrUpgrade(HouseClass* pHouse, BuildingT
 	return count;
 }
 
-// Including the current product
 int HouseExt::CountOwnedNowWithDeployOrUpgrade(HouseClass* pHouse, BuildingTypeClass* pBuildingType, bool upgrade, bool deploy)
 {
 	auto count = pHouse->CountOwnedNow(pBuildingType);
