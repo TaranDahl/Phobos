@@ -85,6 +85,7 @@ public:
 		, NotMainWeapon { false }
 		, FLHCoord {}
 		, BuildingCoord {}
+		, StartCoord {}
 		, ProximityImpact { trajType->ProximityImpact }
 		, TheCasualty {}
 	{ }
@@ -109,6 +110,7 @@ public:
 	bool NotMainWeapon;
 	CoordStruct FLHCoord;
 	CoordStruct BuildingCoord;
+	CoordStruct StartCoord;
 	int ProximityImpact;
 	std::map<int, int> TheCasualty; // Only for recording existence
 
