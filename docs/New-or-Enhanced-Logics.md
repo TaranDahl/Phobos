@@ -805,7 +805,7 @@ Trajectory.Speed=100.0  ; floating point value
     - `Trajectory.Straight.MirrorCoord` controls whether `Trajectory.Straight.OffsetCoord` need to mirror the lateral value to adapt to the current burst index. At the same time, the rotation direction calculated by `Trajectory.Straight.RotateCoord` will also be reversed, and the rotation angle between each adjacent projectile on each side will not change as a result.
     - `Trajectory.Straight.UseDisperseBurst` controls whether the calculation of `Trajectory.Straight.RotateCoord` is based on its superior's `Trajectory.Disperse.WeaponBurst` of the dispersed trajectory, rather than `Burst` of the weapon. If this value is not appropriate, it will result in unsatisfactory visual displays.
     - `Trajectory.Straight.AxisOfRotation` controls the rotation axis when calculating `Trajectory.Straight.RotateCoord`. The axis will rotates with the unit orientation or the vector that from target position to the source position.
-  - `Trajectory.Straight.ProximityImpact` controls the initial proximity fuse times. When there are enough remaining times and the projectile approaches another valid target, it will detonate a warhead defined by `Trajectory.Straight.Warhead` on it. If the times is about to run out, it will also detonate itself at its location. This function can be cancelled by setting to 0. A negative integer means unlimited times. By the way, you can use the weapon's `Warhead` with low versus only to aim at the target, and use the `Trajectory.Straight.ProximityWarhead` to causing actual harm. (You can use this to cause non repeated damage to all units encountered during the flight of the projectile.)
+  - `Trajectory.Straight.ProximityImpact` controls the initial proximity fuse times. When there are enough remaining times and the projectile approaches another valid target, it will detonate a warhead defined by `Trajectory.Straight.ProximityWarhead` on it. If the times is about to run out, it will also detonate itself at its location. This function can be cancelled by setting to 0. A negative integer means unlimited times. By the way, you can use the weapon's `Warhead` with low versus only to aim at the target, and use the `Trajectory.Straight.ProximityWarhead` to causing actual harm. (You can use this to cause non repeated damage to all units encountered during the flight of the projectile.)
     - `Trajectory.Straight.ProximityWarhead` defines the warhead detonated by `Trajectory.Straight.ProximityImpact`, and `Trajectory.Straight.ProximityDamage` defines the damage caused by `Trajectory.Straight.ProximityWarhead`.
     - `Trajectory.Straight.ProximityRadius` controls the range of proximity fuse. It can NOT be set as a negative integer.
     - `Trajectory.Straight.ProximityDirect` controls whether let the target receive damage instead of detonating the warhead.
@@ -857,8 +857,7 @@ Trajectory.Straight.CountAttenuation=1.0        ; floating point value
 
 ```{note}
 - Make sure you set a low `Trajectory.Straight.ProximityRadius` value unless necessary.
-- Note that if `Trajectory.Straight.ProximityFlight` is true, it will consume more CPU performance.
-- Note that the listed Warheads in `Trajectory.Straight.PassDetonateWarhead` and `Trajectory.Straight.ProximityWarhead` must be listed in `[Warheads]` for them to work.
+- The listed Warheads in `Trajectory.Straight.PassDetonateWarhead` and `Trajectory.Straight.ProximityWarhead` must be listed in `[Warheads]` for them to work.
 ```
 
 #### Bombard trajectory
@@ -1023,6 +1022,13 @@ Trajectory.Disperse.WeaponDoRepeat=false        ; boolean
     - `Trajectory.Engrave.LaserDuration` controls the duration of the engrave laser.
     - `Trajectory.Engrave.LaserDelay` controls how often to draw the engrave laser.
   - `Trajectory.Engrave.DamageDelay` controls how often to detonate warheads.
+  - `Trajectory.Engrave.ProximityImpact` controls the initial proximity fuse times. When there are enough remaining times and the projectile approaches another valid target, it will detonate a warhead defined by `Trajectory.Engrave.ProximityWarhead` on it. If the number of times is exhausted, the engraving process can still continue, but it will not detonate additional warhead as a result. This function can be cancelled by setting to 0. A negative integer means unlimited times. (You can use this to cause non repeated damage to all units encountered during the flight of the projectile.)
+    - `Trajectory.Engrave.ProximityWarhead` defines the warhead detonated by `Trajectory.Engrave.ProximityImpact`, and `Trajectory.Engrave.ProximityDamage` defines the damage caused by `Trajectory.Engrave.ProximityWarhead`.
+    - `Trajectory.Engrave.ProximityRadius` controls the range of proximity fuse. It can NOT be set as a negative integer.
+    - `Trajectory.Engrave.ProximityDirect` controls whether let the target receive damage instead of detonating the warhead.
+    - `Trajectory.Engrave.ProximityMedial` controls whether to detonate `Trajectory.Engrave.ProximityWarhead` at the bullet's location rather than the proximity target's location.
+    - `Trajectory.Engrave.ProximityAllies` controls whether allies will also trigger the proximity fuse.
+    - `Trajectory.Engrave.ProximitySuicide` controls whether the projectile will self destruct after the number of proximity fuse times has been exhausted. If `Trajectory.Engrave.ProximityImpact` set to 0, this will not be enabled.
 
 In `rulesmd.ini`:
 ```ini
@@ -1045,6 +1051,14 @@ Trajectory.Engrave.LaserThickness=3            ; integer
 Trajectory.Engrave.LaserDuration=1             ; integer
 Trajectory.Engrave.LaserDelay=1                ; integer
 Trajectory.Engrave.DamageDelay=2               ; integer
+Trajectory.Engrave.ProximityImpact=0           ; integer
+Trajectory.Engrave.ProximityWarhead=           ; WarheadType
+Trajectory.Engrave.ProximityDamage=0           ; integer
+Trajectory.Engrave.ProximityRadius=0.7         ; floating point value
+Trajectory.Engrave.ProximityDirect=false       ; boolean
+Trajectory.Engrave.ProximityMedial=false       ; boolean
+Trajectory.Engrave.ProximityAllies=false       ; boolean
+Trajectory.Engrave.ProximitySuicide=false      ; boolean
 ```
 
 ```{note}
