@@ -95,6 +95,8 @@ public:
 		Valueable<bool> NoBuildAreaOnBuildup;
 		ValueableVector<BuildingTypeClass*> Adjacent_Allowed;
 		ValueableVector<BuildingTypeClass*> Adjacent_Disallowed;
+		ValueableVector<UnitTypeClass*> Adjacent_AllowedUnit;
+		ValueableVector<UnitTypeClass*> Adjacent_DisallowedUnit;
 
 		Nullable<Point2D> BarracksExitCell;
 
@@ -160,6 +162,8 @@ public:
 			, NoBuildAreaOnBuildup { false }
 			, Adjacent_Allowed {}
 			, Adjacent_Disallowed {}
+			, Adjacent_AllowedUnit {}
+			, Adjacent_DisallowedUnit {}
 			, BarracksExitCell {}
 		{ }
 

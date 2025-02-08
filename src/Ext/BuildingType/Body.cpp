@@ -933,6 +933,8 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoBuildAreaOnBuildup.Read(exINI, pSection, "NoBuildAreaOnBuildup");
 	this->Adjacent_Allowed.Read(exINI, pSection, "Adjacent.Allowed");
 	this->Adjacent_Disallowed.Read(exINI, pSection, "Adjacent.Disallowed");
+	this->Adjacent_AllowedUnit.Read(exINI, pSection, "Adjacent.AllowedUnit");
+	this->Adjacent_DisallowedUnit.Read(exINI, pSection, "Adjacent.DisallowedUnit");
 
 	this->BarracksExitCell.Read(exINI, pSection, "BarracksExitCell");
 
@@ -1073,6 +1075,8 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->NoBuildAreaOnBuildup)
 		.Process(this->Adjacent_Allowed)
 		.Process(this->Adjacent_Disallowed)
+		.Process(this->Adjacent_AllowedUnit)
+		.Process(this->Adjacent_DisallowedUnit)
 		.Process(this->BarracksExitCell)
 		;
 }
