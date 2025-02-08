@@ -109,6 +109,7 @@ void EngraveTrajectory::Serialize(T& Stm)
 		.Process(this->NotMainWeapon)
 		.Process(this->FLHCoord)
 		.Process(this->BuildingCoord)
+		.Process(this->StartCoord)
 		.Process(this->ProximityImpact)
 		.Process(this->TheCasualty)
 		;
@@ -272,6 +273,7 @@ void EngraveTrajectory::SetEngraveDirection(BulletClass* pBullet, double rotateA
 	}
 
 	theSource.Z = this->GetFloorCoordHeight(pBullet, theSource);
+	this->StartCoord = theSource;
 	pBullet->SetLocation(theSource);
 
 	theTarget.X += static_cast<int>(this->TargetCoord.X * Math::cos(rotateAngle) + this->TargetCoord.Y * Math::sin(rotateAngle));
@@ -418,7 +420,8 @@ void EngraveTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* p
 		return;
 
 	// Step 1: Find valid targets on the ground within range.
-	std::vector<CellClass*> recCellClass = PhobosTrajectoryType::GetCellsInProximityRadius(pBullet, pType->ProximityRadius.Get());
+	const auto radius = pType->ProximityRadius.Get();
+	std::vector<CellClass*> recCellClass = PhobosTrajectoryType::GetCellsInProximityRadius(pBullet, radius);
 	const size_t cellSize = recCellClass.size() * 2;
 	size_t vectSize = cellSize;
 	size_t thisSize = 0;
@@ -429,10 +432,11 @@ void EngraveTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* p
 		static_cast<int>(pBullet->Velocity.Y),
 		static_cast<int>(pBullet->Velocity.Z)
 	};
+	const auto velocitySq = velocityCrd.MagnitudeSquared();
+	const auto pTarget = pBullet->Target;
 
 	std::vector<TechnoClass*> validTechnos;
 	validTechnos.reserve(vectSize);
-	const auto pTarget = pBullet->Target;
 
 	for (const auto& pRecCell : recCellClass)
 	{
@@ -455,19 +459,23 @@ void EngraveTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* p
 			if (!pType->ProximityAllies && pOwner && pOwner->IsAlliedWith(pTechno->Owner) && pTechno != pTarget)
 				continue;
 
-			const auto distanceCrd = pTechno->GetCoords() - pBullet->SourceCoords;
-			const auto locationCrd = (velocityCrd + (pBullet->Location - pBullet->SourceCoords));
-			const auto terminalCrd = distanceCrd - locationCrd;
-			auto distance = locationCrd.MagnitudeSquared(); // Not true distance yet.
+			// Check distance
+			const auto targetCrd = pTechno->GetCoords();
+			const auto pathCrd = targetCrd - this->StartCoord;
 
-			// Between front and back
-			if (distanceCrd * velocityCrd < 0 || terminalCrd * velocityCrd > 0)
+			if (pathCrd * velocityCrd < 0) // In front of the techno
 				continue;
 
-			distance = (distance > 1e-10) ? sqrt(distanceCrd.CrossProduct(terminalCrd).MagnitudeSquared() / distance) : distanceCrd.Magnitude();
+			const auto distanceCrd = targetCrd - pBullet->Location;
+			const auto nextDistanceCrd = distanceCrd - velocityCrd;
 
-			// Between left and right (cylindrical)
-			if (technoType != AbstractType::Building && distance > pType->ProximityRadius.Get())
+			if (nextDistanceCrd * velocityCrd > 0) // Behind the bullet
+				continue;
+
+			const auto cross = distanceCrd.CrossProduct(nextDistanceCrd).MagnitudeSquared();
+			const auto distance = (velocitySq > 1e-10) ? sqrt(cross / velocitySq) : distanceCrd.Magnitude();
+
+			if (technoType != AbstractType::Building && distance > radius) // In the cylinder
 				continue;
 
 			if (thisSize >= vectSize)
@@ -516,10 +524,10 @@ void EngraveTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* p
 
 	if (this->ProximityImpact > 0 && static_cast<int>(targetsSize) > this->ProximityImpact)
 	{
-		std::sort(&validTargets[0], &validTargets[targetsSize],[pBullet](TechnoClass* pTechnoA, TechnoClass* pTechnoB)
+		std::sort(&validTargets[0], &validTargets[targetsSize],[this](TechnoClass* pTechnoA, TechnoClass* pTechnoB)
 		{
-			const auto distanceA = pTechnoA->GetCoords().DistanceFromSquared(pBullet->SourceCoords);
-			const auto distanceB = pTechnoB->GetCoords().DistanceFromSquared(pBullet->SourceCoords);
+			const auto distanceA = pTechnoA->GetCoords().DistanceFromSquared(this->StartCoord);
+			const auto distanceB = pTechnoB->GetCoords().DistanceFromSquared(this->StartCoord);
 
 			// Distance priority
 			if (distanceA < distanceB)
