@@ -177,6 +177,32 @@ Matrix3D* __stdcall JumpjetLocomotionClass_Draw_Matrix(ILocomotion* iloco, Matri
 			ret->RotateY(arf);
 		}
 	}
+	else if (TechnoTypeExt::ExtMap.Find(linked->GetTechnoType())->JumpjetTilt.Get(RulesExt::Global()->JumpjetTiltWhenMoving) && !onGround)
+	{
+		if (pThis->CurrentSpeed > 0.0)
+		{
+			constexpr auto factor = (Math::HalfPi / 4) / 32;
+			arf += static_cast<float>(std::min(32.0, pThis->CurrentSpeed) * factor);
+		}
+
+		const auto& locoFace = pThis->LocomotionFacing;
+
+		if (locoFace.IsRotating())
+		{
+			constexpr auto factor = (Math::HalfPi / 4) / 32768 / 65536;
+			const auto leftRaw = locoFace.RotationTimer.GetTimeLeft() * locoFace.ROT.Raw;
+			const auto dirMult = (static_cast<short>(locoFace.Difference().Raw) * leftRaw);
+			ars += static_cast<float>(dirMult * factor);
+		}
+
+		if (std::abs(ars) >= 0.005 || std::abs(arf) >= 0.005)
+		{
+			if (pIndex) *pIndex = -1;
+
+			ret->RotateX(ars);
+			ret->RotateY(arf);
+		}
+	}
 
 	if (pIndex && *pIndex != -1)
 	{
