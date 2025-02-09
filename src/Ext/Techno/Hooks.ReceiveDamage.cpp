@@ -39,13 +39,10 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 
 			const auto pHouseExt = HouseExt::ExtMap.Find(pTargetHouse);
 
-			if (pHouseExt->CombatAlertTimer.HasTimeLeft())
+			if (pHouseExt->CombatAlertTimer.HasTimeLeft() || pWHExt->CombatAlert_Suppress.Get(!pWHExt->Malicious || pWHExt->Nonprovocative))
 				return;
 
 			if (!pTypeExt->CombatAlert.Get(pRules->CombatAlert_Default.Get(!pType->Insignificant && !pType->Spawned)) || !pThis->IsInPlayfield)
-				return;
-
-			if (pWHExt->CombatAlert_Suppress.Get(!pWHExt->Malicious || pWHExt->Nonprovocative))
 				return;
 
 			const auto pBuilding = abstract_cast<BuildingClass*>(pThis);

@@ -556,7 +556,6 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 					for (auto& trail : pExt->LaserTrails)
 						trail.LastLocation = middleLocation;
 				}
-
 				this->RefreshBulletLineTrail(pBullet);
 
 				pBullet->SetLocation(middleLocation);
