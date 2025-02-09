@@ -30,7 +30,7 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	const auto pSourceHouse = args->SourceHouse;
 	const auto pTargetHouse = pThis->Owner;
 
-	if (pRules->CombatAlert && nDamageLeft > 1)
+	if (nDamageLeft && (MapClass::GetTotalDamage(*args->Damage, args->WH, pType->Armor, args->DistanceToEpicenter) > 0))
 	{
 		auto raiseCombatAlert = [&]()
 		{
@@ -78,11 +78,12 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 			if (index != -1)
 				VoxClass::PlayIndex(index);
 		};
-		raiseCombatAlert();
-	}
 
-	if (nDamageLeft && (MapClass::GetTotalDamage(*args->Damage, args->WH, pType->Armor, args->DistanceToEpicenter) > 0))
+		if (pRules->CombatAlert)
+			raiseCombatAlert();
+
 		pExt->LastHurtFrame = Unsorted::CurrentFrame;
+	}
 
 	//Calculate Damage Multiplier
 	if (!args->IgnoreDefenses && *args->Damage)
