@@ -236,8 +236,8 @@ public:
 		Valueable<double> Turret_BodyOrientationAngle;
 		Valueable<bool> Turret_BodyOrientationSymmetric;
 		Valueable<bool> CanBeBuiltOn;
-		Valueable<bool> UnitBaseNormal;
-		Valueable<bool> UnitBaseForAllyBuilding;
+		Valueable<bool> ExtraBaseNormal;
+		Valueable<bool> ExtraBaseForAllyBuilding;
 		Nullable<bool> Cameo_AlwaysExist;
 		ValueableVector<TechnoTypeClass*> Cameo_OverrideTechnos;
 		DWORD Cameo_RequiredHouses;
@@ -510,8 +510,8 @@ public:
 			, Turret_BodyOrientationAngle { 0.0 }
 			, Turret_BodyOrientationSymmetric { true }
 			, CanBeBuiltOn { false }
-			, UnitBaseNormal { false }
-			, UnitBaseForAllyBuilding { false }
+			, ExtraBaseNormal { false }
+			, ExtraBaseForAllyBuilding { false }
 			, Cameo_AlwaysExist {}
 			, Cameo_OverrideTechnos {}
 			, Cameo_RequiredHouses { 0xFFFFFFFF }

@@ -31,9 +31,15 @@ TechnoExt::ExtData::~ExtData()
 		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
 	}
 
+	if (RulesExt::Global()->CheckExtraBaseNormal && pTypeExt->ExtraBaseNormal)
+	{
+		auto& vec = ScenarioExt::Global()->BaseNormalTechnos;
+		vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
+	}
+
 	if (pTypeExt->UniqueTechno)
 	{
-		auto& vec = ScenarioExt::Global()->OwnedHeros;
+		auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
 		vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
 	}
 

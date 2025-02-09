@@ -401,7 +401,7 @@ This page lists all the individual contributions to the project by their author.
   - Customized Vehicle Turret Rotation
   - Observer sidebar in skirmish game mode
   - Building placing and deploying logic enhancement
-  - Unit base normal and new placing grids
+  - Techno base normal and new placing grids
   - Grey cameo preview and cameo overlays
   - Draw visual effects for airburst weapons
   - Delay automatic attack on the controlled unit

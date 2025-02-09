@@ -43,7 +43,8 @@ public:
 		DWORD OwnerBitfield_AircraftType;
 
 		std::vector<CellStruct> BaseNormalCells;
-		std::vector<TechnoExt::ExtData*> OwnedHeros;
+		std::vector<TechnoExt::ExtData*> BaseNormalTechnos;
+		std::vector<TechnoExt::ExtData*> OwnedUniqueTechnos;
 
 		ExtData(ScenarioClass* OwnerObject) : Extension<ScenarioClass>(OwnerObject)
 			, ShowBriefing { false }
@@ -58,7 +59,8 @@ public:
 			, OwnerBitfield_NavyType { 0 }
 			, OwnerBitfield_AircraftType { 0 }
 			, BaseNormalCells {}
-			, OwnedHeros {}
+			, BaseNormalTechnos {}
+			, OwnedUniqueTechnos {}
 		{ }
 
 		void SetVariableToByID(bool bIsGlobal, int nIndex, char bState);

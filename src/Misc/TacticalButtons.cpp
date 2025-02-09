@@ -46,7 +46,7 @@ int TacticalButtonsClass::CheckMouseOverButtons(const Point2D* pMousePosition)
 
 	if (this->HeroVisible) // Button index 1-8 : Heros buttons
 	{
-		auto& vec = ScenarioExt::Global()->OwnedHeros;
+		auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
 
 		if (const int counts = Math::min(8, static_cast<int>(vec.size())))
 		{
@@ -187,7 +187,7 @@ void TacticalButtonsClass::SetMouseButtonIndex(const Point2D* pMousePosition)
 	// Hero ToolTip And Button Record
 	if (this->IndexInHerosButtons())
 	{
-		const wchar_t* name = ScenarioExt::Global()->OwnedHeros[this->ButtonIndex - 1]->TypeExtData->OwnerObject()->UIName;
+		const wchar_t* name = ScenarioExt::Global()->OwnedUniqueTechnos[this->ButtonIndex - 1]->TypeExtData->OwnerObject()->UIName;
 
 		if (!name)
 			this->HoveredHero = nullptr;
@@ -971,7 +971,7 @@ void TacticalButtonsClass::HerosDraw()
 	if (!this->HeroVisible || HouseClass::CurrentPlayer->IsObserver())
 		return;
 
-	auto& vec = ScenarioExt::Global()->OwnedHeros;
+	auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
 	const int size = vec.size();
 
 	if (!size)
@@ -1301,7 +1301,7 @@ void TacticalButtonsClass::HeroSelect(int buttonIndex)
 	if (ScenarioClass::Instance->UserInputLocked || !this->HeroVisible)
 		return;
 
-	auto& vec = ScenarioExt::Global()->OwnedHeros;
+	auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
 	const int index = buttonIndex - 1;
 
 	if (index >= static_cast<int>(vec.size()))
@@ -2160,41 +2160,6 @@ DEFINE_HOOK(0x6D4941, TacticalClass_Render_DrawButtonCameo, 0x6)
 DEFINE_HOOK(0x4F4583, GScreenClass_DrawCurrentSelectInfo, 0x6)
 {
 	TacticalButtonsClass::Instance.CurrentSelectInfoDraw();
-	return 0;
-}
-
-#pragma endregion
-
-#pragma region HerosHooks
-
-DEFINE_HOOK(0x7015C9, TechnoClass_SetOwningHouse_ChangeHeroOwner, 0x6)
-{
-	GET(TechnoClass* const, pThis, ESI);
-	GET(HouseClass* const, pNewOwner, EBP);
-
-	const auto pExt = TechnoExt::ExtMap.Find(pThis);
-
-	if (pExt->TypeExtData->UniqueTechno)
-	{
-		const auto pOldOwner = pThis->Owner;
-
-		if (pOldOwner->IsControlledByCurrentPlayer())
-		{
-			if (!pNewOwner->IsControlledByCurrentPlayer())
-			{
-				auto& vec = ScenarioExt::Global()->OwnedHeros;
-				vec.erase(std::remove(vec.begin(), vec.end(), pExt), vec.end());
-			}
-		}
-		else if (pNewOwner->IsControlledByCurrentPlayer())
-		{
-			auto& vec = ScenarioExt::Global()->OwnedHeros;
-
-			if (std::find(vec.begin(), vec.end(), pExt) == vec.end())
-				vec.push_back(pExt);
-		}
-	}
-
 	return 0;
 }
 
