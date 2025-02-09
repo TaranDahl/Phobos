@@ -241,7 +241,7 @@ void BombardTrajectory::PrepareForOpenFire(BulletClass* pBullet)
 
 		pBullet->SetLocation(middleLocation);
 		const auto pOwner = pBullet->Owner ? pBullet->Owner->Owner : BulletExt::ExtMap.Find(pBullet)->FirerHouse;
-		this->ApplyTurningPointAnim(pType->TurningPointAnims, middleLocation, pBullet->Owner, pOwner, true);
+		AnimExt::CreateRandomAnim(pType->TurningPointAnims, middleLocation, pBullet->Owner, pOwner, true);
 	}
 }
 
@@ -556,11 +556,12 @@ void BombardTrajectory::BulletVelocityChange(BulletClass* pBullet)
 					for (auto& trail : pExt->LaserTrails)
 						trail.LastLocation = middleLocation;
 				}
+
 				this->RefreshBulletLineTrail(pBullet);
 
 				pBullet->SetLocation(middleLocation);
 				const auto pTechno = pBullet->Owner;
-				this->ApplyTurningPointAnim(pType->TurningPointAnims, middleLocation, pTechno, pTechno ? pTechno->Owner : pExt->FirerHouse, true);
+				AnimExt::CreateRandomAnim(pType->TurningPointAnims, middleLocation, pTechno, pTechno ? pTechno->Owner : pExt->FirerHouse, true);
 			}
 			else
 			{
@@ -604,39 +605,5 @@ void BombardTrajectory::RefreshBulletLineTrail(BulletClass* pBullet)
 			pLineTrailer->SetDecrement(pType->LineTrailColorDecrement);
 			pLineTrailer->Owner = pBullet;
 		}
-	}
-}
-
-void BombardTrajectory::ApplyTurningPointAnim(const std::vector<AnimTypeClass*>& AnimList, CoordStruct coords, TechnoClass* pTechno, HouseClass* pHouse, bool invoker, bool ownedObject)
-{
-	if (AnimList.empty())
-		return;
-
-	const auto pAnimType = AnimList[ScenarioClass::Instance->Random.RandomRanged(0, AnimList.size() - 1)];
-
-	if (!pAnimType)
-		return;
-
-	const auto pAnim = GameCreate<AnimClass>(pAnimType, coords);
-
-	if (!pAnim || !pTechno)
-		return;
-
-	AnimExt::SetAnimOwnerHouseKind(pAnim, pHouse ? pHouse : pTechno->Owner, nullptr, false, true);
-
-	if (ownedObject)
-		pAnim->SetOwnerObject(pTechno);
-
-	if (invoker)
-	{
-		const auto pAnimExt = AnimExt::ExtMap.Find(pAnim);
-
-		if (!pAnimExt)
-			return;
-
-		if (pHouse)
-			pAnimExt->SetInvoker(pTechno, pHouse);
-		else
-			pAnimExt->SetInvoker(pTechno);
 	}
 }

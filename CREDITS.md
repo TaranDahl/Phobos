@@ -386,10 +386,11 @@ This page lists all the individual contributions to the project by their author.
   - Enhanced Straight trajectory
   - Enable building production queue
   - Fix for sidebar not updating queued unit numbers when on hold
+  - New Parabola trajectory
+  - Enhanced Bombard trajectory
   - Projectile subject to ground check before firing
   - New Disperse trajectory
   - New Engrave trajectory
-  - New Parabola trajectory
   - New Tracing trajectory
   - Technos recount current burst index when change the firing weapon
   - Technos will maintain a suitable distance after firing
@@ -416,12 +417,21 @@ This page lists all the individual contributions to the project by their author.
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
+  - Allowed `AuxBuilding` and Ares' `SW.Aux/NegBuildings` to count building upgrades
+  - Type select for buildings (doc)
+  - Enhanced Bombard trajectory
+- **NaotoYuuki**
+  - Vertical & meteor trajectory projectile prototypes
 - **handama** - AI script action to jump back to previous script
 - **TaranDahl (航味麻酱)**
   - Skirmish AI "sell all buildings and set all technos to hunt" behavior dehardcode
   - Skirmish AI "gather when MCV deploy" behavior dehardcode
   - Global value of `RepairBaseNodes`
   - Skip anim delay for burst fire
+  - Type select for buildings (code)
+  - Raise alert when technos are taking damage
+  - Toggle waypoint for building
+  - Parasite returning bug fix
   - Units are now unable to kick out from a factory that is in construction process
   - No turret unit turn to the target
 - **tyuah8** - Drive/Jumpjet/Ship/Teleport locomotor did not power on when it is un-piggybacked bugfix

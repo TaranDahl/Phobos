@@ -319,10 +319,14 @@ New:
 - Custom exit cell for infantry factory (by Starkku)
 - Option for vehicles to keep target when issued move command (by Starkku)
 - Skip anim delay for burst fire (by TaranDahl)
+- New Parabola trajectory (by CrimRecya)
+- Type select for buildings (code by TaranDahl(航味麻酱), doc by Ollerus)
+- Raise alert when technos are taking damage (by TaranDahl)
+- Enhanced Bombard trajectory (by CrimRecya & Ollerus, based on knowledge of NaotoYuuki)
+- Toggle waypoint for building (by TaranDahl)
 - Projectile subject to ground check before firing (by CrimRecya)
 - New Disperse trajectory (by CrimRecya)
 - New Engrave trajectory (by CrimRecya)
-- New Parabola trajectory (by CrimRecya)
 - New Tracing trajectory (by CrimRecya)
 - Technos will maintain a suitable distance after firing (by CrimRecya)
 - Several new Infotypes, no display in specific status and a new single frame display method (by CrimRecya)
@@ -348,11 +352,15 @@ New:
 
 Vanilla fixes:
 - Aircraft will now behave as expected according to it's `MovementZone` and `SpeedType` when moving onto different surfaces. In particular, this fixes erratic behavior when vanilla aircraft is ordered to move onto water surface and instead the movement order changes to a shore nearby (by CrimRecya)
+- Fix the bug that parasite will vanish if it missed its target when its previous cell is occupied (by 航味麻酱)
 - Units are now unable to kick out from a factory that is in construction process, and will not always stuck in the factory (by CrimRecya & TaranDahl)
 - Observer sidebar in skirmish game mode (by CrimRecya)
 
 Phobos fixes:
 - Type conversion on Warheads and Superweapons will no longer recursively convert units if applicable conversion pairs are listed, and only first applicable pair takes effect (by Starkku)
+
+Fixes / interactions with other extensions:
+- Allowed `AuxBuilding` and Ares' `SW.Aux/NegBuildings` to count building upgrades (by Ollerus)
 </details>
 
 ### 0.4

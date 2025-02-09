@@ -190,6 +190,8 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - `AirburstWeapon` now supports `IsLaser` (with Ares `LaserThickness`), `IsElectricBolt` (with Phobos `Bolt.Disable1`, `Bolt.Disable2`, `Bolt.Disable3`, `Bolt.Arcs`, without Ares `Bolt.Color1` 、`Bolt.Color2` 、`Bolt.Color3`), `IsRadBeam` (with Ares `Beam.Color` 、`Beam.Duration` 、`Beam.Amplitude` 、`Beam.IsHouseColor`), and `AttachedParticleSystem`.
 - Subterranean movement now benefits from speed multipliers from all sources such as veterancy, AttachEffect etc.
 - Aircraft will now behave as expected according to it's `MovementZone` and `SpeedType` when moving onto different surfaces. In particular, this fixes erratic behavior when vanilla aircraft is ordered to move onto water surface and instead the movement order changes to a shore nearby.
+- Allowed `AuxBuilding` to count building upgrades.
+- Fix the bug that parasite will vanish if it missed its target when its previous cell is occupied.
 
 ## Fixes / interactions with other extensions
 
@@ -205,6 +207,7 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Suppressed Ares' swizzle warning when parsing `Tags` and `TaskForces` (typically begin with `[Developer fatal]Pointer 00000000 declared change to both`).
 - Fixed Academy *(Ares feature)* not working on the initial payloads *(Ares feature)* of vehicles built from a war factory.
 - Fixed Ares' InitialPayload not being created for vehicles spawned by trigger actions.
+- Allowed Ares' `SW.AuxBuildings` and `SW.NegBuildings` to count building upgrades.
 
 ## Aircraft
 
