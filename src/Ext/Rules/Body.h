@@ -127,7 +127,7 @@ public:
 		Valueable<double> DamageAlliesMultiplier;
 		Valueable<double> DamageEnemiesMultiplier;
 		Valueable<bool> ExtendedAircraftMissions;
-		Valueable<bool> CheckUnitBaseNormal;
+		Valueable<bool> CheckExtraBaseNormal;
 		Valueable<bool> Cameo_AlwaysExist;
 		Valueable<SHPStruct*> Cameo_OverlayShapes;
 		ValueableVector<int> Cameo_OverlayFrames;
@@ -378,7 +378,7 @@ public:
 			, DamageAlliesMultiplier { 1.0 }
 			, DamageEnemiesMultiplier { 1.0 }
 			, ExtendedAircraftMissions { false }
-			, CheckUnitBaseNormal { false }
+			, CheckExtraBaseNormal { false }
 			, Cameo_AlwaysExist { false }
 			, Cameo_OverlayShapes { FileSystem::PIPS_SHP }
 			, Cameo_OverlayFrames {}

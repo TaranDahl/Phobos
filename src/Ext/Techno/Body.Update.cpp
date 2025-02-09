@@ -443,20 +443,40 @@ void TechnoExt::ExtData::UpdateTypeData(TechnoTypeClass* pCurrentType)
 
 	this->UpdateSelfOwnedAttachEffects();
 
-	// Reset Hero Flag
+	// Reset ExtraBaseNormal
+	if (RulesExt::Global()->CheckExtraBaseNormal)
+	{
+		if (pOldTypeExt->ExtraBaseNormal)
+		{
+			if (!this->TypeExtData->ExtraBaseNormal)
+			{
+				auto& vec = ScenarioExt::Global()->BaseNormalTechnos;
+				vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
+			}
+		}
+		else if (this->TypeExtData->ExtraBaseNormal)
+		{
+			auto& vec = ScenarioExt::Global()->BaseNormalTechnos;
+
+			if (std::find(vec.begin(), vec.end(), this) == vec.end())
+				vec.push_back(this);
+		}
+	}
+
+	// Reset UniqueTechno
 	if (pThis->Owner->IsControlledByCurrentPlayer())
 	{
 		if (pOldTypeExt->UniqueTechno)
 		{
 			if (!this->TypeExtData->UniqueTechno)
 			{
-				auto& vec = ScenarioExt::Global()->OwnedHeros;
+				auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
 				vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
 			}
 		}
 		else if (this->TypeExtData->UniqueTechno)
 		{
-			auto& vec = ScenarioExt::Global()->OwnedHeros;
+			auto& vec = ScenarioExt::Global()->OwnedUniqueTechnos;
 
 			if (std::find(vec.begin(), vec.end(), this) == vec.end())
 				vec.push_back(this);

@@ -332,7 +332,7 @@ New:
 - Customized Vehicle Turret Rotation (by CrimRecya)
 - Jumpjet Climbing Logic Enhancement (by CrimRecya)
 - Building placing and deploying logic enhancement (by CrimRecya)
-- Unit base normal and new placing grids (by CrimRecya)
+- Techno base normal and new placing grids (by CrimRecya)
 - Grey cameo preview and cameo overlays (by CrimRecya)
 - Draw visual effects for airburst weapons (by CrimRecya)
 - Delay automatic attack on the controlled unit (by CrimRecya)

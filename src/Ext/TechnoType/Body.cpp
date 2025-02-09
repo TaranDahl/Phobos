@@ -685,8 +685,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Turret_BodyOrientationAngle.Read(exINI, pSection, "Turret.BodyOrientationAngle");
 	this->Turret_BodyOrientationSymmetric.Read(exINI, pSection, "Turret.BodyOrientationSymmetric");
 	this->CanBeBuiltOn.Read(exINI, pSection, "CanBeBuiltOn");
-	this->UnitBaseNormal.Read(exINI, pSection, "UnitBaseNormal");
-	this->UnitBaseForAllyBuilding.Read(exINI, pSection, "UnitBaseForAllyBuilding");
+	this->ExtraBaseNormal.Read(exINI, pSection, "ExtraBaseNormal");
+	this->ExtraBaseForAllyBuilding.Read(exINI, pSection, "ExtraBaseForAllyBuilding");
 	this->Cameo_AlwaysExist.Read(exINI, pSection, "Cameo.AlwaysExist");
 	this->Cameo_OverrideTechnos.Read(exINI, pSection, "Cameo.OverrideTechnos");
 	this->Cameo_RequiredHouses = pINI->ReadHouseTypesList(pSection, "Cameo.RequiredHouses", this->Cameo_RequiredHouses);
@@ -1170,8 +1170,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Turret_BodyOrientationAngle)
 		.Process(this->Turret_BodyOrientationSymmetric)
 		.Process(this->CanBeBuiltOn)
-		.Process(this->UnitBaseNormal)
-		.Process(this->UnitBaseForAllyBuilding)
+		.Process(this->ExtraBaseNormal)
+		.Process(this->ExtraBaseForAllyBuilding)
 		.Process(this->Cameo_AlwaysExist)
 		.Process(this->Cameo_OverrideTechnos)
 		.Process(this->Cameo_RequiredHouses)

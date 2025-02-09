@@ -141,8 +141,11 @@ DEFINE_HOOK(0x6F42F7, TechnoClass_Init, 0x2)
 	pExt->InitializeAttachEffects();
 	pExt->InitializeDisplayInfo();
 
+	if (RulesExt::Global()->CheckExtraBaseNormal && pExt->TypeExtData->ExtraBaseNormal)
+		ScenarioExt::Global()->BaseNormalTechnos.push_back(pExt);
+
 	if (pExt->TypeExtData->UniqueTechno && pThis->Owner->IsControlledByCurrentPlayer())
-		ScenarioExt::Global()->OwnedHeros.push_back(pExt);
+		ScenarioExt::Global()->OwnedUniqueTechnos.push_back(pExt);
 
 	pExt->InitAggressiveStance();
 

@@ -169,7 +169,8 @@ void ScenarioExt::ExtData::Serialize(T& Stm)
 		.Process(this->OwnerBitfield_NavyType)
 		.Process(this->OwnerBitfield_AircraftType)
 		.Process(this->BaseNormalCells)
-		.Process(this->OwnedHeros)
+		.Process(this->BaseNormalTechnos)
+		.Process(this->OwnedUniqueTechnos)
 		;
 }
 

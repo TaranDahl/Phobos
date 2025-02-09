@@ -404,7 +404,7 @@ This page lists all the individual contributions to the project by their author.
   - Customized Vehicle Turret Rotation
   - Jumpjet climbing logic enhancement
   - Building placing and deploying logic enhancement
-  - Unit base normal and new placing grids
+  - Techno base normal and new placing grids
   - Grey cameo preview and cameo overlays
   - Units will not always stuck in the factory
   - Optimize aircrafts stop action and allow they using area guard and attack moving
