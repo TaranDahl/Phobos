@@ -173,7 +173,9 @@ DEFINE_HOOK(0x4A902C, MapClass_PassesProximityCheck_BaseNormalExtra, 0x5)
 
 		canBuild = false; // Reset to false so that cells with BaseNormal can be correctly identified
 		ProximityTemp::Build = true;
-		ScenarioExt::Global()->BaseNormalCells.push_back(ProximityTemp::CurrentCell->MapCoords);
+
+		GET_STACK(const CellStruct, currentCell, STACK_OFFSET(0x30, -0x20));
+		ScenarioExt::Global()->BaseNormalCells.push_back(currentCell);
 	}
 
 	return 0;
@@ -199,18 +201,23 @@ DEFINE_HOOK(0x4A904E, MapClass_PassesProximityCheck_RestoreResult, 0x5)
 			GET_STACK(const int, foundationHeight, STACK_OFFSET(0x30, 0x4));
 
 			const auto pBuildType = ProximityTemp::BuildType;
+			const auto pBuildTypeExt = BuildingTypeExt::ExtMap.Find(ProximityTemp::BuildType);
 			const auto range = pBuildType->Adjacent + 1;
 			const auto maxX = topLeftX + range + foundationWidth;
 			const auto maxY = topLeftY + range + foundationHeight;
 			const auto minX = topLeftX - range;
 			const auto minY = topLeftY - range;
 
-			for (const auto pExt : baseNormalTechnos)
+			for (const auto& pExt : baseNormalTechnos)
 			{
 				const auto pTechno = pExt->OwnerObject();
+
+				if (!TechnoExt::IsActive(pTechno) || pTechno->Deactivated)
+					continue;
+
 				const auto technoMapCell = pTechno->GetMapCoords();
 
-				if (technoMapCell.X < minX || technoMapCell.Y < minY || technoMapCell.X > maxX || technoMapCell.Y > maxY)
+				if (technoMapCell.X < minX || technoMapCell.Y < minY || technoMapCell.X >= maxX || technoMapCell.Y >= maxY)
 					continue;
 
 				const auto pOwner = pTechno->Owner;
@@ -229,12 +236,12 @@ DEFINE_HOOK(0x4A904E, MapClass_PassesProximityCheck_RestoreResult, 0x5)
 				if (!canBeBaseNormal())
 					continue;
 
-				const auto& pExtraAllowed = BuildingTypeExt::ExtMap.Find(ProximityTemp::BuildType)->Adjacent_AllowedExtra;
+				const auto& pExtraAllowed = pBuildTypeExt->Adjacent_AllowedExtra;
 
 				if (pExtraAllowed.size() > 0 && !pExtraAllowed.Contains(pTypeExt->OwnerObject()))
 					continue;
 
-				const auto& pExtraDisallowed = BuildingTypeExt::ExtMap.Find(ProximityTemp::BuildType)->Adjacent_DisallowedExtra;
+				const auto& pExtraDisallowed = pBuildTypeExt->Adjacent_DisallowedExtra;
 
 				if (pExtraDisallowed.size() > 0 && pExtraDisallowed.Contains(pTypeExt->OwnerObject()))
 					continue;
