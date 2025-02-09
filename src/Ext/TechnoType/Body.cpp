@@ -711,6 +711,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->CanManualReload_ResetROF.Read(exINI, pSection, "CanManualReload.ResetROF");
 	this->CanManualReload_DetonateWarhead.Read(exINI, pSection, "CanManualReload.DetonateWarhead");
 	this->CanManualReload_DetonateConsume.Read(exINI, pSection, "CanManualReload.DetonateConsume");
+	this->JumpjetTilt.Read(exINI, pSection, "JumpjetTilt");
 
 	this->CombatAlert.Read(exINI, pSection, "CombatAlert");
 	this->CombatAlert_NotBuilding.Read(exINI, pSection, "CombatAlert.NotBuilding");
@@ -1202,6 +1203,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->CanManualReload_ResetROF)
 		.Process(this->CanManualReload_DetonateWarhead)
 		.Process(this->CanManualReload_DetonateConsume)
+		.Process(this->JumpjetTilt)
 
 		.Process(this->CombatAlert)
 		.Process(this->CombatAlert_NotBuilding)

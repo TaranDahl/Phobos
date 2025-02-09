@@ -274,6 +274,7 @@ public:
 		Valueable<bool> CanManualReload_ResetROF;
 		Valueable<WarheadTypeClass*> CanManualReload_DetonateWarhead;
 		Valueable<int> CanManualReload_DetonateConsume;
+		Nullable<bool> JumpjetTilt;
 
 		Nullable<bool> CombatAlert;
 		Nullable<bool> CombatAlert_NotBuilding;
@@ -611,6 +612,7 @@ public:
 			, CanManualReload_ResetROF { true }
 			, CanManualReload_DetonateWarhead {}
 			, CanManualReload_DetonateConsume { 0 }
+			, JumpjetTilt {}
 
 			, CombatAlert {}
 			, CombatAlert_NotBuilding {}
