@@ -391,13 +391,14 @@ This page lists all the individual contributions to the project by their author.
   - Enhanced Straight trajectory
   - Enable building production queue
   - Fix for sidebar not updating queued unit numbers when on hold
+  - New Parabola trajectory
+  - Enhanced Bombard trajectory
   - Technos will maintain a suitable distance after firing
   - Several new Infotypes, no display in specific status and a new single frame display method
   - Projectile subject to ground check before firing
   - Technos recount current burst index when change the firing weapon
   - New Disperse trajectory
   - New Engrave trajectory
-  - New Parabola trajectory
   - New Tracing trajectory
   - Display factories, superweapons, iron curtain and temporal progress on specific technos
   - Damage multiplier for different houses
@@ -423,14 +424,21 @@ This page lists all the individual contributions to the project by their author.
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
-  - Enhance bombard trajectory with vertical & meteor trajectory
+  - Allowed `AuxBuilding` and Ares' `SW.Aux/NegBuildings` to count building upgrades
+  - Type select for buildings (doc)
+  - Enhanced Bombard trajectory
+- **NaotoYuuki**
+  - Vertical & meteor trajectory projectile prototypes
 - **handama** - AI script action to jump back to previous script
 - **TaranDahl (航味麻酱)**
   - Skirmish AI "sell all buildings and set all technos to hunt" behavior dehardcode
   - Skirmish AI "gather when MCV deploy" behavior dehardcode
   - Global value of `RepairBaseNodes`
   - Skip anim delay for burst fire
+  - Type select for buildings (code)
   - Raise alert when technos are taking damage
+  - Toggle waypoint for building
+  - Parasite returning bug fix
   - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller
   - `Spawner.RecycleRange`
   - `Spawner.RecycleAnim`
@@ -438,8 +446,6 @@ This page lists all the individual contributions to the project by their author.
   - `CellSpread.Cylinder`
   - `AffectsInAir` and `AffectsOnFloor`
   - Infantry fire while moving
-  - Parasite returning bug fix
-  - Toggle waypoint for building and aircraft
   - Weapon range finding in cylinder
   - Units are now unable to kick out from a factory that is in construction process
   - No turret unit turn to the target

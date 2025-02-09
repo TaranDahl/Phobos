@@ -866,7 +866,7 @@ Trajectory.Straight.CountAttenuation=1.0        ; floating point value
   - `Trajectory.Bombard.Height` controls the height of the turning point.
   - `Trajectory.Bombard.FallPercent` controls the distance of the turning point by its percentage of the total distance between attacker and intended target. If set to 0%, then it'll fly up vertically. If set to 100%, then it'll travel to the top of the intended target.
     - For each launch the turning point percentage could add or minus a random value, which is not greater than `Trajectory.Bombard.FallPercentShift`. If set to 0%, random shift will be disabled.
-    - You can also makes the turning point scatter randomly in a circle with `Trajectory.Bombard.FallScatter.Max` as its radius. If set to 0, random scatter will be disabled. `Trajectory.Bombard.FallScatter.Min` can be used to determine the minimum radius of the circle.
+    - You can also makes the turning point scatter randomly in a circle with `Trajectory.Bombard.FallScatter.Max` as its radius. If set to 0, random scatter will be disabled. `Trajectory.Bombard.FallScatter.Min` can be used to determine the minimum radius of the circle. If `Trajectory.Bombard.FallScatter.Linear` set to true, the random scatter will be limited to the line that is vertical to the original direction of the projectile.
   - `Trajectory.Bombard.FreeFallOnTarget` controls how it'll hit the intended target. If set to true, the projectile will be respawned above the intended target and free fall. If set to false, the projectile will travel to the intended target from the turning point.
   - `Trajectory.Bombard.NoLaunch` controls whether the attacker will fire the projectile by itself. If set to true, projectile will directly fall from the turning point.
   - `Trajectory.Bombard.FallSpeed` controls the initial speed of the projectile after it turns. If set to 0.0, then it'll use `Trajectory.Speed`. Can't work when `Trajectory.Bombard.FreeFallOnTarget` set to true.
@@ -875,7 +875,7 @@ Trajectory.Straight.CountAttenuation=1.0        ; floating point value
   - `Trajectory.Bombard.TargetSnapDistance` controls the maximum distance in cells from intended target the projectile can be at moment of detonation to make the projectile 'snap' on the intended target. Set to 0 to disable snapping.
   - `Trajectory.Bombard.TurningPointAnims`, if set, will play an anim when the projectile reaches the turning point. If `Trajectory.Bombard.FreeFallOnTarget` is set to true, it'll be spawned above the target with the projectile together. If `Trajectory.Bombard.NoLaunch` is set to true, it'll be played at where the projectile falls, no matter if it's free fall or not. If more than one animation is listed, a random one is selected.
   - `Trajectory.Bombard.LeadTimeCalculate` controls whether the projectile need to calculate the lead time of the target when firing. Note that this will not affect the facing of the turret.
-  - The following tags further customize the projectile's descending behaviors when `Trajectory.Bombard.FreeFallOnTarget` set to true.
+  - The following tags further customize the projectile's descending behaviors when `Trajectory.Bombard.FreeFallOnTarget` set to false.
     - `Trajectory.Bombard.OffsetCoord` controls the offsets of the target. Projectile will aim at this position to attack. It also supports `Inaccurate=yes` and `Trajectory.Bombard.LeadTimeCalculate=true` on this basis.
     - `Trajectory.Bombard.RotateCoord` controls whether to rotate the projectile's firing direction within the angle bisector of `Trajectory.Bombard.OffsetCoord` according to the weapon's `Burst`. Set to 0 to disable this function.
     - `Trajectory.Bombard.MirrorCoord` controls whether `Trajectory.Bombard.OffsetCoord` need to mirror the lateral value to adapt to the current burst index. At the same time, the rotation direction calculated by `Trajectory.Bombard.RotateCoord` will also be reversed, and the rotation angle between each adjacent projectile on each side will not change as a result.
@@ -892,6 +892,7 @@ Trajectory.Bombard.FallPercent=1.0            ; double
 Trajectory.Bombard.FallPercentShift=0.0       ; double
 Trajectory.Bombard.FallScatter.Max=0.0        ; floating point value
 Trajectory.Bombard.FallScatter.Min=0.0        ; floating point value
+Trajectory.Bombard.FallScatter.Linear=false   ; boolean
 Trajectory.Bombard.FreeFallOnTarget=true      ; boolean
 Trajectory.Bombard.NoLaunch=false             ; boolean
 Trajectory.Bombard.FallSpeed=0.0              ; double
@@ -1448,6 +1449,7 @@ Spawner.RecycleAnim=             ; Animation
     - `PassengerDeletion.SoylentAllowedHouses` determines which houses passengers can belong to be eligible for refunding.
     - `PassengerDeletion.DisplaySoylent` can be set to true to display the amount of credits refunded on the transport. `PassengerDeletion.DisplaySoylentToHouses` determines which houses can see this and `PassengerDeletion.DisplaySoylentOffset` can be used to adjust the display offset.
   - `PassengerDeletion.ReportSound` and `PassengerDeletion.Anim` can be used to specify a sound and animation to play when a passenger is erased, respectively.
+  - If `PassengerDeletion.UnderEMP` is set to true, the deletion will be processed when the transport is under EMP or deactivated.
 
 In `rulesmd.ini`:
 ```ini
@@ -1467,6 +1469,7 @@ PassengerDeletion.DisplaySoylentToHouses=All    ; Affected House Enumeration (no
 PassengerDeletion.DisplaySoylentOffset=0,0      ; X,Y, pixels relative to default
 PassengerDeletion.ReportSound=                  ; Sound
 PassengerDeletion.Anim=                         ; Animation
+PassengerDeletion.UnderEMP=false                ; boolean
 ```
 
 ### Automatic passenger owner change to match transport owner
@@ -1828,12 +1831,12 @@ Promote.EliteAnimation=           ; Animation
 - In Vanilla, non-building technos will not generate radar events or EVAs when attacked, so players can hardly notice them until they are destroyed. You can now receive a radar event (and optionally a sound effect) when your units is attacked, so you can respond to the combats in time.
 - `[AudioVisual]->CombatAlert` is a global switch, set it to `true` to enable the entire logic.
 - These flags controlls when to trigger a combat alert.
-- You can disable this logic on specific techno by setting `[SOMETECHNO]->CombatAlert` to `false`. It is defaultly disabled for technos with `Insignificant=yes` or `Spawned=yes`.
+  - You can disable this logic on specific techno by setting `[SOMETECHNO]->CombatAlert` to `false`, which default to `[AudioVisual]->CombatAlert.Default`. If `CombatAlert.Default` is also empty, it is defaultly disabled for technos with `Insignificant=yes` or `Spawned=yes`.
   - `[AudioVisual]->CombatAlert.IgnoreBuilding` will turn the logic off on buildings. You can override it for specific building by setting `[SOMETECHNO]->CombatAlert.NotBuilding` to true. You may hope to use it on veh-buildings.
   - `[AudioVisual]->CombatAlert.SuppressIfInScreen` decides whether to disable the logic for the units in the current screen.
   - `[AudioVisual]->CombatAlert.Interval` decides the time interval (in frames) between alerts, to prevent the alert from being anonying. It is default to 150 frames.
   - `[AudioVisual]->CombatAlert.SuppressIfAllyDamage` decides whether to disable the logic for the damage from allys.
-  - Technos hitted by a warhead with `[SOMEWARHEAD]->CombatAlert.Suppress` setted to `true` will not raise a radar event or EVA. This flag is default to the inverse value of ares flag `[SOMEWARHEAD]->Nonprovocative`.
+  - Technos hitted by a warhead with `[SOMEWARHEAD]->CombatAlert.Suppress` setted to `true` will not raise a radar event or EVA. This flag is default to the logical or of inverse value of ares flag `[SOMEWARHEAD]->Malicious` and `[SOMEWARHEAD]->Nonprovocative`.
 - And the following flags controlls the effect of a combat alert.
   - `[AudioVisual]->CombatAlert.MakeAVoice` decides whether to play some sound effect with the combat alert. Set it to `true` will enable the following flags, otherwise they will be ignored.
   - `[SOMETECHNO]->CombatAlert.UseFeedbackVoice` decides whether to use the sound defined by `VoiceFeedback`. Default to `[AudioVisual]->CombatAlert.UseFeedbackVoice`.
@@ -1846,6 +1849,7 @@ In `rulesmd.ini`:
 ```ini
 [AudioVisual]
 CombatAlert=false                      ;boolean
+CombatAlert.Default=                   ;boolean
 CombatAlert.IgnoreBuilding=true        ;boolean
 CombatAlert.SuppressIfInScreen=true    ;boolean
 CombatAlert.Interval=150               ;integer, game frames
@@ -1856,7 +1860,7 @@ CombatAlert.UseAttackVoice=true        ;boolean
 CombatAlert.UseEVA=true                ;boolean
 
 [SOMETECHNO]
-CombatAlert=true                       ;boolean
+CombatAlert=                           ;boolean
 CombatAlert.NotBuilding=false          ;boolean
 CombatAlert.UseFeedbackVoice=true      ;boolean
 CombatAlert.UseAttackVoice=true        ;boolean
@@ -2020,6 +2024,16 @@ RateDown.Delay=0       ; integer, game frames
 RateDown.Ammo=-2       ; integer
 RateDown.Cover=0       ; integer
 RateDown.Reset=false   ; boolean
+```
+
+### Waypoint for building
+
+- In vanilla, building and aircraft is forbiddened to use waypoint. Now you can turn it on by the following flags.
+
+In `rulesmd.ini`:
+```ini
+[General]
+BuildingWaypoint=false    ; boolean
 ```
 
 ## Terrain
