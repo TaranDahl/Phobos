@@ -351,8 +351,8 @@ void TacticalButtonsClass::CurrentSelectPathDraw()
 						auto curCoord = Point2D { pFoot->Location.X, pFoot->Location.Y };
 						auto pCurCell = MapClass::Instance->GetCellAt(CellStruct { static_cast<short>(curCoord.X >> 8), static_cast<short>(curCoord.Y >> 8) });
 						const auto face = pJjLoco ? &pJjLoco->LocomotionFacing : &pFoot->PrimaryFacing;
-						const auto checkLength = face->IsRotating() ? Unsorted::LeptonsPerCell
-							: (pFoot->Destination ? Math::min((Unsorted::LeptonsPerCell * 12), pFoot->DistanceFrom(pFoot->Destination)) : Unsorted::LeptonsPerCell);
+						const auto checkLength = (face->IsRotating() || !pFoot->Destination) ? Unsorted::LeptonsPerCell
+							: Math::min((Unsorted::LeptonsPerCell * 12), pFoot->DistanceFrom(pFoot->Destination));
 						const auto angle = -face->Current().GetRadian<65536>();
 						const auto checkCoord = Point2D { static_cast<int>(checkLength * cos(angle) + 0.5), static_cast<int>(checkLength * sin(angle) + 0.5) };
 						const auto largeStep = Math::max(abs(checkCoord.X), abs(checkCoord.Y));
