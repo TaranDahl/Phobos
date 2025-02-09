@@ -47,29 +47,6 @@
 DEFINE_JUMP(LJMP, 0x545CE2, 0x545CE9) //Phobos_BugFixes_Tileset255_RemoveNonMMArrayFill
 DEFINE_JUMP(LJMP, 0x546C23, 0x546C8B) //Phobos_BugFixes_Tileset255_RefNonMMArray
 
-//Fix the bug that parasite will vanish if it missed its target when its previous cell is occupied.
-DEFINE_HOOK(0x62AA32, ParasiteClass_TryInfect_MissBehaviorFix, 0x5)
-{
-	GET(bool, isReturnSuccess, EAX);
-	GET(ParasiteClass*, pParasite, ESI);
-
-	auto const pParasiteTechno = pParasite->Owner;
-
-	if (isReturnSuccess || !pParasiteTechno)
-		return 0;
-
-	auto const pType = pParasiteTechno->GetTechnoType();
-
-	if (!pType)
-		return 0;
-
-	isReturnSuccess = pParasiteTechno->Unlimbo(CellClass::Cell2Coord(MapClass::Instance->NearByLocation(pParasiteTechno->LastMapCoords, pType->SpeedType, -1,
-		pType->MovementZone, false, 1, 1, false, false, false, true, CellStruct::Empty, false, false)), DirType::North);
-
-	R->AL(isReturnSuccess);
-	return 0;
-}
-
 // Patches TechnoClass::Kill_Cargo/KillPassengers (push ESI -> push EBP)
 // Fixes recursive passenger kills not being accredited
 // to proper techno but to their transports
