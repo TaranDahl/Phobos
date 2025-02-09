@@ -217,17 +217,7 @@ public:
 		Valueable<AnimTypeClass*> Promote_VeteranAnimation;
 		Valueable<AnimTypeClass*> Promote_EliteAnimation;
 
-		Valueable<bool> CombatAlert;
-		Valueable<bool> CombatAlert_IgnoreBuilding;
-		Valueable<bool> CombatAlert_SuppressIfInScreen;
-		Valueable<int> CombatAlert_Interval;
-		Valueable<bool> CombatAlert_SuppressIfAllyDamage;
-		Valueable<bool> CombatAlert_MakeAVoice;
-		Valueable<bool> CombatAlert_UseFeedbackVoice;
-		Valueable<bool> CombatAlert_UseAttackVoice;
-		Valueable<bool> CombatAlert_UseEVA;
 		Valueable<bool> CylinderRangefinding;
-		Valueable<bool> BuildingWaypoint;
 		Valueable<bool> StopPlanningOnEnter;
 		Valueable<bool> StrafingTargetScatter;
 		Nullable<int> AINormalTargetingDelay;
@@ -266,7 +256,6 @@ public:
 		Valueable<bool> DistributeTargetingFrame_AIOnly;
 		Valueable<bool> AttackMove_IgnoreWeaponCheck;
 		Nullable<bool> AttackMove_StopWhenTargetAcquired;
-		Valueable<bool> BuildingTypeSelectable;
 
 		Valueable<double> AircraftLevelLightMultiplier;
 		Valueable<double> JumpjetLevelLightMultiplier;
@@ -475,17 +464,7 @@ public:
 			, ShowDesignatorRange { true }
 			, DropPodTrailer { }
 			, PodImage { }
-			, CombatAlert { false }
-			, CombatAlert_IgnoreBuilding { true }
-			, CombatAlert_SuppressIfInScreen { true }
-			, CombatAlert_Interval { 150 }
-			, CombatAlert_SuppressIfAllyDamage { true }
-			, CombatAlert_MakeAVoice { true }
-			, CombatAlert_UseFeedbackVoice { true }
-			, CombatAlert_UseAttackVoice { true }
-			, CombatAlert_UseEVA { true }
 			, CylinderRangefinding { false }
-			, BuildingWaypoint { false }
 			, StopPlanningOnEnter { true }
 			, StrafingTargetScatter { true }
 			, AINormalTargetingDelay {}
@@ -524,7 +503,6 @@ public:
 			, DistributeTargetingFrame_AIOnly { true }
 			, AttackMove_IgnoreWeaponCheck { false }
 			, AttackMove_StopWhenTargetAcquired {}
-			, BuildingTypeSelectable { false }
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
 			, VoxelLightSource { }

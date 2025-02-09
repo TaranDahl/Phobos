@@ -736,16 +736,6 @@ DEFINE_HOOK(0x5865E2, MapClass_IsLocationFogged_Check, 0x5)
 
 #pragma endregion
 
-#pragma region NewWaypoints
-
-bool __fastcall BuildingTypeClass_CanUseWaypoint(BuildingTypeClass* pThis)
-{
-	return RulesExt::Global()->BuildingWaypoint;
-}
-DEFINE_JUMP(VTABLE, 0x7E4610, GET_OFFSET(BuildingTypeClass_CanUseWaypoint))
-
-#pragma endregion
-
 #pragma region EngineerAutoFire
 
 DEFINE_HOOK(0x707E84, TechnoClass_GetGuardRange_Engineer, 0x6)
@@ -1773,40 +1763,6 @@ DEFINE_HOOK(0x4DF3A6, FootClass_UpdateAttackMove_Follow, 0x6)
 	}
 
 	return 0;
-}
-
-#pragma endregion
-
-#pragma region BuildingTypeSelectable
-
-namespace BuildingTypeSelectable
-{
-	bool ProcessingIDMatches = false;
-}
-
-DEFINE_HOOK_AGAIN(0x732B28, TypeSelectExecute_SetContext, 0x6)
-DEFINE_HOOK(0x732A85, TypeSelectExecute_SetContext, 0x7)
-{
-	BuildingTypeSelectable::ProcessingIDMatches = true;
-	return 0;
-}
-
-DEFINE_HOOK(0x732C97, TechnoClass_IDMatches_ResetContext, 0x5) // Ares hook return
-{
-	BuildingTypeSelectable::ProcessingIDMatches = false;
-	return 0;
-}
-
-// If the context is set as well as the flags is enabled, the vfunc IsStrange return true to enable the type selection.
-DEFINE_HOOK(0x465D40, BuildingClass_Is1x1AndUndeployable_BuildingMassSelectable, 0x6)
-{
-	enum { SkipGameCode = 0x465D6A };
-
-	if (!BuildingTypeSelectable::ProcessingIDMatches || !RulesExt::Global()->BuildingTypeSelectable)
-		return 0;
-
-	R->EAX(true);
-	return SkipGameCode;
 }
 
 #pragma endregion

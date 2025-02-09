@@ -720,12 +720,6 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->CanManualReload_DetonateConsume.Read(exINI, pSection, "CanManualReload.DetonateConsume");
 	this->JumpjetTilt.Read(exINI, pSection, "JumpjetTilt");
 
-	this->CombatAlert.Read(exINI, pSection, "CombatAlert");
-	this->CombatAlert_NotBuilding.Read(exINI, pSection, "CombatAlert.NotBuilding");
-	this->CombatAlert_UseFeedbackVoice.Read(exINI, pSection, "CombatAlert.UseFeedbackVoice");
-	this->CombatAlert_UseAttackVoice.Read(exINI, pSection, "CombatAlert.UseAttackVoice");
-	this->CombatAlert_UseEVA.Read(exINI, pSection, "CombatAlert.UseEVA");
-	this->CombatAlert_EVA.Read(exINI, pSection, "CombatAlert.EVA");
 	this->Spawner_RecycleRange.Read(exINI, pSection, "Spawner.RecycleRange");
 	this->Spawner_RecycleAnim.Read(exINI, pSection, "Spawner.RecycleAnim");
 	this->AINormalTargetingDelay.Read(exINI, pSection, "AINormalTargetingDelay");
@@ -1219,12 +1213,6 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->CanManualReload_DetonateConsume)
 		.Process(this->JumpjetTilt)
 
-		.Process(this->CombatAlert)
-		.Process(this->CombatAlert_NotBuilding)
-		.Process(this->CombatAlert_UseFeedbackVoice)
-		.Process(this->CombatAlert_UseAttackVoice)
-		.Process(this->CombatAlert_UseEVA)
-		.Process(this->CombatAlert_EVA)
 		.Process(this->Spawner_RecycleRange)
 		.Process(this->Spawner_RecycleAnim)
 		.Process(this->AINormalTargetingDelay)

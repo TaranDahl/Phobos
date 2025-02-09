@@ -255,7 +255,6 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->DetonateOnAllMapObjects_AffectTypes.Read(exINI, pSection, "DetonateOnAllMapObjects.AffectTypes");
 	this->DetonateOnAllMapObjects_IgnoreTypes.Read(exINI, pSection, "DetonateOnAllMapObjects.IgnoreTypes");
 
-	this->CombatAlert_Suppress.Read(exINI, pSection, "CombatAlert.Suppress");
 	this->AffectsOnFloor.Read(exINI, pSection, "AffectsOnFloor");
 	this->AffectsInAir.Read(exINI, pSection, "AffectsInAir");
 	this->AffectsUnderground.Read(exINI, pSection, "AffectsUnderground");
@@ -500,7 +499,6 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->DetonateOnAllMapObjects_AffectTypes)
 		.Process(this->DetonateOnAllMapObjects_IgnoreTypes)
 
-		.Process(this->CombatAlert_Suppress)
 		.Process(this->AffectsOnFloor)
 		.Process(this->AffectsInAir)
 		.Process(this->AffectsUnderground)
@@ -542,7 +540,7 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Particle_AlphaImageIsLightFlash)
 
 		.Process(this->CombatAlert_Suppress)
-		
+
 		// Ares tags
 		.Process(this->AffectsEnemies)
 		.Process(this->AffectsOwner)

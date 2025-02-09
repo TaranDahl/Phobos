@@ -257,17 +257,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->Vehicles_DefaultDigitalDisplayTypes.Read(exINI, GameStrings::AudioVisual, "Vehicles.DefaultDigitalDisplayTypes");
 	this->Aircraft_DefaultDigitalDisplayTypes.Read(exINI, GameStrings::AudioVisual, "Aircraft.DefaultDigitalDisplayTypes");
 
-	this->CombatAlert.Read(exINI, GameStrings::AudioVisual, "CombatAlert");
-	this->CombatAlert_IgnoreBuilding.Read(exINI, GameStrings::AudioVisual, "CombatAlert.IgnoreBuilding");
-	this->CombatAlert_SuppressIfInScreen.Read(exINI, GameStrings::AudioVisual, "CombatAlert.SuppressIfInScreen");
-	this->CombatAlert_Interval.Read(exINI, GameStrings::AudioVisual, "CombatAlert.Interval");
-	this->CombatAlert_SuppressIfAllyDamage.Read(exINI, GameStrings::AudioVisual, "CombatAlert.SuppressIfAllyDamage");
-	this->CombatAlert_MakeAVoice.Read(exINI, GameStrings::AudioVisual, "CombatAlert.MakeAVoice");
-	this->CombatAlert_UseFeedbackVoice.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseFeedbackVoice");
-	this->CombatAlert_UseAttackVoice.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseAttackVoice");
-	this->CombatAlert_UseEVA.Read(exINI, GameStrings::AudioVisual, "CombatAlert.UseEVA");
 	this->CylinderRangefinding.Read(exINI, GameStrings::General, "CylinderRangefinding");
-	this->BuildingWaypoint.Read(exINI, GameStrings::General, "BuildingWaypoint");
 	this->StopPlanningOnEnter.Read(exINI, GameStrings::General, "StopPlanningOnEnter");
 	this->StrafingTargetScatter.Read(exINI, GameStrings::General, "StrafingTargetScatter");
 	this->AINormalTargetingDelay.Read(exINI, GameStrings::General, "AINormalTargetingDelay");
@@ -306,7 +296,6 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->DistributeTargetingFrame_AIOnly.Read(exINI, GameStrings::General, "DistributeTargetingFrame.AIOnly");
 	this->AttackMove_IgnoreWeaponCheck.Read(exINI, GameStrings::General, "AttackMove.IgnoreWeaponCheck");
 	this->AttackMove_StopWhenTargetAcquired.Read(exINI, GameStrings::General, "AttackMove.StopWhenTargetAcquired");
-	this->BuildingTypeSelectable.Read(exINI, GameStrings::General, "BuildingTypeSelectable");
 
 	this->AircraftLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "AircraftLevelLightMultiplier");
 	this->JumpjetLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "JumpjetLevelLightMultiplier");
@@ -578,17 +567,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->ShowDesignatorRange)
 		.Process(this->DropPodTrailer)
 		.Process(this->PodImage)
-		.Process(this->CombatAlert)
-		.Process(this->CombatAlert_IgnoreBuilding)
-		.Process(this->CombatAlert_SuppressIfInScreen)
-		.Process(this->CombatAlert_Interval)
-		.Process(this->CombatAlert_SuppressIfAllyDamage)
-		.Process(this->CombatAlert_MakeAVoice)
-		.Process(this->CombatAlert_UseFeedbackVoice)
-		.Process(this->CombatAlert_UseAttackVoice)
-		.Process(this->CombatAlert_UseEVA)
 		.Process(this->CylinderRangefinding)
-		.Process(this->BuildingWaypoint)
 		.Process(this->StopPlanningOnEnter)
 		.Process(this->StrafingTargetScatter)
 		.Process(this->AINormalTargetingDelay)
@@ -627,7 +606,6 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->DistributeTargetingFrame_AIOnly)
 		.Process(this->AttackMove_IgnoreWeaponCheck)
 		.Process(this->AttackMove_StopWhenTargetAcquired)
-		.Process(this->BuildingTypeSelectable)
 		.Process(this->AircraftLevelLightMultiplier)
 		.Process(this->JumpjetLevelLightMultiplier)
 		.Process(this->VoxelLightSource)

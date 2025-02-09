@@ -283,12 +283,6 @@ public:
 		Valueable<int> CanManualReload_DetonateConsume;
 		Nullable<bool> JumpjetTilt;
 
-		Nullable<bool> CombatAlert;
-		Nullable<bool> CombatAlert_NotBuilding;
-		Nullable<bool> CombatAlert_UseFeedbackVoice;
-		Nullable<bool> CombatAlert_UseAttackVoice;
-		Nullable<bool> CombatAlert_UseEVA;
-		NullableIdx<VoxClass> CombatAlert_EVA;
 		Valueable<int> Spawner_RecycleRange;
 		Valueable<AnimTypeClass*> Spawner_RecycleAnim;
 		Nullable<int> AINormalTargetingDelay;
@@ -629,12 +623,6 @@ public:
 			, CanManualReload_DetonateConsume { 0 }
 			, JumpjetTilt {}
 
-			, CombatAlert {}
-			, CombatAlert_NotBuilding {}
-			, CombatAlert_UseFeedbackVoice {}
-			, CombatAlert_UseAttackVoice {}
-			, CombatAlert_UseEVA {}
-			, CombatAlert_EVA {}
 			, Spawner_RecycleRange { -1 }
 			, Spawner_RecycleAnim { nullptr }
 			, AINormalTargetingDelay {}

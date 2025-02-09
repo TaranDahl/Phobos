@@ -139,7 +139,6 @@ public:
 		Valueable<bool> InflictLocomotor;
 		Valueable<bool> RemoveInflictedLocomotor;
 
-		Nullable<bool> CombatAlert_Suppress;
 		Valueable<bool> AffectsOnFloor;
 		Valueable<bool> AffectsInAir;
 		Valueable<bool> AffectsUnderground;
@@ -317,7 +316,6 @@ public:
 			, InflictLocomotor { false }
 			, RemoveInflictedLocomotor { false }
 
-			, CombatAlert_Suppress {}
 			, AffectsOnFloor { true }
 			, AffectsInAir { true }
 			, AffectsUnderground { false }
