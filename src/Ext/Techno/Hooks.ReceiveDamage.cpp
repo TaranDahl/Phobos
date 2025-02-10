@@ -30,6 +30,7 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	const auto pSourceHouse = args->SourceHouse;
 	const auto pTargetHouse = pThis->Owner;
 
+	// Raise Combat Alert
 	if (nDamageLeft && (MapClass::GetTotalDamage(*args->Damage, args->WH, pType->Armor, args->DistanceToEpicenter) > 0))
 	{
 		auto raiseCombatAlert = [&]()
@@ -41,8 +42,7 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 
 			if (pHouseExt->CombatAlertTimer.HasTimeLeft() || pWHExt->CombatAlert_Suppress.Get(!pWHExt->Malicious || pWHExt->Nonprovocative))
 				return;
-
-			if (!pTypeExt->CombatAlert.Get(pRules->CombatAlert_Default.Get(!pType->Insignificant && !pType->Spawned)) || !pThis->IsInPlayfield)
+			else if (!pTypeExt->CombatAlert.Get(pRules->CombatAlert_Default.Get(!pType->Insignificant && !pType->Spawned)) || !pThis->IsInPlayfield)
 				return;
 
 			const auto pBuilding = abstract_cast<BuildingClass*>(pThis);
@@ -54,7 +54,7 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 
 			if (pRules->CombatAlert_SuppressIfInScreen)
 			{
-				TacticalClass* const pTactical = TacticalClass::Instance;
+				const auto pTactical = TacticalClass::Instance();
 				const auto coordInScreen = pTactical->CoordsToScreen(coordInMap) - pTactical->TacticalPos;
 				const auto screenArea = DSurface::Composite->GetRect();
 
@@ -85,7 +85,7 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 		pExt->LastHurtFrame = Unsorted::CurrentFrame;
 	}
 
-	//Calculate Damage Multiplier
+	// Calculate Damage Multiplier
 	if (!args->IgnoreDefenses && *args->Damage)
 	{
 		double multiplier = 1.0;
@@ -105,7 +105,7 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 		}
 	}
 
-	// Combat Alert
+	// Shield Receive Damage
 	if (!args->IgnoreDefenses)
 	{
 		if (const auto pShieldData = pExt->Shield.get())
