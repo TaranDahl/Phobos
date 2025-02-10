@@ -227,7 +227,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->BuildingTypeSelectable.Read(exINI, GameStrings::General, "BuildingTypeSelectable");
 
-	this->InvisoLatencyFix.Read(exINI, GameStrings::CombatDamage, "InvisoLatencyFix");
+	this->InvisoLatencyFix.Read(exINI, GameStrings::General, "InvisoLatencyFix");
 
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
