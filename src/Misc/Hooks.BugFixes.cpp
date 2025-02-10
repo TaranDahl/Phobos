@@ -71,10 +71,9 @@ DEFINE_HOOK(0x62AA32, ParasiteClass_TryInfect_MissBehaviorFix, 0x5)
 	const auto cell = MapClass::Instance->NearByLocation(pParasiteTechno->LastMapCoords, pType->SpeedType, -1,
 		pType->MovementZone, false, 1, 1, false, false, false, true, CellStruct::Empty, false, false);
 
-	const auto crd = CellClass::Cell2Coord(cell);
-	isReturnSuccess = pParasiteTechno->Unlimbo(crd, DirType::North);
+	if (cell != CellStruct::Empty) // Cell2Coord makes X/Y values of CoordStruct non-zero, additional checks are required
+		R->AL(pParasiteTechno->Unlimbo(CellClass::Cell2Coord(cell), DirType::North));
 
-	R->AL(isReturnSuccess);
 	return 0;
 }
 
