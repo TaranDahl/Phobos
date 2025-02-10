@@ -185,6 +185,8 @@ public:
 		Valueable<bool> BuildingWaypoint;
 		Valueable<bool> BuildingTypeSelectable;
 
+		Valueable<bool> InvisoLatencyFix;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -322,6 +324,7 @@ public:
 			, LightFlashAlphaImageDetailLevel { 0 }
 			, BuildingWaypoint { false }
 			, BuildingTypeSelectable { false }
+			, InvisoLatencyFix { false }
 		{ }
 
 		virtual ~ExtData() = default;

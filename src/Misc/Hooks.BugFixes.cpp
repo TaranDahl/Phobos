@@ -1209,3 +1209,14 @@ size_t __fastcall HexStr2Int_replacement(const char* str)
 }
 DEFINE_JUMP(CALL, 0x6E8305, GET_OFFSET(HexStr2Int_replacement)); // TaskForce
 DEFINE_JUMP(CALL, 0x6E5FA6, GET_OFFSET(HexStr2Int_replacement)); // TagType
+
+// In theory, a projectile with Inviso=yes should detonate at the center of the target the next frame after firing, assuming it is not intercepted.
+// In fact, when the target is moving at high speed, the projectile may have to delay multiple frames to hit, or even fail and hit the ground.
+// I didn't study the specific reasons for this, but this hook does solve the problem.
+// Netsu_Negi told me this method, and I verified it.
+DEFINE_HOOK(0x467C1C, BulletClass_Update_InvisoLatencyFix, 0x6)
+{
+	GET(BulletTypeClass*, pType, EAX);
+	R->CL(RulesExt::Global()->InvisoLatencyFix ? (pType->Inviso || pType->Ranged) : pType->Ranged);
+	return 0x467C22;
+}
