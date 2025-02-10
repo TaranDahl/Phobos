@@ -892,37 +892,11 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		drawText("  CenterRevealed --------- %s", (pCell->Flags & CellFlags::CenterRevealed ? "Yes" : "No"));
 		drawText("  EdgeRevealed ----------- %s", (pCell->Flags & CellFlags::EdgeRevealed ? "Yes" : "No"));
 		drawText("  IsWaypoint ------------- %s", (pCell->Flags & CellFlags::IsWaypoint ? "Yes" : "No"));
-		drawText("  Explored --------------- %s", (pCell->Flags & CellFlags::Explored ? "Yes" : "No"));
-		drawText("  FlagPresent ------------ %s", (pCell->Flags & CellFlags::FlagPresent ? "Yes" : "No"));
-		drawText("  FlagToShroud ----------- %s", (pCell->Flags & CellFlags::FlagToShroud ? "Yes" : "No"));
-		drawText("  IsPlot ----------------- %s", (pCell->Flags & CellFlags::IsPlot ? "Yes" : "No"));
 		drawText("  BridgeOwner ------------ %s", (pCell->Flags & CellFlags::BridgeOwner ? "Yes" : "No"));
 		drawText("  BridgeHead ------------- %s", (pCell->Flags & CellFlags::BridgeHead ? "Yes" : "No"));
 		drawText("  Unknown_200 ------------ %s", (pCell->Flags & CellFlags::Unknown_200 ? "Yes" : "No"));
 		drawText("  BridgeBody ------------- %s", (pCell->Flags & CellFlags::BridgeBody ? "Yes" : "No"));
 		drawText("  BridgeDir -------------- %s", (pCell->Flags & CellFlags::BridgeDir ? "Yes" : "No"));
-		drawText("  PixelFX ---------------- %s", (pCell->Flags & CellFlags::PixelFX ? "Yes" : "No"));
-		drawText("  Unknown_2000 ----------- %s", (pCell->Flags & CellFlags::Unknown_2000 ? "Yes" : "No"));
-		drawText("  Unknown_4000 ----------- %s", (pCell->Flags & CellFlags::Unknown_4000 ? "Yes" : "No"));
-		drawText("  Veinhole --------------- %s", (pCell->Flags & CellFlags::Veinhole ? "Yes" : "No"));
-		drawText("  DrawDarkenIfInAir ------ %s", (pCell->Flags & CellFlags::DrawDarkenIfInAir ? "Yes" : "No"));
-		drawText("  AnimAttached ----------- %s", (pCell->Flags & CellFlags::AnimAttached ? "Yes" : "No"));
-		drawText("  Tube ------------------- %s", (pCell->Flags & CellFlags::Tube ? "Yes" : "No"));
-		drawText("  EMPPresent ------------- %s", (pCell->Flags & CellFlags::EMPPresent ? "Yes" : "No"));
-		drawText("  HorizontalLineEventTag - %s", (pCell->Flags & CellFlags::HorizontalLineEventTag ? "Yes" : "No"));
-		drawText("  VerticalLineEventTag --- %s", (pCell->Flags & CellFlags::VerticalLineEventTag ? "Yes" : "No"));
-		drawText("  Fogged ----------------- %s", (pCell->Flags & CellFlags::Fogged ? "Yes" : "No"));
-
-		drawText("AltCellFlags:");
-		drawText("  Unknown_1 -------------- %s", (pCell->AltFlags & AltCellFlags::Unknown_1 ? "Yes" : "No"));
-		drawText("  ContainsBuilding ------- %s", (pCell->AltFlags & AltCellFlags::ContainsBuilding ? "Yes" : "No"));
-		drawText("  ContainsBuildingBuffer - %s", (pCell->AltFlags & AltCellFlags::Unknown_4 ? "Yes" : "No"));
-		drawText("  Mapped ----------------- %s", (pCell->AltFlags & AltCellFlags::Mapped ? "Yes" : "No"));
-		drawText("  NoFog ------------------ %s", (pCell->AltFlags & AltCellFlags::NoFog ? "Yes" : "No"));
-		drawText("  Unknown_20 ------------- %s", (pCell->AltFlags & AltCellFlags::Unknown_20 ? "Yes" : "No"));
-		drawText("  Unknown_40 ------------- %s", (pCell->AltFlags & AltCellFlags::Unknown_40 ? "Yes" : "No"));
-		drawText("  Unknown_80 ------------- %s", (pCell->AltFlags & AltCellFlags::Unknown_80 ? "Yes" : "No"));
-		drawText("  Unknown_100 ------------ %s", (pCell->AltFlags & AltCellFlags::Unknown_100 ? "Yes" : "No"));
 
 		drawText("TheOccupationFlags: %u", pCell->OccupationFlags);
 		drawText("AltOccupationFlags: %u", pCell->AltOccupationFlags);
@@ -937,6 +911,19 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		drawText(" ");
 
 		drawText("Mouse: ( %d , %d )", mouseXY1.X, mouseXY1.Y);
+
+		const auto& pMouse = MouseClass::Instance();
+
+		drawText("Display: LeftDrag ( %s ) , LeftDown ( %s )", pMouse->DraggingRectangle ? "Yes" : "No", pMouse->unknown_bool_11D0 ? "Yes" : "No");
+		drawText("Display: LeftDownLocation ( %d , %d )", pMouse->unknown_11D4.X, pMouse->unknown_11D4.Y);
+
+		drawText("Radar: RadarScope ( %d , %d , %d , %d )", pMouse->unknown_rect_14DC.X, pMouse->unknown_rect_14DC.Y, pMouse->unknown_rect_14DC.Width, pMouse->unknown_rect_14DC.Height);
+
+		drawText("Power: Wait ( %d ) , Floating ( %s )", pMouse->unknown_151C, pMouse->unknown_bool_1538 ? "Yes" : "No");
+		drawText("Power: Green ( %d ) , Yellow ( %d ) , Red ( %d )", pMouse->unknown_152C, pMouse->unknown_1530, pMouse->unknown_1534);
+
+		drawText("Scroll: RightDrag ( %s ) , AnyDown ( %s )", pMouse->unknown_byte_5548 ? "Yes" : "No", pMouse->unknown_byte_554A ? "Yes" : "No");
+		drawText("Scroll: RightDownLocation ( %d , %d )", pMouse->unknown_int_5550, pMouse->unknown_int_5554);
 	}
 }
 
@@ -2108,6 +2095,61 @@ DEFINE_HOOK(0x693397, ScrollClass_WindowsProcedure_ReleaseRightMouseButton, 0x6)
 #pragma endregion
 
 #pragma region MouseSuspendHooks
+
+DEFINE_HOOK(0x777998, Game_WndProc_ScrollMouseWheel, 0x6)
+{
+	GET(const WPARAM, WParam, ECX);
+/*
+	const auto pInput = InputManagerClass::Instance();
+
+	if (WParam & 0x80000000u)
+	{
+		if (pInput->IsForceFireKeyPressed())
+			Debug::LogAndMessage("[Frame: %d] Ctrl + Mouse Wheel Down", Unsorted::CurrentFrame());
+		else if (pInput->IsForceMoveKeyPressed())
+			Debug::LogAndMessage("[Frame: %d] Alt + Mouse Wheel Down", Unsorted::CurrentFrame());
+		else if (pInput->IsForceSelectKeyPressed())
+			Debug::LogAndMessage("[Frame: %d] Shift + Mouse Wheel Down", Unsorted::CurrentFrame());
+		else
+			Debug::LogAndMessage("[Frame: %d] Mouse Wheel Down", Unsorted::CurrentFrame());
+	}
+	else
+	{
+		if (pInput->IsForceFireKeyPressed())
+			Debug::LogAndMessage("[Frame: %d] Ctrl + Mouse Wheel Up", Unsorted::CurrentFrame());
+		else if (pInput->IsForceMoveKeyPressed())
+			Debug::LogAndMessage("[Frame: %d] Alt + Mouse Wheel Up", Unsorted::CurrentFrame());
+		else if (pInput->IsForceSelectKeyPressed())
+			Debug::LogAndMessage("[Frame: %d] Shift + Mouse Wheel Up", Unsorted::CurrentFrame());
+		else
+			Debug::LogAndMessage("[Frame: %d] Mouse Wheel Up", Unsorted::CurrentFrame());
+	}
+*/
+	return 0;
+}
+
+DEFINE_HOOK(0x533F50, Game_ScrollSidebar_Skip, 0x5)
+{
+	enum { SkipScrollSidebar = 0x533FC3 };
+
+	if (!Phobos::Config::ScrollSidebarStripWhenHoldKey)
+	{
+		const auto pInput = InputManagerClass::Instance();
+
+		if (pInput->IsForceFireKeyPressed() || pInput->IsForceMoveKeyPressed() || pInput->IsForceSelectKeyPressed())
+			return SkipScrollSidebar;
+	}
+
+	if (!Phobos::Config::ScrollSidebarStripInTactical)
+	{
+		const auto pMouse = WWMouseClass::Instance();
+
+		if (pMouse->XY1.X < Make_Global<int>(0xB0CE30))
+			return SkipScrollSidebar;
+	}
+
+	return 0;
+}
 
 DEFINE_HOOK(0x692F85, ScrollClass_MouseUpdate_SkipMouseLongPress, 0x7)
 {
