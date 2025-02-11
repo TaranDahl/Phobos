@@ -349,6 +349,7 @@ New:
 - Exclusive SuperWeapon Sidebar (by NetsuNegi & CrimRecya)
 - Allow merging AOE damage to buildings into one (by CrimRecya)
 - Distribution click action mode (by CrimRecya)
+- Jumpjet Tilts While Moving (by CrimRecya)
 
 Vanilla fixes:
 - Aircraft will now behave as expected according to it's `MovementZone` and `SpeedType` when moving onto different surfaces. In particular, this fixes erratic behavior when vanilla aircraft is ordered to move onto water surface and instead the movement order changes to a shore nearby (by CrimRecya)
