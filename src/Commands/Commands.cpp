@@ -20,6 +20,7 @@
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
 #include "AggressiveStance.h"
+#include "AggressiveStance.h"
 
 #include <CCINIClass.h>
 #include <InputManagerClass.h>
@@ -27,8 +28,6 @@
 
 #include <Utilities/Macro.h>
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
-
-#include "AggressiveStance.h"
 
 DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 {
