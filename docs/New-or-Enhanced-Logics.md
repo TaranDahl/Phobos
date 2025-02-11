@@ -2036,7 +2036,7 @@ In `rulesmd.ini`:
 JumpjetTiltWhenMoving=false   ; boolean
 
 [SOMEUNIT]                    ; UnitType, with Locomotor=Jumpjet
-JumpjetTilt=                  ; sound entry
+JumpjetTilt=                  ; boolean
 ```
 
 ## Terrain
