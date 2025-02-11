@@ -278,7 +278,6 @@ public:
 		Valueable<bool> CanManualReload_ResetROF;
 		Valueable<WarheadTypeClass*> CanManualReload_DetonateWarhead;
 		Valueable<int> CanManualReload_DetonateConsume;
-		Nullable<bool> JumpjetTilt;
 
 		Nullable<AnimTypeClass*> Wake;
 		Nullable<AnimTypeClass*> Wake_Grapple;
@@ -563,7 +562,6 @@ public:
 			, CanManualReload_ResetROF { true }
 			, CanManualReload_DetonateWarhead {}
 			, CanManualReload_DetonateConsume { 0 }
-			, JumpjetTilt {}
 
 			, Wake { }
 			, Wake_Grapple { }

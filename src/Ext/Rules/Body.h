@@ -95,7 +95,6 @@ public:
 		Valueable<double> HeightShadowScaling_MinScale;
 		double AirShadowBaseScale_log;
 
-		Valueable<bool> JumpjetTiltWhenMoving;
 		Valueable<bool> JumpjetClimbPredictHeight;
 		Valueable<bool> JumpjetClimbWithoutCutOut;
 		Valueable<bool> ExpandTurretRotation;
@@ -310,7 +309,6 @@ public:
 			, HeightShadowScaling_MinScale { 0.0 }
 			, AirShadowBaseScale_log { 0.693376137 }
 
-			, JumpjetTiltWhenMoving { false }
 			, JumpjetClimbPredictHeight { false }
 			, JumpjetClimbWithoutCutOut { false }
 			, ExpandTurretRotation { false }
