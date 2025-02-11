@@ -709,10 +709,10 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->NoRearm_Temporal.Read(exINI, pSection, "NoRearm.Temporal");
 	this->NoReload_UnderEMP.Read(exINI, pSection, "NoReload.UnderEMP");
 	this->NoReload_Temporal.Read(exINI, pSection, "NoReload.Temporal");
-	this->RateDown_Ammo.Read(exINI, pSection, "RateDown.Ammo");
 	this->RateDown_Delay.Read(exINI, pSection, "RateDown.Delay");
-	this->RateDown_Cover.Read(exINI, pSection, "RateDown.Cover");
 	this->RateDown_Reset.Read(exINI, pSection, "RateDown.Reset");
+	this->RateDown_Cover_Value.Read(exINI, pSection, "RateDown.Cover.Value");
+	this->RateDown_Cover_AmmoBelow.Read(exINI, pSection, "RateDown.Cover.AmmoBelow");
 	this->UniqueTechno.Read(exINI, pSection, "UniqueTechno");
 	this->NoQueueUpToEnter.Read(exINI, pSection, "NoQueueUpToEnter");
 	this->NoQueueUpToUnload.Read(exINI, pSection, "NoQueueUpToUnload");
@@ -1203,10 +1203,10 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->NoRearm_Temporal)
 		.Process(this->NoReload_UnderEMP)
 		.Process(this->NoReload_Temporal)
-		.Process(this->RateDown_Ammo)
 		.Process(this->RateDown_Delay)
-		.Process(this->RateDown_Cover)
 		.Process(this->RateDown_Reset)
+		.Process(this->RateDown_Cover_Value)
+		.Process(this->RateDown_Cover_AmmoBelow)
 		.Process(this->UniqueTechno)
 		.Process(this->NoQueueUpToEnter)
 		.Process(this->NoQueueUpToUnload)
