@@ -90,8 +90,6 @@ public:
 		static bool AutoBuilding_Enable;
 		static bool ShowBuildingStatistics;
 		static bool DrawAdjacentBoundary;
-		static bool ScrollSidebarStripInTactical;
-		static bool ScrollSidebarStripWhenHoldKey;
 		static bool RealTimeTimers;
 		static bool RealTimeTimers_Adaptive;
 		static int CampaignDefaultGameSpeed;
