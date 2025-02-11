@@ -177,7 +177,8 @@ Matrix3D* __stdcall JumpjetLocomotionClass_Draw_Matrix(ILocomotion* iloco, Matri
 			ret->RotateY(arf);
 		}
 	}
-	else if (TechnoTypeExt::ExtMap.Find(linked->GetTechnoType())->JumpjetTilt.Get(RulesExt::Global()->JumpjetTiltWhenMoving) && !onGround)
+	else if (TechnoTypeExt::ExtMap.Find(linked->GetTechnoType())->JumpjetTilt.Get(RulesExt::Global()->JumpjetTiltWhenMoving)
+		&& !onGround && linked->IsAlive && linked->Health > 0 && !linked->IsAttackedByLocomotor)
 	{
 		if (pThis->CurrentSpeed > 0.0)
 		{
