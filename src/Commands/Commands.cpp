@@ -1,7 +1,3 @@
-#include <CCINIClass.h>
-#include <InputManagerClass.h>
-#include <WWMouseClass.h>
-
 #include "Commands.h"
 
 #include "ObjectInfo.h"
@@ -22,6 +18,11 @@
 #include "ManualReloadAmmo.h"
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
+#include "AggressiveStance.h"
+
+#include <CCINIClass.h>
+#include <InputManagerClass.h>
+#include <WWMouseClass.h>
 
 #include <Utilities/Macro.h>
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
