@@ -350,6 +350,7 @@ New:
 - Allow merging AOE damage to buildings into one (by CrimRecya)
 - Distribution click action mode (by CrimRecya)
 - Jumpjet Tilts While Moving (by CrimRecya)
+- Change the scrolling action of the sidebar and trigger hook of mouse wheel scroll (by CrimRecya)
 - Raise alert when technos are taking damage (by TaranDahl)
 - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller. (by TaranDahl)
 - Recycle spawned in long-range (by TaranDahl)

@@ -28,6 +28,13 @@
 #include <Utilities/Macro.h>
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
 
+#include <CCINIClass.h>
+#include <InputManagerClass.h>
+#include <MouseClass.h>
+#include <WWMouseClass.h>
+
+#include <Utilities/Macro.h>
+
 DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 {
 	// Load it after Ares'
@@ -77,17 +84,29 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	return 0;
 }
 
+static void MouseWheelDownCommand()
+{
+//	Debug::LogAndMessage("[Frame: %d] Mouse Wheel Down", Unsorted::CurrentFrame());
 
+//	SomeCommand->Execute(WWKey);
+}
+
+static void MouseWheelUpCommand()
+{
+//	Debug::LogAndMessage("[Frame: %d] Mouse Wheel Up", Unsorted::CurrentFrame());
+
+//	SomeCommand->Execute(WWKey);
+}
 
 DEFINE_HOOK(0x777998, Game_WndProc_ScrollMouseWheel, 0x6)
 {
 	GET(const WPARAM, WParam, ECX);
-/*
+
 	if (WParam & 0x80000000u)
-		Debug::LogAndMessage("[Frame: %d] Mouse Wheel Down", Unsorted::CurrentFrame());
+		MouseWheelDownCommand();
 	else
-		Debug::LogAndMessage("[Frame: %d] Mouse Wheel Up", Unsorted::CurrentFrame());
-*/
+		MouseWheelUpCommand();
+
 	return 0;
 }
 
