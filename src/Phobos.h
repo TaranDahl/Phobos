@@ -107,6 +107,8 @@ public:
 		static bool HideLightFlashEffects;
 		static bool ShowFlashOnSelecting;
 		static bool UnitPowerDrain;
+		static bool ScrollSidebarStripInTactical;
+		static bool ScrollSidebarStripWhenHoldKey;
 	};
 
 	class Misc
