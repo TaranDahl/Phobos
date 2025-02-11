@@ -507,18 +507,14 @@ Units.RepairPercent=  ; floating point value, percents or absolute
 Units.UseRepairCost=  ; boolean
 ```
 
-### Enable Building Production Queue
+### Waypoints for buildings
 
-- Buildings can now be queued for construction like other units if `BuildingProductionQueue` is set to true.
+- In vanilla, buildings are forbidden to use waypoints. Now you can allow that using the following flag.
 
 In `rulesmd.ini`:
 ```ini
 [General]
-BuildingProductionQueue=false  ; boolean
-```
-
-```{note}
-When the building becomes ready to be placed, the next building's construction will not begin until the player places the current building.
+BuildingWaypoints=false  ; boolean
 ```
 
 ## Particle systems
