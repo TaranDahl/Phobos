@@ -190,6 +190,8 @@ public:
 		std::vector<Promotable<int>> InsigniaFrame_Weapon;
 		std::vector<Vector3D<int>> InsigniaFrames_Weapon;
 
+		Nullable<bool> JumpjetTilt;
+
 		Nullable<bool> TiltsWhenCrushes_Vehicles;
 		Nullable<bool> TiltsWhenCrushes_Overlays;
 		Nullable<double> CrushForwardTiltPerFrame;
@@ -281,7 +283,6 @@ public:
 		Valueable<bool> CanManualReload_ResetROF;
 		Valueable<WarheadTypeClass*> CanManualReload_DetonateWarhead;
 		Valueable<int> CanManualReload_DetonateConsume;
-		Nullable<bool> JumpjetTilt;
 
 		Valueable<int> Spawner_RecycleRange;
 		Valueable<AnimTypeClass*> Spawner_RecycleAnim;
@@ -529,6 +530,8 @@ public:
 			, InsigniaFrame_Weapon {}
 			, InsigniaFrames_Weapon {}
 
+			, JumpjetTilt {}
+
 			, TiltsWhenCrushes_Vehicles {}
 			, TiltsWhenCrushes_Overlays {}
 			, CrushSlowdownMultiplier { 0.2 }
@@ -621,7 +624,6 @@ public:
 			, CanManualReload_ResetROF { true }
 			, CanManualReload_DetonateWarhead {}
 			, CanManualReload_DetonateConsume { 0 }
-			, JumpjetTilt {}
 
 			, Spawner_RecycleRange { -1 }
 			, Spawner_RecycleAnim { nullptr }

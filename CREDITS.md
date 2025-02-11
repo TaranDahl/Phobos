@@ -421,6 +421,7 @@ This page lists all the individual contributions to the project by their author.
   - Extended gattling rate down logic
   - Allow merging AOE damage to buildings into one
   - Distribution click action mode
+  - Jumpjet Tilts While Moving
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude

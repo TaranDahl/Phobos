@@ -95,7 +95,6 @@ public:
 		Valueable<double> HeightShadowScaling_MinScale;
 		double AirShadowBaseScale_log;
 
-		Valueable<bool> JumpjetTiltWhenMoving;
 		Valueable<bool> JumpjetClimbPredictHeight;
 		Valueable<bool> JumpjetClimbWithoutCutOut;
 		Valueable<bool> ExpandTurretRotation;
@@ -260,6 +259,8 @@ public:
 		Valueable<double> AircraftLevelLightMultiplier;
 		Valueable<double> JumpjetLevelLightMultiplier;
 
+		Valueable<bool> JumpjetTiltWhenMoving;
+
 		Valueable<bool> CombatAlert;
 		Nullable<bool> CombatAlert_Default;
 		Valueable<bool> CombatAlert_IgnoreBuilding;
@@ -350,7 +351,6 @@ public:
 			, HeightShadowScaling_MinScale { 0.0 }
 			, AirShadowBaseScale_log { 0.693376137 }
 
-			, JumpjetTiltWhenMoving { false }
 			, JumpjetClimbPredictHeight { false }
 			, JumpjetClimbWithoutCutOut { false }
 			, ExpandTurretRotation { false }
@@ -505,6 +505,7 @@ public:
 			, AttackMove_StopWhenTargetAcquired {}
 			, AircraftLevelLightMultiplier { 1.0 }
 			, JumpjetLevelLightMultiplier { 0.0 }
+			, JumpjetTiltWhenMoving { false }
 			, VoxelLightSource { }
 			// , VoxelShadowLightSource { }
 

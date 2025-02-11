@@ -635,6 +635,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->InsigniaFrame.Read(exINI, pSection, "InsigniaFrame.%s");
 	this->Insignia_ShowEnemy.Read(exINI, pSection, "Insignia.ShowEnemy");
 
+	this->JumpjetTilt.Read(exINI, pSection, "JumpjetTilt");
+
 	this->TiltsWhenCrushes_Vehicles.Read(exINI, pSection, "TiltsWhenCrushes.Vehicles");
 	this->TiltsWhenCrushes_Overlays.Read(exINI, pSection, "TiltsWhenCrushes.Overlays");
 	this->CrushForwardTiltPerFrame.Read(exINI, pSection, "CrushForwardTiltPerFrame");
@@ -718,7 +720,6 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->CanManualReload_ResetROF.Read(exINI, pSection, "CanManualReload.ResetROF");
 	this->CanManualReload_DetonateWarhead.Read(exINI, pSection, "CanManualReload.DetonateWarhead");
 	this->CanManualReload_DetonateConsume.Read(exINI, pSection, "CanManualReload.DetonateConsume");
-	this->JumpjetTilt.Read(exINI, pSection, "JumpjetTilt");
 
 	this->Spawner_RecycleRange.Read(exINI, pSection, "Spawner.RecycleRange");
 	this->Spawner_RecycleAnim.Read(exINI, pSection, "Spawner.RecycleAnim");
@@ -1119,6 +1120,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->InsigniaFrame_Weapon)
 		.Process(this->InsigniaFrames_Weapon)
 
+		.Process(this->JumpjetTilt)
+
 		.Process(this->TiltsWhenCrushes_Vehicles)
 		.Process(this->TiltsWhenCrushes_Overlays)
 		.Process(this->CrushForwardTiltPerFrame)
@@ -1211,7 +1214,6 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->CanManualReload_ResetROF)
 		.Process(this->CanManualReload_DetonateWarhead)
 		.Process(this->CanManualReload_DetonateConsume)
-		.Process(this->JumpjetTilt)
 
 		.Process(this->Spawner_RecycleRange)
 		.Process(this->Spawner_RecycleAnim)

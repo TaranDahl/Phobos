@@ -349,6 +349,7 @@ New:
 - Exclusive SuperWeapon Sidebar (by NetsuNegi & CrimRecya)
 - Allow merging AOE damage to buildings into one (by CrimRecya)
 - Distribution click action mode (by CrimRecya)
+- Jumpjet Tilts While Moving (by CrimRecya)
 - Raise alert when technos are taking damage (by TaranDahl)
 - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller. (by TaranDahl)
 - Recycle spawned in long-range (by TaranDahl)
