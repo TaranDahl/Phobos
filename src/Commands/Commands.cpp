@@ -20,7 +20,6 @@
 #include "ToggleSWSidebar.h"
 #include "FireTacticalSW.h"
 #include "AggressiveStance.h"
-#include "AggressiveStance.h"
 
 #include <CCINIClass.h>
 #include <InputManagerClass.h>
@@ -77,6 +76,8 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 
 	return 0;
 }
+
+
 
 DEFINE_HOOK(0x777998, Game_WndProc_ScrollMouseWheel, 0x6)
 {
