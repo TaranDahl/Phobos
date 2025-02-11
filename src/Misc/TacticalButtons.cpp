@@ -2096,61 +2096,6 @@ DEFINE_HOOK(0x693397, ScrollClass_WindowsProcedure_ReleaseRightMouseButton, 0x6)
 
 #pragma region MouseSuspendHooks
 
-DEFINE_HOOK(0x777998, Game_WndProc_ScrollMouseWheel, 0x6)
-{
-	GET(const WPARAM, WParam, ECX);
-/*
-	const auto pInput = InputManagerClass::Instance();
-
-	if (WParam & 0x80000000u)
-	{
-		if (pInput->IsForceFireKeyPressed())
-			Debug::LogAndMessage("[Frame: %d] Ctrl + Mouse Wheel Down", Unsorted::CurrentFrame());
-		else if (pInput->IsForceMoveKeyPressed())
-			Debug::LogAndMessage("[Frame: %d] Alt + Mouse Wheel Down", Unsorted::CurrentFrame());
-		else if (pInput->IsForceSelectKeyPressed())
-			Debug::LogAndMessage("[Frame: %d] Shift + Mouse Wheel Down", Unsorted::CurrentFrame());
-		else
-			Debug::LogAndMessage("[Frame: %d] Mouse Wheel Down", Unsorted::CurrentFrame());
-	}
-	else
-	{
-		if (pInput->IsForceFireKeyPressed())
-			Debug::LogAndMessage("[Frame: %d] Ctrl + Mouse Wheel Up", Unsorted::CurrentFrame());
-		else if (pInput->IsForceMoveKeyPressed())
-			Debug::LogAndMessage("[Frame: %d] Alt + Mouse Wheel Up", Unsorted::CurrentFrame());
-		else if (pInput->IsForceSelectKeyPressed())
-			Debug::LogAndMessage("[Frame: %d] Shift + Mouse Wheel Up", Unsorted::CurrentFrame());
-		else
-			Debug::LogAndMessage("[Frame: %d] Mouse Wheel Up", Unsorted::CurrentFrame());
-	}
-*/
-	return 0;
-}
-
-DEFINE_HOOK(0x533F50, Game_ScrollSidebar_Skip, 0x5)
-{
-	enum { SkipScrollSidebar = 0x533FC3 };
-
-	if (!Phobos::Config::ScrollSidebarStripWhenHoldKey)
-	{
-		const auto pInput = InputManagerClass::Instance();
-
-		if (pInput->IsForceFireKeyPressed() || pInput->IsForceMoveKeyPressed() || pInput->IsForceSelectKeyPressed())
-			return SkipScrollSidebar;
-	}
-
-	if (!Phobos::Config::ScrollSidebarStripInTactical)
-	{
-		const auto pMouse = WWMouseClass::Instance();
-
-		if (pMouse->XY1.X < Make_Global<int>(0xB0CE30))
-			return SkipScrollSidebar;
-	}
-
-	return 0;
-}
-
 DEFINE_HOOK(0x692F85, ScrollClass_MouseUpdate_SkipMouseLongPress, 0x7)
 {
 	enum { CheckMousePress = 0x692F8E, CheckMouseNoPress = 0x692FDC };
