@@ -1977,16 +1977,6 @@ RateDown.Cover=0       ; integer
 RateDown.Reset=false   ; boolean
 ```
 
-### Waypoint for building
-
-- In vanilla, building and aircraft is forbiddened to use waypoint. Now you can turn it on by the following flags.
-
-In `rulesmd.ini`:
-```ini
-[General]
-BuildingWaypoint=false    ; boolean
-```
-
 ## Terrain
 
 ### Destroy animation & sound
