@@ -266,10 +266,10 @@ public:
 		Nullable<bool> NoRearm_Temporal;
 		Nullable<bool> NoReload_UnderEMP;
 		Nullable<bool> NoReload_Temporal;
-		Valueable<int> RateDown_Ammo;
 		Valueable<int> RateDown_Delay;
-		Valueable<int> RateDown_Cover;
 		Valueable<bool> RateDown_Reset;
+		Valueable<int> RateDown_Cover_Value;
+		Valueable<int> RateDown_Cover_AmmoBelow;
 		Valueable<bool> UniqueTechno;
 		Valueable<bool> HarvesterQuickUnloader;
 		Nullable<bool> NoQueueUpToEnter;
@@ -550,10 +550,10 @@ public:
 			, NoRearm_Temporal {}
 			, NoReload_UnderEMP {}
 			, NoReload_Temporal {}
-			, RateDown_Ammo { -2 }
 			, RateDown_Delay { 0 }
-			, RateDown_Cover { 0 }
 			, RateDown_Reset { false }
+			, RateDown_Cover_Value { 0 }
+			, RateDown_Cover_AmmoBelow { -2 }
 			, UniqueTechno { false }
 			, HarvesterQuickUnloader { false }
 			, NoQueueUpToEnter {}
