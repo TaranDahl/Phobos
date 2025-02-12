@@ -441,6 +441,8 @@ This page lists all the individual contributions to the project by their author.
   - Raise alert when technos are taking damage
   - Toggle waypoint for building
   - Parasite returning bug fix
+  - Bunkerable checks dehardcode
+  - Prevent the units with locomotors that cause problems from entering the tank bunker
   - New hotkey to select the units within the current screen that are captured by non-permanent mind-controller
   - `Spawner.RecycleRange`
   - `Spawner.RecycleAnim`

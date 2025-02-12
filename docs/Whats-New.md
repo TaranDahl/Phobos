@@ -324,6 +324,7 @@ New:
 - Raise alert when technos are taking damage (by TaranDahl)
 - Enhanced Bombard trajectory (by CrimRecya & Ollerus, based on knowledge of NaotoYuuki)
 - Toggle waypoint for building (by TaranDahl)
+- Bunkerable checks dehardcode (by TaranDahl)
 - Projectile subject to ground check before firing (by CrimRecya)
 - New Disperse trajectory (by CrimRecya)
 - New Engrave trajectory (by CrimRecya)
@@ -370,6 +371,7 @@ New:
 Vanilla fixes:
 - Aircraft will now behave as expected according to it's `MovementZone` and `SpeedType` when moving onto different surfaces. In particular, this fixes erratic behavior when vanilla aircraft is ordered to move onto water surface and instead the movement order changes to a shore nearby (by CrimRecya)
 - Fix the bug that parasite will vanish if it missed its target when its previous cell is occupied (by 航味麻酱)
+- Prevent the units with locomotors that cause problems from entering the tank bunker (by TaranDahl)
 - Units are now unable to kick out from a factory that is in construction process, and will not always stuck in the factory (by CrimRecya & TaranDahl)
 - Observer sidebar in skirmish game mode (by CrimRecya)
 
