@@ -434,6 +434,8 @@ This page lists all the individual contributions to the project by their author.
   - Raise alert when technos are taking damage
   - Toggle waypoint for building
   - Parasite returning bug fix
+  - Bunkerable checks dehardcode
+  - Prevent the units with locomotors that cause problems from entering the tank bunker
   - Units are now unable to kick out from a factory that is in construction process
   - No turret unit turn to the target
 - **tyuah8** - Drive/Jumpjet/Ship/Teleport locomotor did not power on when it is un-piggybacked bugfix
