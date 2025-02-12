@@ -1180,21 +1180,6 @@ DEFINE_HOOK(0x4D6D34, FootClass_MissionAreaGuard_Miner, 0x5)
 
 #pragma endregion
 
-#pragma region Bunkerable
-
-DEFINE_HOOK(0x70FB73, FootClass_IsBunkerableNow_Dehardcode, 0x6)
-{
-	enum { SkipVanillaChecks = 0x70FBAF };
-
-	GET(TechnoTypeClass*, pType, EAX);
-
-	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
-
-	return (pTypeExt && pTypeExt->BunkerableAnyWay) ? SkipVanillaChecks : 0;
-}
-
-#pragma endregion
-
 #pragma region MissileSpawnFLH
 
 DEFINE_HOOK(0x6B73EA, SpawnManagerClass_Update_MissileSpawnFLH, 0x5)

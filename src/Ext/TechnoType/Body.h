@@ -305,7 +305,6 @@ public:
 		Nullable<Leptons> AIGuardModeGuardRangeAddend;
 		Nullable<Leptons> AIGuardStationaryStray;
 		Valueable<bool> Engineer_CanAutoFire;
-		Valueable<bool> BunkerableAnyWay;
 		Valueable<bool> Harvester_CanGuardArea;
 		Valueable<int> DigStartROT;
 		Valueable<int> DigInSpeed;
@@ -647,7 +646,6 @@ public:
 			, AIGuardModeGuardRangeAddend {}
 			, AIGuardStationaryStray {}
 			, Engineer_CanAutoFire { false }
-			, BunkerableAnyWay { false }
 			, Harvester_CanGuardArea { false }
 			, DigStartROT { -1 }
 			, DigInSpeed { -1 }
