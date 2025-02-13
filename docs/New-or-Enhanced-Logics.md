@@ -1006,11 +1006,12 @@ Trajectory.Disperse.WeaponDoRepeat=false        ; boolean
 #### Engrave trajectory
 
 - Visually, like the thermal lance. Calling it 'trajectory' may not be appropriate. It does not read the settings on the weapon.
-  - `Trajectory.Engrave.ApplyRangeModifiers` controls whether any applicable weapon range modifiers from the firer are applied to the engrave process.
   - `Trajectory.Engrave.SourceCoord` controls the starting point of engraving line segment. Taking the target as the coordinate center. Specifically, it will start from the firing position when set to 0,0 . The height of the point will always at ground level.
   - `Trajectory.Engrave.TargetCoord` controls the end point of engraving line segment. Taking the target as the coordinate center. The height of the point will always at ground level.
     - `Trajectory.Engrave.MirrorCoord` controls whether `Trajectory.Engrave.SourceCoord` and `Trajectory.Engrave.TargetCoord` need to mirror the lateral value to adapt to the current FLH.
   - `Trajectory.Engrave.UseDisperseCoord` controls whether the emission position of the engrave laser need to replaced with the FLH of its superior's dispersed trajectory, which set `Trajectory.Disperse.RecordSourceCoord` to true.
+  - `Trajectory.Engrave.ApplyRangeModifiers` controls whether any applicable weapon range modifiers from the firer are applied to the engrave process.
+  - `Trajectory.Engrave.AllowFirerTurning` controls whether the projectile allow for significant changes in the orientation of the firer, otherwise it will disappear.
   - `Trajectory.Engrave.Duration` controls the duration of the entire engrave process. Set to 0 will automatically use `Trajectory.Engrave.SourceCoord` and `Trajectory.Engrave.TargetCoord` to calculate the process duration.
   - `Trajectory.Engrave.IsLaser` controls whether laser drawing is required.
     - `Trajectory.Engrave.IsIntense` controls whether the engrave laser will be brighter and thicker. Need to set `Trajectory.Engrave.IsHouseColor` or `Trajectory.Engrave.IsSingleColor` to true.
@@ -1035,11 +1036,12 @@ In `rulesmd.ini`:
 ```ini
 [SOMEPROJECTILE]                               ; Projectile
 Trajectory=Engrave                             ; Trajectory type
-Trajectory.Engrave.ApplyRangeModifiers=false   ; boolean
 Trajectory.Engrave.SourceCoord=0,0             ; integer - Forward,Lateral
 Trajectory.Engrave.TargetCoord=0,0             ; integer - Forward,Lateral
 Trajectory.Engrave.MirrorCoord=true            ; boolean
 Trajectory.Engrave.UseDisperseCoord=false      ; boolean
+Trajectory.Engrave.ApplyRangeModifiers=false   ; boolean
+Trajectory.Engrave.AllowFirerTurning=true      ; boolean
 Trajectory.Engrave.Duration=0                  ; integer
 Trajectory.Engrave.IsLaser=true                ; boolean
 Trajectory.Engrave.IsIntense=false             ; boolean
@@ -1144,6 +1146,7 @@ Trajectory.Parabola.AxisOfRotation=0,0,1        ; integer - Forward,Lateral,Heig
   - `Trajectory.Tracing.OffsetCoord` controls the tracing position on its target, use `Trajectory.Tracing.TraceMode` determines the specific location.
   - `Trajectory.Tracing.WeaponCoord` controls the FLH where the projectile fires the weapon when `Trajectory.Tracing.TraceTheTarget=false`.
   - `Trajectory.Tracing.UseDisperseCoord` controls whether the fire position of `Trajectory.Tracing.Weapons` need to replaced with the FLH of its superior's dispersed trajectory, which set `Trajectory.Disperse.RecordSourceCoord` to true (Only if the weapon should be fired from the unit position).
+  - `Trajectory.Tracing.AllowFirerTurning` controls whether the projectile allow for significant changes in the orientation of the firer, otherwise it will disappear.
   - `Trajectory.Tracing.Weapons` defines the tracing weapons of the projectile.
     - `Trajectory.Tracing.WeaponCount` controls how many times the projectile can fire the corresponding weapon. Set to a negative value means unlimited times. If set to zero, the cooling will be calculated directly without firing the tracing weapon. If the quantity is less than `Trajectory.Tracing.Weapons`, the last value in the list will be used.
     - `Trajectory.Tracing.WeaponDelay` controls the delay after firing the corresponding weapon, at least 1 frame. If the quantity is less than `Trajectory.Tracing.Weapons`, the last value in the list will be used.
@@ -1162,23 +1165,24 @@ Trajectory.Tracing.TraceMode=Connection     ; TraceMode value enumeration (Conne
 Trajectory.Tracing.TheDuration=0            ; integer
 Trajectory.Tracing.TolerantTime=-1          ; integer
 Trajectory.Tracing.ROT=-1                   ; integer
-Trajectory.Tracing.BulletSpin=no            ; boolean
-Trajectory.Tracing.PeacefullyVanish=no      ; boolean
-Trajectory.Tracing.TraceTheTarget=yes       ; boolean
-Trajectory.Tracing.CreateAtTarget=no        ; boolean
+Trajectory.Tracing.BulletSpin=false         ; boolean
+Trajectory.Tracing.PeacefullyVanish=false   ; boolean
+Trajectory.Tracing.TraceTheTarget=true      ; boolean
+Trajectory.Tracing.CreateAtTarget=false     ; boolean
 Trajectory.Tracing.CreateCoord=0,0,0        ; integer - Forward,Lateral,Height
 Trajectory.Tracing.OffsetCoord=0,0,0        ; integer - Forward,Lateral,Height
 Trajectory.Tracing.WeaponCoord=0,0,0        ; integer - Forward,Lateral,Height
 Trajectory.Tracing.UseDisperseCoord=false   ; boolean
+Trajectory.Tracing.AllowFirerTurning=true   ; boolean
 Trajectory.Tracing.Weapons=                 ; list of WeaponTypes
 Trajectory.Tracing.WeaponCount=             ; list of integers
 Trajectory.Tracing.WeaponDelay=             ; list of integers
 Trajectory.Tracing.WeaponInitialDelay=0     ; integer
 Trajectory.Tracing.WeaponCycle=-1           ; integer
-Trajectory.Tracing.WeaponCheck=no           ; boolean
-Trajectory.Tracing.Synchronize=yes          ; boolean
-Trajectory.Tracing.SuicideAboveRange=no     ; boolean
-Trajectory.Tracing.SuicideIfNoWeapon=no     ; boolean
+Trajectory.Tracing.WeaponCheck=false        ; boolean
+Trajectory.Tracing.Synchronize=true         ; boolean
+Trajectory.Tracing.SuicideAboveRange=false  ; boolean
+Trajectory.Tracing.SuicideIfNoWeapon=false  ; boolean
 ```
 
 ```{note}
