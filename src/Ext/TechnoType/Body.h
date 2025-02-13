@@ -342,6 +342,7 @@ public:
 		Nullable<bool> AttackMove_Aggressive;
 		Nullable<bool> AttackMove_UpdateTarget;
 
+		Valueable<bool> BunkerableAnyway;
 		Valueable<bool> KeepTargetOnMove;
 		Valueable<Leptons> KeepTargetOnMove_ExtraDistance;
 
@@ -683,6 +684,7 @@ public:
 			, AttackMove_Aggressive {}
 			, AttackMove_UpdateTarget {}
 
+			, BunkerableAnyway { false }
 			, KeepTargetOnMove { false }
 			, KeepTargetOnMove_ExtraDistance { Leptons(0) }
 
