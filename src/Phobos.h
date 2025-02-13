@@ -107,6 +107,7 @@ public:
 		static bool UnitPowerDrain;
 		static bool ScrollSidebarStripInTactical;
 		static bool ScrollSidebarStripWhenHoldKey;
+		static bool AllowDistributionCommand;
 	};
 
 	class Misc
