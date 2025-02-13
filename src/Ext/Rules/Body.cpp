@@ -298,7 +298,7 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->AircraftLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "AircraftLevelLightMultiplier");
 	this->JumpjetLevelLightMultiplier.Read(exINI, GameStrings::AudioVisual, "JumpjetLevelLightMultiplier");
-	this->JumpjetTiltWhenMoving.Read(exINI, GameStrings::AudioVisual, "JumpjetTiltWhenMoving");
+	this->JumpjetTilt.Read(exINI, GameStrings::AudioVisual, "JumpjetTilt");
 
 	this->VoxelLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelLightSource");
 	// this->VoxelShadowLightSource.Read(exINI, GameStrings::AudioVisual, "VoxelShadowLightSource");
@@ -609,7 +609,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AttackMove_StopWhenTargetAcquired)
 		.Process(this->AircraftLevelLightMultiplier)
 		.Process(this->JumpjetLevelLightMultiplier)
-		.Process(this->JumpjetTiltWhenMoving)
+		.Process(this->JumpjetTilt)
 		.Process(this->VoxelLightSource)
 		// .Process(this->VoxelShadowLightSource)
 		.Process(this->BuildingWaypoints)
