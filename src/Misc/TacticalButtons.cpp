@@ -630,6 +630,8 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		else
 			drawInfo("First OldTarget", pTechno, nullptr);
 
+		drawTime("UpdateTimer", pTechno->UpdateTimer);
+
 		drawText("Status = %d , StartFrame = %d", pTechno->MissionStatus, pTechno->CurrentMissionStartTime);
 		drawTask("CurrentMission", pTechno->CurrentMission);
 		drawTask("SuspendMission", pTechno->SuspendedMission);
