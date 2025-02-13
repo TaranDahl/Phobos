@@ -373,7 +373,8 @@ DEFINE_HOOK(0x469AA4, BulletClass_Logics_Extras, 0x5)
 						pFirerType->SpeedType, -1, pFirerType->MovementZone, isBridge, 1, 1, false,
 						false, false, isBridge, CellStruct::Empty, false, false);
 
-					unlimboResult = pFirer->Unlimbo(CellClass::Cell2Coord(nearByCell), pExt->LimboedDir);
+					if (nearByCell != CellStruct::Empty)
+						unlimboResult = pFirer->Unlimbo(CellClass::Cell2Coord(nearByCell), pExt->LimboedDir);
 				}
 
 				if (unlimboResult)
