@@ -48,7 +48,6 @@ public:
 		bool LastRearmWasFullDelay;
 		bool CanCloakDuringRearm; // Current rearm timer was started by DecloakToFire=no weapon.
 		int WHAnimRemainingCreationInterval;
-		bool CanCurrentlyDeployIntoBuilding; // Only set on UnitClass technos with DeploysInto set in multiplayer games, recalculated once per frame so no need to serialize.
 		bool UnitIdleIsSelected;
 		CDTimerClass UnitIdleActionTimer;
 		CDTimerClass UnitIdleActionGapTimer;
@@ -109,7 +108,6 @@ public:
 			, LastRearmWasFullDelay { false }
 			, CanCloakDuringRearm { false }
 			, WHAnimRemainingCreationInterval { 0 }
-			, CanCurrentlyDeployIntoBuilding { false }
 			, UnitIdleIsSelected { false }
 			, UnitIdleActionTimer {}
 			, UnitIdleActionGapTimer {}
@@ -210,6 +208,8 @@ public:
 	};
 
 	static ExtContainer ExtMap;
+
+	static UnitClass* Deployer;
 
 	static bool LoadGlobals(PhobosStreamReader& Stm);
 	static bool SaveGlobals(PhobosStreamWriter& Stm);
