@@ -900,8 +900,11 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		drawText("  BridgeBody ------------- %s", (pCell->Flags & CellFlags::BridgeBody ? "Yes" : "No"));
 		drawText("  BridgeDir -------------- %s", (pCell->Flags & CellFlags::BridgeDir ? "Yes" : "No"));
 
-		drawText("TheOccupationFlags: %u", pCell->OccupationFlags);
-		drawText("AltOccupationFlags: %u", pCell->AltOccupationFlags);
+		const auto nOF = pCell->OccupationFlags;
+		const auto nAF = pCell->AltOccupationFlags;
+
+		drawText("TheOccupationFlags: %d%d%d%d%d%d%d%d", (nOF & 0x80), (nOF & 0x40), (nOF & 0x20), (nOF & 0x10), (nOF & 0x8), (nOF & 0x4), (nOF & 0x2), (nOF & 0x1));
+		drawText("AltOccupationFlags: %d%d%d%d%d%d%d%d", (nAF & 0x80), (nAF & 0x40), (nAF & 0x20), (nAF & 0x10), (nAF & 0x8), (nAF & 0x4), (nAF & 0x2), (nAF & 0x1));
 
 		drawInfo("TheFirstObject", pCell, pCell->FirstObject);
 		drawInfo("AltFirstObject", pCell, pCell->AltObject);
