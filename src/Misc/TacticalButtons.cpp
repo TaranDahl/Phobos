@@ -656,7 +656,7 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 
 			constexpr const char* moveTypes[8] = { "Clear", "Cloak", "Move", "Gate", "A-Block", "E-Block", "Temp", "Unable" };
 			const auto facingType = static_cast<FacingType>(primaryFacing);
-			const auto moveType = static_cast<int>(pFoot->IsCellOccupied(pFoot->GetCell()->GetNeighbourCell(facingType), facingType, pFoot->GetCellLevel(), nullptr, true));
+			const auto moveType = static_cast<int>(pFoot->IsCellOccupied(MapClass::Instance->GetCellAt(pFoot->CurrentMapCoords)->GetNeighbourCell(facingType), facingType, pFoot->GetCellLevel(), nullptr, true));
 
 			drawText("FaceMoveType = ( %s )", (moveType >= 0 && moveType < 8) ? moveTypes[moveType] : "N/A");
 
