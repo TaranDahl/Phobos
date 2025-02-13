@@ -22,7 +22,7 @@ DEFINE_HOOK(0x73E730, UnitClass_MissionHarvest_HarvesterScanAfterUnload, 0x5)
 
 		if (*pCellStru != CellStruct::Empty)
 		{
-			const auto pCell = MapClass::Instance->GetCellAt(*pCellStru);
+			const auto pCell = MapClass::Instance->TryGetCellAt(*pCellStru);
 			const auto distFromTiberium = pCell ? pThis->DistanceFrom(pCell) : -1;
 			const auto distFromFocus = pThis->DistanceFrom(pFocus);
 
