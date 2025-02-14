@@ -177,8 +177,16 @@ inline void BulletExt::SimulatedFiringAnim(BulletClass* pBullet, HouseClass* pHo
 
 	const auto pFirer = pBullet->Owner;
 	const auto pAnimType = pWeapon->Anim[(animCounts % 8 == 0) // Have direction
-		? (animCounts * static_cast<int>(DirStruct(-Math::atan2(pBullet->Velocity.Y, pBullet->Velocity.X)).Raw) / 65536) // Calculate direction
+		? (static_cast<int>((Math::atan2(pBullet->Velocity.Y , pBullet->Velocity.X) / Math::TwoPi + 1.5) * animCounts - (animCounts / 8) + 0.5) % animCounts) // Calculate direction
 		: ScenarioClass::Instance->Random.RandomRanged(0 , animCounts - 1)]; // Simple random;
+/*
+	const auto velocityRadian = Math::atan2(pBullet->Velocity.Y , pBullet->Velocity.X);
+	const auto ratioOfRotateAngle = velocityRadian / Math::TwoPi;
+	const auto correctRatioOfRotateAngle = ratioOfRotateAngle + 1.5; // Correct the Y-axis in reverse and ensure that the ratio is a positive number
+	const auto animIndex = correctRatioOfRotateAngle * animCounts;
+	const auto correctAnimIndex = animIndex - (animCounts / 8); // A multiple of 8 greater than 8 will have an additional offset
+	const auto trueAnimIndex = static_cast<int>(correctAnimIndex + 0.5) % animCounts; // Round down and prevent exceeding the scope
+*/
 
 	if (!pAnimType)
 		return;
