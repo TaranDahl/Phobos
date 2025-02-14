@@ -903,8 +903,8 @@ void TacticalButtonsClass::CurrentSelectInfoDraw()
 		const auto nOF = pCell->OccupationFlags;
 		const auto nAF = pCell->AltOccupationFlags;
 
-		drawText("TheOccupationFlags: %d%d%d%d%d%d%d%d", (nOF & 0x80), (nOF & 0x40), (nOF & 0x20), (nOF & 0x10), (nOF & 0x8), (nOF & 0x4), (nOF & 0x2), (nOF & 0x1));
-		drawText("AltOccupationFlags: %d%d%d%d%d%d%d%d", (nAF & 0x80), (nAF & 0x40), (nAF & 0x20), (nAF & 0x10), (nAF & 0x8), (nAF & 0x4), (nAF & 0x2), (nAF & 0x1));
+		drawText("TheOccupationFlags: %d%d%d%d%d%d%d%d", ((nOF >> 7) & 0x1), ((nOF >> 6) & 0x1), ((nOF >> 5) & 0x1), ((nOF >> 4) & 0x1), ((nOF >> 3) & 0x1), ((nOF >> 2) & 0x1), ((nOF >> 1) & 0x1), (nOF & 0x1));
+		drawText("AltOccupationFlags: %d%d%d%d%d%d%d%d", ((nAF >> 7) & 0x1), ((nAF >> 6) & 0x1), ((nAF >> 5) & 0x1), ((nAF >> 4) & 0x1), ((nAF >> 3) & 0x1), ((nAF >> 2) & 0x1), ((nAF >> 1) & 0x1), (nAF & 0x1));
 
 		drawInfo("TheFirstObject", pCell, pCell->FirstObject);
 		drawInfo("AltFirstObject", pCell, pCell->AltObject);
