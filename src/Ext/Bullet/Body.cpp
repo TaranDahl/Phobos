@@ -177,7 +177,7 @@ inline void BulletExt::SimulatedFiringAnim(BulletClass* pBullet, HouseClass* pHo
 
 	const auto pFirer = pBullet->Owner;
 	const auto pAnimType = pWeapon->Anim[(animCounts % 8 == 0) // Have direction
-		? (static_cast<int>(DirStruct(-Math::atan2(pBullet->Velocity.Y, pBullet->Velocity.X)).Raw) / animCounts) // Calculate direction
+		? (animCounts * static_cast<int>(DirStruct(-Math::atan2(pBullet->Velocity.Y, pBullet->Velocity.X)).Raw) / 65536) // Calculate direction
 		: ScenarioClass::Instance->Random.RandomRanged(0 , animCounts - 1)]; // Simple random;
 
 	if (!pAnimType)
