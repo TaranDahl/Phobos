@@ -176,16 +176,16 @@ inline void BulletExt::SimulatedFiringAnim(BulletClass* pBullet, HouseClass* pHo
 		return;
 
 	const auto pFirer = pBullet->Owner;
-	const auto pAnimType = pWeapon->Anim[(animCounts % 8 == 0) ? // Have direction ?
-		(static_cast<int>((Math::atan2(pBullet->Velocity.Y , pBullet->Velocity.X) / Math::TwoPi + 1.5) * animCounts - (animCounts / 8) + 0.5) % animCounts) : // Calculate direction :
-		ScenarioClass::Instance->Random.RandomRanged(0 , animCounts - 1)]; // Simple random;
+	const auto pAnimType = pWeapon->Anim[(animCounts % 8 == 0) // Have direction
+		? (static_cast<int>(DirStruct(-Math::atan2(pBullet->Velocity.Y, pBullet->Velocity.X)).Raw) / animCounts) // Calculate direction
+		: ScenarioClass::Instance->Random.RandomRanged(0 , animCounts - 1)]; // Simple random;
 
 	if (!pAnimType)
 		return;
 
 	const auto pAnim = GameCreate<AnimClass>(pAnimType, pBullet->SourceCoords);
 
-	pAnim->Owner = pHouse;
+	AnimExt::SetAnimOwnerHouseKind(pAnim, pHouse, nullptr, false, true);
 	AnimExt::ExtMap.Find(pAnim)->SetInvoker(pFirer, pHouse);
 
 	if (pAttach)

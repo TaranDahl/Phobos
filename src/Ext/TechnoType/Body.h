@@ -287,6 +287,7 @@ public:
 		Valueable<bool> CanManualReload_ResetROF;
 		Valueable<WarheadTypeClass*> CanManualReload_DetonateWarhead;
 		Valueable<int> CanManualReload_DetonateConsume;
+		Nullable<bool> NoTurret_EarlyTurnToTarget;
 
 		Valueable<int> Spawner_RecycleRange;
 		Valueable<AnimTypeClass*> Spawner_RecycleAnim;
@@ -632,6 +633,7 @@ public:
 			, CanManualReload_ResetROF { true }
 			, CanManualReload_DetonateWarhead {}
 			, CanManualReload_DetonateConsume { 0 }
+			, NoTurret_EarlyTurnToTarget {}
 
 			, Spawner_RecycleRange { -1 }
 			, Spawner_RecycleAnim { nullptr }

@@ -728,6 +728,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->CanManualReload_ResetROF.Read(exINI, pSection, "CanManualReload.ResetROF");
 	this->CanManualReload_DetonateWarhead.Read(exINI, pSection, "CanManualReload.DetonateWarhead");
 	this->CanManualReload_DetonateConsume.Read(exINI, pSection, "CanManualReload.DetonateConsume");
+	this->NoTurret_EarlyTurnToTarget.Read(exINI, pSection, "NoTurret.EarlyTurnToTarget");
 
 	this->Spawner_RecycleRange.Read(exINI, pSection, "Spawner.RecycleRange");
 	this->Spawner_RecycleAnim.Read(exINI, pSection, "Spawner.RecycleAnim");
@@ -1226,6 +1227,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->CanManualReload_ResetROF)
 		.Process(this->CanManualReload_DetonateWarhead)
 		.Process(this->CanManualReload_DetonateConsume)
+		.Process(this->NoTurret_EarlyTurnToTarget)
 
 		.Process(this->Spawner_RecycleRange)
 		.Process(this->Spawner_RecycleAnim)
