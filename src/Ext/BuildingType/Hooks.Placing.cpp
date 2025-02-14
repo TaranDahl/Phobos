@@ -303,15 +303,14 @@ static inline bool IsSameFenceType(const BuildingTypeClass* const pPostType, con
 	return true;
 }
 
-static inline bool CheckCanNotExistHere(ObjectClass* const pObject, HouseClass* const pOwner, bool expand, bool& skipFlag, bool& builtOnCanBeBuiltOn, bool& landFootOnly)
+static inline bool CheckCanNotExistHere(FootClass* const pTechno, HouseClass* const pOwner, bool expand, bool& skipFlag, bool& builtOnCanBeBuiltOn, bool& landFootOnly)
 {
-	if (pObject == TechnoExt::Deployer)
+	if (pTechno == TechnoExt::Deployer)
 	{
 		skipFlag = true;
 		return false;
 	}
 
-	const auto pTechno = static_cast<FootClass*>(pObject);
 	const auto pTechnoType = pTechno->GetTechnoType();
 	const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pTechnoType);
 
@@ -414,7 +413,7 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 			}
 			else if (absType == AbstractType::Infantry || absType == AbstractType::Unit)
 			{
-				if (CheckCanNotExistHere(pObject, pOwner, expand, skipFlag, builtOnCanBeBuiltOn, landFootOnly))
+				if (CheckCanNotExistHere(static_cast<FootClass*>(pObject), pOwner, expand, skipFlag, builtOnCanBeBuiltOn, landFootOnly))
 					return CanNotExistHere;
 			}
 			else if (const auto pTerrain = abstract_cast<TerrainClass*>(pObject))
@@ -480,7 +479,7 @@ DEFINE_HOOK(0x47C640, CellClass_CanThisExistHere_IgnoreSomething, 0x6)
 			}
 			else if (absType == AbstractType::Infantry || absType == AbstractType::Unit)
 			{
-				if (CheckCanNotExistHere(pObject, pOwner, expand, skipFlag, builtOnCanBeBuiltOn, landFootOnly))
+				if (CheckCanNotExistHere(static_cast<FootClass*>(pObject), pOwner, expand, skipFlag, builtOnCanBeBuiltOn, landFootOnly))
 					return CanNotExistHere;
 			}
 			else if (const auto pTerrain = abstract_cast<TerrainClass*>(pObject))
