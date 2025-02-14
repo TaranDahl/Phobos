@@ -156,7 +156,6 @@ public:
 		Valueable<bool> NoQueueUpToUnload;
 		Valueable<bool> AttackMove_Aggressive;
 		Valueable<bool> ExtendedScatterAction;
-		Valueable<bool> UnitWithoutTurretAlwaysTurnToTarget;
 		Valueable<bool> MergeBuildingDamage;
 
 		Valueable<bool> AllowParallelAIQueues;
@@ -235,6 +234,8 @@ public:
 		Nullable<Vector3D<float>> VoxelLightSource;
 		// Nullable<Vector3D<float>> VoxelShadowLightSource;
 		Valueable<bool> UseFixedVoxelLighting;
+
+		Valueable<bool> NoTurret_EarlyTurnToTarget;
 
 		Valueable<bool> GatherWhenMCVDeploy;
 		Valueable<bool> AIFireSale;
@@ -370,7 +371,6 @@ public:
 			, NoQueueUpToUnload { false }
 			, AttackMove_Aggressive { false }
 			, ExtendedScatterAction { false }
-			, UnitWithoutTurretAlwaysTurnToTarget { false }
 			, MergeBuildingDamage { false }
 
 			, AllowParallelAIQueues { true }
@@ -439,6 +439,7 @@ public:
 			, CombatAlert_UseAttackVoice { true }
 			, CombatAlert_UseEVA { true }
 			, UseFixedVoxelLighting { false }
+			, NoTurret_EarlyTurnToTarget { false }
 			, GatherWhenMCVDeploy { true }
 			, AIFireSale { true }
 			, AIFireSaleDelay { 0 }

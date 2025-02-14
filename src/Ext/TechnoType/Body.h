@@ -282,6 +282,7 @@ public:
 		Valueable<bool> CanManualReload_ResetROF;
 		Valueable<WarheadTypeClass*> CanManualReload_DetonateWarhead;
 		Valueable<int> CanManualReload_DetonateConsume;
+		Nullable<bool> NoTurret_EarlyTurnToTarget;
 
 		Nullable<AnimTypeClass*> Wake;
 		Nullable<AnimTypeClass*> Wake_Grapple;
@@ -571,6 +572,7 @@ public:
 			, CanManualReload_ResetROF { true }
 			, CanManualReload_DetonateWarhead {}
 			, CanManualReload_DetonateConsume { 0 }
+			, NoTurret_EarlyTurnToTarget {}
 
 			, Wake { }
 			, Wake_Grapple { }
