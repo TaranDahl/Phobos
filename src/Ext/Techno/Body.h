@@ -28,6 +28,8 @@ public:
 		std::vector<LaserTrailClass> LaserTrails;
 		std::vector<std::unique_ptr<AttachEffectClass>> AttachedEffects;
 		AttachEffectTechnoProperties AE;
+		bool SubterraneanHarvFreshFromFactory;
+		AbstractClass* SubterraneanHarvRallyDest;
 		bool ReceiveDamage;
 		bool LastKillWasTeamTarget;
 		CDTimerClass PassengerDeletionTimer;
@@ -88,6 +90,8 @@ public:
 			, LaserTrails {}
 			, AttachedEffects {}
 			, AE {}
+			, SubterraneanHarvFreshFromFactory { false }
+			, SubterraneanHarvRallyDest { nullptr }
 			, ReceiveDamage { false }
 			, LastKillWasTeamTarget { false }
 			, PassengerDeletionTimer {}
