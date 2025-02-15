@@ -1,12 +1,7 @@
-#include <AircraftClass.h>
 #include "Body.h"
-#include <ScenarioClass.h>
-#include <TunnelLocomotionClass.h>
+
 #include <Ext/BuildingType/Body.h>
 #include <Ext/House/Body.h>
-#include <Ext/Anim/Body.h>
-#include <Ext/WarheadType/Body.h>
-#include <Ext/WeaponType/Body.h>
 #include <Utilities/EnumFunctions.h>
 
 void __fastcall ArrivingRefineryNearBy(UnitClass* pThis, BuildingClass* pDock)
