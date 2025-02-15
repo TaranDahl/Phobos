@@ -1335,33 +1335,6 @@ DEFINE_HOOK(0x4F8DB1, HouseClass_Update_CheckHangUpBuilding, 0x6)
 	return 0;
 }
 
-static inline BuildingTypeClass* GetAnotherPlacingType(DisplayClass* pDisplay)
-{
-	if (const auto pCurrentBuilding = abstract_cast<BuildingClass*>(pDisplay->CurrentBuilding))
-	{
-		const auto pType = pCurrentBuilding->Type;
-
-		if (!pType->PlaceAnywhere)
-		{
-			const auto pTypeExt = BuildingTypeExt::ExtMap.Find(pType);
-
-			if (!pTypeExt->LimboBuild)
-			{
-				const auto onWater = MapClass::Instance->GetCellAt(pDisplay->CurrentFoundation_CenterCell)->LandType == LandType::Water;
-				const auto waterBound = pType->SpeedType == SpeedType::Float;
-
-				if (const auto pAnotherType = onWater ? (waterBound ? nullptr : pTypeExt->PlaceBuilding_OnWater) : (waterBound ? pTypeExt->PlaceBuilding_OnLand : nullptr))
-				{
-					if (pAnotherType->BuildCat == pType->BuildCat && !pAnotherType->PlaceAnywhere && !BuildingTypeExt::ExtMap.Find(pAnotherType)->LimboBuild)
-						return pAnotherType;
-				}
-			}
-		}
-	}
-
-	return nullptr;
-}
-
 // Place Another Type Hook #2 -> sub_4AB9B0 - Replace current building type for check
 DEFINE_HOOK_AGAIN(0x4ABA47, DisplayClass_PreparePassesProximityCheck_ReplaceBuildingType, 0x6)
 DEFINE_HOOK(0x4A946E, DisplayClass_PreparePassesProximityCheck_ReplaceBuildingType, 0x6)
