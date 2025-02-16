@@ -106,8 +106,11 @@ public:
 		static bool ShowFlashOnSelecting;
 		static bool UnitPowerDrain;
 		static bool ScrollSidebarStripInTactical;
-		static bool ScrollSidebarStripWhenHoldKey;
 		static bool AllowDistributionCommand;
+		static bool ScrollSidebarStripWhenHoldKey;
+		static bool ScrollSidebarStripWhenHoldAlt;
+		static bool ScrollSidebarStripWhenHoldCtrl;
+		static bool ScrollSidebarStripWhenHoldShift;
 	};
 
 	class Misc
