@@ -419,3 +419,24 @@ DEFINE_HOOK(0x441226, BuildingClass_Unlimbo_RecheckRefinery, 0x6)
 }
 
 #pragma endregion
+
+#pragma region AmphibiousHarvester
+
+DEFINE_HOOK(0x73ED40, UnitClass_Mission_Harvest_PathfindingFix, 0x7)
+{
+	enum { SkipGameCode = 0x73ED7A };
+
+	GET(UnitClass*, pThis, EBP);
+	REF_STACK(CellStruct, closeTo, STACK_OFFSET(0x64, -0x4C));
+	REF_STACK(CellStruct, cell, STACK_OFFSET(0x64, -0x54));
+	REF_STACK(CellStruct, outBuffer, STACK_OFFSET(0x64, -0x3C));
+
+	const auto movementZone = pThis->Type->MovementZone;
+	const auto currentZone = MapClass::Instance->GetMovementZoneType(pThis->GetMapCoords(), movementZone, pThis->OnBridge);
+	closeTo = CellStruct::Empty;
+
+	R->EAX(MapClass::Instance->NearByLocation(outBuffer, cell, pThis->Type->SpeedType, currentZone, movementZone, false, 1, 1, false, false, false, true, closeTo, false, false));
+	return SkipGameCode;
+}
+
+#pragma endregion
