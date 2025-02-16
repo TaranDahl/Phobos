@@ -299,21 +299,19 @@ DEFINE_HOOK(0x441226, BuildingClass_Unlimbo_RecheckRefinery, 0x6)
 
 #pragma region AmphibiousHarvester
 
-DEFINE_HOOK(0x73ED40, UnitClass_Mission_Harvest_PathfindingFix, 0x7)
+DEFINE_HOOK(0x73ED66, UnitClass_Mission_Harvest_PathfindingFix, 0x5)
 {
-	enum { SkipGameCode = 0x73ED7A };
-
 	GET(UnitClass*, pThis, EBP);
-	REF_STACK(CellStruct, closeTo, STACK_OFFSET(0x64, -0x4C));
-	REF_STACK(CellStruct, cell, STACK_OFFSET(0x64, -0x54));
-	REF_STACK(CellStruct, outBuffer, STACK_OFFSET(0x64, -0x3C));
+	REF_STACK(SpeedType, speedType, STACK_OFFSET(0xA0, -0x98));
+	REF_STACK(int, currentZoneType, STACK_OFFSET(0xA0, -0x94));
+	REF_STACK(MovementZone, movementZone, STACK_OFFSET(0xA0, -0x90));
 
-	const auto movementZone = pThis->Type->MovementZone;
-	const auto currentZone = MapClass::Instance->GetMovementZoneType(pThis->GetMapCoords(), movementZone, pThis->OnBridge);
-	closeTo = CellStruct::Empty;
+	const auto pType = pThis->Type;
+	speedType = pType->SpeedType;
+	movementZone = pType->MovementZone;
+	currentZoneType = MapClass::Instance->GetMovementZoneType(pThis->GetMapCoords(), movementZone, pThis->OnBridge);
 
-	R->EAX(MapClass::Instance->NearByLocation(outBuffer, cell, pThis->Type->SpeedType, currentZone, movementZone, false, 1, 1, false, false, false, true, closeTo, false, false));
-	return SkipGameCode;
+	return 0;
 }
 
 #pragma endregion
