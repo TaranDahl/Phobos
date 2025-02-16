@@ -305,6 +305,8 @@ DEFINE_HOOK(0x73EB2C, UnitClass_MissionHarvest_Status2, 0x6)
 
 	if (pType->Teleporter && (move == MovementZone::AmphibiousCrusher || move == MovementZone::AmphibiousDestroyer))
 		move = MovementZone::Amphibious;
+	else if (move == MovementZone::Subterrannean)
+		move = MovementZone::Fly;
 
 	const auto destLocation = pThis->GetDestination();
 	auto destCell = CellStruct { static_cast<short>(destLocation.X >> 8), static_cast<short>(destLocation.Y >> 8) };
