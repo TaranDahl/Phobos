@@ -669,7 +669,7 @@ public:
 			, ExitCoord {}
 			, MissileSpawnUseOtherFLHs { false }
 			, HarvesterQuickUnloader { false }
-			, HarvesterScanAfterUnload { false }
+			, HarvesterScanAfterUnload {}
 			, DistributeTargetingFrame {}
 			, AttackMove_Follow { false }
 			, AttackMove_Follow_IncludeAir { false }
