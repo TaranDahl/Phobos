@@ -1282,7 +1282,9 @@ DEFINE_HOOK(0x4F8DB1, HouseClass_Update_CheckHangUpBuilding, 0x6)
 		if (reinterpret_cast<bool(__thiscall*)(HouseClass*, TechnoTypeClass*)>(0x50B370)(pHouse, pType)) // ShouldDisableCameo
 		{
 			ClearPlacingBuildingData(pType->BuildCat != BuildCat::Combat ? &pHouseExt->Common : &pHouseExt->Combat);
-			VoxClass::Play(GameStrings::EVA_CannotDeployHere);
+
+			if (pHouse == HouseClass::CurrentPlayer)
+				VoxClass::Play(GameStrings::EVA_CannotDeployHere);
 		}
 		else if (pHouse == HouseClass::CurrentPlayer) // Prevent unexpected wrong event
 		{
