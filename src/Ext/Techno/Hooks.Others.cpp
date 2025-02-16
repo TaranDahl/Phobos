@@ -3,6 +3,7 @@
 #include <EventClass.h>
 #include <SpawnManagerClass.h>
 #include <JumpjetLocomotionClass.h>
+#include <HoverLocomotionClass.h>
 
 #include <Ext/Building/Body.h>
 #include <Ext/WeaponType/Body.h>
@@ -472,8 +473,8 @@ DEFINE_HOOK(0x51A0D4, InfantryClass_UpdatePosition_NoQueueUpToEnter, 0x6)
 					pThis->SetSpeedPercentage(0.0);
 
 					// Added, to stop hover unit's meaningless behavior
-					if (VTable::Get(pThis->Locomotor.GetInterfacePtr()) == 0x7EACFC) // Hover
-						*reinterpret_cast<double*>(reinterpret_cast<int*>(pThis->Locomotor.GetInterfacePtr()) + 0x11) = 0; // CurrentSpeed
+					if (const auto pHover = locomotion_cast<HoverLocomotionClass*>(pThis->Locomotor))
+						pHover->MaxSpeed = 0;
 
 					return EnteredThenReturn;
 				}
@@ -535,8 +536,8 @@ DEFINE_HOOK(0x73A5EA, UnitClass_UpdatePosition_NoQueueUpToEnter, 0x5)
 					pThis->SetSpeedPercentage(0.0);
 
 					// Added, to stop hover unit's meaningless behavior
-					if (VTable::Get(pThis->Locomotor.GetInterfacePtr()) == 0x7EACFC) // Hover
-						*reinterpret_cast<double*>(reinterpret_cast<int*>(pThis->Locomotor.GetInterfacePtr()) + 0x11) = 0; // CurrentSpeed
+					if (const auto pHover = locomotion_cast<HoverLocomotionClass*>(pThis->Locomotor))
+						pHover->MaxSpeed = 0;
 
 					return EnteredThenReturn;
 				}
