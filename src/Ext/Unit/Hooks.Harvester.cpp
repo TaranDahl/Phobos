@@ -81,7 +81,7 @@ DEFINE_HOOK(0x7389B1, UnitClass_EnterIdleMode_SubterraneanHarvester, 0x6)
 		pThis->SetArchiveTarget(nullptr);
 		pThis->ClearNavigationList();
 
-		if (pThis->Destination && pExt->SubterraneanHarvRallyDest && pThis->Destination != pExt->SubterraneanHarvRallyDest && pThis->DistanceFrom(pThis->Destination) > RulesClass::Instance->CloseEnough)
+		if (pThis->Destination && pExt->SubterraneanHarvRallyDest && pThis->Destination != pExt->SubterraneanHarvRallyDest && pThis->DistanceFrom(pThis->Destination) > Unsorted::LeptonsPerCell)
 			pThis->SetDestination(pExt->SubterraneanHarvRallyDest, false);
 		else
 			pThis->SetDestination(nullptr, false);
