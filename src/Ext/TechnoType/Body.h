@@ -322,6 +322,7 @@ public:
 		Nullable<CoordStruct> ExitCoord;
 		Valueable<bool> MissileSpawnUseOtherFLHs;
 		Valueable<bool> HarvesterQuickUnloader;
+		Nullable<bool> HarvesterScanAfterUnload;
 		Nullable<bool> DistributeTargetingFrame;
 		Valueable<bool> AttackMove_Follow;
 		Valueable<bool> AttackMove_Follow_IncludeAir;
@@ -668,6 +669,7 @@ public:
 			, ExitCoord {}
 			, MissileSpawnUseOtherFLHs { false }
 			, HarvesterQuickUnloader { false }
+			, HarvesterScanAfterUnload { false }
 			, DistributeTargetingFrame {}
 			, AttackMove_Follow { false }
 			, AttackMove_Follow_IncludeAir { false }
