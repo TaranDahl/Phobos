@@ -1274,37 +1274,33 @@ DEFINE_HOOK(0x4F8DB1, HouseClass_Update_CheckHangUpBuilding, 0x6)
 		return 0;
 
 	const auto pHouseExt = HouseExt::ExtMap.Find(pHouse);
-
-	if (pHouse == HouseClass::CurrentPlayer) // Prevent unexpected wrong event
+	auto buildCurrent = [&pHouse, &pHouseExt](BuildingTypeClass* pType, CellStruct cell)
 	{
-		auto buildCurrent = [&pHouse, &pHouseExt](BuildingTypeClass* pType, CellStruct cell)
-		{
-			if (!pType)
-				return;
+		if (!pType)
+			return;
 
-			if (reinterpret_cast<bool(__thiscall*)(HouseClass*, TechnoTypeClass*)>(0x50B370)(pHouse, pType)) // ShouldDisableCameo
-			{
-				ClearPlacingBuildingData(pType->BuildCat != BuildCat::Combat ? &pHouseExt->Common : &pHouseExt->Combat);
-				VoxClass::Play(GameStrings::EVA_CannotDeployHere);
-			}
-			else
-			{
-				const EventClass event (pHouse->ArrayIndex, EventType::Place, AbstractType::Building, pType->GetArrayIndex(), pType->Naval, cell);
-				EventClass::AddEvent(event);
-			}
-		};
-
-		if (pHouseExt->Common.Timer.Completed())
+		if (reinterpret_cast<bool(__thiscall*)(HouseClass*, TechnoTypeClass*)>(0x50B370)(pHouse, pType)) // ShouldDisableCameo
 		{
-			pHouseExt->Common.Timer.Stop();
-			buildCurrent(pHouseExt->Common.Type, pHouseExt->Common.TopLeft);
+			ClearPlacingBuildingData(pType->BuildCat != BuildCat::Combat ? &pHouseExt->Common : &pHouseExt->Combat);
+			VoxClass::Play(GameStrings::EVA_CannotDeployHere);
 		}
-
-		if (pHouseExt->Combat.Timer.Completed())
+		else if (pHouse == HouseClass::CurrentPlayer) // Prevent unexpected wrong event
 		{
-			pHouseExt->Combat.Timer.Stop();
-			buildCurrent(pHouseExt->Combat.Type, pHouseExt->Combat.TopLeft);
+			const EventClass event (pHouse->ArrayIndex, EventType::Place, AbstractType::Building, pType->GetArrayIndex(), pType->Naval, cell);
+			EventClass::AddEvent(event);
 		}
+	};
+
+	if (pHouseExt->Common.Timer.Completed())
+	{
+		pHouseExt->Common.Timer.Stop();
+		buildCurrent(pHouseExt->Common.Type, pHouseExt->Common.TopLeft);
+	}
+
+	if (pHouseExt->Combat.Timer.Completed())
+	{
+		pHouseExt->Combat.Timer.Stop();
+		buildCurrent(pHouseExt->Combat.Type, pHouseExt->Combat.TopLeft);
 	}
 
 	if (pHouseExt->OwnedDeployingUnits.size() > 0)
