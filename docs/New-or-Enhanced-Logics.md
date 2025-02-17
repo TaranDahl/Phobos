@@ -922,7 +922,7 @@ Trajectory.Bombard.SubjectToGround=false      ; boolean
     - `Trajectory.Disperse.UseDisperseBurst` controls whether the calculation of `Trajectory.Disperse.RotateCoord` is based on its superior's `Trajectory.Disperse.WeaponBurst` of the dispersed trajectory, rather than `Burst` of the weapon. If this value is not appropriate, it will result in unsatisfactory visual displays.
     - `Trajectory.Disperse.AxisOfRotation` controls the rotation axis when calculating `Trajectory.Disperse.RotateCoord`. The axis will rotates with the unit orientation or the vector that from target position to the source position.
   - `Trajectory.Disperse.LaunchSpeed` controls the initial flight speed of the projectile.
-  - `Trajectory.Disperse.Acceleration` controls the acceleration of the projectile's flight speed, increasing the speed per frame according to this value, the final speed will not exceed `Trajectory.Speed`.
+  - `Trajectory.Disperse.Acceleration` controls the acceleration of the projectile's flight speed, increasing or decreasing the speed per frame according to this value, the final speed will be `Trajectory.Speed`.
   - `Trajectory.Disperse.ROT` controls the turning speed of the projectile which refers to the maximum angle that the projectile can rotate per frame in terms of direction.
   - `Trajectory.Disperse.LockDirection` controls whether after reaching `Trajectory.Disperse.PreAimCoord` and completing the first turn, the projectile will lock the direction of motion without further adjustment.
   - `Trajectory.Disperse.CruiseEnable` controls whether after reaching `Trajectory.Disperse.PreAimCoord` and completing the first turn, the projectile will maintain altitude while moving towards the target.
