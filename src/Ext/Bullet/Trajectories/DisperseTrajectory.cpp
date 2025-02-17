@@ -813,7 +813,7 @@ bool DisperseTrajectory::ChangeBulletVelocity(BulletClass* pBullet, const CoordS
 	const auto dotProduct = (targetVelocity * bulletVelocity);
 	const auto cosTheta = dotProduct / sqrt(targetVelocity.MagnitudeSquared() * bulletVelocity.MagnitudeSquared());
 	const auto radian = Math::acos(Math::clamp(cosTheta, -1.0, 1.0));
-	const auto turningRadius = (pType->UniqueCurve ? 24.0 : pType->ROT) * (Math::TwoPi / 360);
+	const auto turningRadius = (pType->UniqueCurve ? 10.0 : pType->ROT) * (Math::TwoPi / 360);
 
 	if (std::abs(radian) > turningRadius)
 	{
