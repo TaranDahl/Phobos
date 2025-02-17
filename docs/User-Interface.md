@@ -8,14 +8,13 @@ This page lists all user interface additions, changes, fixes that are implemente
 - You can specify custom `gamemd.exe` icon via `-icon` command line argument followed by absolute or relative path to an `*.ico` file (f. ex. `gamemd.exe -icon Resources/clienticon.ico`).
 - Fixed `Blowfish.dll`-caused error `***FATAL*** String Manager failed to initialize properly`, which occurred if `Blowfish.dll` could not be registered in the OS, for example, it happened when the player did not have administrator rights. With Phobos, if the game did not find a registered file in the system, it will no longer try to register this file, but will load it bypassing registration.
 - Fixed non-IME keyboard input to be working correctly for languages / keyboard layouts that use character ranges other than Basic Latin and Latin-1 Supplement (font support required).
-- Fixed position and layer of info tip and reveal production cameo on selected building
+- Fixed position and layer of info tip and reveal production cameo on selected building.
 - Timer (superweapon, mission etc) blinking color scheme can be customized by setting `[AudioVisual]` -> `TimerBlinkColorScheme`. Defaults to third color scheme listed in `[Colors]`.
+- Fixed sidebar not updating queued unit numbers when adding or removing units when the production is on hold.
 
 ```{note}
 You can use the improved vanilla font which can be found on [Phobos supplementaries repo](https://github.com/Phobos-developers/PhobosSupplementaries) which has way more Unicode character coverage than the default one.
 ```
-
-- Fixed sidebar not updating queued unit numbers when adding or removing units when the production is on hold.
 
 ## Audio
 
@@ -98,7 +97,7 @@ DigitalDisplay.Enable=false             ; boolean
 ```
 
 ```{note}
-An example shape file for digits can be found on [Phobos supplementaries repo](https://github.com/Phobos-developers/PhobosSupplementaries)).
+An example shape file for digits can be found on [Phobos supplementaries repo](https://github.com/Phobos-developers/PhobosSupplementaries).
 ```
 
 ### Show designator & inhibitor range
@@ -162,7 +161,7 @@ HideLightFlashEffects=false  ; boolean
 ### Low priority for box selection
 
 ![smartvesters](_static/images/lowpriority-01.gif)
-*Harvesters not selected together with battle units in [Rise of the East](https://www.moddb.com/mods/riseoftheeast) mod*
+*Harvesters not selected together with battle units in [Rise of the East](https://www.moddb.com/mods/riseoftheeast)*
 
 - You can now set lower priority for an ingame object (currently has effect on units mostly), which means it will be excluded from box selection if there's at least one normal priority unit in the box. Otherwise it would be selected as normal. Works with box+type selecting (type select hotkey + drag) and regular box selecting. Box shift-selection adds low-priority units to the group if there are no normal priority units among the appended ones.
 
@@ -187,7 +186,7 @@ PrioritySelectionFiltering=true  ; boolean
   - `DisplayIncome.Houses` determines which houses can see the credits display.
     - If you don't want players to see how AI cheats with `VirtualPurifiers` for example, `DisplayIncome.AllowAI` can be set to false to disable the display. It overrides the previous option.
   - `DisplayIncome.Offset` is additional pixel offset for the center of the credits display, by default (0,0) at building's center.
-  -`[AudioVisual]->DisplayIncome` also allows to display the amount of credits when selling a unit on a repair bay.
+  - `[AudioVisual]->DisplayIncome` also allows to display the amount of credits when selling a unit on a repair bay.
 
 In `rulesmd.ini`:
 ```ini
@@ -211,7 +210,7 @@ DisplayIncome.Offset=0,0  ; X,Y, pixels relative to default
 - The building placement grid (`place.shp`) translucency setting can be adjusted via `PlacementGrid.Translucency` if `PlacementPreview` is disabled and `PlacementGrid.TranslucencyWithPreview` if enabled.
 - If using the building's appropriate `Buildup` is not desired, customizations allow for you to choose the exact SHP and frame you'd prefer to show as preview through `PlacementPreview.Shape`, `PlacementPreview.ShapeFrame` and `PlacementPreview.Palette`.
   - You can specify theater-specific palettes and shapes by putting three `~` marks to the theater specific part of the filename. `~~~` is replaced with the theater’s three-letter extension.
-- `PlacementPreview.ShapeFrame=` tag defaults to building's artmd.ini `Buildup` entry's last non-shadow frame. If there is no 'Buildup' specified it will instead attempt to default to the building's normal first frame (animation frames and bibs are not included in this preview).
+- `PlacementPreview.ShapeFrame` tag defaults to building's artmd.ini `Buildup` entry's last non-shadow frame. If there is no 'Buildup' specified it will instead attempt to default to the building's normal first frame (animation frames and bibs are not included in this preview).
 
 In `rulesmd.ini`:
 ```ini
@@ -233,7 +232,7 @@ PlacementPreview.Translucency=       ; translucency level (0/25/50/75), defaults
 ```
 
 ```{note}
-The `PlacementPreview.Palette` option is not used when `PlacementPreview.Remap=yes` is set to yes. This may change in future.
+The `PlacementPreview.Palette` option is not used when `PlacementPreview.Remap` is set to yes. This may change in future.
 ```
 
 - This behavior is designed to be toggleable by users. For now you can only do that externally via client or manually.
@@ -264,7 +263,7 @@ RealTimeTimers.Adaptive=false   ; boolean
 
 - You can now sort the timers of superweapons in ascending order from top to bottom according to a given priority value.
 
-In `rulesmd.ini`
+In `rulesmd.ini`:
 ```ini
 [SOMESWTYPE]
 ShowTimer=yes
@@ -274,7 +273,7 @@ ShowTimer.Priority=0  ; integer
 ### Type select for buildings
 - In vanilla game, type select can almost only be used on 1x1 buildings with `UndeploysInto`. Now it's possible to use it on all buildings if `BuildingTypeSelectable` set to true.
 
-In `rulesmd.ini`
+In `rulesmd.ini`:
 ```ini
 [General]
 BuildingTypeSelectable=false  ; boolean
@@ -374,7 +373,7 @@ PlacementGrid.WaterFrames=1,0,0  ; integer, zero-based frame index - have techno
 - Save the current singleplayer game.
 - For localization, add `TXT_QUICKSAVE`, `TXT_QUICKSAVE_DESC`, `TXT_QUICKSAVE_SUFFIX` and `MSG:NotAvailableInMultiplayer` into your `.csf` file.
   - These vanilla CSF entries will be used: `TXT_SAVING_GAME`, `TXT_GAME_WAS_SAVED` and `TXT_ERROR_SAVING_GAME`.
-  - The save should be looks like `Allied Mission 25: Esther's Money - QuickSaved`
+  - The save should be looks like `Allied Mission 25: Esther's Money - QuickSaved`.
 
 ### `[ ]` Save Variables
 
@@ -525,7 +524,7 @@ CenterPauseMenuBackground=false  ; boolean
 
 ### Custom Missing Cameo (`XXICON.SHP`)
 
-- You can now specify any SHP/PCX file as XXICON.SHP for missing cameo.
+- You can now specify any SHP/PCX file as `XXICON.SHP` for missing cameo.
 
 In `rulesmd.ini`:
 ```ini
