@@ -350,6 +350,7 @@ This page lists all the individual contributions to the project by their author.
    - Tunnel/Walk/Mech locomotor being stuck when moving too fast bugfix
    - Assign Super Weapon cameo to any sidebar tab
    - Fix impassable invisible barrier created by chronosphere on uncrushable unit.
+   - Fix amphibious harvesters can not automatically return to refineries with `WaterBound`
    - Exclusive SuperWeapon Sidebar
 - **Apollo** - Translucent SHP drawing patches
 - **ststl**
