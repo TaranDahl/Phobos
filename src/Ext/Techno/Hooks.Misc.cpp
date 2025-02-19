@@ -146,7 +146,7 @@ DEFINE_HOOK(0x6B79BF, SpawnManagerClass_AI_CheckRepairDone, 0x5)
 	{
 		auto pTarget = abstract_cast<TechnoClass*>(pThis->Target);
 
-		if (pTarget && pTarget->GetHealthPercentage() > RulesClass::Instance->unknown_double_16F8)
+		if (pTarget && pTarget->GetHealthPercentage() >= RulesClass::Instance->unknown_double_16F8)
 			return ResetTarget;
 	}
 	else
