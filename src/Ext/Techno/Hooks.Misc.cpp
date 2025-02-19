@@ -142,16 +142,14 @@ DEFINE_HOOK(0x6B79BF, SpawnManagerClass_AI_CheckRepairDone, 0x5)
 	enum { ResetTarget = 0x6B79C4, KeepTarget = 0x6B79D3 };
 	GET(SpawnManagerClass*, pThis, ESI);
 
+	if (!pThis->Target)
+		return ResetTarget;
+
 	if (pThis->Owner->CombatDamage(-1) < 0)
 	{
 		auto pTarget = abstract_cast<TechnoClass*>(pThis->Target);
 
 		if (pTarget && pTarget->GetHealthPercentage() >= RulesClass::Instance->unknown_double_16F8)
-			return ResetTarget;
-	}
-	else
-	{
-		if (!pThis->Target)
 			return ResetTarget;
 	}
 
