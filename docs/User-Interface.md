@@ -450,7 +450,7 @@ VoiceExitAggressiveStance=             ; sound entry
 ### `[ ]` Distribution Mode Spread / Filter / Enable
 
 - Change the click action when hold down the specific hotkey if enabled `AllowDistributionCommand`.
-  - When the range is 0, it is the original default behavior of the game. The range can be adjusted to 4, 8 or 16 cells by shortcut keys.
+  - When the range is 0, it is the original default behavior of the game. The range can be adjusted to 4, 8 or 16 cells by another shortcut key. Of course, you can also adjust this by using the mouse wheel while holding down the specific hotkey.
     - The targets within the range will be allocated equally to the selected technos. Only when the behavior to be performed by the current techno is the same as that displayed by the mouse will it be allocated. Otherwise, it will return to the original default behavior of the game (it will not be effective for technos in the air). This will display a range ring.
   - When the filter is `None`, it is the default behavior of the game. If the range is not zero at this time, a green ring will be displayed. You can adjust the filter mode to:
     - `Auto` - if the behavior to be executed by the current techno is different from the behavior displayed by the mouse, and the behavior to be executed will make the techno move near the target, the behavior will be replaced with area guard. At this time, a blue ring will be displayed.
@@ -462,6 +462,13 @@ In `rulesmd.ini`:
 ```ini
 [GlobalControls]
 AllowDistributionCommand=false  ; boolean
+```
+
+In `ra2md.ini`:
+```ini
+[Phobos]
+DefaultDistributionSpreadMode=2  ; integer, 0 - r=0 , 1 - r=4 , 2 - r=8 , 3 - r=16
+DefaultDistributionFilterMode=2  ; integer, 0 - None , 1 - Auto , 2 - Type , 3 - Name
 ```
 
 ## Loading screen
