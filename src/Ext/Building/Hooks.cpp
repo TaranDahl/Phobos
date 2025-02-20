@@ -9,6 +9,7 @@
 #include <Ext/SWType/Body.h>
 #include <Ext/WarheadType/Body.h>
 #include <TacticalClass.h>
+#include <PlanningTokenClass.h>
 
 #pragma region Update
 
@@ -341,6 +342,35 @@ DEFINE_HOOK(0x449149, BuildingClass_Captured_FactoryPlant2, 0x6)
 }
 
 #pragma endregion
+
+DEFINE_HOOK(0x450630, BuildingClass_UpdateRepair_PlayerAutoRepair, 0x9)
+{
+	GET(BuildingClass*, pThis, ECX);
+
+	auto const pOwner = pThis->Owner;
+	auto const mission = pThis->CurrentMission;
+
+	if (pThis->Health < pThis->GetTechnoType()->Strength
+		&& pThis->Type->ClickRepairable
+		&& mission != Mission::Construction && mission != Mission::Selling
+		&& (pOwner->IsHumanPlayer || pOwner->IsControlledByHuman()) && RulesExt::Global()->PlayerAutoRepair)
+	{
+		pThis->IsBeingRepaired = true;	}
+
+	return 0;
+}
+
+DEFINE_HOOK(0x448480, BuildingClass_SetOwningHouse_CapturedEVA, 0x5)
+{
+	GET(HouseClass*, pToHouse, EBX);
+
+	if (pToHouse->IsControlledByCurrentPlayer()) // Not necessary to per techno customize this, I guess?
+		VoxClass::PlayIndex(RulesExt::Global()->EVA_WeCaptureABuilding.Get(VoxClass::FindIndex((const char*)"EVA_BuildingCaptured")));
+	else
+		VoxClass::PlayIndex(RulesExt::Global()->EVA_OurBuildingIsCaptured.Get(VoxClass::FindIndex((const char*)"EVA_BuildingCaptured")));
+
+	return 0x44848F;
+}
 
 #pragma region DestroyableObstacle
 
@@ -691,6 +721,20 @@ DEFINE_HOOK(0x444B83, BuildingClass_ExitObject_BarracksExitCell, 0x7)
 	return 0;
 }
 
+DEFINE_HOOK(0x54BC99, JumpjetLocomotionClass_Ascending_BarracksExitCell, 0x6)
+{
+	enum { Continue = 0x54BCA3 };
+
+	GET(BuildingTypeClass*, pType, EAX);
+
+	auto const pTypeExt = BuildingTypeExt::ExtMap.Find(pType);
+
+	if (pTypeExt->BarracksExitCell.isset())
+		return Continue;
+
+	return 0;
+}
+
 #pragma endregion
 
 #pragma region BuildingFiring
@@ -712,5 +756,20 @@ bool __fastcall BuildingTypeClass_CanUseWaypoint(BuildingTypeClass* pThis)
 	return RulesExt::Global()->BuildingWaypoints;
 }
 DEFINE_JUMP(VTABLE, 0x7E4610, GET_OFFSET(BuildingTypeClass_CanUseWaypoint))
+
+DEFINE_HOOK(0x4AE95E, DisplayClass_sub_4AE750_DisallowBuildingNonAttackPlanning, 0x5)
+{
+	enum { SkipGameCode = 0x4AE982 };
+
+	GET(ObjectClass* const, pObject, ECX);
+	LEA_STACK(CellStruct*, pCell, STACK_OFFSET(0x20, 0x8));
+
+	auto action = pObject->MouseOverCell(pCell);
+
+	if (!PlanningNodeClass::PlanningModeActive || pObject->WhatAmI() != AbstractType::Building || action == Action::Attack)
+		pObject->CellClickedAction(action, pCell, pCell, false);
+
+	return SkipGameCode;
+}
 
 #pragma endregion

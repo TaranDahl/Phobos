@@ -73,10 +73,9 @@ You can use the migration utility (can be found on [Phobos supplementaries repo]
 
 - Key `rulesmd.ini->[SOMETECHNOTYPE]->Deployed.RememberTarget` is deprecated and can be removed now, the bugfix for `DeployToFire` deployers is now always on.
 
-### New user settings in RA2MD.ini
+### New user settings in RA2MD.INI
 
 - These are new user setting keys added by various features in Phobos. Most of them can be found in either in [user inteface](User-Interface.md) or [miscellaneous](Miscellanous.md) sections. Search functionality can be used to find them quickly if needed.
-
 ```ini
 [Phobos]
 CampaignDefaultGameSpeed=4       ; integer
@@ -325,14 +324,62 @@ New:
 - Enhanced Bombard trajectory (by CrimRecya & Ollerus, based on knowledge of NaotoYuuki)
 - Toggle waypoint for building (by TaranDahl)
 - Bunkerable checks dehardcode (by TaranDahl)
+- Projectile subject to ground check before firing (by CrimRecya)
+- New Disperse trajectory (by CrimRecya)
+- New Engrave trajectory (by CrimRecya)
+- New Tracing trajectory (by CrimRecya)
+- Technos will maintain a suitable distance after firing (by CrimRecya)
+- Several new Infotypes, no display in specific status and a new single frame display method (by CrimRecya)
+- Technos recount current burst index when change the firing weapon (by CrimRecya)
+- Damage multiplier for different houses (by CrimRecya)
+- Display factories, superweapons, iron curtain and temporal progress on specific technos (by CrimRecya)
+- Customized Vehicle Turret Rotation (by CrimRecya)
+- Jumpjet Climbing Logic Enhancement (by CrimRecya)
+- Building placing and deploying logic enhancement (by CrimRecya)
+- Techno base normal and new placing grids (by CrimRecya)
+- Grey cameo preview and cameo overlays (by CrimRecya)
+- Draw visual effects for airburst weapons (by CrimRecya)
+- Delay automatic attack on the controlled unit (by CrimRecya)
+- Aggressive attack move mission (by CrimRecya)
+- No rearm and reload in EMP or temporal (by CrimRecya)
+- Manually empty and reload ammo (by CrimRecya)
+- No turret unit turn to the target (by CrimRecya & TaranDahl)
+- Sell or undeploy building on impact (by CrimRecya)
+- Extended gattling rate down logic (by CrimRecya)
+- Exclusive SuperWeapon Sidebar (by NetsuNegi & CrimRecya)
+- Allow merging AOE damage to buildings into one (by CrimRecya)
+- Distribution click action mode (by CrimRecya)
+- Jumpjet Tilts While Moving (by CrimRecya)
+- Change the scrolling action of the sidebar and trigger hook of mouse wheel scroll (by CrimRecya)
+- Raise alert when technos are taking damage (by TaranDahl)
+- New hotkey to select the units within the current screen that are captured by non-permanent mind-controller. (by TaranDahl)
+- Recycle spawned in long-range (by TaranDahl)
+- Play an anim when recycling a spawned (by TaranDahl)
+- CellSpread in cylinder shape (by TaranDahl)
+- CellSpread damage check if victim is in air (by TaranDahl)
+- Toggle waypoint for building and aircraft (by TaranDahl)
+- Weapon range finding in cylinder (by TaranDahl)
+- Buildings with foundation bigger than 1x1 can now recycle spawned correctly (by TaranDahl)
+- Infantry firing while moving (by TaranDahl)
+- Fix the bug that parasite will vanish if it missed its target when its previous cell is occupied (by TaranDahl)
+- Grant new superweapons in superweapons (by FS-21).
+- Enhance bombard trajectory with vertical and meteor trajectory (by NaotoYuuki & Ollerus)
+- Option for vehicles to keep target when issued move command (by Starkku)
+- Aggressive stance toggle command (auto target unarmed enemy buildings) (by Aephiex)
 
 Vanilla fixes:
 - Aircraft will now behave as expected according to it's `MovementZone` and `SpeedType` when moving onto different surfaces. In particular, this fixes erratic behavior when vanilla aircraft is ordered to move onto water surface and instead the movement order changes to a shore nearby (by CrimRecya)
 - Fix the bug that parasite will vanish if it missed its target when its previous cell is occupied (by 航味麻酱)
 - Prevent the units with locomotors that cause problems from entering the tank bunker (by TaranDahl)
+- Fixed `MovementZone=Subterannean` harvesters being unable to find docks if in area enclosed by water, cliffs etc.
+- Fix an issue where a unit will leave an impassable invisible barrier in its original position when it is teleported by ChronoSphere onto an uncrushable unit and self destruct (by NetsuNegi)
+- Fix an issue that harvesters with amphibious movement zone can not automatically return to refineries with `WaterBound` on water surface (by NetsuNegi)
+- Units are now unable to kick out from a factory that is in construction process, and will not always stuck in the factory (by CrimRecya & TaranDahl)
+- Observer sidebar in skirmish game mode (by CrimRecya)
 
 Phobos fixes:
-- Type conversion on Warheads and Superweapons will no longer recursively convert units if applicable conversion pairs are listed, and only first applicable pair takes effect (by Starkku)
+- Fixed `Ammo.DeployUnlockMinimumAmount`/`Ammo.DeployUnlockMaximumAmount` behavior inside tank bunkers (by Fryone)
+- Fixed `Ammo.AddOnDeploy` behavior inside tank bunkers for non-converters (by Fryone)
 
 Fixes / interactions with other extensions:
 - Allowed `AuxBuilding` and Ares' `SW.Aux/NegBuildings` to count building upgrades (by Ollerus)
@@ -488,7 +535,7 @@ New:
 - Custom object palettes for TerrainTypes (by Starkku)
 - Forbidding parallel AI queues for specific TechnoTypes (by Starkku)
 - Nonprovocative Warheads (by Starkku)
-- Buildings considered as destroyable pathfinding obstacles (by Starkku)
+- Option to restore `PowerSurplus` setting for AI (by Starkku)
 - `FireOnce` infantry sequence reset toggle (by Starkku)
 - Assign Super Weapon cameo to any sidebar tab (by NetsuNegi)
 - Customizing effect of level lighting on air units (by Starkku)
