@@ -7,6 +7,8 @@
 #include <HouseClass.h>
 
 bool DistributionModeHoldDownCommandClass::Enabled = false;
+bool DistributionModeHoldDownCommandClass::OnMessageShowed = false;
+bool DistributionModeHoldDownCommandClass::OffMessageShowed = false;
 int DistributionModeHoldDownCommandClass::ShowTime = 0;
 
 const char* DistributionModeSpreadCommandClass::GetName() const
@@ -89,9 +91,31 @@ bool DistributionModeHoldDownCommandClass::ExtraTriggerCondition(WWKey eInput) c
 void DistributionModeHoldDownCommandClass::Execute(WWKey eInput) const
 {
 	if (eInput & WWKey::Release)
+	{
 		DistributionModeHoldDownCommandClass::Enabled = false;
-	else
+
+		if (HouseClass::IsCurrentPlayerObserver() || SessionClass::Instance->MultiplayerObserver)
+			return;
+
+		VocClass::PlayGlobal(RulesExt::Global()->EndDistributionModeSound, 0x2000, 1.0);
+
+		if (!DistributionModeHoldDownCommandClass::OffMessageShowed)
+		{
+			DistributionModeHoldDownCommandClass::OffMessageShowed = true;
+			MessageListClass::Instance->PrintMessage(GeneralUtils::LoadStringUnlessMissing("MSG:DistributionModeOff", L"Distribution mode unabled."), RulesClass::Instance->MessageDelay, HouseClass::CurrentPlayer->ColorSchemeIndex, true);
+		}
+	}
+	else if (!HouseClass::IsCurrentPlayerObserver() && !SessionClass::Instance->MultiplayerObserver)
+	{
 		DistributionModeHoldDownCommandClass::Enabled = true;
+		VocClass::PlayGlobal(RulesExt::Global()->StartDistributionModeSound, 0x2000, 1.0);
+
+		if (!DistributionModeHoldDownCommandClass::OnMessageShowed)
+		{
+			DistributionModeHoldDownCommandClass::OnMessageShowed = true;
+			MessageListClass::Instance->PrintMessage(GeneralUtils::LoadStringUnlessMissing("MSG:DistributionModeOn", L"Distribution mode enabled."), RulesClass::Instance->MessageDelay, HouseClass::CurrentPlayer->ColorSchemeIndex, true);
+		}
+	}
 }
 
 void DistributionModeHoldDownCommandClass::DistributionSpreadModeExpand()
@@ -122,6 +146,7 @@ DEFINE_HOOK(0x4AE818, DisplayClass_sub_4AE750_AutoDistribution, 0xA)
 		if (DistributionModeHoldDownCommandClass::Enabled && mode1 && count > 1 && mouseAction != Action::NoMove && !PlanningNodeClass::PlanningModeActive
 			&& (pTarget->AbstractFlags & AbstractFlags::Techno) != AbstractFlags::None && !pTarget->IsInAir())
 		{
+			VocClass::PlayGlobal(RulesExt::Global()->AddDistributionModeCommandSound, 0x2000, 1.0);
 			const auto pSpecial = HouseClass::FindSpecial();
 			const auto pCivilian = HouseClass::FindCivilianSide();
 			const auto pNeutral = HouseClass::FindNeutral();

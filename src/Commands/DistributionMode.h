@@ -26,6 +26,8 @@ class DistributionModeHoldDownCommandClass : public CommandClass
 {
 public:
 	static bool Enabled;
+	static bool OnMessageShowed;
+	static bool OffMessageShowed;
 	static int ShowTime;
 
 	virtual const char* GetName() const override;
