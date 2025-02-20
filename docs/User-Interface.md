@@ -456,19 +456,24 @@ VoiceExitAggressiveStance=             ; sound entry
     - `Auto` - if the behavior to be executed by the current techno is different from the behavior displayed by the mouse, and the behavior to be executed will make the techno move near the target, the behavior will be replaced with area guard. At this time, a blue ring will be displayed.
     - `Type` - on the basis of `Auto`, only targets of the same type (like infantries, vehicles or buildings) will be selected among the targets allocated in the range. At this time, a yellow ring will be displayed.
     - `Name` - on the basis of `Type`, only targets of the same name (or with the same `GroupAs`) will be selected among the targets allocated in the range. At this time, a red ring will be displayed.
-- For localization add `TXT_DISTR_SPREAD`, `TXT_DISTR_FILTER`, `TXT_DISTR_HOLDDOWN`, `TXT_DISTR_SPREAD_DESC`, `TXT_DISTR_FILTER_DESC` and `TXT_DISTR_HOLDDOWN_DESC` into your `.csf` file.
+- For localization add `TXT_DISTR_SPREAD`, `TXT_DISTR_FILTER`, `TXT_DISTR_HOLDDOWN`, `TXT_DISTR_SPREAD_DESC`, `TXT_DISTR_FILTER_DESC`, `TXT_DISTR_HOLDDOWN_DESC`, `MSG:DistributionModeOn`, `MSG:DistributionModeOff` into your `.csf` file.
 
 In `rulesmd.ini`:
 ```ini
 [GlobalControls]
-AllowDistributionCommand=false  ; boolean
+AllowDistributionCommand=false    ; boolean
+
+[AudioVisual]
+StartDistributionModeSound=       ; sound entry
+EndDistributionModeSound=         ; sound entry
+AddDistributionModeCommandSound=  ; sound entry
 ```
 
 In `ra2md.ini`:
 ```ini
 [Phobos]
-DefaultDistributionSpreadMode=2  ; integer, 0 - r=0 , 1 - r=4 , 2 - r=8 , 3 - r=16
-DefaultDistributionFilterMode=2  ; integer, 0 - None , 1 - Auto , 2 - Type , 3 - Name
+DefaultDistributionSpreadMode=2   ; integer, 0 - r=0 , 1 - r=4 , 2 - r=8 , 3 - r=16
+DefaultDistributionFilterMode=2   ; integer, 0 - None , 1 - Auto , 2 - Type , 3 - Name
 ```
 
 ## Loading screen
