@@ -275,9 +275,6 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->CLIsBlack.Read(exINI, pSection, "CLIsBlack");
 	this->Particle_AlphaImageIsLightFlash.Read(exINI, pSection, "Particle.AlphaImageIsLightFlash");
 
-	this->BuildingSell.Read(exINI, pSection, "BuildingSell");
-	this->BuildingUndeploy.Read(exINI, pSection, "BuildingUndeploy");
-	this->BuildingUndeploy_Leave.Read(exINI, pSection, "BuildingUndeploy.Leave");
 	this->MergeBuildingDamage.Read(exINI, pSection, "MergeBuildingDamage");
 	this->DamageOwnerMultiplier.Read(exINI, pSection, "DamageOwnerMultiplier");
 	this->DamageAlliesMultiplier.Read(exINI, pSection, "DamageAlliesMultiplier");
@@ -287,6 +284,10 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SuppressRevengeWeapons_Types.Read(exINI, pSection, "SuppressRevengeWeapons.Types");
 	this->SuppressReflectDamage.Read(exINI, pSection, "SuppressReflectDamage");
 	this->SuppressReflectDamage_Types.Read(exINI, pSection, "SuppressReflectDamage.Types");
+
+	this->BuildingSell.Read(exINI, pSection, "BuildingSell");
+	this->BuildingUndeploy.Read(exINI, pSection, "BuildingUndeploy");
+	this->BuildingUndeploy_Leave.Read(exINI, pSection, "BuildingUndeploy.Leave");
 
 	this->CombatAlert_Suppress.Read(exINI, pSection, "CombatAlert.Suppress");
 
@@ -524,9 +525,6 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->InflictLocomotor)
 		.Process(this->RemoveInflictedLocomotor)
 
-		.Process(this->BuildingSell)
-		.Process(this->BuildingUndeploy)
-		.Process(this->BuildingUndeploy_Leave)
 		.Process(this->MergeBuildingDamage)
 		.Process(this->DamageOwnerMultiplier)
 		.Process(this->DamageAlliesMultiplier)
@@ -538,6 +536,10 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->CombatLightChance)
 		.Process(this->CLIsBlack)
 		.Process(this->Particle_AlphaImageIsLightFlash)
+
+		.Process(this->BuildingSell)
+		.Process(this->BuildingUndeploy)
+		.Process(this->BuildingUndeploy_Leave)
 
 		.Process(this->CombatAlert_Suppress)
 

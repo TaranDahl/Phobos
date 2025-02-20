@@ -159,9 +159,6 @@ public:
 		Valueable<bool> CLIsBlack;
 		Nullable<bool> Particle_AlphaImageIsLightFlash;
 
-		Valueable<bool> BuildingSell;
-		Valueable<bool> BuildingUndeploy;
-		Valueable<bool> BuildingUndeploy_Leave;
 		Nullable<bool> MergeBuildingDamage;
 		Nullable<double> DamageOwnerMultiplier;
 		Nullable<double> DamageAlliesMultiplier;
@@ -171,6 +168,10 @@ public:
 		ValueableVector<WeaponTypeClass*> SuppressRevengeWeapons_Types;
 		Valueable<bool> SuppressReflectDamage;
 		ValueableVector<AttachEffectTypeClass*> SuppressReflectDamage_Types;
+
+		Valueable<bool> BuildingSell;
+		Valueable<bool> BuildingUndeploy;
+		Valueable<bool> BuildingUndeploy_Leave;
 
 		Nullable<bool> CombatAlert_Suppress;
 
@@ -336,9 +337,6 @@ public:
 		    , CLIsBlack { false }
 			, Particle_AlphaImageIsLightFlash {}
 
-			, BuildingSell { false }
-			, BuildingUndeploy { false }
-			, BuildingUndeploy_Leave { false }
 			, MergeBuildingDamage {}
 			, DamageOwnerMultiplier {}
 			, DamageAlliesMultiplier {}
@@ -348,6 +346,10 @@ public:
 			, SuppressRevengeWeapons_Types {}
 			, SuppressReflectDamage { false }
 			, SuppressReflectDamage_Types {}
+
+			, BuildingSell { false }
+			, BuildingUndeploy { false }
+			, BuildingUndeploy_Leave { false }
 
 			, CombatAlert_Suppress {}
 
