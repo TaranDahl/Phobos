@@ -157,6 +157,7 @@ public:
 		ValueableVector<AttachEffectTypeClass*> SuppressReflectDamage_Types;
 
 		Valueable<bool> BuildingSell;
+		Valueable<bool> BuildingSell_IgnoreUnsellable;
 		Valueable<bool> BuildingUndeploy;
 		Valueable<bool> BuildingUndeploy_Leave;
 
@@ -322,6 +323,7 @@ public:
 			, SuppressReflectDamage_Types {}
 
 			, BuildingSell { false }
+			, BuildingSell_IgnoreUnsellable { false }
 			, BuildingUndeploy { false }
 			, BuildingUndeploy_Leave { false }
 
