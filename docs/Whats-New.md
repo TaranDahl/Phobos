@@ -362,7 +362,8 @@ Vanilla fixes:
 - Observer sidebar in skirmish game mode (by CrimRecya)
 
 Phobos fixes:
-- Type conversion on Warheads and Superweapons will no longer recursively convert units if applicable conversion pairs are listed, and only first applicable pair takes effect (by Starkku)
+- Fixed `Ammo.DeployUnlockMinimumAmount`/`Ammo.DeployUnlockMaximumAmount` behavior inside tank bunkers (by Fryone)
+- Fixed `Ammo.AddOnDeploy` behavior inside tank bunkers for non-converters (by Fryone)
 
 Fixes / interactions with other extensions:
 - Allowed `AuxBuilding` and Ares' `SW.Aux/NegBuildings` to count building upgrades (by Ollerus)
