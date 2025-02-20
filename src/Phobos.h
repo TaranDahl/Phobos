@@ -107,6 +107,8 @@ public:
 		static bool UnitPowerDrain;
 		static bool ScrollSidebarStripInTactical;
 		static bool AllowDistributionCommand;
+		static int DistributionSpreadMode;
+		static int DistributionFilterMode;
 		static bool ScrollSidebarStripWhenHoldKey;
 		static bool ScrollSidebarStripWhenHoldAlt;
 		static bool ScrollSidebarStripWhenHoldCtrl;
