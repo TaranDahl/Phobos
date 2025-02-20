@@ -286,6 +286,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SuppressReflectDamage_Types.Read(exINI, pSection, "SuppressReflectDamage.Types");
 
 	this->BuildingSell.Read(exINI, pSection, "BuildingSell");
+	this->BuildingSell_IgnoreUnsellable.Read(exINI, pSection, "BuildingSell.IgnoreUnsellable");
 	this->BuildingUndeploy.Read(exINI, pSection, "BuildingUndeploy");
 	this->BuildingUndeploy_Leave.Read(exINI, pSection, "BuildingUndeploy.Leave");
 
@@ -538,6 +539,7 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Particle_AlphaImageIsLightFlash)
 
 		.Process(this->BuildingSell)
+		.Process(this->BuildingSell_IgnoreUnsellable)
 		.Process(this->BuildingUndeploy)
 		.Process(this->BuildingUndeploy_Leave)
 
