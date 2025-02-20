@@ -118,8 +118,8 @@ static inline bool CheckSkipScrollSidebar()
 	return !Phobos::Config::ScrollSidebarStripWhenHoldAlt && InputManagerClass::Instance->IsForceMoveKeyPressed()
 		|| !Phobos::Config::ScrollSidebarStripWhenHoldCtrl && InputManagerClass::Instance->IsForceFireKeyPressed()
 		|| !Phobos::Config::ScrollSidebarStripWhenHoldShift && InputManagerClass::Instance->IsForceSelectKeyPressed()
-		|| !Phobos::Config::ScrollSidebarStripInTactical && WWMouseClass::Instance->XY1.X < Make_Global<int>(0xB0CE30)
-		|| DistributionModeHoldDownCommandClass::Enabled; // TacticalClass::view_bound.Width
+		|| !Phobos::Config::ScrollSidebarStripInTactical && WWMouseClass::Instance->XY1.X < Make_Global<int>(0xB0CE30) // TacticalClass::view_bound.Width
+		|| DistributionModeHoldDownCommandClass::Enabled;
 }
 
 DEFINE_HOOK(0x533F50, Game_ScrollSidebar_Skip, 0x5)
